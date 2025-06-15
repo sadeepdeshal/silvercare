@@ -1,0 +1,24 @@
+{
+  "name": "silvercare",
+  "version": "1.0.0",
+  "description": "Digital Care System for Senior Citizens",
+  "scripts": {
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "cd server && npm run dev",
+    "client": "cd client && npm start",
+    "install-server": "cd server && npm install",
+    "install-client": "cd client && npm install",
+    "install-all": "npm run install-server && npm run install-client"
+  },
+  "devDependencies": {
+    "concurrently": "^8.0.1"
+  },
+  "keywords": [
+    "silvercare",
+    "senior-care",
+    "healthcare",
+    "mern-stack"
+  ],
+  "author": "Group 32 - UCSC",
+  "license": "MIT"
+}
