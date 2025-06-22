@@ -1,0 +1,14 @@
+const express = require('express');
+const cors = require('cors');
+require('dotenv').config();
+
+const app = express();
+app.use(cors());
+app.use(express.json()); // Important: for parsing JSON body
+
+// Load user routes
+const userRoutes = require('./routes/userRoutes');
+app.use('/api/users', userRoutes); // Mount the full route
+
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
