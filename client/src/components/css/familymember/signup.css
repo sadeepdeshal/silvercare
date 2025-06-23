@@ -302,3 +302,94 @@
 .register-btn-centered:active {
   transform: translateY(0);
 }
+
+
+/* Add these styles to your existing CSS file */
+
+.password-requirements {
+  font-size: 0.8rem;
+  color: #666;
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  background-color: #f9f9f9;
+  border-radius: 4px;
+  border-left: 3px solid #667eea;
+}
+
+.password-requirements p {
+  margin: 0 0 0.3rem 0;
+  font-weight: bold;
+  color: #333;
+}
+
+.password-requirements ul {
+  margin: 0;
+  padding-left: 1.2rem;
+}
+
+.password-requirements li {
+  margin-bottom: 0.2rem;
+}
+
+.password-strength {
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.strength-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.strength-bar {
+  width: 100px;
+  height: 4px;
+  background-color: #e0e0e0;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.strength-fill {
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.password-match-indicator {
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.register-btn-centered:disabled {
+  cursor: not-allowed;
+  transform: none;
+}
+
+.register-btn-centered:disabled:hover {
+  transform: none;
+}
+
+/* Enhanced error message styling */
+.error-message {
+  animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+/* Success message styling */
+.success-message {
+  color: #00aa00;
+  background-color: #e6ffe6;
+  border: 1px solid #99ff99;
+  padding: 10px;
+  border-radius: 5px;
+  text-align: center;
+  margin-bottom: 1rem;
+}

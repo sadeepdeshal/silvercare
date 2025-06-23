@@ -8,7 +8,9 @@ app.use(express.json()); // Important: for parsing JSON body
 
 // Load user routes
 const userRoutes = require('./routes/userRoutes');
+const registerRoutes = require('./routes/registerRoutes');
 app.use('/api/users', userRoutes); // Mount the full route
+app.use('/api/register', registerRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
