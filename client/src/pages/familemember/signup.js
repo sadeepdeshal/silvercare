@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import x52201 from "../../components/images/5220-1.jpg";
 import group41 from "../../components/images/group41.png";
@@ -37,6 +37,15 @@ export const FamilyMemberReg = () => {
     // Navigate to step 2
     navigate('/family-member/signup-step2');
   };
+
+  // Add this useEffect to load saved data
+useEffect(() => {
+  // Load step 1 data if returning from step 2
+  const savedStep1Data = localStorage.getItem('familyMemberStep1Data');
+  if (savedStep1Data) {
+    setFormData(JSON.parse(savedStep1Data));
+  }
+}, []);
 
   return (
     <div className="family-member-reg">
