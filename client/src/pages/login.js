@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { loginUser } from "../services/loginApi";
 import loginImage from "../components/images/login.jpg";
 import welcomeIcon from "../components/images/5220-1.jpg";
 import nameIcon from "../components/images/group41.png";
@@ -7,10 +8,13 @@ import emailIcon from "../components/images/group.jpg";
 import "../components/css/login.css";
 
 export const Login = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -18,12 +22,46 @@ export const Login = () => {
       ...prev,
       [name]: value
     }));
+    // Clear error when user starts typing
+    if (error) setError('');
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Login form submitted:', formData);
-    // Add login logic here later
+    setLoading(true);
+    setError('');
+    
+    try {
+      const response = await loginUser(formData);
+      const { user, token, role } = response.data;
+      
+      // Store user data and token in localStorage
+      localStorage.setItem('silvercare_token', token);
+      localStorage.setItem('silvercare_user', JSON.stringify(user));
+      localStorage.setItem('silvercare_role', role);
+      
+      console.log('Login successful:', { user, role });
+      
+      // Redirect based on user role
+      if (role === 'caregiver') {
+        navigate('/caregiver/dashboard');
+      } else if (role === 'family_member') {
+        navigate('/family-member/dashboard');
+      } else {
+        // Default fallback
+        navigate('/dashboard');
+      }
+      
+    } catch (err) {
+      console.error('Login error:', err);
+      if (err.response && err.response.data && err.response.data.error) {
+        setError(err.response.data.error);
+      } else {
+        setError('Login failed. Please try again.');
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -55,6 +93,12 @@ export const Login = () => {
                 <h3 className="section-title">Login Information</h3>
                 <p className="section-subtitle">Please enter your credentials to continue</p>
 
+                {error && (
+                  <div className="error-message">
+                    {error}
+                  </div>
+                )}
+
                 <div className="form-group">
                   <label className="form-label">Email</label>
                   <div className="input-container">
@@ -67,6 +111,7 @@ export const Login = () => {
                       placeholder="Enter your email address"
                       className="form-input"
                       required
+                      disabled={loading}
                     />
                   </div>
                 </div>
@@ -83,6 +128,7 @@ export const Login = () => {
                       placeholder="Enter your password"
                       className="form-input"
                       required
+                      disabled={loading}
                     />
                   </div>
                 </div>
@@ -98,8 +144,10 @@ export const Login = () => {
                 </div>
               </div>
 
-              <button type="submit" className="primary-btn">
-                <span className="button-text">Log In</span>
+              <button type="submit" className="primary-btn" disabled={loading}>
+                <span className="button-text">
+                  {loading ? 'Log In...' : 'Log In'}
+                </span>
               </button>
             </form>
 
@@ -107,7 +155,7 @@ export const Login = () => {
               <p className="signup-prompt">Don't Have An Account?</p>
               <div className="signup-links">
                 <Link to="/caregiver/signup" className="sign-up-link">Sign Up</Link>
-                
+
               </div>
             </div>
           </div>
