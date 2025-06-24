@@ -318,4 +318,31 @@
   .form-container {
     padding: 20px 15px;
   }
+
+
+
+  /* Add this to your existing login.css file */
+
+.error-message {
+  background-color: #fee;
+  border: 1px solid #fcc;
+  color: #c33;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.primary-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.primary-btn:disabled:hover {
+  transform: none;
+  box-shadow: none;
+}
+
 }
