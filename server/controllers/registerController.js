@@ -34,13 +34,19 @@ const createFamilyMemberRegistration = async (req, res) => {
       return res.status(400).json({ error: passwordValidation.message });
     }
 
-    // Check if user already exists with this email
+    // Check if user already exists with this email in register table
     const existingUser = await pool.query(
       'SELECT * FROM register WHERE email = $1',
       [email]
     );
     
-    if (existingUser.rows.length > 0) {
+    // Check if user already exists with this email in registration table
+    const existingUserInRegistration = await pool.query(
+      'SELECT * FROM registration WHERE email = $1',
+      [email]
+    );
+    
+    if (existingUser.rows.length > 0 || existingUserInRegistration.rows.length > 0) {
       return res.status(400).json({ error: 'User already exists with this email address' });
     }
     
@@ -65,6 +71,7 @@ const createFamilyMemberRegistration = async (req, res) => {
   }
 };
 
+
 // CREATE a caregiver registration
 const createCaregiverRegistration = async (req, res) => {
   const { name, email, phone, fixedLine, password, role = 'caregiver' } = req.body;
@@ -82,7 +89,13 @@ const createCaregiverRegistration = async (req, res) => {
       [email]
     );
     
-    if (existingUser.rows.length > 0) {
+    // Check if user already exists with this email in register table
+    const existingUserInRegister = await pool.query(
+      'SELECT * FROM register WHERE email = $1',
+      [email]
+    );
+    
+    if (existingUser.rows.length > 0 || existingUserInRegister.rows.length > 0) {
       return res.status(400).json({ error: 'User already exists with this email address' });
     }
     
@@ -106,6 +119,7 @@ const createCaregiverRegistration = async (req, res) => {
     res.status(500).json({ error: 'Error creating caregiver registration' });
   }
 };
+
 
 // GET all registrations
 const getRegistrations = async (req, res) => {
