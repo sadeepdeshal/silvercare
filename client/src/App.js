@@ -7,13 +7,15 @@ import FamilyMemberDashboard from './pages/familemember/dashboard';
 import { CaregiverReg } from './pages/caregiver/signup';
 import { CaregiverRegStep2 } from './pages/caregiver/signup-step2';
 import CaregiverDashboard from './pages/caregiver/dashboard';
+import { Login } from './pages/login';
 
 
 function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={< FamilyMemberReg />} />
+        <Route path="/" element={< Login  />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/family-member/signup" element={<FamilyMemberReg />} />
         <Route path="/family-member/signup-step2" element={<FamilyMemberReg2 />} />
         <Route path="/family-member/dashboard" element={<FamilyMemberDashboard />} />
