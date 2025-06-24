@@ -74,7 +74,7 @@ const createFamilyMemberRegistration = async (req, res) => {
 
 // CREATE a caregiver registration
 const createCaregiverRegistration = async (req, res) => {
-  const { name, email, phone, fixedLine, password, role = 'caregiver' } = req.body;
+  const { name, email, phone, fixedLine, district, password, role = 'caregiver' } = req.body;
   
   try {
     // Validate password strength on server side
@@ -103,10 +103,10 @@ const createCaregiverRegistration = async (req, res) => {
     const saltRounds = 12;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
     
-    // Insert new registration into registration table
+    // Insert new registration into registration table with district
     const result = await pool.query(
-      'INSERT INTO registration (name, email, phone, fixed_line, password, role) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, name, email, phone, fixed_line, role, created_at',
-      [name, email, phone, fixedLine, hashedPassword, role]
+      'INSERT INTO registration (name, email, phone, fixed_line, district, password, role) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id, name, email, phone, fixed_line, district, role, created_at',
+      [name, email, phone, fixedLine, district, hashedPassword, role]
     );
     
     res.status(201).json({
@@ -121,12 +121,13 @@ const createCaregiverRegistration = async (req, res) => {
 };
 
 
+
 // GET all registrations
 const getRegistrations = async (req, res) => {
   try {
     // Get from both tables
     const registerResult = await pool.query('SELECT id, name, email, phone, fixed_line, role, created_at FROM register ORDER BY created_at DESC');
-    const registrationResult = await pool.query('SELECT id, name, email, phone, fixed_line, role, created_at FROM registration ORDER BY created_at DESC');
+    const registrationResult = await pool.query('SELECT id, name, email, phone, fixed_line, district, role, created_at FROM registration ORDER BY created_at DESC');
     
     // Combine results
     const allRegistrations = [

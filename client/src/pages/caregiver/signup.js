@@ -16,7 +16,8 @@ export const CaregiverReg = () => {
     name: '',
     email: '',
     phone: '',
-    fixedLine: ''
+    fixedLine: '',
+    district: ''
   });
 
   const handleInputChange = (e) => {
@@ -134,6 +135,47 @@ export const CaregiverReg = () => {
                       placeholder="e.g, 041-5869896"
                       className="form-input"
                     />
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">District</label>
+                  <div className="input-container">
+                    <img className="input-icon" alt="District icon" src={group41} />
+                    <select
+                      name="district"
+                      value={formData.district}
+                      onChange={handleInputChange}
+                      className="form-input"
+                      required
+                    >
+                      <option value="">Select District</option>
+                      <option value="Colombo">Colombo</option>
+                      <option value="Gampaha">Gampaha</option>
+                      <option value="Kalutara">Kalutara</option>
+                      <option value="Kandy">Kandy</option>
+                      <option value="Matale">Matale</option>
+                      <option value="Nuwara Eliya">Nuwara Eliya</option>
+                      <option value="Galle">Galle</option>
+                      <option value="Matara">Matara</option>
+                      <option value="Hambantota">Hambantota</option>
+                      <option value="Jaffna">Jaffna</option>
+                      <option value="Kilinochchi">Kilinochchi</option>
+                      <option value="Mannar">Mannar</option>
+                      <option value="Mullaitivu">Mullaitivu</option>
+                      <option value="Vavuniya">Vavuniya</option>
+                      <option value="Puttalam">Puttalam</option>
+                      <option value="Kurunegala">Kurunegala</option>
+                      <option value="Anuradhapura">Anuradhapura</option>
+                      <option value="Polonnaruwa">Polonnaruwa</option>
+                      <option value="Badulla">Badulla</option>
+                      <option value="Moneragala">Moneragala</option>
+                      <option value="Ratnapura">Ratnapura</option>
+                      <option value="Kegalle">Kegalle</option>
+                      <option value="Ampara">Ampara</option>
+                      <option value="Batticaloa">Batticaloa</option>
+                      <option value="Trincomalee">Trincomalee</option>
+                    </select>
                   </div>
                 </div>
               </div>
