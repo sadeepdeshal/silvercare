@@ -187,7 +187,7 @@ export const CaregiverReg = () => {
 
             <div className="form-footer">
               <p className="login-prompt">Do You Have An Account?</p>
-              <Link to="/caregiver/login" className="sign-in-link">Log In</Link>
+              <Link to="/login" className="sign-in-link">Log In</Link>
             </div>
           </div>
         </div>

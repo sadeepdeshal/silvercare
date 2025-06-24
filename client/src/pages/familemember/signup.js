@@ -149,7 +149,7 @@ useEffect(() => {
 
             <div className="form-footer">
               <p className="login-prompt">Do You Have An Account?</p>
-              <Link to="/family-member/signup" className="sign-in-link">Log In</Link>
+              <Link to="/login" className="sign-in-link">Log In</Link>
             </div>
           </div>
         </div>

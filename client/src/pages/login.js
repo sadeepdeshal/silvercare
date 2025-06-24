@@ -43,11 +43,13 @@ export const Login = () => {
       console.log('Login successful:', { user, role });
       
       // Redirect based on user role
-      if (role === 'caregiver') {
-        navigate('/caregiver/dashboard');
-      } else if (role === 'family_member') {
-        navigate('/family-member/dashboard');
-      } else {
+if (role === 'admin') {
+  navigate('/admin/dashboard');
+} else if (role === 'caregiver') {
+  navigate('/caregiver/dashboard');
+} else if (role === 'family_member') {
+  navigate('/family-member/dashboard');
+} else {
         // Default fallback
         navigate('/dashboard');
       }
@@ -154,7 +156,7 @@ export const Login = () => {
             <div className="form-footer">
               <p className="signup-prompt">Don't Have An Account?</p>
               <div className="signup-links">
-                <Link to="/caregiver/signup" className="sign-up-link">Sign Up</Link>
+                <Link to="/family-member/signup" className="sign-up-link">Sign Up</Link>
 
               </div>
             </div>
