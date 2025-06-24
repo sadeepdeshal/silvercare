@@ -7,6 +7,7 @@ import FamilyMemberDashboard from './pages/familemember/dashboard';
 import { CaregiverReg } from './pages/caregiver/signup';
 import { CaregiverRegStep2 } from './pages/caregiver/signup-step2';
 import CaregiverDashboard from './pages/caregiver/dashboard';
+import AdminDashboard from './pages/admin/dashboard';
 import { Login } from './pages/login';
 
 
@@ -22,6 +23,7 @@ function App() {
         <Route path="/caregiver/signup" element={<CaregiverReg />} />
         <Route path="/caregiver/signup-step2" element={<CaregiverRegStep2 />} />
         <Route path="/caregiver/dashboard" element={<CaregiverDashboard />} />
+        <Route path="/admin/dashboard" element={<AdminDashboard />} />
         <Route path="/users" element={<UserPage />} />
       </Routes>
     </Router>
