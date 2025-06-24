@@ -6,6 +6,10 @@ export const registerFamilyMember = (userData) => {
   return axios.post(`${API_BASE}/family-member`, userData);
 };
 
+export const registerCaregiver = (userData) => {
+  return axios.post(`${API_BASE}/caregiver`, userData);
+};
+
 export const getRegistrations = () => {
   return axios.get(API_BASE);
 };
