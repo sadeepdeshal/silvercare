@@ -13,7 +13,7 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<CaregiverReg />} />
+        <Route path="/" element={< FamilyMemberReg />} />
         <Route path="/family-member/signup" element={<FamilyMemberReg />} />
         <Route path="/family-member/signup-step2" element={<FamilyMemberReg2 />} />
         <Route path="/family-member/dashboard" element={<FamilyMemberDashboard />} />
