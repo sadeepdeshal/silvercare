@@ -20,16 +20,98 @@ export const CaregiverReg = () => {
     district: ''
   });
 
+  // Add error states
+  const [errors, setErrors] = useState({
+    email: '',
+    phone: '',
+    fixedLine: ''
+  });
+
+  // Custom email validation function
+  const validateEmail = (email) => {
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return emailRegex.test(email);
+  };
+
+  // Phone validation function
+  const validatePhone = (phone) => {
+    const phoneRegex = /^[0-9]{10}$/;
+    return phoneRegex.test(phone);
+  };
+
+  // Fixed line validation function
+  const validateFixedLine = (fixedLine) => {
+    if (!fixedLine) return true; // Optional field
+    const fixedLineRegex = /^[0-9]{10}$/;
+    return fixedLineRegex.test(fixedLine);
+  };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: value
     }));
+
+    // Clear previous error when user starts typing
+    setErrors(prev => ({
+      ...prev,
+      [name]: ''
+    }));
+
+    // Real-time validation
+    if (name === 'email' && value) {
+      if (!validateEmail(value)) {
+        setErrors(prev => ({
+          ...prev,
+          email: 'Please enter a valid email address (e.g., user@example.com)'
+        }));
+      }
+    }
+
+    if (name === 'phone' && value) {
+      if (!validatePhone(value)) {
+        setErrors(prev => ({
+          ...prev,
+          phone: 'Phone number must be exactly 10 digits'
+        }));
+      }
+    }
+
+    if (name === 'fixedLine' && value) {
+      if (!validateFixedLine(value)) {
+        setErrors(prev => ({
+          ...prev,
+          fixedLine: 'Fixed line must be exactly 10 digits'
+        }));
+      }
+    }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    
+    // Validate all fields before submission
+    const newErrors = {};
+    
+    if (!validateEmail(formData.email)) {
+      newErrors.email = 'Please enter a valid email address (e.g., user@example.com)';
+    }
+    
+    if (!validatePhone(formData.phone)) {
+      newErrors.phone = 'Phone number must be exactly 10 digits';
+    }
+    
+    if (formData.fixedLine && !validateFixedLine(formData.fixedLine)) {
+      newErrors.fixedLine = 'Fixed line must be exactly 10 digits';
+    }
+
+    // If there are errors, set them and don't submit
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+    
     console.log('Form submitted:', formData);
     
     // Store form data in localStorage for use in step 2
@@ -101,10 +183,13 @@ export const CaregiverReg = () => {
                       value={formData.email}
                       onChange={handleInputChange}
                       placeholder="Email address"
-                      className="form-input"
+                      className={`form-input ${errors.email ? 'error' : ''}`}
+                      pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"
+                      title="Please enter a valid email address"
                       required
                     />
                   </div>
+                  {errors.email && <span className="error-message">{errors.email}</span>}
                 </div>
 
                 <div className="form-group">
@@ -116,11 +201,14 @@ export const CaregiverReg = () => {
                       name="phone"
                       value={formData.phone}
                       onChange={handleInputChange}
-                      placeholder="e.g, 071-5896477"
-                      className="form-input"
+                      placeholder="e.g, 0715896477"
+                      className={`form-input ${errors.phone ? 'error' : ''}`}
+                      pattern="[0-9]{10}"
+                      maxLength="10"
                       required
                     />
                   </div>
+                  {errors.phone && <span className="error-message">{errors.phone}</span>}
                 </div>
 
                 <div className="form-group">
@@ -132,10 +220,13 @@ export const CaregiverReg = () => {
                       name="fixedLine"
                       value={formData.fixedLine}
                       onChange={handleInputChange}
-                      placeholder="e.g, 041-5869896"
-                      className="form-input"
+                      placeholder="e.g, 0415869896"
+                      className={`form-input ${errors.fixedLine ? 'error' : ''}`}
+                      pattern="[0-9]{10}"
+                      maxLength="10"
                     />
                   </div>
+                  {errors.fixedLine && <span className="error-message">{errors.fixedLine}</span>}
                 </div>
 
                 <div className="form-group">
