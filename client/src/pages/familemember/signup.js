@@ -28,7 +28,7 @@ export const FamilyMemberReg = () => {
 
   // Custom email validation function
   const validateEmail = (email) => {
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
     return emailRegex.test(email);
   };
 
@@ -184,7 +184,7 @@ export const FamilyMemberReg = () => {
                       onChange={handleInputChange}
                       placeholder="Email address"
                       className={`form-input ${errors.email ? 'error' : ''}`}
-                      pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"
+                      pattern="[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}"
                       title="Please enter a valid email address"
                       required
                     />

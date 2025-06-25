@@ -27,10 +27,10 @@ export const CaregiverReg = () => {
     fixedLine: ''
   });
 
-  // Custom email validation function
+  // Custom email validation function - Only Gmail addresses
   const validateEmail = (email) => {
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    return emailRegex.test(email);
+    const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+    return gmailRegex.test(email);
   };
 
   // Phone validation function
@@ -64,7 +64,7 @@ export const CaregiverReg = () => {
       if (!validateEmail(value)) {
         setErrors(prev => ({
           ...prev,
-          email: 'Please enter a valid email address (e.g., user@example.com)'
+          email: 'Please enter a valid Gmail address (e.g., user@gmail.com)'
         }));
       }
     }
@@ -95,7 +95,7 @@ export const CaregiverReg = () => {
     const newErrors = {};
     
     if (!validateEmail(formData.email)) {
-      newErrors.email = 'Please enter a valid email address (e.g., user@example.com)';
+      newErrors.email = 'Please enter a valid Gmail address (e.g., user@gmail.com)';
     }
     
     if (!validatePhone(formData.phone)) {
@@ -174,7 +174,7 @@ export const CaregiverReg = () => {
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label">Email</label>
+                  <label className="form-label">Email (Gmail only)</label>
                   <div className="input-container">
                     <img className="input-icon" alt="Email icon" src={group} />
                     <input
@@ -182,10 +182,10 @@ export const CaregiverReg = () => {
                       name="email"
                       value={formData.email}
                       onChange={handleInputChange}
-                      placeholder="Email address"
+                      placeholder="e.g., user@gmail.com"
                       className={`form-input ${errors.email ? 'error' : ''}`}
-                      pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"
-                      title="Please enter a valid email address"
+                      pattern="[a-zA-Z0-9._%+\-]+@gmail\.com"
+                      title="Please enter a valid Gmail address (must end with @gmail.com)"
                       required
                     />
                   </div>
@@ -197,7 +197,7 @@ export const CaregiverReg = () => {
                   <div className="input-container">
                     <img className="input-icon" alt="Phone icon" src={image} />
                     <input
-                      type="tel"
+                      type="number"
                       name="phone"
                       value={formData.phone}
                       onChange={handleInputChange}
@@ -216,7 +216,7 @@ export const CaregiverReg = () => {
                   <div className="input-container">
                     <img className="input-icon" alt="Fixed line icon" src={group3984} />
                     <input
-                      type="tel"
+                      type="number"
                       name="fixedLine"
                       value={formData.fixedLine}
                       onChange={handleInputChange}
