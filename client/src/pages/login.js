@@ -156,7 +156,7 @@ if (role === 'admin') {
             <div className="form-footer">
               <p className="signup-prompt">Don't Have An Account?</p>
               <div className="signup-links">
-                <Link to="/family-member/signup" className="sign-up-link">Sign Up</Link>
+                <Link to="/roles" className="sign-up-link">Sign Up</Link>
 
               </div>
             </div>
