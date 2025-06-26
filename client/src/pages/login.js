@@ -5,7 +5,7 @@ import loginImage from "../components/images/login.jpg";
 import welcomeIcon from "../components/images/5220-1.jpg";
 import nameIcon from "../components/images/group41.png";
 import emailIcon from "../components/images/group.jpg";
-import "../components/css/login.css";
+import styles from "../components/css/login.module.css";
 
 export const Login = () => {
   const navigate = useNavigate();
@@ -67,13 +67,13 @@ if (role === 'admin') {
   };
 
   return (
-    <div className="login-page">
-      <div className="bg">
-        <div className="left-section">
-          <img className="main-image" alt="Login" src={loginImage} />
-          <div className="welcome-text">
-            <h1 className="welcome-title">Welcome Back to SilverCare!</h1>
-            <p className="welcome-description">
+    <div className={styles.loginPage}>
+      <div className={styles.bg}>
+        <div className={styles.leftSection}>
+          <img className={styles.mainImage} alt="Login" src={loginImage} />
+          <div className={styles.welcomeText}>
+            <h1 className={styles.welcomeTitle}>Welcome Back to SilverCare!</h1>
+            <p className={styles.welcomeDescription}>
               Sign in to your account to continue providing
               <br />
               exceptional care and support to your community.
@@ -83,81 +83,80 @@ if (role === 'admin') {
           </div>
         </div>
 
-        <div className="right-section">
-          <div className="form-container">
-            <div className="form-header">
-              <h2 className="form-title">Log In to Your Account</h2>
-              <img className="welcome-image" alt="Welcome" src={welcomeIcon} />
+        <div className={styles.rightSection}>
+          <div className={styles.formContainer}>
+            <div className={styles.formHeader}>
+              <h2 className={styles.formTitle}>Log In to Your Account</h2>
+              <img className={styles.welcomeImage} alt="Welcome" src={welcomeIcon} />
             </div>
 
-            <form onSubmit={handleSubmit} className="login-form">
-              <div className="form-section">
-                <h3 className="section-title">Login Information</h3>
-                <p className="section-subtitle">Please enter your credentials to continue</p>
+            <form onSubmit={handleSubmit} className={styles.loginForm}>
+              <div className={styles.formSection}>
+                <h3 className={styles.sectionTitle}>Login Information</h3>
+                <p className={styles.sectionSubtitle}>Please enter your credentials to continue</p>
 
                 {error && (
-                  <div className="error-message">
+                  <div className={styles.errorMessage}>
                     {error}
                   </div>
                 )}
 
-                <div className="form-group">
-                  <label className="form-label">Email</label>
-                  <div className="input-container">
-                    <img className="input-icon" alt="Email icon" src={emailIcon} />
+                <div className={styles.formGroup}>
+                  <label className={styles.formLabel}>Email</label>
+                  <div className={styles.inputContainer}>
+                    <img className={styles.inputIcon} alt="Email icon" src={emailIcon} />
                     <input
                       type="email"
                       name="email"
                       value={formData.email}
                       onChange={handleInputChange}
                       placeholder="Enter your email address"
-                      className="form-input"
+                      className={styles.formInput}
                       required
                       disabled={loading}
                     />
                   </div>
                 </div>
 
-                <div className="form-group">
-                  <label className="form-label">Password</label>
-                  <div className="input-container">
-                    <img className="input-icon" alt="Password icon" src={nameIcon} />
+                <div className={styles.formGroup}>
+                  <label className={styles.formLabel}>Password</label>
+                  <div className={styles.inputContainer}>
+                    <img className={styles.inputIcon} alt="Password icon" src={nameIcon} />
                     <input
                       type="password"
                       name="password"
                       value={formData.password}
                       onChange={handleInputChange}
                       placeholder="Enter your password"
-                      className="form-input"
+                      className={styles.formInput}
                       required
                       disabled={loading}
                     />
                   </div>
                 </div>
 
-                <div className="form-options">
-                  <div className="remember-me">
+                <div className={styles.formOptions}>
+                  <div className={styles.rememberMe}>
                     <input type="checkbox" id="remember" />
                     <label htmlFor="remember">Remember me</label>
                   </div>
-                  <Link to="/forgot-password" className="forgot-password">
+                  <Link to="/forgot-password" className={styles.forgotPassword}>
                     Forgot Password?
                   </Link>
                 </div>
               </div>
 
-              <button type="submit" className="primary-btn" disabled={loading}>
-                <span className="button-text">
+              <button type="submit" className={styles.primaryBtn} disabled={loading}>
+                <span className={styles.buttonText}>
                   {loading ? 'Log In...' : 'Log In'}
                 </span>
               </button>
             </form>
 
-            <div className="form-footer">
-              <p className="signup-prompt">Don't Have An Account?</p>
-              <div className="signup-links">
-                <Link to="/roles" className="sign-up-link">Sign Up</Link>
-
+            <div className={styles.formFooter}>
+              <p className={styles.signupPrompt}>Don't Have An Account?</p>
+              <div className={styles.signupLinks}>
+                <Link to="/roles" className={styles.signUpLink}>Sign Up</Link>
               </div>
             </div>
           </div>
