@@ -16,26 +16,26 @@ export const Roles = () => {
     navigate('/family-member/signup');
   };
 
+  const handleDoctorClick = () => {
+    navigate('/doctor/signup');
+  };
+
+  const handleMentalHealthProfessionalClick = () => {
+    navigate('/healthproffesional/signup');
+  };
+
   return (
     <div className="roles-page">
       <div className="roles-bg">
         <div className="left-section">
           <img className="main-image" alt="Registration" src={commonReg} />
-          <div className="welcome-text">
-            <h1 className="welcome-title">Welcome to SilverCare!</h1>
-            <p className="welcome-description">
-              Choose your role to get started with our comprehensive
-              <br /> 
-              elderly care platform. Connect with caregivers, families,
-              and healthcare professionals — all in one place
-            </p>
-          </div>
+
         </div>
 
         <div className="right-section">
-          <div className="form-container">
+          <div className="form-containe">
             <div className="form-header">
-              <h2 className="form-title">Choose Your Role</h2>
+              
               
             </div>
 
@@ -78,6 +78,42 @@ export const Roles = () => {
                     </div>
                     <button className="role-btn family-btn">
                       Register as Family Member
+                    </button>
+                  </div>
+
+                  <div className="role-card" onClick={handleDoctorClick}>
+                    <div className="role-content">
+                      <div className="role-icon">👨‍⚕️</div>
+                      <h4 className="role-title">Doctor</h4>
+                      <p className="role-description">
+                        Medical professionals providing healthcare services
+                      </p>
+                      <div className="role-features">
+                        <span className="feature">• Manage patient records</span>
+                        <span className="feature">• Provide medical consultations</span>
+                        <span className="feature">• Monitor health conditions</span>
+                      </div>
+                    </div>
+                    <button className="role-btn doctor-btn">
+                      Register as Doctor
+                    </button>
+                  </div>
+
+                  <div className="role-card" onClick={handleMentalHealthProfessionalClick}>
+                    <div className="role-content">
+                      <div className="role-icon">🧠</div>
+                      <h4 className="role-title">Mental Health Professional</h4>
+                      <p className="role-description">
+                        Specialists providing mental health and wellness support
+                      </p>
+                      <div className="role-features">
+                        <span className="feature">• Conduct therapy sessions</span>
+                        <span className="feature">• Mental health assessments</span>
+                        <span className="feature">• Wellness program management</span>
+                      </div>
+                    </div>
+                    <button className="role-btn mental-health-btn">
+                      Register as Counseller
                     </button>
                   </div>
                 </div>
