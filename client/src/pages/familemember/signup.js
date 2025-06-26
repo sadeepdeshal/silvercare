@@ -7,7 +7,7 @@ import group from "../../components/images/group.jpg";
 import image1 from "../../components/images/image-1.jpg";
 import image from "../../components/images/image.jpg";
 import line133 from "../../components/images/line-133.jpg";
-import "../../components/css/familymember/signup.css";
+import styles from "../../components/css/familymember/signup.module.css";
 import { Link } from "react-router-dom";
 
 export const FamilyMemberReg = () => {
@@ -58,8 +58,7 @@ export const FamilyMemberReg = () => {
       [name]: ''
     }));
 
-    // Real-time validation
-    if (name === 'email' && value) {
+        if (name === 'email' && value) {
       if (!validateEmail(value)) {
         setErrors(prev => ({
           ...prev,
@@ -130,13 +129,13 @@ export const FamilyMemberReg = () => {
   }, []);
 
   return (
-    <div className="family-member-reg">
-      <div className="bg">
-        <div className="left-section">
-          <img className="main-image" alt="Family Care" src={image1} />
-          <div className="welcome-text">
-            <h1 className="welcome-title">Welcome to SilverCare!</h1>
-            <p className="welcome-description">
+    <div className={styles.familyMemberReg}>
+      <div className={styles.bg}>
+        <div className={styles.leftSection}>
+          <img className={styles.mainImage} alt="Family Care" src={image1} />
+          <div className={styles.welcomeText}>
+            <h1 className={styles.welcomeTitle}>Welcome to SilverCare!</h1>
+            <p className={styles.welcomeDescription}>
               Help your loved ones stay safe, healthy, and supported.
               <br /> 
               Create your family member account to connect with seniors,
@@ -145,99 +144,99 @@ export const FamilyMemberReg = () => {
           </div>
         </div>
 
-        <div className="right-section">
-          <div className="form-container">
-            <div className="form-header">
-              <h2 className="form-title">Register as a Family Member</h2>
-              <img className="welcome-image" alt="Welcome" src={x52201} />
+        <div className={styles.rightSection}>
+          <div className={styles.formContainer}>
+            <div className={styles.formHeader}>
+              <h2 className={styles.formTitle}>Register as a Family Member</h2>
+              <img className={styles.welcomeImage} alt="Welcome" src={x52201} />
             </div>
 
-            <form onSubmit={handleSubmit} className="registration-form">
-              <div className="form-section">
-                <h3 className="section-title">Personal Information</h3>
-                <p className="section-subtitle">Make sure you have filled all the details</p>
+            <form onSubmit={handleSubmit} className={styles.registrationForm}>
+              <div className={styles.formSection}>
+                <h3 className={styles.sectionTitle}>Personal Information</h3>
+                <p className={styles.sectionSubtitle}>Make sure you have filled all the details</p>
 
-                <div className="form-group">
-                  <label className="form-label">Name</label>
-                  <div className="input-container">
-                    <img className="input-icon" alt="Name icon" src={group41} />
+                <div className={styles.formGroup}>
+                  <label className={styles.formLabel}>Name</label>
+                  <div className={styles.inputContainer}>
+                    <img className={styles.inputIcon} alt="Name icon" src={group41} />
                     <input
                       type="text"
                       name="name"
                       value={formData.name}
                       onChange={handleInputChange}
                       placeholder="e.g., Sadeep Deshal"
-                      className="form-input"
+                      className={styles.formInput}
                       required
                     />
                   </div>
                 </div>
 
-                <div className="form-group">
-                  <label className="form-label">Email</label>
-                  <div className="input-container">
-                    <img className="input-icon" alt="Email icon" src={group} />
+                <div className={styles.formGroup}>
+                  <label className={styles.formLabel}>Email</label>
+                  <div className={styles.inputContainer}>
+                    <img className={styles.inputIcon} alt="Email icon" src={group} />
                     <input
                       type="email"
                       name="email"
                       value={formData.email}
                       onChange={handleInputChange}
                       placeholder="Email address"
-                      className={`form-input ${errors.email ? 'error' : ''}`}
+                      className={`${styles.formInput} ${errors.email ? styles.error : ''}`}
                       pattern="[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}"
                       title="Please enter a valid email address"
                       required
                     />
                   </div>
-                  {errors.email && <span className="error-message">{errors.email}</span>}
+                  {errors.email && <span className={styles.errorMessage}>{errors.email}</span>}
                 </div>
 
-                <div className="form-group">
-                  <label className="form-label">Phone Number</label>
-                  <div className="input-container">
-                    <img className="input-icon" alt="Phone icon" src={image} />
+                <div className={styles.formGroup}>
+                  <label className={styles.formLabel}>Phone Number</label>
+                  <div className={styles.inputContainer}>
+                    <img className={styles.inputIcon} alt="Phone icon" src={image} />
                     <input
                       type="number"
                       name="phone"
                       value={formData.phone}
                       onChange={handleInputChange}
                       placeholder="e.g, 0715896477"
-                      className={`form-input ${errors.phone ? 'error' : ''}`}
+                      className={`${styles.formInput} ${errors.phone ? styles.error : ''}`}
                       pattern="[0-9]{10}"
                       maxLength="10"
                       required
                     />
                   </div>
-                  {errors.phone && <span className="error-message">{errors.phone}</span>}
+                  {errors.phone && <span className={styles.errorMessage}>{errors.phone}</span>}
                 </div>
 
-                <div className="form-group">
-                  <label className="form-label">Fixed Line</label>
-                  <div className="input-container">
-                    <img className="input-icon" alt="Fixed line icon" src={group3984} />
+                <div className={styles.formGroup}>
+                  <label className={styles.formLabel}>Fixed Line</label>
+                  <div className={styles.inputContainer}>
+                    <img className={styles.inputIcon} alt="Fixed line icon" src={group3984} />
                     <input
                       type="number"
                       name="fixedLine"
                       value={formData.fixedLine}
                       onChange={handleInputChange}
                       placeholder="e.g, 0415869896"
-                      className={`form-input ${errors.fixedLine ? 'error' : ''}`}
+                      className={`${styles.formInput} ${errors.fixedLine ? styles.error : ''}`}
                       pattern="[0-9]{10}"
                       maxLength="10"
                     />
                   </div>
-                  {errors.fixedLine && <span className="error-message">{errors.fixedLine}</span>}
+                  {errors.fixedLine && <span className={styles.errorMessage}>{errors.fixedLine}</span>}
                 </div>
               </div>
 
-              <button type="submit" className="primary-btn">
-                <span className="button-text">Next step</span>
+              <button type="submit" className={styles.primaryBtn}>
+                <span className={styles.buttonText}>Next step</span>
               </button>
             </form>
 
-            <div className="form-footer">
-              <p className="login-prompt">Do You Have An Account?</p>
-              <Link to="/login" className="sign-in-link">Log In</Link>
+            <div className={styles.formFooter}>
+              <p className={styles.loginPrompt}>Do You Have An Account?</p>
+              <Link to="/login" className={styles.signInLink}>Log In</Link>
             </div>
           </div>
         </div>
@@ -245,3 +244,4 @@ export const FamilyMemberReg = () => {
     </div>
   );
 };
+

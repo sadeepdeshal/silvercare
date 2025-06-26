@@ -4,7 +4,7 @@ import { registerCaregiver } from "../../services/registerApi";
 import x52201 from "../../components/images/5220-1.jpg";
 import group41 from "../../components/images/group41.png";
 import image1 from "../../components/images/image-1.jpg";
-import "../../components/css/caregiver/signup.css";
+import styles from "../../components/css/caregiver/signup.module.css";
 import { Link } from "react-router-dom";
 
 export const CaregiverRegStep2 = () => {
@@ -163,13 +163,13 @@ export const CaregiverRegStep2 = () => {
   };
 
   return (
-    <div className="family-member-reg">
-      <div className="bg">
-        <div className="left-section">
-          <img className="main-image" alt="Caregiver Care" src={image1} />
-          <div className="welcome-text">
-            <h1 className="welcome-title">Almost There!</h1>
-            <p className="welcome-description">
+    <div className={styles.familyMemberReg}>
+      <div className={styles.bg}>
+        <div className={styles.leftSection}>
+          <img className={styles.mainImage} alt="Caregiver Care" src={image1} />
+          <div className={styles.welcomeText}>
+            <h1 className={styles.welcomeTitle}>Almost There!</h1>
+            <p className={styles.welcomeDescription}>
               Create a secure password to complete your caregiver registration.
               <br />
               Join our community of professional caregivers today!
@@ -177,15 +177,15 @@ export const CaregiverRegStep2 = () => {
           </div>
         </div>
 
-        <div className="right-section">
-          <div className="form-container">
-            <div className="form-header">
-              <h2 className="form-title">Complete Your Registration</h2>
-              <img className="welcome-image" alt="Welcome" src={x52201} />
+        <div className={styles.rightSection}>
+          <div className={styles.formContainer}>
+            <div className={styles.formHeader}>
+              <h2 className={styles.formTitle}>Complete Your Registration</h2>
+              <img className={styles.welcomeImage} alt="Welcome" src={x52201} />
             </div>
 
             {error && (
-              <div className="error-message" style={{
+              <div className={styles.errorMessage} style={{
                 backgroundColor: '#ffe6e6',
                 color: '#d63031',
                 padding: '12px',
@@ -197,27 +197,27 @@ export const CaregiverRegStep2 = () => {
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="registration-form">
-              <div className="form-section">
-                <h3 className="section-title">Create Password</h3>
-                <p className="section-subtitle">Choose a strong password to secure your account</p>
+            <form onSubmit={handleSubmit} className={styles.registrationForm}>
+              <div className={styles.formSection}>
+                <h3 className={styles.sectionTitle}>Create Password</h3>
+                <p className={styles.sectionSubtitle}>Choose a strong password to secure your account</p>
 
-                <div className="form-group">
-                  <label className="form-label">Password</label>
-                  <div className="input-container">
-                    <img className="input-icon" alt="Password icon" src={group41} />
+                <div className={styles.formGroup}>
+                  <label className={styles.formLabel}>Password</label>
+                  <div className={styles.inputContainer}>
+                    <img className={styles.inputIcon} alt="Password icon" src={group41} />
                     <input
                       type={showPassword ? "text" : "password"}
                       name="password"
                       value={formData.password}
                       onChange={handleInputChange}
                       placeholder="Enter your password"
-                      className="form-input"
+                      className={styles.formInput}
                       required
                     />
                     <button
                       type="button"
-                      className="password-toggle"
+                      className={styles.passwordToggle}
                       onClick={() => setShowPassword(!showPassword)}
                       style={{
                         position: 'absolute',
@@ -236,7 +236,7 @@ export const CaregiverRegStep2 = () => {
                   </div>
                   
                   {formData.password && (
-                    <div className="password-strength" style={{ marginTop: '8px' }}>
+                    <div className={styles.passwordStrength} style={{ marginTop: '8px' }}>
                       <div style={{
                         display: 'flex',
                         alignItems: 'center',
@@ -279,22 +279,22 @@ export const CaregiverRegStep2 = () => {
                   )}
                 </div>
 
-                <div className="form-group">
-                  <label className="form-label">Confirm Password</label>
-                  <div className="input-container">
-                    <img className="input-icon" alt="Confirm Password icon" src={group41} />
+                <div className={styles.formGroup}>
+                  <label className={styles.formLabel}>Confirm Password</label>
+                  <div className={styles.inputContainer}>
+                    <img className={styles.inputIcon} alt="Confirm Password icon" src={group41} />
                     <input
                       type={showConfirmPassword ? "text" : "password"}
                       name="confirmPassword"
                       value={formData.confirmPassword}
                       onChange={handleInputChange}
                       placeholder="Confirm your password"
-                      className="form-input"
+                      className={styles.formInput}
                       required
                     />
                     <button
                       type="button"
-                      className="password-toggle"
+                      className={styles.passwordToggle}
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                       style={{
                         position: 'absolute',
@@ -324,11 +324,11 @@ export const CaregiverRegStep2 = () => {
                 </div>
               </div>
 
-              <div className="form-actions">
+              <div className={styles.formActions}>
                 <button 
                   type="button" 
                   onClick={handleBackToStep1}
-                  className="secondary-btn"
+                  className={styles.secondaryBtn}
                   style={{
                     backgroundColor: '#f8f9fa',
                     color: '#6c757d',
@@ -346,23 +346,23 @@ export const CaregiverRegStep2 = () => {
                 
                 <button 
                   type="submit" 
-                  className="primary-btn"
+                  className={styles.primaryBtn}
                   disabled={isLoading || passwordStrength.score < 5 || formData.password !== formData.confirmPassword}
                   style={{
                     opacity: (isLoading || passwordStrength.score < 5 || formData.password !== formData.confirmPassword) ? 0.6 : 1,
                     cursor: (isLoading || passwordStrength.score < 5 || formData.password !== formData.confirmPassword) ? 'not-allowed' : 'pointer'
                   }}
                 >
-                  <span className="button-text">
+                  <span className={styles.buttonText}>
                     {isLoading ? 'Creating Account...' : 'Complete Registration'}
                   </span>
                 </button>
               </div>
             </form>
 
-            <div className="form-footer">
-              <p className="login-prompt">Already Have An Account?</p>
-              <Link to="/login" className="sign-in-link">Log In</Link>
+            <div className={styles.formFooter}>
+              <p className={styles.loginPrompt}>Already Have An Account?</p>
+              <Link to="/login" className={styles.signInLink}>Log In</Link>
             </div>
           </div>
         </div>
