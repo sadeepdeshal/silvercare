@@ -10,7 +10,8 @@ import CaregiverDashboard from './pages/caregiver/dashboard';
 import AdminDashboard from './pages/admin/dashboard';
 import { DoctorReg } from './pages/doctor/signup';
 import { MentalHealthProfessionalReg } from './pages/healthproffesional/signup';
-
+import { DoctorRegStep2 } from './pages/doctor/signup-step2';
+import { DoctorRegStep3  } from './pages/doctor/signup-step3';
 import { Login } from './pages/login';
 import { Roles } from './pages/roles';
 
@@ -28,6 +29,8 @@ function App() {
         <Route path="/family-member/signup-step2" element={<FamilyMemberReg2 />} />
         <Route path="/family-member/dashboard" element={<FamilyMemberDashboard />} />
          <Route path="/doctor/signup" element={<DoctorReg  />} />
+         <Route path="/doctor/signup-step2" element={<DoctorRegStep2  />} />
+         <Route path="/doctor/signup-step3" element={<DoctorRegStep3  />} />
          <Route path="/healthproffesional/signup" element={<MentalHealthProfessionalReg />} />
         <Route path="/caregiver/signup" element={<CaregiverReg />} />
         <Route path="/caregiver/signup-step2" element={<CaregiverRegStep2 />} />
