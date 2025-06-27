@@ -10,6 +10,10 @@ export const registerCaregiver = (userData) => {
   return axios.post(`${API_BASE}/caregiver`, userData);
 };
 
+export const registerDoctor = (userData) => {
+  return axios.post(`${API_BASE}/doctor`, userData);
+};
+
 export const getRegistrations = () => {
   return axios.get(API_BASE);
 };

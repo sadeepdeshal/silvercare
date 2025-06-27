@@ -9,6 +9,7 @@ import image from "../../components/images/image.jpg";
 import line133 from "../../components/images/line-133.jpg";
 import styles from "../../components/css/doctor/signup.module.css";
 import { Link } from "react-router-dom";
+import { registerDoctor } from "../../services/registerApi";
 
 export const DoctorRegStep3 = () => {
   const navigate = useNavigate();
@@ -19,7 +20,8 @@ export const DoctorRegStep3 = () => {
 
   const [errors, setErrors] = useState({
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    submit: ''
   });
 
   const [passwordStrength, setPasswordStrength] = useState({
@@ -82,7 +84,8 @@ export const DoctorRegStep3 = () => {
     // Clear previous error when user starts typing
     setErrors(prev => ({
       ...prev,
-      [name]: ''
+      [name]: '',
+      submit: ''
     }));
 
     // Password strength validation
@@ -128,7 +131,7 @@ export const DoctorRegStep3 = () => {
 
     // If there are errors, set them and don't submit
     if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
+      setErrors(prev => ({ ...prev, ...newErrors }));
       return;
     }
     
@@ -139,27 +142,68 @@ export const DoctorRegStep3 = () => {
       const step1Data = JSON.parse(localStorage.getItem('doctorStep1Data') || '{}');
       const step2Data = JSON.parse(localStorage.getItem('doctorStep2Data') || '{}');
       
+      // Check if previous step data exists
+      if (!step1Data.name || !step1Data.email || !step2Data.areaOfSpecification) {
+        setErrors(prev => ({
+          ...prev,
+          submit: 'Missing information from previous steps. Please start registration again.'
+        }));
+        setIsSubmitting(false);
+        return;
+      }
+      
       const completeFormData = {
-        ...step1Data,
-        ...step2Data,
+        name: step1Data.name,
+        email: step1Data.email,
+        phone: step1Data.phone,
+        alternativeNumber: step1Data.alternativeNumber,
+        areaOfSpecification: step2Data.areaOfSpecification,
+        medicalLicenseNumber: step2Data.medicalLicenseNumber,
+        yearOfExperience: step2Data.yearOfExperience,
+        currentInstitutions: step2Data.currentInstitutions,
+        medicalCredentials: step2Data.medicalCredentials,
         password: formData.password
       };
       
-      console.log('Complete registration data:', completeFormData);
+      console.log('Submitting doctor registration:', completeFormData);
       
-      // Here you would typically send the data to your backend
-      // await registerDoctor(completeFormData);
+      // Call the API to register the doctor
+      const response = await registerDoctor(completeFormData);
+      
+      console.log('Registration successful:', response.data);
       
       // Clear localStorage after successful registration
       localStorage.removeItem('doctorStep1Data');
       localStorage.removeItem('doctorStep2Data');
       
-      // Navigate to success page or login
+      // Show success message and navigate
+      alert('Registration successful! Your account is pending approval. You will be notified once approved.');
       navigate('/login');
       
     } catch (error) {
       console.error('Registration failed:', error);
-      // Handle registration error
+      
+      // Handle different types of errors
+      if (error.response) {
+        // Server responded with error status
+        const errorMessage = error.response.data?.error || 'Registration failed. Please try again.';
+        setErrors(prev => ({
+          ...prev,
+          submit: errorMessage
+        }));
+      } else if (error.request) {
+        // Request was made but no response received
+        setErrors(prev => ({
+          ...prev,
+          submit: 'Network error. Please check your connection and try again.'
+        }));
+      } else {
+        // Something else happened
+        setErrors(prev => ({
+          ...prev,
+          submit: 'An unexpected error occurred. Please try again.'
+        }));
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -185,6 +229,17 @@ export const DoctorRegStep3 = () => {
   const getStrengthWidth = (score) => {
     return `${(score / 5) * 100}%`;
   };
+
+  // Check if previous step data exists on component mount
+  useEffect(() => {
+    const step1Data = localStorage.getItem('doctorStep1Data');
+    const step2Data = localStorage.getItem('doctorStep2Data');
+    
+    if (!step1Data || !step2Data) {
+      alert('Please complete all previous steps first.');
+      navigate('/doctor/signup');
+    }
+  }, [navigate]);
 
   return (
     <div className={styles.doctorReg}>
@@ -213,6 +268,13 @@ export const DoctorRegStep3 = () => {
               <div className={styles.formSection}>
                 <h3 className={styles.sectionTitle}>Account Security</h3>
                 <p className={styles.sectionSubtitle}>Create a strong password for your account</p>
+
+                {/* Display submit error if any */}
+                {errors.submit && (
+                  <div className={styles.submitError}>
+                    <span className={styles.errorMessage}>{errors.submit}</span>
+                  </div>
+                )}
 
                 <div className={styles.formGroup}>
                   <label className={styles.formLabel}>Password</label>
@@ -303,6 +365,24 @@ export const DoctorRegStep3 = () => {
               </div>
 
               <div className={styles.buttonContainer}>
+                  <button 
+    type="button" 
+    className={styles.backBtn}
+                                      style={{
+                                    backgroundColor: '#f8f9fa',
+                                    color: '#6c757d',
+                                    border: '1px solid #dee2e6',
+                                    padding: '12px 24px',
+                                    borderRadius: '8px',
+                                    cursor: 'pointer',
+                                    fontSize: '14px',
+                                    fontWeight: '500',
+                                    marginRight: '12px'
+                                  }}
+    onClick={() => navigate('/doctor/signup-step2')}
+  >
+    <span className={styles.buttonText}>Back to Step 1</span>
+  </button>
                 <button 
                   type="submit" 
                   className={`${styles.registerBtnCentered} ${isSubmitting ? styles.loading : ''}`}

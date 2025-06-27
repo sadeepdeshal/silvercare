@@ -275,6 +275,25 @@ export const DoctorRegStep2 = () => {
                   <small className={styles.fileNote}>Accept: .pdf, .jpg, .png (Max 5MB)</small>
                 </div>
               </div>
+              
+                                <button 
+                  type="button" 
+                  className={styles.backBtn}
+                                                    style={{
+                                                  backgroundColor: '#f8f9fa',
+                                                  color: '#6c757d',
+                                                  border: '1px solid #dee2e6',
+                                                  padding: '12px 24px',
+                                                  borderRadius: '8px',
+                                                  cursor: 'pointer',
+                                                  fontSize: '14px',
+                                                  fontWeight: '500',
+                                                  marginRight: '12px'
+                                                }}
+                  onClick={() => navigate('/doctor/signup')}
+                >
+                  <span className={styles.buttonText}>Back to Step 1</span>
+                </button>
 
               <button type="submit" className={styles.primaryBtn}>
                 <span className={styles.buttonText}>Next step</span>
