@@ -43,13 +43,15 @@ export const Login = () => {
       console.log('Login successful:', { user, role });
       
       // Redirect based on user role
-if (role === 'admin') {
-  navigate('/admin/dashboard');
-} else if (role === 'caregiver') {
-  navigate('/caregiver/dashboard');
-} else if (role === 'family_member') {
-  navigate('/family-member/dashboard');
-} else {
+      if (role === 'admin') {
+        navigate('/admin/dashboard');
+      } else if (role === 'caregiver') {
+        navigate('/caregiver/dashboard');
+      } else if (role === 'family_member') {
+        navigate('/family-member/dashboard');
+      } else if (role === 'doctor') {
+        navigate('/doctor/dashboard');
+      } else {
         // Default fallback
         navigate('/dashboard');
       }
@@ -58,6 +60,9 @@ if (role === 'admin') {
       console.error('Login error:', err);
       if (err.response && err.response.data && err.response.data.error) {
         setError(err.response.data.error);
+      } else if (err.response && err.response.status === 403) {
+        // Handle doctor pending approval specifically
+        setError('Your account is pending approval. Please wait for admin confirmation before logging in.');
       } else {
         setError('Login failed. Please try again.');
       }
