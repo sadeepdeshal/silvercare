@@ -6,7 +6,7 @@ const loginUser = async (req, res) => {
   const { email, password } = req.body;
   
   try {
-    // Check in both tables for the user
+    // Check in all tables for the user
     let user = null;
     let userTable = null;
     
@@ -29,6 +29,24 @@ const loginUser = async (req, res) => {
       if (registerResult.rows.length > 0) {
         user = registerResult.rows[0];
         userTable = 'register';
+      } else {
+        // Check in DoctorReg table (doctors)
+        const doctorResult = await pool.query(
+          'SELECT id, name, email, password, role, status FROM DoctorReg WHERE email = $1',
+          [email]
+        );
+        
+        if (doctorResult.rows.length > 0) {
+          user = doctorResult.rows[0];
+          userTable = 'doctor';
+          
+          // Check if doctor status is confirmed
+          if (user.status !== 'confirmed') {
+            return res.status(403).json({ 
+              error: 'Your account is pending approval. Please wait for admin confirmation before logging in.' 
+            });
+          }
+        }
       }
     }
     
