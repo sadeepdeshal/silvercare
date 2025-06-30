@@ -14,6 +14,10 @@ export const registerDoctor = (userData) => {
   return axios.post(`${API_BASE}/doctor`, userData);
 };
 
+export const registerHealthProfessional = (userData) => {
+  return axios.post(`${API_BASE}/health-professional`, userData);
+};
+
 export const getRegistrations = () => {
   return axios.get(API_BASE);
 };
