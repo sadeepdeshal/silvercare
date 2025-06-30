@@ -9,6 +9,7 @@ import image from "../../components/images/image.jpg";
 import line133 from "../../components/images/line-133.jpg";
 import styles from "../../components/css/healthprofessional/signup.module.css";
 import { Link } from "react-router-dom";
+import { registerHealthProfessional } from "../../services/registerApi";
 
 export const HealthProfessionalRegStep3 = () => {
   const navigate = useNavigate();
@@ -166,21 +167,18 @@ export const HealthProfessionalRegStep3 = () => {
       
       console.log('Submitting health professional registration:', completeFormData);
       
-      // For now, just simulate API call - you can implement the actual API call later
-      // const response = await registerHealthProfessional(completeFormData);
+      // Call the API to register the health professional
+      const response = await registerHealthProfessional(completeFormData);
       
-      // Simulate successful registration
-      setTimeout(() => {
-        console.log('Registration successful');
-        
-        // Clear localStorage after successful registration
-        localStorage.removeItem('healthProfessionalStep1Data');
-        localStorage.removeItem('healthProfessionalStep2Data');
-        
-        // Show success message and navigate
-        alert('Registration successful! Your account is pending approval. You will be notified once approved.');
-        navigate('/login');
-      }, 2000);
+      console.log('Registration successful:', response.data);
+      
+      // Clear localStorage after successful registration
+      localStorage.removeItem('healthProfessionalStep1Data');
+      localStorage.removeItem('healthProfessionalStep2Data');
+      
+      // Show success message and navigate
+      alert('Registration successful! Your account is pending approval. You will be notified once approved.');
+      navigate('/login');
       
     } catch (error) {
       console.error('Registration failed:', error);
@@ -366,7 +364,7 @@ export const HealthProfessionalRegStep3 = () => {
                 </div>
               </div>
 
-              <div className={styles.buttonContainer}>
+                            <div className={styles.buttonContainer}>
                 <button 
                   type="button" 
                   className={styles.backBtn}
@@ -407,3 +405,4 @@ export const HealthProfessionalRegStep3 = () => {
     </div>
   );
 };
+
