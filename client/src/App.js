@@ -10,6 +10,9 @@ import CaregiverDashboard from './pages/caregiver/dashboard';
 import AdminDashboard from './pages/admin/dashboard';
 import { DoctorReg } from './pages/doctor/signup';
 import { MentalHealthProfessionalReg } from './pages/healthproffesional/signup';
+import { HealthProfessionalRegStep2 } from './pages/healthproffesional/signup-step2';
+import { HealthProfessionalRegStep3 } from './pages/healthproffesional/signup-step3';
+import HealthDashboard from './pages/healthproffesional/dashboard';
 import { DoctorRegStep2 } from './pages/doctor/signup-step2';
 import { DoctorRegStep3  } from './pages/doctor/signup-step3';
 import DoctorDashboard from './pages/doctor/dashboard';
@@ -34,6 +37,10 @@ function App() {
          <Route path="/doctor/signup-step3" element={<DoctorRegStep3  />} />
           <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
          <Route path="/healthproffesional/signup" element={<MentalHealthProfessionalReg />} />
+        <Route path="/healthproffesional/signup-step2" element={<HealthProfessionalRegStep2 />} />
+        <Route path="/healthproffesional/signup-step3" element={<HealthProfessionalRegStep3 />} />
+        
+        <Route path="/healthproffesional/dashboard" element={<HealthDashboard />} />
         <Route path="/caregiver/signup" element={<CaregiverReg />} />
         <Route path="/caregiver/signup-step2" element={<CaregiverRegStep2 />} />
         <Route path="/caregiver/dashboard" element={<CaregiverDashboard />} />
