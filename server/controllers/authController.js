@@ -46,6 +46,24 @@ const loginUser = async (req, res) => {
               error: 'Your account is pending approval. Please wait for admin confirmation before logging in.' 
             });
           }
+        } else {
+          // Check in HealthReg table (health professionals)
+          const healthResult = await pool.query(
+            'SELECT id, name, email, password, role, status FROM HealthReg WHERE email = $1',
+            [email]
+          );
+          
+          if (healthResult.rows.length > 0) {
+            user = healthResult.rows[0];
+            userTable = 'health_professional';
+            
+            // Check if health professional status is confirmed
+            if (user.status !== 'confirmed') {
+              return res.status(403).json({ 
+                error: 'Your account is pending approval. Please wait for admin confirmation before logging in.' 
+              });
+            }
+          }
         }
       }
     }

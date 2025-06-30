@@ -51,6 +51,8 @@ export const Login = () => {
         navigate('/family-member/dashboard');
       } else if (role === 'doctor') {
         navigate('/doctor/dashboard');
+      } else if (role === 'healthprofessional') {
+        navigate('/healthproffesional/dashboard');
       } else {
         // Default fallback
         navigate('/dashboard');
@@ -61,7 +63,7 @@ export const Login = () => {
       if (err.response && err.response.data && err.response.data.error) {
         setError(err.response.data.error);
       } else if (err.response && err.response.status === 403) {
-        // Handle doctor pending approval specifically
+        // Handle pending approval specifically for both doctors and health professionals
         setError('Your account is pending approval. Please wait for admin confirmation before logging in.');
       } else {
         setError('Login failed. Please try again.');
