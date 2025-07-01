@@ -69,14 +69,9 @@ const Navbar = () => {
             className={styles.loginBtn}
             onClick={() => handleNavigation('/login')}
           >
-            Login
+            Logout
           </button>
-          <button 
-            className={styles.signupBtn}
-            onClick={() => handleNavigation('/roles')}
-          >
-            Sign Up
-          </button>
+
         </div>
 
         {/* Mobile Menu Toggle */}

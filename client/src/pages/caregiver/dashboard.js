@@ -1,11 +1,20 @@
 import React from 'react';
 import Navbar from '../../components/navbar';
 import styles from "../../components/css/navbar.module.css";
+import { useAuth } from '../../context/AuthContext';
 
 const CaregiverDashboard = () => {
+    const { currentUser, logout } = useAuth();
   return (
     <div>
       <Navbar />
+          <div>
+      <h1>Welcome, {currentUser.name}!</h1>
+      <p>Email: {currentUser.email}</p>
+      <p>Role: {currentUser.role}</p>
+      {/* Caregiver-specific content */}
+      <button onClick={logout}>Logout</button>
+    </div>
       <div style={{
         padding: '40px',
         fontFamily: 'Arial, sans-serif',

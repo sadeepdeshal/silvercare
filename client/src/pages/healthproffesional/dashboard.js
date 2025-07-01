@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext'; //
+import Navbar from '../../components/navbar';
 
 const HealthProfessionalDashboard = () => {
   const navigate = useNavigate();
+    const { currentUser } = useAuth(); // ADD THIS LINE
   const [user, setUser] = useState(null);
 
   useEffect(() => {
@@ -33,6 +36,15 @@ const HealthProfessionalDashboard = () => {
   }
 
   return (
+    <div>
+         <Navbar />
+               <h1>Hi</h1>
+            <h1>Welcome, {currentUser.name}!</h1>
+      <p>Email: {currentUser.email}</p>
+      <p>Role: {currentUser.role}</p>
+      {/* Caregiver-specific content */}
+     
+      
     <div style={{ padding: '20px' }}>
       <div style={{ 
         display: 'flex', 
@@ -50,20 +62,9 @@ const HealthProfessionalDashboard = () => {
             Health Professional Dashboard
           </p>
         </div>
-        <button 
-          onClick={handleLogout}
-          style={{
-            padding: '10px 20px',
-            backgroundColor: '#e74c3c',
-            color: 'white',
-            border: 'none',
-            borderRadius: '5px',
-            cursor: 'pointer'
-          }}
-        >
-          Logout
-        </button>
+
       </div>
+      
 
       <div style={{ 
         display: 'grid', 
@@ -222,6 +223,7 @@ const HealthProfessionalDashboard = () => {
           Use the dashboard features above to manage your practice effectively.
         </p>
       </div>
+    </div>
     </div>
   );
 };

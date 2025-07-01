@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { loginUser } from "../services/loginApi";
+import { useAuth } from "../context/AuthContext"; // ADD THIS IMPORT
 import loginImage from "../components/images/login.jpg";
 import welcomeIcon from "../components/images/5220-1.jpg";
 import nameIcon from "../components/images/group41.png";
@@ -9,6 +10,7 @@ import styles from "../components/css/login.module.css";
 
 export const Login = () => {
   const navigate = useNavigate();
+  const { login } = useAuth(); // ADD THIS LINE
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -35,28 +37,38 @@ export const Login = () => {
       const response = await loginUser(formData);
       const { user, token, role } = response.data;
       
-      // Store user data and token in localStorage
-      localStorage.setItem('silvercare_token', token);
-      localStorage.setItem('silvercare_user', JSON.stringify(user));
-      localStorage.setItem('silvercare_role', role);
+      // UPDATED: Use AuthContext instead of localStorage directly
+      const userData = {
+        ...user,
+        token,
+        role
+      };
+      
+      // Store in AuthContext (this will also handle localStorage)
+      login(userData);
       
       console.log('Login successful:', { user, role });
       
-      // Redirect based on user role
-      if (role === 'admin') {
+         switch(role) {
+      case 'admin':
         navigate('/admin/dashboard');
-      } else if (role === 'caregiver') {
+        break;
+      case 'caregiver':
         navigate('/caregiver/dashboard');
-      } else if (role === 'family_member') {
+        break;
+      case 'family_member':
         navigate('/family-member/dashboard');
-      } else if (role === 'doctor') {
+        break;
+      case 'doctor':
         navigate('/doctor/dashboard');
-      } else if (role === 'healthprofessional') {
-        navigate('/healthproffesional/dashboard');
-      } else {
-        // Default fallback
+        break;
+      case 'healthprofessional':  // This matches your console output
+        navigate('/healthproffesional/dashboard');  // This matches your route
+        break;
+      default:
+        console.log('Unknown role:', role);
         navigate('/dashboard');
-      }
+    }
       
     } catch (err) {
       console.error('Login error:', err);
