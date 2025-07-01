@@ -149,7 +149,7 @@ export const FamilyMemberReg2 = () => {
       
       // Redirect to family member dashboard after a short delay
       setTimeout(() => {
-        navigate('/family-member/dashboard');
+        navigate('/login');
       }, 2000);
       
     } catch (error) {

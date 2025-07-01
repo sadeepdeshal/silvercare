@@ -139,7 +139,7 @@ export const CaregiverRegStep2 = () => {
       
       // Show success message and redirect
       alert('Registration successful! Welcome to SilverCare.');
-      navigate('/caregiver/dashboard');
+      navigate('/login');
       
     } catch (error) {
       console.error('Registration error:', error);
