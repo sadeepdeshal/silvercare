@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { registerElder } from '../../services/registerApi';
 import styles from '../../components/css/familymember/elder-signup.module.css';
 
 const ElderSignup = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     fullName: '',
     dateOfBirth: '',
@@ -18,6 +21,7 @@ const ElderSignup = () => {
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -51,6 +55,13 @@ const ElderSignup = () => {
     if (!formData.gender) newErrors.gender = 'Gender is required';
     if (!formData.nicPassport.trim()) newErrors.nicPassport = 'NIC/Passport is required';
     if (!formData.contactNumber.trim()) newErrors.contactNumber = 'Contact number is required';
+    
+    // Validate contact number format (10 digits)
+    const phoneRegex = /^[0-9]{10}$/;
+    if (formData.contactNumber && !phoneRegex.test(formData.contactNumber)) {
+      newErrors.contactNumber = 'Contact number must be exactly 10 digits';
+    }
+    
     if (!formData.address.trim()) newErrors.address = 'Address is required';
     if (!formData.password) newErrors.password = 'Password is required';
     if (formData.password.length < 6) newErrors.password = 'Password must be at least 6 characters';
@@ -63,11 +74,48 @@ const ElderSignup = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (validateForm()) {
-      console.log('Form submitted:', formData);
-      // Handle form submission here
+    
+    if (!validateForm()) {
+      return;
+    }
+
+    setIsSubmitting(true);
+    
+    try {
+      // Create FormData for file upload
+      const submitData = new FormData();
+      submitData.append('fullName', formData.fullName);
+      submitData.append('dateOfBirth', formData.dateOfBirth);
+      submitData.append('gender', formData.gender);
+      submitData.append('nicPassport', formData.nicPassport);
+      submitData.append('contactNumber', formData.contactNumber);
+      submitData.append('medicalConditions', formData.medicalConditions);
+      submitData.append('address', formData.address);
+      submitData.append('password', formData.password);
+      submitData.append('confirmPassword', formData.confirmPassword);
+      
+      if (formData.profilePhoto) {
+        submitData.append('profilePhoto', formData.profilePhoto);
+      }
+
+      const response = await registerElder(submitData);
+      
+      if (response.status === 201) {
+        alert('Elder registered successfully!');
+        navigate('/family-member/dashboard');
+      }
+    } catch (error) {
+      console.error('Registration error:', error);
+      
+      if (error.response?.data?.error) {
+        alert(`Registration failed: ${error.response.data.error}`);
+      } else {
+        alert('Registration failed. Please try again.');
+      }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -175,7 +223,7 @@ const ElderSignup = () => {
                 value={formData.contactNumber}
                 onChange={handleInputChange}
                 className={`${styles.input} ${errors.contactNumber ? styles.inputError : ''}`}
-                placeholder="Enter contact number"
+                placeholder="Enter contact number (10 digits)"
               />
               {errors.contactNumber && <span className={styles.error}>{errors.contactNumber}</span>}
             </div>
@@ -257,8 +305,12 @@ const ElderSignup = () => {
 
           {/* Submit Button */}
           <div className={styles.submitSection}>
-            <button type="submit" className={styles.submitButton}>
-              Create Account
+            <button 
+              type="submit" 
+              className={styles.submitButton}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Creating Account...' : 'Create Account'}
             </button>
             <p className={styles.loginLink}>
               Already have an account? <a href="/login">Sign in here</a>
