@@ -7,6 +7,7 @@ const ElderSignup = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     fullName: '',
+    email: '',
     dateOfBirth: '',
     gender: '',
     nicPassport: '',
@@ -51,6 +52,14 @@ const ElderSignup = () => {
     const newErrors = {};
 
     if (!formData.fullName.trim()) newErrors.fullName = 'Full name is required';
+    if (!formData.email.trim()) newErrors.email = 'Email is required';
+    
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (formData.email && !emailRegex.test(formData.email)) {
+      newErrors.email = 'Please enter a valid email address';
+    }
+    
     if (!formData.dateOfBirth) newErrors.dateOfBirth = 'Date of birth is required';
     if (!formData.gender) newErrors.gender = 'Gender is required';
     if (!formData.nicPassport.trim()) newErrors.nicPassport = 'NIC/Passport is required';
@@ -87,6 +96,7 @@ const ElderSignup = () => {
       // Create FormData for file upload
       const submitData = new FormData();
       submitData.append('fullName', formData.fullName);
+      submitData.append('email', formData.email);
       submitData.append('dateOfBirth', formData.dateOfBirth);
       submitData.append('gender', formData.gender);
       submitData.append('nicPassport', formData.nicPassport);
@@ -170,6 +180,19 @@ const ElderSignup = () => {
                 placeholder="Enter full name"
               />
               {errors.fullName && <span className={styles.error}>{errors.fullName}</span>}
+            </div>
+
+            <div className={styles.inputGroup}>
+              <label className={styles.label}>Email Address *</label>
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleInputChange}
+                className={`${styles.input} ${errors.email ? styles.inputError : ''}`}
+                placeholder="Enter email address"
+              />
+              {errors.email && <span className={styles.error}>{errors.email}</span>}
             </div>
 
             <div className={styles.row}>
