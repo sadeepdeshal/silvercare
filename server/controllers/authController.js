@@ -29,13 +29,13 @@ const loginUser = async (req, res) => {
       if (registerResult.rows.length > 0) {
         user = registerResult.rows[0];
         userTable = 'register';
-          if (user.role === 'admin') {
-    role = 'admin';
-    // Redirect to admin dashboard
-  } else {
-    role = 'family_member';
-    // Redirect to family member dashboard
-  }
+        if (user.role === 'admin') {
+          role = 'admin';
+          // Redirect to admin dashboard
+        } else {
+          role = 'family_member';
+          // Redirect to family member dashboard
+        }
       } else {
         // Check in DoctorReg table (doctors)
         const doctorResult = await pool.query(
@@ -69,6 +69,17 @@ const loginUser = async (req, res) => {
               return res.status(403).json({ 
                 error: 'Your account is pending approval. Please wait for admin confirmation before logging in.' 
               });
+            }
+          } else {
+            // Check in elderreg table (elders)
+            const elderResult = await pool.query(
+              'SELECT id, full_name as name, email, password, role FROM elderreg WHERE email = $1',
+              [email]
+            );
+            
+            if (elderResult.rows.length > 0) {
+              user = elderResult.rows[0];
+              userTable = 'elder';
             }
           }
         }
