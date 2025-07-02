@@ -18,6 +18,15 @@ export const registerHealthProfessional = (userData) => {
   return axios.post(`${API_BASE}/health-professional`, userData);
 };
 
+
+export const registerElder = (userData) => {
+  return axios.post(`${API_BASE}/elder`, userData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+};
+
 export const getRegistrations = () => {
   return axios.get(API_BASE);
 };

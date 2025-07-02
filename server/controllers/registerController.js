@@ -1,5 +1,40 @@
 const pool = require('../db');
 const bcrypt = require('bcrypt');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+
+// Configure multer for file uploads
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const uploadDir = 'uploads/profiles/';
+    // Create directory if it doesn't exist
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    cb(null, uploadDir);
+  },
+  filename: function (req, file, cb) {
+    // Generate unique filename
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, 'elder-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({
+  storage: storage,
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB limit
+  },
+  fileFilter: function (req, file, cb) {
+    // Check file type
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed'));
+    }
+  }
+});
 
 // Password strength validation function
 const validatePasswordStrength = (password) => {
@@ -21,6 +56,151 @@ const validatePasswordStrength = (password) => {
   }
 
   return { isValid: true, message: 'Password is strong' };
+};
+
+// CREATE an elder registration
+const createElderRegistration = async (req, res) => {
+  // Handle file upload first
+  upload.single('profilePhoto')(req, res, async function (err) {
+    if (err instanceof multer.MulterError) {
+      if (err.code === 'LIMIT_FILE_SIZE') {
+        return res.status(400).json({ error: 'File size too large. Maximum size is 5MB.' });
+      }
+      return res.status(400).json({ error: 'File upload error: ' + err.message });
+    } else if (err) {
+      return res.status(400).json({ error: err.message });
+    }
+
+    const { 
+      fullName, 
+      dateOfBirth, 
+      gender, 
+      nicPassport, 
+      contactNumber, 
+      medicalConditions, 
+      address, 
+      password, 
+      confirmPassword,
+      role = 'elder' 
+    } = req.body;
+    
+    try {
+      // Validate required fields
+      if (!fullName || !dateOfBirth || !gender || !nicPassport || !contactNumber || !address || !password || !confirmPassword) {
+        return res.status(400).json({ error: 'All required fields must be filled' });
+      }
+
+      // Validate password confirmation
+      if (password !== confirmPassword) {
+        return res.status(400).json({ error: 'Passwords do not match' });
+      }
+
+      // Validate contact number format (10 digits)
+      const phoneRegex = /^[0-9]{10}$/;
+      if (!phoneRegex.test(contactNumber)) {
+        return res.status(400).json({ error: 'Contact number must be exactly 10 digits' });
+      }
+
+      // Validate gender
+      const validGenders = ['Male', 'Female', 'Other'];
+      if (!validGenders.includes(gender)) {
+        return res.status(400).json({ error: 'Invalid gender selection' });
+      }
+
+      // Validate date of birth (should be in the past and reasonable age)
+      const birthDate = new Date(dateOfBirth);
+      const today = new Date();
+      const age = today.getFullYear() - birthDate.getFullYear();
+      
+      if (birthDate >= today) {
+        return res.status(400).json({ error: 'Date of birth must be in the past' });
+      }
+      
+      if (age < 50) {
+        return res.status(400).json({ error: 'Elder must be at least 50 years old' });
+      }
+
+      // Validate password strength (using simpler validation for elders)
+      if (password.length < 6) {
+        return res.status(400).json({ error: 'Password must be at least 6 characters long' });
+      }
+
+      // Check if elder already exists with this NIC/Passport
+      const existingElder = await pool.query(
+        'SELECT * FROM elderreg WHERE nic_passport = $1',
+        [nicPassport]
+      );
+      
+      if (existingElder.rows.length > 0) {
+        return res.status(400).json({ error: 'Elder already registered with this NIC/Passport number' });
+      }
+
+      // Check if contact number already exists
+      const existingContact = await pool.query(
+        'SELECT * FROM elderreg WHERE contact_number = $1',
+        [contactNumber]
+      );
+      
+      if (existingContact.rows.length > 0) {
+        return res.status(400).json({ error: 'Contact number already registered' });
+      }
+      
+      // Hash the password
+      const saltRounds = 12;
+      const hashedPassword = await bcrypt.hash(password, saltRounds);
+      const hashedConfirmPassword = await bcrypt.hash(confirmPassword, saltRounds);
+      
+      // Get profile photo path if uploaded
+      const profilePhotoPath = req.file ? req.file.path : null;
+      
+      // Insert new elder registration
+      const result = await pool.query(
+        `INSERT INTO elderreg (
+          full_name, date_of_birth, gender, nic_passport, contact_number, 
+          medical_conditions, address, profile_photo, password, confirm_password, role
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) 
+        RETURNING id, full_name, date_of_birth, gender, nic_passport, contact_number, 
+                  medical_conditions, address, profile_photo, role, created_at`,
+        [
+          fullName, 
+          dateOfBirth, 
+          gender, 
+          nicPassport, 
+          contactNumber, 
+          medicalConditions || null, 
+          address, 
+          profilePhotoPath, 
+          hashedPassword, 
+          hashedConfirmPassword, 
+          role
+        ]
+      );
+      
+      res.status(201).json({
+        message: 'Elder registered successfully',
+        elder: result.rows[0]
+      });
+      
+    } catch (err) {
+      console.error('Elder registration error:', err);
+      
+      // Clean up uploaded file if there was an error
+      if (req.file) {
+        fs.unlink(req.file.path, (unlinkErr) => {
+          if (unlinkErr) console.error('Error deleting file:', unlinkErr);
+        });
+      }
+      
+      // Handle specific database errors
+      if (err.code === '23505') { // Unique constraint violation
+        if (err.constraint === 'elderreg_nic_passport_key') {
+          return res.status(400).json({ error: 'NIC/Passport number already registered' });
+        }
+      }
+      
+      res.status(500).json({ error: 'Error creating elder registration. Please try again.' });
+    }
+  });
 };
 
 // CREATE a health professional registration
@@ -200,7 +380,7 @@ const createDoctorRegistration = async (req, res) => {
       return res.status(400).json({ error: passwordValidation.message });
     }
 
-    // Check if user already exists with this email in any table
+        // Check if user already exists with this email in any table
     const existingUserQueries = [
       pool.query('SELECT * FROM DoctorReg WHERE email = $1', [email]),
       pool.query('SELECT * FROM HealthReg WHERE email = $1', [email]),
@@ -374,18 +554,20 @@ const createCaregiverRegistration = async (req, res) => {
 // GET all registrations
 const getRegistrations = async (req, res) => {
   try {
-    // Get from all tables
+    // Get from all tables including elderreg
     const registerResult = await pool.query('SELECT id, name, email, phone, fixed_line, role, created_at FROM register ORDER BY created_at DESC');
     const registrationResult = await pool.query('SELECT id, name, email, phone, fixed_line, district, role, created_at FROM registration ORDER BY created_at DESC');
     const doctorResult = await pool.query('SELECT id, name, email, phone, alter_phone, specification, license, years_experience, institutions, role, status, created_at FROM DoctorReg ORDER BY created_at DESC');
     const healthResult = await pool.query('SELECT id, name, email, phone, alter_phone, specification, license, years_experience, institutions, role, status, created_at FROM HealthReg ORDER BY created_at DESC');
+    const elderResult = await pool.query('SELECT id, full_name, date_of_birth, gender, nic_passport, contact_number, medical_conditions, address, profile_photo, role, created_at FROM elderreg ORDER BY created_at DESC');
     
     // Combine results
     const allRegistrations = [
       ...registerResult.rows.map(row => ({ ...row, table: 'register' })),
       ...registrationResult.rows.map(row => ({ ...row, table: 'registration' })),
       ...doctorResult.rows.map(row => ({ ...row, table: 'doctor' })),
-      ...healthResult.rows.map(row => ({ ...row, table: 'health_professional' }))
+      ...healthResult.rows.map(row => ({ ...row, table: 'health_professional' })),
+      ...elderResult.rows.map(row => ({ ...row, table: 'elder', name: row.full_name }))
     ].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
     
     res.json(allRegistrations);
@@ -400,6 +582,6 @@ module.exports = {
   createCaregiverRegistration,
   createDoctorRegistration,
   createHealthProfessionalRegistration,
+  createElderRegistration,
   getRegistrations
 };
-
