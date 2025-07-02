@@ -32,8 +32,8 @@ const Unauthorized = () => (
 
 function App() {
   return (
-    <AuthProvider>
-      <Router>
+    <Router>
+      <AuthProvider>
         <Routes>
           {/* Public Routes - No authentication required */}
           <Route path="/" element={<Roles />} />
@@ -91,8 +91,8 @@ function App() {
             </ProtectedRoute>
           } />
         </Routes>
-      </Router>
-    </AuthProvider>
+      </AuthProvider>
+    </Router>
   );
 }
 

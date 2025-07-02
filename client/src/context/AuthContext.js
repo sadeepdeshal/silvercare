@@ -1,49 +1,64 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const AuthContext = createContext();
-
-export const useAuth = () => {
-  return useContext(AuthContext);
-};
 
 export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate(); // ✅ Now this will work because AuthProvider is inside Router
 
   useEffect(() => {
-    // Check for stored user data on app load - USE SAME KEY AS DASHBOARD
-    const storedUser = localStorage.getItem('silvercare_user');
-    if (storedUser) {
-      setCurrentUser(JSON.parse(storedUser));
+    // Check localStorage on app start
+    checkAuthStatus();
+  }, []);
+
+  const checkAuthStatus = () => {
+    const token = localStorage.getItem('silvercare_token');
+    const userData = localStorage.getItem('silvercare_user');
+    
+    if (token && userData) {
+      setCurrentUser(JSON.parse(userData));
+    } else {
+      setCurrentUser(null);
     }
     setLoading(false);
-  }, []);
+  };
 
   const login = (userData) => {
     setCurrentUser(userData);
-    // Store with the SAME KEYS your dashboard expects
+    localStorage.setItem('silvercare_token', userData.token);
     localStorage.setItem('silvercare_user', JSON.stringify(userData));
-    localStorage.setItem('silvercare_token', userData.token || 'dummy-token');
     localStorage.setItem('silvercare_role', userData.role);
   };
 
   const logout = () => {
-    setCurrentUser(null);
-    // Remove the SAME KEYS
-    localStorage.removeItem('silvercare_user');
+    // ✅ Complete logout
+    setCurrentUser(null); // Clear state immediately
+    
+    // Clear all localStorage
     localStorage.removeItem('silvercare_token');
+    localStorage.removeItem('silvercare_user');
     localStorage.removeItem('silvercare_role');
-  };
-
-  const value = {
-    currentUser,
-    login,
-    logout
+    localStorage.clear(); // Clear everything to be safe
+    
+    // Force redirect to login
+    navigate('/login', { replace: true });
+    
+    // Optional: Reload page to clear any cached data
+    window.location.reload();
   };
 
   return (
-    <AuthContext.Provider value={value}>
-      {!loading && children}
+    <AuthContext.Provider value={{
+      currentUser,
+      login,
+      logout,
+      loading
+    }}>
+      {children}
     </AuthContext.Provider>
   );
 };
+
+export const useAuth = () => useContext(AuthContext);
