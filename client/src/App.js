@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import UserPage from './pages/UserPage';
 import { FamilyMemberReg } from './pages/familemember/signup';
 import { FamilyMemberReg2 } from './pages/familemember/signup-step2';
+import ElderSignup from './pages/familemember/elder-signup';
 import FamilyMemberDashboard from './pages/familemember/dashboard';
 import { CaregiverReg } from './pages/caregiver/signup';
 import { CaregiverRegStep2 } from './pages/caregiver/signup-step2';
@@ -44,6 +45,7 @@ function App() {
           {/* Registration Routes - No authentication required */}
           <Route path="/family-member/signup" element={<FamilyMemberReg />} />
           <Route path="/family-member/signup-step2" element={<FamilyMemberReg2 />} />
+           <Route path="/family-member/elder-signup" element={<ElderSignup />} />
           <Route path="/doctor/signup" element={<DoctorReg />} />
           <Route path="/doctor/signup-step2" element={<DoctorRegStep2 />} />
           <Route path="/doctor/signup-step3" element={<DoctorRegStep3 />} />
