@@ -18,7 +18,6 @@ export const registerHealthProfessional = (userData) => {
   return axios.post(`${API_BASE}/health-professional`, userData);
 };
 
-
 export const registerElder = (userData) => {
   return axios.post(`${API_BASE}/elder`, userData, {
     headers: {

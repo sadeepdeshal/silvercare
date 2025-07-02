@@ -73,6 +73,7 @@ const createElderRegistration = async (req, res) => {
 
     const { 
       fullName, 
+      email,
       dateOfBirth, 
       gender, 
       nicPassport, 
@@ -86,8 +87,14 @@ const createElderRegistration = async (req, res) => {
     
     try {
       // Validate required fields
-      if (!fullName || !dateOfBirth || !gender || !nicPassport || !contactNumber || !address || !password || !confirmPassword) {
+      if (!fullName || !email || !dateOfBirth || !gender || !nicPassport || !contactNumber || !address || !password || !confirmPassword) {
         return res.status(400).json({ error: 'All required fields must be filled' });
+      }
+
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({ error: 'Please enter a valid email address' });
       }
 
       // Validate password confirmation
@@ -125,6 +132,31 @@ const createElderRegistration = async (req, res) => {
         return res.status(400).json({ error: 'Password must be at least 6 characters long' });
       }
 
+      // Check if elder already exists with this email
+      const existingEmailElder = await pool.query(
+        'SELECT * FROM elderreg WHERE email = $1',
+        [email]
+      );
+      
+      if (existingEmailElder.rows.length > 0) {
+        return res.status(400).json({ error: 'Elder already registered with this email address' });
+      }
+
+      // Check if email already exists in other tables
+      const existingEmailQueries = [
+        pool.query('SELECT * FROM register WHERE email = $1', [email]),
+        pool.query('SELECT * FROM registration WHERE email = $1', [email]),
+        pool.query('SELECT * FROM DoctorReg WHERE email = $1', [email]),
+        pool.query('SELECT * FROM HealthReg WHERE email = $1', [email])
+      ];
+      
+      const existingEmailResults = await Promise.all(existingEmailQueries);
+      const emailExists = existingEmailResults.some(result => result.rows.length > 0);
+      
+      if (emailExists) {
+        return res.status(400).json({ error: 'Email address already registered in the system' });
+      }
+
       // Check if elder already exists with this NIC/Passport
       const existingElder = await pool.query(
         'SELECT * FROM elderreg WHERE nic_passport = $1',
@@ -156,13 +188,14 @@ const createElderRegistration = async (req, res) => {
       // Insert new elder registration
       const result = await pool.query(
         `INSERT INTO elderreg (
-          full_name, date_of_birth, gender, nic_passport, contact_number, 
+          full_name, email, date_of_birth, gender, nic_passport, contact_number, 
           medical_conditions, address, profile_photo, password, confirm_password, role
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) 
-        RETURNING id, full_name, date_of_birth, gender, nic_passport, contact_number, 
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) 
+        RETURNING id, full_name, email, date_of_birth, gender, nic_passport, contact_number, 
                   medical_conditions, address, profile_photo, role, created_at`,
         [
           fullName, 
+          email,
           dateOfBirth, 
           gender, 
           nicPassport, 
@@ -193,8 +226,14 @@ const createElderRegistration = async (req, res) => {
       
       // Handle specific database errors
       if (err.code === '23505') { // Unique constraint violation
+        if (err.constraint === 'elderreg_email_key') {
+          return res.status(400).json({ error: 'Email address already registered' });
+        }
         if (err.constraint === 'elderreg_nic_passport_key') {
           return res.status(400).json({ error: 'NIC/Passport number already registered' });
+        }
+        if (err.constraint === 'elderreg_contact_number_key') {
+          return res.status(400).json({ error: 'Contact number already registered' });
         }
       }
       
@@ -259,7 +298,8 @@ const createHealthProfessionalRegistration = async (req, res) => {
       pool.query('SELECT * FROM HealthReg WHERE email = $1', [email]),
       pool.query('SELECT * FROM DoctorReg WHERE email = $1', [email]),
       pool.query('SELECT * FROM register WHERE email = $1', [email]),
-      pool.query('SELECT * FROM registration WHERE email = $1', [email])
+      pool.query('SELECT * FROM registration WHERE email = $1', [email]),
+      pool.query('SELECT * FROM elderreg WHERE email = $1', [email])
     ];
     
     const existingUserResults = await Promise.all(existingUserQueries);
@@ -380,12 +420,13 @@ const createDoctorRegistration = async (req, res) => {
       return res.status(400).json({ error: passwordValidation.message });
     }
 
-        // Check if user already exists with this email in any table
+    // Check if user already exists with this email in any table
     const existingUserQueries = [
       pool.query('SELECT * FROM DoctorReg WHERE email = $1', [email]),
       pool.query('SELECT * FROM HealthReg WHERE email = $1', [email]),
       pool.query('SELECT * FROM register WHERE email = $1', [email]),
-      pool.query('SELECT * FROM registration WHERE email = $1', [email])
+      pool.query('SELECT * FROM registration WHERE email = $1', [email]),
+      pool.query('SELECT * FROM elderreg WHERE email = $1', [email])
     ];
     
     const existingUserResults = await Promise.all(existingUserQueries);
@@ -466,19 +507,19 @@ const createFamilyMemberRegistration = async (req, res) => {
       return res.status(400).json({ error: passwordValidation.message });
     }
 
-    // Check if user already exists with this email in register table
-    const existingUser = await pool.query(
-      'SELECT * FROM register WHERE email = $1',
-      [email]
-    );
+    // Check if user already exists with this email in any table
+    const existingUserQueries = [
+      pool.query('SELECT * FROM register WHERE email = $1', [email]),
+      pool.query('SELECT * FROM registration WHERE email = $1', [email]),
+      pool.query('SELECT * FROM DoctorReg WHERE email = $1', [email]),
+      pool.query('SELECT * FROM HealthReg WHERE email = $1', [email]),
+      pool.query('SELECT * FROM elderreg WHERE email = $1', [email])
+    ];
     
-    // Check if user already exists with this email in registration table
-    const existingUserInRegistration = await pool.query(
-      'SELECT * FROM registration WHERE email = $1',
-      [email]
-    );
+    const existingUserResults = await Promise.all(existingUserQueries);
+    const userExists = existingUserResults.some(result => result.rows.length > 0);
     
-    if (existingUser.rows.length > 0 || existingUserInRegistration.rows.length > 0) {
+    if (userExists) {
       return res.status(400).json({ error: 'User already exists with this email address' });
     }
     
@@ -514,19 +555,19 @@ const createCaregiverRegistration = async (req, res) => {
       return res.status(400).json({ error: passwordValidation.message });
     }
 
-    // Check if user already exists with this email in registration table
-    const existingUser = await pool.query(
-      'SELECT * FROM registration WHERE email = $1',
-      [email]
-    );
+    // Check if user already exists with this email in any table
+    const existingUserQueries = [
+      pool.query('SELECT * FROM registration WHERE email = $1', [email]),
+      pool.query('SELECT * FROM register WHERE email = $1', [email]),
+      pool.query('SELECT * FROM DoctorReg WHERE email = $1', [email]),
+      pool.query('SELECT * FROM HealthReg WHERE email = $1', [email]),
+      pool.query('SELECT * FROM elderreg WHERE email = $1', [email])
+    ];
     
-    // Check if user already exists with this email in register table
-    const existingUserInRegister = await pool.query(
-      'SELECT * FROM register WHERE email = $1',
-      [email]
-    );
+    const existingUserResults = await Promise.all(existingUserQueries);
+    const userExists = existingUserResults.some(result => result.rows.length > 0);
     
-    if (existingUser.rows.length > 0 || existingUserInRegister.rows.length > 0) {
+    if (userExists) {
       return res.status(400).json({ error: 'User already exists with this email address' });
     }
     
@@ -554,12 +595,12 @@ const createCaregiverRegistration = async (req, res) => {
 // GET all registrations
 const getRegistrations = async (req, res) => {
   try {
-    // Get from all tables including elderreg
+    // Get from all tables including elderreg with email
     const registerResult = await pool.query('SELECT id, name, email, phone, fixed_line, role, created_at FROM register ORDER BY created_at DESC');
     const registrationResult = await pool.query('SELECT id, name, email, phone, fixed_line, district, role, created_at FROM registration ORDER BY created_at DESC');
     const doctorResult = await pool.query('SELECT id, name, email, phone, alter_phone, specification, license, years_experience, institutions, role, status, created_at FROM DoctorReg ORDER BY created_at DESC');
     const healthResult = await pool.query('SELECT id, name, email, phone, alter_phone, specification, license, years_experience, institutions, role, status, created_at FROM HealthReg ORDER BY created_at DESC');
-    const elderResult = await pool.query('SELECT id, full_name, date_of_birth, gender, nic_passport, contact_number, medical_conditions, address, profile_photo, role, created_at FROM elderreg ORDER BY created_at DESC');
+    const elderResult = await pool.query('SELECT id, full_name, email, date_of_birth, gender, nic_passport, contact_number, medical_conditions, address, profile_photo, role, created_at FROM elderreg ORDER BY created_at DESC');
     
     // Combine results
     const allRegistrations = [
