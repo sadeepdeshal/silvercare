@@ -17,6 +17,7 @@ import HealthProfessionalDashboard from './pages/healthproffesional/dashboard';
 import { DoctorRegStep2 } from './pages/doctor/signup-step2';
 import { DoctorRegStep3  } from './pages/doctor/signup-step3';
 import DoctorDashboard from './pages/doctor/dashboard';
+import ElderDashboard from './pages/elder/dashboard';
 import { Login } from './pages/login';
 import { Roles } from './pages/roles';
 import { AuthProvider } from './context/AuthContext';
@@ -83,6 +84,12 @@ function App() {
           <Route path="/admin/dashboard" element={
             <ProtectedRoute allowedRoles={['admin']}>
               <AdminDashboard />
+            </ProtectedRoute>
+          } />
+
+                    <Route path="/elder/dashboard" element={
+            <ProtectedRoute allowedRoles={['elder']}>
+              <ElderDashboard />
             </ProtectedRoute>
           } />
           

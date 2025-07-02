@@ -49,26 +49,29 @@ export const Login = () => {
       
       console.log('Login successful:', { user, role });
       
-         switch(role) {
-      case 'admin':
-        navigate('/admin/dashboard');
-        break;
-      case 'caregiver':
-        navigate('/caregiver/dashboard');
-        break;
-      case 'family_member':
-        navigate('/family-member/dashboard');
-        break;
-      case 'doctor':
-        navigate('/doctor/dashboard');
-        break;
-      case 'healthprofessional':  // This matches your console output
-        navigate('/healthproffesional/dashboard');  // This matches your route
-        break;
-      default:
-        console.log('Unknown role:', role);
-        navigate('/dashboard');
-    }
+      switch(role) {
+        case 'admin':
+          navigate('/admin/dashboard');
+          break;
+        case 'caregiver':
+          navigate('/caregiver/dashboard');
+          break;
+        case 'family_member':
+          navigate('/family-member/dashboard');
+          break;
+        case 'doctor':
+          navigate('/doctor/dashboard');
+          break;
+        case 'healthprofessional':  // This matches your console output
+          navigate('/healthproffesional/dashboard');  // This matches your route
+          break;
+        case 'elder':
+          navigate('/elder/dashboard');
+          break;
+        default:
+          console.log('Unknown role:', role);
+          navigate('/dashboard');
+      }
       
     } catch (err) {
       console.error('Login error:', err);
