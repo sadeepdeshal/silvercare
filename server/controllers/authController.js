@@ -29,6 +29,13 @@ const loginUser = async (req, res) => {
       if (registerResult.rows.length > 0) {
         user = registerResult.rows[0];
         userTable = 'register';
+          if (user.role === 'admin') {
+    role = 'admin';
+    // Redirect to admin dashboard
+  } else {
+    role = 'family_member';
+    // Redirect to family member dashboard
+  }
       } else {
         // Check in DoctorReg table (doctors)
         const doctorResult = await pool.query(
