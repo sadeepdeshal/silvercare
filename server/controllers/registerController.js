@@ -82,6 +82,7 @@ const createElderRegistration = async (req, res) => {
       address, 
       password, 
       confirmPassword,
+      familyMemberId, // Add this field
       role = 'elder' 
     } = req.body;
     
@@ -89,6 +90,21 @@ const createElderRegistration = async (req, res) => {
       // Validate required fields
       if (!fullName || !email || !dateOfBirth || !gender || !nicPassport || !contactNumber || !address || !password || !confirmPassword) {
         return res.status(400).json({ error: 'All required fields must be filled' });
+      }
+
+      // Validate familyMemberId is provided
+      if (!familyMemberId) {
+        return res.status(400).json({ error: 'Family member ID is required' });
+      }
+
+      // Verify that the family member exists and has the correct role
+      const familyMemberCheck = await pool.query(
+        'SELECT id, role FROM register WHERE id = $1 AND role = $2',
+        [familyMemberId, 'family_member']
+      );
+
+      if (familyMemberCheck.rows.length === 0) {
+        return res.status(400).json({ error: 'Invalid family member ID or family member not found' });
       }
 
       // Validate email format
@@ -185,14 +201,14 @@ const createElderRegistration = async (req, res) => {
       // Get profile photo path if uploaded
       const profilePhotoPath = req.file ? req.file.path : null;
       
-      // Insert new elder registration
+      // Insert new elder registration with family member relationship
       const result = await pool.query(
         `INSERT INTO elderreg (
           full_name, email, date_of_birth, gender, nic_passport, contact_number, 
-          medical_conditions, address, profile_photo, password, confirm_password, role
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) 
+          medical_conditions, address, profile_photo, password, confirm_password, role, family_member_id
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) 
         RETURNING id, full_name, email, date_of_birth, gender, nic_passport, contact_number, 
-                  medical_conditions, address, profile_photo, role, created_at`,
+                  medical_conditions, address, profile_photo, role, family_member_id, created_at`,
         [
           fullName, 
           email,
@@ -205,7 +221,8 @@ const createElderRegistration = async (req, res) => {
           profilePhotoPath, 
           hashedPassword, 
           hashedConfirmPassword, 
-          role
+          role,
+          familyMemberId // Add family member ID to the insert
         ]
       );
       
@@ -235,6 +252,11 @@ const createElderRegistration = async (req, res) => {
         if (err.constraint === 'elderreg_contact_number_key') {
           return res.status(400).json({ error: 'Contact number already registered' });
         }
+      }
+      
+      // Handle foreign key constraint violation
+      if (err.code === '23503') {
+        return res.status(400).json({ error: 'Invalid family member reference' });
       }
       
       res.status(500).json({ error: 'Error creating elder registration. Please try again.' });
@@ -299,7 +321,7 @@ const createHealthProfessionalRegistration = async (req, res) => {
       pool.query('SELECT * FROM DoctorReg WHERE email = $1', [email]),
       pool.query('SELECT * FROM register WHERE email = $1', [email]),
       pool.query('SELECT * FROM registration WHERE email = $1', [email]),
-      pool.query('SELECT * FROM elderreg WHERE email = $1', [email])
+            pool.query('SELECT * FROM elderreg WHERE email = $1', [email])
     ];
     
     const existingUserResults = await Promise.all(existingUserQueries);
@@ -595,12 +617,34 @@ const createCaregiverRegistration = async (req, res) => {
 // GET all registrations
 const getRegistrations = async (req, res) => {
   try {
-    // Get from all tables including elderreg with email
+    // Get from all tables including elderreg with family member relationship
     const registerResult = await pool.query('SELECT id, name, email, phone, fixed_line, role, created_at FROM register ORDER BY created_at DESC');
     const registrationResult = await pool.query('SELECT id, name, email, phone, fixed_line, district, role, created_at FROM registration ORDER BY created_at DESC');
     const doctorResult = await pool.query('SELECT id, name, email, phone, alter_phone, specification, license, years_experience, institutions, role, status, created_at FROM DoctorReg ORDER BY created_at DESC');
     const healthResult = await pool.query('SELECT id, name, email, phone, alter_phone, specification, license, years_experience, institutions, role, status, created_at FROM HealthReg ORDER BY created_at DESC');
-    const elderResult = await pool.query('SELECT id, full_name, email, date_of_birth, gender, nic_passport, contact_number, medical_conditions, address, profile_photo, role, created_at FROM elderreg ORDER BY created_at DESC');
+    
+    // Updated elder query to include family member information
+    const elderResult = await pool.query(`
+      SELECT 
+        e.id, 
+        e.full_name, 
+        e.email, 
+        e.date_of_birth, 
+        e.gender, 
+        e.nic_passport, 
+        e.contact_number, 
+        e.medical_conditions, 
+        e.address, 
+        e.profile_photo, 
+        e.role, 
+        e.family_member_id,
+        e.created_at,
+        fm.name as family_member_name,
+        fm.email as family_member_email
+      FROM elderreg e
+      LEFT JOIN register fm ON e.family_member_id = fm.id
+      ORDER BY e.created_at DESC
+    `);
     
     // Combine results
     const allRegistrations = [
@@ -608,7 +652,16 @@ const getRegistrations = async (req, res) => {
       ...registrationResult.rows.map(row => ({ ...row, table: 'registration' })),
       ...doctorResult.rows.map(row => ({ ...row, table: 'doctor' })),
       ...healthResult.rows.map(row => ({ ...row, table: 'health_professional' })),
-      ...elderResult.rows.map(row => ({ ...row, table: 'elder', name: row.full_name }))
+      ...elderResult.rows.map(row => ({ 
+        ...row, 
+        table: 'elder', 
+        name: row.full_name,
+        family_member: {
+          id: row.family_member_id,
+          name: row.family_member_name,
+          email: row.family_member_email
+        }
+      }))
     ].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
     
     res.json(allRegistrations);
@@ -618,11 +671,184 @@ const getRegistrations = async (req, res) => {
   }
 };
 
+// GET elders by family member ID (new function)
+const getEldersByFamilyMember = async (req, res) => {
+  const { familyMemberId } = req.params;
+  
+  try {
+    // Verify family member exists
+        // Verify family member exists
+    const familyMemberCheck = await pool.query(
+      'SELECT id, name, email FROM register WHERE id = $1 AND role = $2',
+      [familyMemberId, 'family_member']
+    );
+
+    if (familyMemberCheck.rows.length === 0) {
+      return res.status(404).json({ error: 'Family member not found' });
+    }
+
+    // Get all elders registered by this family member
+    const eldersResult = await pool.query(`
+      SELECT 
+        id, 
+        full_name, 
+        email, 
+        date_of_birth, 
+        gender, 
+        nic_passport, 
+        contact_number, 
+        medical_conditions, 
+        address, 
+        profile_photo, 
+        role, 
+        family_member_id,
+        created_at
+      FROM elderreg 
+      WHERE family_member_id = $1 
+      ORDER BY created_at DESC
+    `, [familyMemberId]);
+    
+    res.json({
+      message: 'Elders retrieved successfully',
+      familyMember: familyMemberCheck.rows[0],
+      elders: eldersResult.rows,
+      count: eldersResult.rows.length
+    });
+    
+  } catch (err) {
+    console.error('Get elders by family member error:', err);
+    res.status(500).json({ error: 'Error fetching elders' });
+  }
+};
+
+// GET single elder by ID (new function)
+const getElderById = async (req, res) => {
+  const { elderId } = req.params;
+  
+  try {
+    const elderResult = await pool.query(`
+      SELECT 
+        e.id, 
+        e.full_name, 
+        e.email, 
+        e.date_of_birth, 
+        e.gender, 
+        e.nic_passport, 
+        e.contact_number, 
+        e.medical_conditions, 
+        e.address, 
+        e.profile_photo, 
+        e.role, 
+        e.family_member_id,
+        e.created_at,
+        fm.name as family_member_name,
+        fm.email as family_member_email,
+        fm.phone as family_member_phone
+      FROM elderreg e
+      LEFT JOIN register fm ON e.family_member_id = fm.id
+      WHERE e.id = $1
+    `, [elderId]);
+    
+    if (elderResult.rows.length === 0) {
+      return res.status(404).json({ error: 'Elder not found' });
+    }
+    
+    const elder = elderResult.rows[0];
+    
+    res.json({
+      message: 'Elder retrieved successfully',
+      elder: {
+        ...elder,
+        family_member: {
+          id: elder.family_member_id,
+          name: elder.family_member_name,
+          email: elder.family_member_email,
+          phone: elder.family_member_phone
+        }
+      }
+    });
+    
+  } catch (err) {
+    console.error('Get elder by ID error:', err);
+    res.status(500).json({ error: 'Error fetching elder' });
+  }
+};
+
+// UPDATE elder information (new function)
+const updateElderById = async (req, res) => {
+  const { elderId } = req.params;
+  const { 
+    fullName, 
+    email, 
+    dateOfBirth, 
+    gender, 
+    nicPassport, 
+    contactNumber, 
+    medicalConditions, 
+    address 
+  } = req.body;
+  
+  try {
+    // Check if elder exists
+    const elderCheck = await pool.query('SELECT * FROM elderreg WHERE id = $1', [elderId]);
+    
+    if (elderCheck.rows.length === 0) {
+      return res.status(404).json({ error: 'Elder not found' });
+    }
+    
+    // Update elder information
+    const result = await pool.query(`
+      UPDATE elderreg 
+      SET 
+        full_name = COALESCE($1, full_name),
+        email = COALESCE($2, email),
+        date_of_birth = COALESCE($3, date_of_birth),
+        gender = COALESCE($4, gender),
+        nic_passport = COALESCE($5, nic_passport),
+        contact_number = COALESCE($6, contact_number),
+        medical_conditions = COALESCE($7, medical_conditions),
+        address = COALESCE($8, address),
+        updated_at = CURRENT_TIMESTAMP
+      WHERE id = $9
+      RETURNING id, full_name, email, date_of_birth, gender, nic_passport, 
+                contact_number, medical_conditions, address, family_member_id, created_at
+    `, [fullName, email, dateOfBirth, gender, nicPassport, contactNumber, medicalConditions, address, elderId]);
+    
+    res.json({
+      message: 'Elder updated successfully',
+      elder: result.rows[0]
+    });
+    
+  } catch (err) {
+    console.error('Update elder error:', err);
+    
+    // Handle specific database errors
+    if (err.code === '23505') { // Unique constraint violation
+      if (err.constraint === 'elderreg_email_key') {
+        return res.status(400).json({ error: 'Email address already registered' });
+      }
+      if (err.constraint === 'elderreg_nic_passport_key') {
+        return res.status(400).json({ error: 'NIC/Passport number already registered' });
+      }
+      if (err.constraint === 'elderreg_contact_number_key') {
+        return res.status(400).json({ error: 'Contact number already registered' });
+      }
+    }
+    
+    res.status(500).json({ error: 'Error updating elder information' });
+  }
+};
+
 module.exports = {
   createFamilyMemberRegistration,
   createCaregiverRegistration,
   createDoctorRegistration,
   createHealthProfessionalRegistration,
   createElderRegistration,
-  getRegistrations
+  getRegistrations,
+  getEldersByFamilyMember,
+  getElderById,
+  updateElderById
 };
+
+

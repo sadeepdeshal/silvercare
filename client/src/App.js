@@ -46,7 +46,14 @@ function App() {
           {/* Registration Routes - No authentication required */}
           <Route path="/family-member/signup" element={<FamilyMemberReg />} />
           <Route path="/family-member/signup-step2" element={<FamilyMemberReg2 />} />
-           <Route path="/family-member/elder-signup" element={<ElderSignup />} />
+                      <Route 
+              path="/family-member/elder-signup" 
+              element={
+                <ProtectedRoute allowedRoles={['family_member']}>
+                  <ElderSignup />
+                </ProtectedRoute>
+              } 
+            />
           <Route path="/doctor/signup" element={<DoctorReg />} />
           <Route path="/doctor/signup-step2" element={<DoctorRegStep2 />} />
           <Route path="/doctor/signup-step3" element={<DoctorRegStep3 />} />
