@@ -5,6 +5,7 @@ import { FamilyMemberReg } from './pages/familemember/signup';
 import { FamilyMemberReg2 } from './pages/familemember/signup-step2';
 import ElderSignup from './pages/familemember/elder-signup';
 import FamilyMemberDashboard from './pages/familemember/dashboard';
+import FamilyMemberElders from './pages/familemember/elders'; // Add this import
 import { CaregiverReg } from './pages/caregiver/signup';
 import { CaregiverRegStep2 } from './pages/caregiver/signup-step2';
 import CaregiverDashboard from './pages/caregiver/dashboard';
@@ -67,6 +68,13 @@ function App() {
           <Route path="/family-member/dashboard" element={
             <ProtectedRoute allowedRoles={['family_member']}>
               <FamilyMemberDashboard />
+            </ProtectedRoute>
+          } />
+
+                    {/* Add the elders route */}
+          <Route path="/family-member/elders" element={
+            <ProtectedRoute allowedRoles={['family_member']}>
+              <FamilyMemberElders />
             </ProtectedRoute>
           } />
           
