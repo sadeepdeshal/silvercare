@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext'; // ✅ Import useAuth
 import styles from './css/navbar.module.css';
 
 const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { logout, currentUser, isAuthenticated } = useAuth(); // ✅ Get logout function
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleLogoClick = () => {
@@ -22,6 +24,11 @@ const Navbar = () => {
 
   const isActive = (path) => {
     return location.pathname === path;
+  };
+
+  // ✅ Proper logout handler
+  const handleLogout = () => {
+    logout(); // Use the logout function from AuthContext
   };
 
   return (
@@ -65,13 +72,23 @@ const Navbar = () => {
 
         {/* Auth Buttons */}
         <div className={styles.navAuth}>
-          <button 
-            className={styles.loginBtn}
-            onClick={() => handleNavigation('/login')}
-          >
-            Logout
-          </button>
-
+          {isAuthenticated ? (
+            // ✅ Show logout button when authenticated
+            <button 
+              className={styles.loginBtn}
+              onClick={handleLogout} // ✅ Use proper logout handler
+            >
+              Logout
+            </button>
+          ) : (
+            // ✅ Show login button when not authenticated
+            <button 
+              className={styles.loginBtn}
+              onClick={() => handleNavigation('/login')}
+            >
+              Login
+            </button>
+          )}
         </div>
 
         {/* Mobile Menu Toggle */}
@@ -99,18 +116,31 @@ const Navbar = () => {
           Contact
         </div>
         <div className={styles.mobileAuthButtons}>
-          <button 
-            className={styles.mobileLoginBtn}
-            onClick={() => handleNavigation('/login')}
-          >
-            Login
-          </button>
-          <button 
-            className={styles.mobileSignupBtn}
-            onClick={() => handleNavigation('/roles')}
-          >
-            Sign Up
-          </button>
+          {isAuthenticated ? (
+            // ✅ Mobile logout button
+            <button 
+              className={styles.mobileLoginBtn}
+              onClick={handleLogout}
+            >
+              Logout
+            </button>
+          ) : (
+            // ✅ Mobile login/signup buttons
+            <>
+              <button 
+                className={styles.mobileLoginBtn}
+                onClick={() => handleNavigation('/login')}
+              >
+                Login
+              </button>
+              <button 
+                className={styles.mobileSignupBtn}
+                onClick={() => handleNavigation('/roles')}
+              >
+                Sign Up
+              </button>
+            </>
+          )}
         </div>
       </div>
     </nav>
