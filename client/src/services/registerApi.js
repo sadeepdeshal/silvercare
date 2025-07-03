@@ -29,3 +29,16 @@ export const registerElder = (userData) => {
 export const getRegistrations = () => {
   return axios.get(API_BASE);
 };
+
+// New elder management functions
+export const getEldersByFamilyMember = (familyMemberId) => {
+  return axios.get(`${API_BASE}/elders/family-member/${familyMemberId}`);
+};
+
+export const getElderById = (elderId) => {
+  return axios.get(`${API_BASE}/elders/${elderId}`);
+};
+
+export const updateElderById = (elderId, elderData) => {
+  return axios.put(`${API_BASE}/elders/${elderId}`, elderData);
+};
