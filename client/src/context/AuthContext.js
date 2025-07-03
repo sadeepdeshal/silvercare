@@ -32,22 +32,23 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem('silvercare_role', userData.role);
   };
 
-  const logout = () => {
-    // ✅ Complete logout
-    setCurrentUser(null); // Clear state immediately
-    
-    // Clear all localStorage
-    localStorage.removeItem('silvercare_token');
-    localStorage.removeItem('silvercare_user');
-    localStorage.removeItem('silvercare_role');
-    localStorage.clear(); // Clear everything to be safe
-    
-    // Force redirect to login
-    navigate('/login', { replace: true });
-    
-    // Optional: Reload page to clear any cached data
-    window.location.reload();
-  };
+const logout = () => {
+  // ✅ Complete logout
+  setCurrentUser(null); // Clear state immediately
+  
+  // Clear all localStorage
+  localStorage.removeItem('silvercare_token');
+  localStorage.removeItem('silvercare_user');
+  localStorage.removeItem('silvercare_role');
+  localStorage.clear(); // Clear everything to be safe
+  
+  // Force redirect to login
+  navigate('/login', { replace: true });
+  
+  // Optional: Reload page to clear any cached data
+  window.location.reload();
+};
+
 
   return (
     <AuthContext.Provider value={{
