@@ -3,6 +3,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext'; // ✅ Import useAuth
 import styles from './css/navbar.module.css';
 import logoSilver from './images/logo_silver.png'; // ✅ Import your custom logo
+import userIcon from './images/user.png'; // ✅ Import user icon
+import bellIcon from './images/bell.png'; // ✅ Import bell icon
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -30,6 +32,16 @@ const Navbar = () => {
   // ✅ Proper logout handler
   const handleLogout = () => {
     logout(); // Use the logout function from AuthContext
+  };
+
+  // ✅ Profile icon click handler
+  const handleProfileClick = () => {
+    navigate('/profile'); // Navigate to profile page
+  };
+
+  // ✅ Bell icon click handler
+  const handleNotificationClick = () => {
+    navigate('/notifications'); // Navigate to notifications page
   };
 
   return (
@@ -65,6 +77,34 @@ const Navbar = () => {
           >
             Contact
           </div>
+
+          {/* ✅ Icons Section - Only show when authenticated */}
+          {isAuthenticated && (
+            <div className={styles.navIcons}>
+              <div 
+                className={styles.iconButton}
+                onClick={handleProfileClick}
+                title="Profile"
+              >
+                <img 
+                  src={userIcon} 
+                  alt="Profile" 
+                  className={styles.iconImage}
+                />
+              </div>
+              <div 
+                className={styles.iconButton}
+                onClick={handleNotificationClick}
+                title="Notifications"
+              >
+                <img 
+                  src={bellIcon} 
+                  alt="Notifications" 
+                  className={styles.iconImage}
+                />
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Auth Buttons */}
@@ -112,6 +152,21 @@ const Navbar = () => {
         <div className={styles.mobileNavItem} onClick={() => handleNavigation('/contact')}>
           Contact
         </div>
+        
+        {/* ✅ Mobile Icons Section - Only show when authenticated */}
+        {isAuthenticated && (
+          <div className={styles.mobileIconsSection}>
+            <div className={styles.mobileNavItem} onClick={handleProfileClick}>
+              <img src={userIcon} alt="Profile" className={styles.mobileIconImage} />
+              Profile
+            </div>
+            <div className={styles.mobileNavItem} onClick={handleNotificationClick}>
+              <img src={bellIcon} alt="Notifications" className={styles.mobileIconImage} />
+              Notifications
+            </div>
+          </div>
+        )}
+
         <div className={styles.mobileAuthButtons}>
           {isAuthenticated ? (
             // ✅ Mobile logout button

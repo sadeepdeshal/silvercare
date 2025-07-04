@@ -100,6 +100,60 @@
   border-radius: 50%;
 }
 
+/* ✅ Icons Section Styles */
+/* ✅ Icons Section Styles - Updated to remove background circle */
+.navIcons {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-left: 20px;
+}
+
+.iconButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: transparent; /* ✅ Changed from rgba(0, 0, 0, 0.05) to transparent */
+  border: none; /* ✅ Changed from 2px solid transparent to none */
+}
+
+.iconButton:hover {
+  background: rgba(0, 0, 0, 0.05); /* ✅ Only show background on hover */
+  transform: translateY(-2px);
+}
+
+.iconImage {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  filter: brightness(0.7);
+  transition: filter 0.3s ease;
+}
+
+.iconButton:hover .iconImage {
+  filter: brightness(0.5);
+}
+
+
+/* ✅ Mobile Icons Section */
+.mobileIconsSection {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  margin: 10px 0;
+}
+
+.mobileIconImage {
+  width: 18px;
+  height: 18px;
+  margin-right: 10px;
+  filter: brightness(0) invert(1);
+}
+
 /* Auth Buttons */
 .navAuth {
   display: flex;
@@ -226,6 +280,8 @@
   cursor: pointer;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   transition: background 0.3s ease;
+  display: flex;
+  align-items: center;
 }
 
 .mobileNavItem:hover {
@@ -312,6 +368,11 @@
     height: 45px;
     max-width: 180px;
   }
+
+  /* ✅ Hide desktop icons on mobile */
+  .navIcons {
+    display: none;
+  }
 }
 
 @media (max-width: 480px) {
@@ -337,6 +398,12 @@
   .logoImage {
     height: 40px;
     max-width: 160px;
+  }
+
+  /* ✅ Smaller mobile icons */
+  .mobileIconImage {
+    width: 16px;
+    height: 16px;
   }
 }
 
@@ -430,4 +497,48 @@ body {
 
 .navLogo:hover {
   transform: scale(1.05);
+}
+
+/* ✅ Additional icon hover effects */
+.iconButton:active {
+  transform: translateY(0) scale(0.95);
+}
+
+/* ✅ Icon notification badge (optional - for future use) */
+.iconButton::after {
+  content: '';
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 8px;
+  height: 8px;
+  background: #ff4757;
+  border-radius: 50%;
+  opacity: 0;
+  transform: scale(0);
+  transition: all 0.3s ease;
+}
+
+.iconButton.hasNotification::after {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* ✅ Better spacing for navigation items with icons */
+.navMenu {
+  display: flex;
+  align-items: center;
+  gap: 30px; /* Reduced gap to accommodate icons */
+  margin-left: auto;
+  margin-right: 20px;
+}
+
+/* ✅ Ensure proper alignment */
+.navIcons {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: 15px;
+  padding-left: 15px;
+  border-left: 1px solid rgba(0, 0, 0, 0.1);
 }
