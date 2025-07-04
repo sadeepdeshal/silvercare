@@ -107,32 +107,7 @@ const FamilyMemberDashboard = () => {
   return (
     <div className={styles.dashboardContainer}>
       <Navbar />
-      <button 
-        onClick={handleElderRegistration}
-        style={{
-          backgroundColor: '#4facfe',
-          color: 'white',
-          border: 'none',
-          padding: '12px 24px',
-          fontSize: '16px',
-          fontWeight: '600',
-          borderRadius: '8px',
-          cursor: 'pointer',
-          marginRight: '10px',
-          transition: 'all 0.3s ease'
-        }}
-        onMouseOver={(e) => {
-          e.target.style.backgroundColor = '#00f2fe';
-          e.target.style.transform = 'translateY(-2px)';
-        }}
-        onMouseOut={(e) => {
-          e.target.style.backgroundColor = '#4facfe';
-          e.target.style.transform = 'translateY(0)';
-        }}
-      >
-        Register Your Elder
-      </button>
-      
+
       {/* Header Section */}
       <div className={styles.headerSection}>
         <div className={styles.welcomeCard}>

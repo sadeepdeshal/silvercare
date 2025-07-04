@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext'; // ✅ Import useAuth
 import styles from './css/navbar.module.css';
+import logoSilver from './images/logo_silver.png'; // ✅ Import your custom logo
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -34,12 +35,13 @@ const Navbar = () => {
   return (
     <nav className={styles.navbar}>
       <div className={styles.navContainer}>
-        {/* Logo Section */}
-        <div className={styles.navLogo} onClick={handleLogoClick}>
-          <div className={styles.logoIcon}>
-            <span className={styles.logoSymbol}>🏥</span>
-          </div>
-          <span className={styles.logoText}>SilverCare</span>
+        {/* Logo */}
+        <div className={styles.navLogo} >
+          <img 
+            src={logoSilver} 
+            alt="SilverCare Logo" 
+            className={styles.logoImage}
+          />
         </div>
 
         {/* Desktop Navigation Links */}
@@ -56,12 +58,7 @@ const Navbar = () => {
           >
             About
           </div>
-          <div 
-            className={`${styles.navItem} ${isActive('/services') ? styles.active : ''}`}
-            onClick={() => handleNavigation('/services')}
-          >
-            Services
-          </div>
+
           <div 
             className={`${styles.navItem} ${isActive('/contact') ? styles.active : ''}`}
             onClick={() => handleNavigation('/contact')}

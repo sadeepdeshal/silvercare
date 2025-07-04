@@ -1,5 +1,8 @@
+*{
+  font-family: poppins, sans-serif  !important ;
+}
 .navbar {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: white;
   box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
   position: fixed;
   top: 0;
@@ -54,15 +57,17 @@
   letter-spacing: -0.5px;
 }
 
-/* Navigation Menu */
+/* Navigation Menu - Updated to move to right */
 .navMenu {
   display: flex;
   align-items: center;
   gap: 40px;
+  margin-left: auto; /* Push to the right */
+  margin-right: 20px; /* Add some space before auth buttons */
 }
 
 .navItem {
-  color: white;
+  color: black;
   font-size: 16px;
   font-weight: 500;
   cursor: pointer;
@@ -103,22 +108,17 @@
 }
 
 .loginBtn {
-  background: transparent;
+  background: black;
   color: white;
   border: 2px solid rgba(255, 255, 255, 0.3);
   padding: 10px 25px;
+  margin-left: 150%;
   border-radius: 25px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
   backdrop-filter: blur(10px);
-}
-
-.loginBtn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.5);
-  transform: translateY(-2px);
 }
 
 .signupBtn {
@@ -306,6 +306,12 @@
   .logoSymbol {
     font-size: 18px;
   }
+
+  /* Mobile logo size */
+  .logoImage {
+    height: 45px;
+    max-width: 180px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -325,6 +331,12 @@
 
   .logoSymbol {
     font-size: 16px;
+  }
+
+  /* Small mobile logo size */
+  .logoImage {
+    height: 40px;
+    max-width: 160px;
   }
 }
 
@@ -385,4 +397,37 @@ body {
 
 .navItem:hover::before {
   transform: scaleX(1);
+}
+
+/* Updated Logo Image Styles - LARGER SIZE */
+.logoImage {
+  height: 260px; /* Increased from 40px */
+  width: auto;
+  max-width: 250px; /* Increased from 150px */
+  object-fit: contain;
+  display: block;
+  transition: transform 0.3s ease;
+  margin-left: -200px;
+}
+
+.logoImage:hover {
+  transform: scale(1.05);
+}
+
+/* Logo container styles */
+.logoIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.navLogo {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: transform 0.3s ease;
+}
+
+.navLogo:hover {
+  transform: scale(1.05);
 }
