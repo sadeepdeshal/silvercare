@@ -33,5 +33,46 @@ export const elderApi = {
       console.error('Error fetching elder count:', error);
       throw error;
     }
+  },
+
+  // Get specific elder by ID
+  getElderById: async (elderId) => {
+    try {
+      const response = await fetch(`${API_BASE}/${elderId}`);
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to fetch elder details');
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('Error fetching elder details:', error);
+      throw error;
+    }
+  },
+
+  // Update elder details
+  updateElder: async (elderId, elderData) => {
+    try {
+      const response = await fetch(`${API_BASE}/${elderId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(elderData),
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to update elder details');
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('Error updating elder details:', error);
+      throw error;
+    }
   }
 };
