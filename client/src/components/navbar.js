@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext'; // ✅ Import useAuth
 import styles from './css/navbar.module.css';
@@ -11,6 +11,8 @@ const Navbar = () => {
   const location = useLocation();
   const { logout, currentUser, isAuthenticated } = useAuth(); // ✅ Get logout function
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
 
   const handleLogoClick = () => {
     navigate('/');
@@ -32,17 +34,43 @@ const Navbar = () => {
   // ✅ Proper logout handler
   const handleLogout = () => {
     logout(); // Use the logout function from AuthContext
+    setIsProfileDropdownOpen(false); // Close dropdown after logout
   };
 
-  // ✅ Profile icon click handler
+  // ✅ Profile icon click handler - Toggle dropdown
   const handleProfileClick = () => {
-    navigate('/profile'); // Navigate to profile page
+    setIsProfileDropdownOpen(!isProfileDropdownOpen);
+  };
+
+  // ✅ Profile dropdown navigation handlers
+  const handleProfileNavigation = () => {
+    navigate('/profile');
+    setIsProfileDropdownOpen(false);
+  };
+
+  const handleSettingsNavigation = () => {
+    navigate('/settings');
+    setIsProfileDropdownOpen(false);
   };
 
   // ✅ Bell icon click handler
   const handleNotificationClick = () => {
     navigate('/notifications'); // Navigate to notifications page
   };
+
+  // ✅ Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsProfileDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   return (
     <nav className={styles.navbar}>
@@ -81,17 +109,45 @@ const Navbar = () => {
           {/* ✅ Icons Section - Only show when authenticated */}
           {isAuthenticated && (
             <div className={styles.navIcons}>
-              <div 
-                className={styles.iconButton}
-                onClick={handleProfileClick}
-                title="Profile"
-              >
-                <img 
-                  src={userIcon} 
-                  alt="Profile" 
-                  className={styles.iconImage}
-                />
+              {/* ✅ Profile Icon with Dropdown */}
+              <div className={styles.profileDropdownContainer} ref={dropdownRef}>
+                <div 
+                  className={styles.iconButton}
+                  onClick={handleProfileClick}
+                  title="Profile"
+                >
+                  <img 
+                    src={userIcon} 
+                    alt="Profile" 
+                    className={styles.iconImage}
+                  />
+                </div>
+                
+                {/* ✅ Profile Dropdown */}
+                {isProfileDropdownOpen && (
+                  <div className={styles.profileDropdown}>
+                    <div 
+                      className={styles.dropdownItem}
+                      onClick={handleProfileNavigation}
+                    >
+                      Profile
+                    </div>
+                    <div 
+                      className={styles.dropdownItem}
+                      onClick={handleSettingsNavigation}
+                    >
+                      Settings
+                    </div>
+                    <div 
+                      className={styles.dropdownItem}
+                      onClick={handleLogout}
+                    >
+                      Logout
+                    </div>
+                  </div>
+                )}
               </div>
+
               <div 
                 className={styles.iconButton}
                 onClick={handleNotificationClick}
@@ -107,26 +163,18 @@ const Navbar = () => {
           )}
         </div>
 
-        {/* Auth Buttons */}
         <div className={styles.navAuth}>
-          {isAuthenticated ? (
-            // ✅ Show logout button when authenticated
-            <button 
-              className={styles.loginBtn}
-              onClick={handleLogout} // ✅ Use proper logout handler
-            >
-              Logout
-            </button>
-          ) : (
-            // ✅ Show login button when not authenticated
-            <button 
-              className={styles.loginBtn}
-              onClick={() => handleNavigation('/login')}
-            >
-              Login
-            </button>
-          )}
-        </div>
+  {!isAuthenticated && (
+    // ✅ Show login button when not authenticated
+    <button
+      className={styles.loginBtn}
+      onClick={() => handleNavigation('/login')}
+    >
+      Login
+    </button>
+  )}
+</div>
+
 
         {/* Mobile Menu Toggle */}
         <div className={styles.mobileMenuToggle} onClick={toggleMobileMenu}>
@@ -156,9 +204,12 @@ const Navbar = () => {
         {/* ✅ Mobile Icons Section - Only show when authenticated */}
         {isAuthenticated && (
           <div className={styles.mobileIconsSection}>
-            <div className={styles.mobileNavItem} onClick={handleProfileClick}>
+            <div className={styles.mobileNavItem} onClick={() => handleNavigation('/profile')}>
               <img src={userIcon} alt="Profile" className={styles.mobileIconImage} />
               Profile
+            </div>
+            <div className={styles.mobileNavItem} onClick={() => handleNavigation('/settings')}>
+              Settings
             </div>
             <div className={styles.mobileNavItem} onClick={handleNotificationClick}>
               <img src={bellIcon} alt="Notifications" className={styles.mobileIconImage} />

@@ -9,6 +9,7 @@ import image from "../../components/images/image.jpg";
 import line133 from "../../components/images/line-133.jpg";
 import styles from "../../components/css/familymember/signup.module.css";
 import { Link } from "react-router-dom";
+import Navbar from '../../components/navbar';
 
 export const FamilyMemberReg = () => {
   const navigate = useNavigate();
@@ -130,6 +131,8 @@ export const FamilyMemberReg = () => {
 
   return (
     <div className={styles.familyMemberReg}>
+      <Navbar />
+
       <div className={styles.bg}>
         <div className={styles.leftSection}>
           <img className={styles.mainImage} alt="Family Care" src={image1} />

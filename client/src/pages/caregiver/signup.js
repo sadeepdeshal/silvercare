@@ -9,6 +9,7 @@ import image from "../../components/images/image.jpg";
 import line133 from "../../components/images/line-133.jpg";
 import styles from "../../components/css/caregiver/signup.module.css";
 import { Link } from "react-router-dom";
+import Navbar from '../../components/navbar';
 
 export const CaregiverReg = () => {
   const navigate = useNavigate();
@@ -131,6 +132,7 @@ export const CaregiverReg = () => {
 
   return (
     <div className={styles.caregiverReg}>
+      <Navbar />
       <div className={styles.bg}>
         <div className={styles.leftSection}>
           <img className={styles.mainImage} alt="Caregiver Care" src={image1} />
