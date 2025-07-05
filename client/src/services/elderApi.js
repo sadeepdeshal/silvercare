@@ -4,8 +4,11 @@ export const elderApi = {
   // Get all elders for a family member
   getEldersByFamilyMember: async (familyMemberId) => {
     try {
+      console.log('API: Fetching elders for family member:', familyMemberId);
       const response = await fetch(`${API_BASE}/family-member/${familyMemberId}`);
       const data = await response.json();
+      
+      console.log('API: Response data:', data);
       
       if (!response.ok) {
         throw new Error(data.error || 'Failed to fetch elders');
@@ -13,7 +16,7 @@ export const elderApi = {
       
       return data;
     } catch (error) {
-      console.error('Error fetching elders:', error);
+      console.error('API: Error fetching elders:', error);
       throw error;
     }
   },
@@ -38,8 +41,11 @@ export const elderApi = {
   // Get specific elder by ID
   getElderById: async (elderId) => {
     try {
+      console.log('API: Fetching elder by ID:', elderId);
       const response = await fetch(`${API_BASE}/${elderId}`);
       const data = await response.json();
+      
+      console.log('API: Elder details response:', data);
       
       if (!response.ok) {
         throw new Error(data.error || 'Failed to fetch elder details');
@@ -47,7 +53,7 @@ export const elderApi = {
       
       return data;
     } catch (error) {
-      console.error('Error fetching elder details:', error);
+      console.error('API: Error fetching elder details:', error);
       throw error;
     }
   },
