@@ -7,6 +7,7 @@ import welcomeIcon from "../components/images/5220-1.jpg";
 import nameIcon from "../components/images/group41.png";
 import emailIcon from "../components/images/group.jpg";
 import styles from "../components/css/login.module.css";
+import Navbar from '../components/navbar';
 
 export const Login = () => {
   const navigate = useNavigate();
@@ -89,6 +90,7 @@ export const Login = () => {
   };
 
   return (
+    <div> <Navbar />
     <div className={styles.loginPage}>
       <div className={styles.bg}>
         <div className={styles.leftSection}>
@@ -184,6 +186,7 @@ export const Login = () => {
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 };

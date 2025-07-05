@@ -5,6 +5,7 @@ import commonReg from "../components/images/roles.png";
 import rolesImage from "../components/images/roles.png";
 // Import as CSS Module
 import styles from "../components/css/roles.module.css";
+import Navbar from '../components/navbar';
 
 export const Roles = () => {
   const navigate = useNavigate();
@@ -26,7 +27,9 @@ export const Roles = () => {
   };
 
   return (
+    <div> <Navbar />
     <div className={styles.rolesPage}>
+      
       <div className={styles.rolesBg}>
         <div className={styles.leftSection}>
           <img className={styles.mainImage} alt="Registration" src={commonReg} />
@@ -126,6 +129,7 @@ export const Roles = () => {
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 };
