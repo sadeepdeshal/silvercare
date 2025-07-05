@@ -174,48 +174,52 @@ const FamilyMemberDashboard = () => {
       <div className={styles.mainContentSection}>
         {/* Quick Actions Section - Left Half */}
         <div className={styles.quickActionsContainer}>
-          <h2 className={styles.sectionTitle}>Quick Actions</h2>
-          <div className={styles.quickActionsGrid}>
-            <div className={styles.quickActionCard} onClick={handleElderRegistration}>
-              <div className={styles.quickActionIcon}>➕</div>
-              <div className={styles.quickActionContent}>
-                <h3 className={styles.quickActionTitle}>Register New Elder</h3>
-                <p className={styles.quickActionDescription}>Add a new elderly person to your care network</p>
+          
+          <div className={styles.quickActionsCard}>
+            <h2 className={styles.sectionTitle}>Quick Actions</h2>
+            <div className={styles.quickActionsGrid}>
+              <div className={styles.quickActionCard} onClick={handleElderRegistration}>
+                <div className={styles.quickActionIcon}>➕</div>
+                <div className={styles.quickActionContent}>
+                  <h3 className={styles.quickActionTitle}>Register New Elder</h3>
+                  <p className={styles.quickActionDescription}>Add a new elderly person to your care network</p>
+                </div>
               </div>
-            </div>
 
-            <div className={styles.quickActionCard} onClick={handleViewElders}>
-              <div className={styles.quickActionIcon}>👥</div>
-              <div className={styles.quickActionContent}>
-                <h3 className={styles.quickActionTitle}>View My Elders</h3>
-                <p className={styles.quickActionDescription}>
-                  Manage {elderCount} registered elder{elderCount !== 1 ? 's' : ''}
-                </p>
+              <div className={styles.quickActionCard} onClick={handleViewElders}>
+                <div className={styles.quickActionIcon}>👥</div>
+                <div className={styles.quickActionContent}>
+                  <h3 className={styles.quickActionTitle}>View My Elders</h3>
+                  <p className={styles.quickActionDescription}>
+                    Manage {elderCount} registered elder{elderCount !== 1 ? 's' : ''}
+                  </p>
+                </div>
               </div>
-            </div>
 
-            <div className={styles.quickActionCard} onClick={handleBookAppointment}>
-              <div className={styles.quickActionIcon}>📅</div>
-              <div className={styles.quickActionContent}>
-                <h3 className={styles.quickActionTitle}>Book Appointment</h3>
-                <p className={styles.quickActionDescription}>Schedule medical appointments and care services</p>
+              <div className={styles.quickActionCard} onClick={handleBookAppointment}>
+                <div className={styles.quickActionIcon}>📅</div>
+                <div className={styles.quickActionContent}>
+                  <h3 className={styles.quickActionTitle}>Book Appointment</h3>
+                  <p className={styles.quickActionDescription}>Schedule medical appointments and care services</p>
+                </div>
               </div>
-            </div>
 
-            <div className={styles.quickActionCard} onClick={handleViewReports}>
-              <div className={styles.quickActionIcon}>📊</div>
-              <div className={styles.quickActionContent}>
-                <h3 className={styles.quickActionTitle}>Health Reports</h3>
-                <p className={styles.quickActionDescription}>View health reports and care summaries</p>
+              <div className={styles.quickActionCard} onClick={handleViewReports}>
+                <div className={styles.quickActionIcon}>📊</div>
+                <div className={styles.quickActionContent}>
+                  <h3 className={styles.quickActionTitle}>Health Reports</h3>
+                  <p className={styles.quickActionDescription}>View health reports and care summaries</p>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Recent Activity Section - Right Half */}
+                {/* Recent Activity Section - Right Half */}
         <div className={styles.recentActivityContainer}>
-          <h2 className={styles.sectionTitle}>Recent Activity</h2>
+         
           <div className={styles.activityCard}>
+             <h2 className={styles.sectionTitle}>Recent Activity</h2>
             <div className={styles.activityList}>
               {dataLoading ? (
                 <div className={styles.activityItem}>
@@ -317,3 +321,4 @@ const FamilyMemberDashboard = () => {
 };
 
 export default FamilyMemberDashboard;
+
