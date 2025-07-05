@@ -74,5 +74,29 @@ export const elderApi = {
       console.error('Error updating elder details:', error);
       throw error;
     }
+  },
+
+  // Create new elder
+  createElder: async (elderData) => {
+    try {
+      const response = await fetch(`${API_BASE}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(elderData),
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to create elder');
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('Error creating elder:', error);
+      throw error;
+    }
   }
 };

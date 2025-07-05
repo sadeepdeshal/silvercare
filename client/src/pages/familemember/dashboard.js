@@ -29,40 +29,42 @@ const FamilyMemberDashboard = () => {
   }, [currentUser, isAuthenticated, loading, navigate]);
 
   // Fetch elders data when component mounts
-  useEffect(() => {
-    const fetchEldersData = async () => {
-      if (!currentUser?.id) return;
+  // Update the useEffect to use user_id instead of family_id
+useEffect(() => {
+  const fetchEldersData = async () => {
+    if (!currentUser?.user_id) return;
+    
+    try {
+      setDataLoading(true);
+      setError(null);
       
-      try {
-        setDataLoading(true);
-        setError(null);
-        
-        // Fetch both elder count and elders list
-        const [countResponse, eldersResponse] = await Promise.all([
-          elderApi.getElderCount(currentUser.id),
-          elderApi.getEldersByFamilyMember(currentUser.id)
-        ]);
-        
-        if (countResponse.success) {
-          setElderCount(countResponse.count);
-        }
-        
-        if (eldersResponse.success) {
-          setElders(eldersResponse.elders);
-        }
-        
-      } catch (err) {
-        console.error('Error fetching elders data:', err);
-        setError('Failed to load elders data');
-      } finally {
-        setDataLoading(false);
+      // Fetch both elder count and elders list using user_id (which will be converted to family_id in the backend)
+      const [countResponse, eldersResponse] = await Promise.all([
+        elderApi.getElderCount(currentUser.user_id),
+        elderApi.getEldersByFamilyMember(currentUser.user_id)
+      ]);
+      
+      if (countResponse.success) {
+        setElderCount(countResponse.count);
       }
-    };
-
-    if (currentUser && currentUser.role === 'family_member') {
-      fetchEldersData();
+      
+      if (eldersResponse.success) {
+        setElders(eldersResponse.elders);
+      }
+      
+    } catch (err) {
+      console.error('Error fetching elders data:', err);
+      setError('Failed to load elders data');
+    } finally {
+      setDataLoading(false);
     }
-  }, [currentUser]);
+  };
+
+  if (currentUser && currentUser.role === 'family_member') {
+    fetchEldersData();
+  }
+}, [currentUser]);
+
 
   const handleElderRegistration = () => {
     navigate('/family-member/elder-signup');
@@ -215,7 +217,7 @@ const FamilyMemberDashboard = () => {
           </div>
         </div>
 
-                {/* Recent Activity Section - Right Half */}
+        {/* Recent Activity Section - Right Half */}
         <div className={styles.recentActivityContainer}>
          
           <div className={styles.activityCard}>
@@ -231,11 +233,11 @@ const FamilyMemberDashboard = () => {
               ) : elders.length > 0 ? (
                 <>
                   {elders.slice(0, 3).map((elder, index) => (
-                    <div key={elder.id} className={styles.activityItem}>
+                    <div key={elder.elder_id} className={styles.activityItem}>
                       <div className={styles.activityIcon}>👤</div>
                       <div className={styles.activityContent}>
                         <p className={styles.activityText}>
-                          Elder {elder.full_name} registered successfully
+                          Elder {elder.name} registered successfully
                         </p>
                         <span className={styles.activityTime}>
                           {new Date(elder.created_at).toLocaleDateString()}
@@ -271,30 +273,33 @@ const FamilyMemberDashboard = () => {
           <h2 className={styles.sectionTitle}>Your Registered Elders</h2>
           <div className={styles.eldersGrid}>
             {elders.map((elder) => (
-              <div key={elder.id} className={styles.elderCard}>
+              <div key={elder.elder_id} className={styles.elderCard}>
                 <div className={styles.elderAvatar}>
                   {elder.profile_photo ? (
                     <img 
                       src={`http://localhost:5000/${elder.profile_photo}`} 
-                      alt={elder.full_name}
+                      alt={elder.name}
                       className={styles.elderPhoto}
                     />
                   ) : (
                     <div className={styles.elderInitial}>
-                      {elder.full_name.charAt(0).toUpperCase()}
+                      {elder.name.charAt(0).toUpperCase()}
                     </div>
                   )}
                 </div>
                 <div className={styles.elderInfo}>
-                  <h3 className={styles.elderName}>{elder.full_name}</h3>
+                  <h3 className={styles.elderName}>{elder.name}</h3>
                   <p className={styles.elderDetail}>
-                    📞 {elder.contact_number}
+                    📞 {elder.contact}
                   </p>
                   <p className={styles.elderDetail}>
-                    🎂 {new Date(elder.date_of_birth).toLocaleDateString()}
+                    🎂 {new Date(elder.dob).toLocaleDateString()}
                   </p>
                   <p className={styles.elderDetail}>
                     👤 {elder.gender}
+                  </p>
+                  <p className={styles.elderDetail}>
+                    🆔 {elder.nic}
                   </p>
                   {elder.medical_conditions && (
                     <p className={styles.elderMedical}>
@@ -306,7 +311,7 @@ const FamilyMemberDashboard = () => {
                 <div className={styles.elderActions}>
                   <button 
                     className={styles.elderActionBtn}
-                    onClick={() => navigate(`/family-member/elder/${elder.id}`)}
+                    onClick={() => navigate(`/family-member/elder/${elder.elder_id}`)}
                   >
                     View Details
                   </button>

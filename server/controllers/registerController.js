@@ -59,6 +59,7 @@ const validatePasswordStrength = (password) => {
 };
 
 // CREATE an elder registration
+// CREATE an elder registration
 const createElderRegistration = async (req, res) => {
   // Handle file upload first
   upload.single('profilePhoto')(req, res, async function (err) {
@@ -82,11 +83,23 @@ const createElderRegistration = async (req, res) => {
       address, 
       password, 
       confirmPassword,
-      familyMemberId, // Add this field
+      familyMemberId, // This will be the user_id from the family member
       role = 'elder' 
     } = req.body;
     
     try {
+      console.log('Elder registration data received:', {
+        fullName,
+        email,
+        dateOfBirth,
+        gender,
+        nicPassport,
+        contactNumber,
+        address,
+        familyMemberId,
+        role
+      });
+
       // Validate required fields
       if (!fullName || !email || !dateOfBirth || !gender || !nicPassport || !contactNumber || !address || !password || !confirmPassword) {
         return res.status(400).json({ error: 'All required fields must be filled' });
@@ -97,15 +110,18 @@ const createElderRegistration = async (req, res) => {
         return res.status(400).json({ error: 'Family member ID is required' });
       }
 
-      // Verify that the family member exists and has the correct role
+      // Get the family_id from the familymember table using the user_id
       const familyMemberCheck = await pool.query(
-        'SELECT id, role FROM register WHERE id = $1 AND role = $2',
-        [familyMemberId, 'family_member']
+        'SELECT fm.family_id, u.name, u.email FROM familymember fm JOIN "User" u ON fm.user_id = u.user_id WHERE fm.user_id = $1',
+        [familyMemberId]
       );
 
       if (familyMemberCheck.rows.length === 0) {
         return res.status(400).json({ error: 'Invalid family member ID or family member not found' });
       }
+
+      const familyId = familyMemberCheck.rows[0].family_id;
+      console.log('Found family_id:', familyId);
 
       // Validate email format
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -124,11 +140,22 @@ const createElderRegistration = async (req, res) => {
         return res.status(400).json({ error: 'Contact number must be exactly 10 digits' });
       }
 
-      // Validate gender
-      const validGenders = ['Male', 'Female', 'Other'];
-      if (!validGenders.includes(gender)) {
-        return res.status(400).json({ error: 'Invalid gender selection' });
+      // Validate and normalize gender for enum
+      const validGenders = {
+        'Male': 'male',
+        'Female': 'female', 
+        'Other': 'other',
+        'male': 'male',
+        'female': 'female',
+        'other': 'other'
+      };
+      
+      const normalizedGender = validGenders[gender];
+      if (!normalizedGender) {
+        return res.status(400).json({ error: 'Invalid gender selection. Must be Male, Female, or Other' });
       }
+
+      console.log('Normalized gender:', normalizedGender);
 
       // Validate date of birth (should be in the past and reasonable age)
       const birthDate = new Date(dateOfBirth);
@@ -148,88 +175,102 @@ const createElderRegistration = async (req, res) => {
         return res.status(400).json({ error: 'Password must be at least 6 characters long' });
       }
 
-      // Check if elder already exists with this email
-      const existingEmailElder = await pool.query(
-        'SELECT * FROM elderreg WHERE email = $1',
+      // Check if elder already exists with this contact or NIC in the elder table
+      const existingElderCheck = await pool.query(
+        'SELECT * FROM elder WHERE contact = $1 OR nic = $2',
+        [contactNumber, nicPassport]
+      );
+      
+      if (existingElderCheck.rows.length > 0) {
+        const existing = existingElderCheck.rows[0];
+        if (existing.contact === contactNumber) {
+          return res.status(400).json({ error: 'Contact number already registered' });
+        }
+        if (existing.nic === nicPassport) {
+          return res.status(400).json({ error: 'NIC/Passport number already registered' });
+        }
+      }
+
+      // Check if email already exists in the User table
+      const existingEmailCheck = await pool.query(
+        'SELECT * FROM "User" WHERE email = $1',
         [email]
       );
       
-      if (existingEmailElder.rows.length > 0) {
-        return res.status(400).json({ error: 'Elder already registered with this email address' });
-      }
-
-      // Check if email already exists in other tables
-      const existingEmailQueries = [
-        pool.query('SELECT * FROM register WHERE email = $1', [email]),
-        pool.query('SELECT * FROM registration WHERE email = $1', [email]),
-        pool.query('SELECT * FROM DoctorReg WHERE email = $1', [email]),
-        pool.query('SELECT * FROM HealthReg WHERE email = $1', [email])
-      ];
-      
-      const existingEmailResults = await Promise.all(existingEmailQueries);
-      const emailExists = existingEmailResults.some(result => result.rows.length > 0);
-      
-      if (emailExists) {
+      if (existingEmailCheck.rows.length > 0) {
         return res.status(400).json({ error: 'Email address already registered in the system' });
-      }
-
-      // Check if elder already exists with this NIC/Passport
-      const existingElder = await pool.query(
-        'SELECT * FROM elderreg WHERE nic_passport = $1',
-        [nicPassport]
-      );
-      
-      if (existingElder.rows.length > 0) {
-        return res.status(400).json({ error: 'Elder already registered with this NIC/Passport number' });
-      }
-
-      // Check if contact number already exists
-      const existingContact = await pool.query(
-        'SELECT * FROM elderreg WHERE contact_number = $1',
-        [contactNumber]
-      );
-      
-      if (existingContact.rows.length > 0) {
-        return res.status(400).json({ error: 'Contact number already registered' });
       }
       
       // Hash the password
       const saltRounds = 12;
       const hashedPassword = await bcrypt.hash(password, saltRounds);
-      const hashedConfirmPassword = await bcrypt.hash(confirmPassword, saltRounds);
       
       // Get profile photo path if uploaded
       const profilePhotoPath = req.file ? req.file.path : null;
       
-      // Insert new elder registration with family member relationship
-      const result = await pool.query(
-        `INSERT INTO elderreg (
-          full_name, email, date_of_birth, gender, nic_passport, contact_number, 
-          medical_conditions, address, profile_photo, password, confirm_password, role, family_member_id
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) 
-        RETURNING id, full_name, email, date_of_birth, gender, nic_passport, contact_number, 
-                  medical_conditions, address, profile_photo, role, family_member_id, created_at`,
-        [
-          fullName, 
-          email,
-          dateOfBirth, 
-          gender, 
-          nicPassport, 
-          contactNumber, 
-          medicalConditions || null, 
-          address, 
-          profilePhotoPath, 
-          hashedPassword, 
-          hashedConfirmPassword, 
-          role,
-          familyMemberId // Add family member ID to the insert
-        ]
-      );
+      // Start transaction
+      const client = await pool.connect();
       
-      res.status(201).json({
-        message: 'Elder registered successfully',
-        elder: result.rows[0]
-      });
+      try {
+        await client.query('BEGIN');
+        
+        // Insert into User table first for elder login
+        const userResult = await client.query(
+          'INSERT INTO "User" (name, email, password, phone, role, created_at) VALUES ($1, $2, $3, $4, $5, CURRENT_TIMESTAMP) RETURNING user_id, name, email, phone, role, created_at',
+          [fullName, email, hashedPassword, contactNumber, role]
+        );
+        
+        const elderUserId = userResult.rows[0].user_id;
+        console.log('Created user with ID:', elderUserId);
+        
+        // Insert into elder table with family relationship
+        // Use CAST to ensure proper enum type conversion
+        const elderResult = await client.query(
+          `INSERT INTO elder (
+            family_id, name, dob, gender, contact, address, nic, medical_conditions, profile_photo
+          ) VALUES ($1, $2, $3, $4::gender_type, $5, $6, $7, $8, $9) 
+          RETURNING elder_id, family_id, name, dob, gender, contact, address, nic, medical_conditions, profile_photo`,
+          [
+            familyId,
+            fullName,
+            dateOfBirth,
+            normalizedGender, // Use normalized gender
+            contactNumber,
+            address,
+            nicPassport,
+            medicalConditions || null,
+            profilePhotoPath
+          ]
+        );
+        
+        console.log('Created elder with ID:', elderResult.rows[0].elder_id);
+        
+        await client.query('COMMIT');
+        
+        // Combine user and elder data for response
+        const responseData = {
+          user: userResult.rows[0],
+          elder: elderResult.rows[0],
+          family_member: {
+            id: familyMemberId,
+            family_id: familyId,
+            name: familyMemberCheck.rows[0].name,
+            email: familyMemberCheck.rows[0].email
+          }
+        };
+        
+        res.status(201).json({
+          message: 'Elder registered successfully',
+          data: responseData
+        });
+        
+      } catch (transactionErr) {
+        await client.query('ROLLBACK');
+        console.error('Transaction error:', transactionErr);
+        throw transactionErr;
+      } finally {
+        client.release();
+      }
       
     } catch (err) {
       console.error('Elder registration error:', err);
@@ -243,15 +284,20 @@ const createElderRegistration = async (req, res) => {
       
       // Handle specific database errors
       if (err.code === '23505') { // Unique constraint violation
-        if (err.constraint === 'elderreg_email_key') {
+        if (err.constraint && err.constraint.includes('email')) {
           return res.status(400).json({ error: 'Email address already registered' });
         }
-        if (err.constraint === 'elderreg_nic_passport_key') {
-          return res.status(400).json({ error: 'NIC/Passport number already registered' });
-        }
-        if (err.constraint === 'elderreg_contact_number_key') {
+        if (err.constraint && err.constraint.includes('contact')) {
           return res.status(400).json({ error: 'Contact number already registered' });
         }
+        if (err.constraint && err.constraint.includes('nic')) {
+          return res.status(400).json({ error: 'NIC/Passport number already registered' });
+        }
+      }
+      
+      // Handle enum constraint violation
+      if (err.code === '22P02' || err.message.includes('invalid input value for enum')) {
+        return res.status(400).json({ error: 'Invalid gender value. Please select Male, Female, or Other.' });
       }
       
       // Handle foreign key constraint violation
@@ -263,6 +309,8 @@ const createElderRegistration = async (req, res) => {
     }
   });
 };
+
+
 
 // CREATE a health professional registration
 const createHealthProfessionalRegistration = async (req, res) => {

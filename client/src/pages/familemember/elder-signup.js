@@ -27,7 +27,7 @@ const ElderSignup = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [familyMemberId, setFamilyMemberId] = useState(null);
-  const [authChecked, setAuthChecked] = useState(false); // Add this state
+  const [authChecked, setAuthChecked] = useState(false);
 
   // Get family member ID from AuthContext when component mounts
   useEffect(() => {
@@ -46,20 +46,20 @@ const ElderSignup = () => {
 
     if (!isAuthenticated || !currentUser) {
       alert('Please login first to register an elder');
-      navigate('/login', { replace: true }); // Use replace to prevent back navigation
+      navigate('/login', { replace: true });
       return;
     }
 
     if (currentUser.role === 'family_member') {
-      console.log('Setting family member ID:', currentUser.id);
-      setFamilyMemberId(currentUser.id);
+      // Use user_id instead of id for the new User table structure
+      console.log('Setting family member ID:', currentUser.user_id);
+      setFamilyMemberId(currentUser.user_id);
     } else {
       alert('Only family members can register elders');
       navigate('/login', { replace: true });
     }
   }, [currentUser, isAuthenticated, loading, navigate]);
 
-  // Rest of your component methods remain the same...
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -390,25 +390,31 @@ const ElderSignup = () => {
                     className={styles.passwordToggle}
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   >
-                    {showConfirmPassword ? '👁️' : '👁️‍🗨️'}
+                                        {showConfirmPassword ? '👁️' : '👁️‍🗨️'}
                   </button>
                 </div>
-                                {errors.confirmPassword && <span className={styles.error}>{errors.confirmPassword}</span>}
+                {errors.confirmPassword && <span className={styles.error}>{errors.confirmPassword}</span>}
               </div>
             </div>
 
             {/* Submit Button */}
-            <div className={styles.submitSection}>
-              <button 
-                type="submit" 
-                className={styles.submitButton}
+            <div className={styles.buttonSection}>
+              <button
+                type="button"
+                onClick={() => navigate('/family-member/dashboard')}
+                className={styles.cancelButton}
                 disabled={isSubmitting}
               >
-                {isSubmitting ? 'Creating Account...' : 'Create Account'}
+                Cancel
               </button>
-              <p className={styles.loginLink}>
-                Already have an account? <a href="/login">Sign in here</a>
-              </p>
+              
+              <button
+                type="submit"
+                className={`${styles.submitButton} ${isSubmitting ? styles.loading : ''}`}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'Registering...' : 'Register Elder'}
+              </button>
             </div>
           </form>
         </div>
