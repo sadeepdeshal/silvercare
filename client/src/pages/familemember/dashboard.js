@@ -170,94 +170,97 @@ const FamilyMemberDashboard = () => {
         </div>
       )}
 
-      {/* Main Actions Section */}
-      <div className={styles.actionsSection}>
-        <h2 className={styles.sectionTitle}>Quick Actions</h2>
-        <div className={styles.actionsGrid}>
-          <div className={styles.actionCard} onClick={handleElderRegistration}>
-            <div className={styles.actionIcon}>➕</div>
-            <div className={styles.actionContent}>
-              <h3 className={styles.actionTitle}>Register New Elder</h3>
-              <p className={styles.actionDescription}>Add a new elderly person to your care network</p>
-            </div>
-            <div className={styles.actionArrow}>→</div>
-          </div>
+      {/* Main Content Section - Quick Actions and Recent Activity Side by Side */}
+      <div className={styles.mainContentSection}>
+        {/* Quick Actions Section - Left Half */}
+        <div className={styles.quickActionsContainer}>
+          
+          <div className={styles.quickActionsCard}>
+            <h2 className={styles.sectionTitle}>Quick Actions</h2>
+            <div className={styles.quickActionsGrid}>
+              <div className={styles.quickActionCard} onClick={handleElderRegistration}>
+                <div className={styles.quickActionIcon}>➕</div>
+                <div className={styles.quickActionContent}>
+                  <h3 className={styles.quickActionTitle}>Register New Elder</h3>
+                  <p className={styles.quickActionDescription}>Add a new elderly person to your care network</p>
+                </div>
+              </div>
 
-          <div className={styles.actionCard} onClick={handleViewElders}>
-            <div className={styles.actionIcon}>👥</div>
-            <div className={styles.actionContent}>
-              <h3 className={styles.actionTitle}>View My Elders</h3>
-              <p className={styles.actionDescription}>
-                Manage and monitor {elderCount} registered elderly person{elderCount !== 1 ? 's' : ''}
-              </p>
-            </div>
-            <div className={styles.actionArrow}>→</div>
-          </div>
+              <div className={styles.quickActionCard} onClick={handleViewElders}>
+                <div className={styles.quickActionIcon}>👥</div>
+                <div className={styles.quickActionContent}>
+                  <h3 className={styles.quickActionTitle}>View My Elders</h3>
+                  <p className={styles.quickActionDescription}>
+                    Manage {elderCount} registered elder{elderCount !== 1 ? 's' : ''}
+                  </p>
+                </div>
+              </div>
 
-          <div className={styles.actionCard} onClick={handleBookAppointment}>
-            <div className={styles.actionIcon}>📅</div>
-            <div className={styles.actionContent}>
-              <h3 className={styles.actionTitle}>Book Appointment</h3>
-              <p className={styles.actionDescription}>Schedule medical appointments and care services</p>
-            </div>
-            <div className={styles.actionArrow}>→</div>
-          </div>
+              <div className={styles.quickActionCard} onClick={handleBookAppointment}>
+                <div className={styles.quickActionIcon}>📅</div>
+                <div className={styles.quickActionContent}>
+                  <h3 className={styles.quickActionTitle}>Book Appointment</h3>
+                  <p className={styles.quickActionDescription}>Schedule medical appointments and care services</p>
+                </div>
+              </div>
 
-          <div className={styles.actionCard} onClick={handleViewReports}>
-            <div className={styles.actionIcon}>📊</div>
-            <div className={styles.actionContent}>
-              <h3 className={styles.actionTitle}>Health Reports</h3>
-              <p className={styles.actionDescription}>View health reports and care summaries</p>
+              <div className={styles.quickActionCard} onClick={handleViewReports}>
+                <div className={styles.quickActionIcon}>📊</div>
+                <div className={styles.quickActionContent}>
+                  <h3 className={styles.quickActionTitle}>Health Reports</h3>
+                  <p className={styles.quickActionDescription}>View health reports and care summaries</p>
+                </div>
+              </div>
             </div>
-            <div className={styles.actionArrow}>→</div>
           </div>
         </div>
-      </div>
 
-      {/* Recent Activity Section - Updated with real elder data */}
-      <div className={styles.activitySection}>
-        <h2 className={styles.sectionTitle}>Recent Activity</h2>
-        <div className={styles.activityCard}>
-          <div className={styles.activityList}>
-            {dataLoading ? (
-              <div className={styles.activityItem}>
-                <div className={styles.activityIcon}>⏳</div>
-                <div className={styles.activityContent}>
-                  <p className={styles.activityText}>Loading recent activity...</p>
+                {/* Recent Activity Section - Right Half */}
+        <div className={styles.recentActivityContainer}>
+         
+          <div className={styles.activityCard}>
+             <h2 className={styles.sectionTitle}>Recent Activity</h2>
+            <div className={styles.activityList}>
+              {dataLoading ? (
+                <div className={styles.activityItem}>
+                  <div className={styles.activityIcon}>⏳</div>
+                  <div className={styles.activityContent}>
+                    <p className={styles.activityText}>Loading recent activity...</p>
+                  </div>
                 </div>
-              </div>
-            ) : elders.length > 0 ? (
-              <>
-                {elders.slice(0, 3).map((elder, index) => (
-                  <div key={elder.id} className={styles.activityItem}>
-                    <div className={styles.activityIcon}>👤</div>
+              ) : elders.length > 0 ? (
+                <>
+                  {elders.slice(0, 3).map((elder, index) => (
+                    <div key={elder.id} className={styles.activityItem}>
+                      <div className={styles.activityIcon}>👤</div>
+                      <div className={styles.activityContent}>
+                        <p className={styles.activityText}>
+                          Elder {elder.full_name} registered successfully
+                        </p>
+                        <span className={styles.activityTime}>
+                          {new Date(elder.created_at).toLocaleDateString()}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                  <div className={styles.activityItem}>
+                    <div className={styles.activityIcon}>📅</div>
                     <div className={styles.activityContent}>
-                      <p className={styles.activityText}>
-                        Elder {elder.full_name} registered successfully
-                      </p>
-                                            <span className={styles.activityTime}>
-                        {new Date(elder.created_at).toLocaleDateString()}
-                      </span>
+                      <p className={styles.activityText}>Appointment scheduled with Dr. Smith</p>
+                      <span className={styles.activityTime}>1 day ago</span>
                     </div>
                   </div>
-                ))}
+                </>
+              ) : (
                 <div className={styles.activityItem}>
-                  <div className={styles.activityIcon}>📅</div>
+                  <div className={styles.activityIcon}>📝</div>
                   <div className={styles.activityContent}>
-                    <p className={styles.activityText}>Appointment scheduled with Dr. Smith</p>
-                    <span className={styles.activityTime}>1 day ago</span>
+                    <p className={styles.activityText}>No elders registered yet. Click "Register New Elder" to get started.</p>
+                    <span className={styles.activityTime}>Welcome to SilverCare</span>
                   </div>
                 </div>
-              </>
-            ) : (
-              <div className={styles.activityItem}>
-                <div className={styles.activityIcon}>📝</div>
-                <div className={styles.activityContent}>
-                  <p className={styles.activityText}>No elders registered yet. Click "Register New Elder" to get started.</p>
-                  <span className={styles.activityTime}>Welcome to SilverCare</span>
-                </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -318,3 +321,4 @@ const FamilyMemberDashboard = () => {
 };
 
 export default FamilyMemberDashboard;
+

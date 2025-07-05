@@ -9,6 +9,7 @@ import image from "../../components/images/image.jpg";
 import line133 from "../../components/images/line-133.jpg";
 import styles from "../../components/css/healthprofessional/signup.module.css";
 import { Link } from "react-router-dom";
+import Navbar from '../../components/navbar';
 
 export const MentalHealthProfessionalReg = () => {
   const navigate = useNavigate();
@@ -130,6 +131,7 @@ export const MentalHealthProfessionalReg = () => {
 
   return (
     <div className={styles.doctorReg}>
+       <Navbar />
       <div className={styles.bg}>
         <div className={styles.leftSection}>
           <img className={styles.mainImage} alt="Health Professional Care" src={image1} />
