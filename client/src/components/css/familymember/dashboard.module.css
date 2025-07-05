@@ -39,7 +39,7 @@
 }
 
 .welcomeCard {
-  background-color: rgba(162, 188, 213, 0.95); /* Light blue background */
+  background-color: rgba(162, 188, 213, 0.95);
   border-radius: 20px;
   padding: 40px;
   display: flex;
@@ -48,7 +48,6 @@
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(10px);
 }
-
 
 .welcomeContent {
   flex: 1;
@@ -59,15 +58,7 @@
   font-weight: 700;
   color: black;
   margin-bottom: 10px;
-  /* Remove or comment out these gradient lines that are overriding the color */
-  /* background: black;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text; */
 }
-
-
-
 
 .welcomeSubtitle {
   font-size: 1.2rem;
@@ -165,14 +156,22 @@
   font-size: 0.9rem;
 }
 
-/* Actions Section */
-.actionsSection {
+/* Main Content Section - Side by Side Layout */
+.mainContentSection {
+  display: flex;
+  gap: 30px;
   padding: 0 20px 40px;
   max-width: 1200px;
   margin: 0 auto;
 }
 
-.sectionTitl {
+/* Quick Actions Container - Left Half */
+.quickActionsContainer {
+  flex: 1;
+  min-width: 0;
+}
+
+.sectionTitle {
   color: black;
   font-size: 2rem;
   font-weight: 600;
@@ -180,79 +179,70 @@
   text-align: center;
 }
 
-.actionsGrid {
+.quickActionsGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: 1fr 1fr;
   gap: 20px;
+  height: fit-content;
 }
 
-.actionCard {
+.quickActionCard {
   background: rgba(255, 255, 255, 0.95);
   border-radius: 16px;
-  padding: 30px;
-  display: flex;
-  align-items: center;
-  gap: 20px;
+  padding: 25px;
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(10px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  min-height: 180px;
+  justify-content: center;
 }
 
-.actionCard:hover {
+.quickActionCard:hover {
   transform: translateY(-5px);
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
   background: rgba(255, 255, 255, 1);
 }
 
-.actionIcon {
-  font-size: 2rem;
-  width: 60px;
-  height: 60px;
+.quickActionIcon {
+  font-size: 2.5rem;
+  width: 70px;
+  height: 70px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   border-radius: 50%;
   display: flex;
   align-items: center;
-    justify-content: center;
+  justify-content: center;
   color: white;
-  flex-shrink: 0;
+  margin-bottom: 15px;
 }
 
-.actionContent {
+.quickActionContent {
   flex: 1;
 }
 
-.actionTitle {
-  font-size: 1.3rem;
+.quickActionTitle {
+  font-size: 1.1rem;
   font-weight: 600;
   color: #2d3748;
   margin: 0 0 8px 0;
 }
 
-.actionDescription {
+.quickActionDescription {
   color: #718096;
   margin: 0;
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   line-height: 1.4;
 }
 
-.actionArrow {
-  font-size: 1.5rem;
-  color: #cbd5e0;
-  transition: all 0.3s ease;
-  flex-shrink: 0;
-}
-
-.actionCard:hover .actionArrow {
-  color: #667eea;
-  transform: translateX(5px);
-}
-
-/* Activity Section */
-.activitySection {
-  padding: 0 20px 40px;
-  max-width: 1200px;
-  margin: 0 auto;
+/* Recent Activity Container - Right Half */
+.recentActivityContainer {
+  flex: 1;
+  min-width: 0;
 }
 
 .activityCard {
@@ -261,6 +251,7 @@
   padding: 30px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(10px);
+  height: fit-content;
 }
 
 .activityList {
@@ -310,231 +301,30 @@
   font-size: 0.85rem;
 }
 
-/* Logout Section */
-.logoutSection {
-  padding: 0 20px;
-  max-width: 1200px;
-  margin: 0 auto;
-  text-align: center;
-}
-
-.logoutButton {
-  background: rgba(255, 255, 255, 0.2);
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  color: white;
-  padding: 15px 30px;
-  border-radius: 50px;
-  font-size: 1.1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  backdrop-filter: blur(10px);
-}
-
-.logoutButton:hover {
-  background: rgba(255, 255, 255, 0.3);
-  border-color: rgba(255, 255, 255, 0.5);
-  transform: translateY(-2px);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-}
-
-.logoutIcon {
-  font-size: 1.2rem;
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-  .welcomeCard {
-    flex-direction: column;
-    text-align: center;
-    padding: 30px 20px;
-  }
-
-  .welcomeImage {
-    margin-left: 0;
-    margin-top: 20px;
-  }
-
-  .welcomeTitle {
-    font-size: 2rem;
-  }
-
-  .userInfo {
-    justify-content: center;
-  }
-
-  .statsGrid {
-    grid-template-columns: 1fr;
-  }
-
-  .actionsGrid {
-    grid-template-columns: 1fr;
-  }
-
-  .actionCard {
-    padding: 20px;
-  }
-
-  .headerSection,
-  .statsSection,
-  .actionsSection,
-  .activitySection {
-    padding-left: 15px;
-    padding-right: 15px;
-  }
-}
-
-@media (max-width: 480px) {
-  .welcomeTitle {
-    font-size: 1.8rem;
-  }
-
-  .welcomeSubtitle {
-    font-size: 1rem;
-  }
-
-  .userInfo {
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .statCard {
-    padding: 20px;
-    flex-direction: column;
-    text-align: center;
-  }
-
-  .actionCard {
-    flex-direction: column;
-    text-align: center;
-  }
-
-  .actionArrow {
-    transform: rotate(90deg);
-  }
-
-  .actionCard:hover .actionArrow {
-    transform: rotate(90deg) translateX(5px);
-  }
-
-  .activityItem {
-    flex-direction: column;
-    text-align: center;
-  }
-}
-
-/* Additional Animations */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.welcomeCard,
-.statCard,
-.actionCard,
-.activityCard {
-  animation: fadeInUp 0.6s ease-out;
-}
-
-.statCard:nth-child(2) {
-  animation-delay: 0.1s;
-}
-
-.statCard:nth-child(3) {
-  animation-delay: 0.2s;
-}
-
-.statCard:nth-child(4) {
-  animation-delay: 0.3s;
-}
-
-.actionCard:nth-child(2) {
-  animation-delay: 0.1s;
-}
-
-.actionCard:nth-child(3) {
-  animation-delay: 0.2s;
-}
-
-.actionCard:nth-child(4) {
-  animation-delay: 0.3s;
-}
-
-/* Glassmorphism Effect */
-.welcomeCard,
-.statCard,
-.actionCard,
-.activityCard {
-  background: rgba(255, 255, 255, 0.25);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-}
-
-.actionCard:hover,
-.statCard:hover {
-  background: rgba(255, 255, 255, 0.35);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-}
-
-/* Gradient Text Effects */
-.welcomeTitle,
-.sectionTitle {
-  background: black;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.sectionTitle {
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-/* Custom Scrollbar */
-.activityList::-webkit-scrollbar {
-  width: 6px;
-}
-
-.activityList::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 3px;
-}
-
-.activityList::-webkit-scrollbar-thumb {
-  background: rgba(102, 126, 234, 0.3);
-  border-radius: 3px;
-}
-
-.activityList::-webkit-scrollbar-thumb:hover {
-  background: rgba(102, 126, 234, 0.5);
-}
-
-/* Add these styles to your existing dashboard.module.css file */
-
+/* Error Message */
 .errorMessage {
   background-color: #fee;
   border: 1px solid #fcc;
   color: #c33;
   padding: 12px;
   border-radius: 8px;
-  margin: 16px 0;
+  margin: 16px 20px;
   text-align: center;
+  max-width: 1160px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
+/* Elders Section */
 .eldersSection {
-  margin: 32px 0;
+  margin: 32px 20px 0;
   padding: 24px;
   background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
   border-radius: 16px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  max-width: 1160px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .eldersGrid {
@@ -632,8 +422,76 @@
   box-shadow: 0 4px 12px rgba(79, 172, 254, 0.4);
 }
 
-/* Responsive design */
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .mainContentSection {
+    flex-direction: column;
+    gap: 40px;
+  }
+  
+  .quickActionsGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
 @media (max-width: 768px) {
+  .welcomeCard {
+    flex-direction: column;
+    text-align: center;
+    padding: 30px 20px;
+  }
+
+  .welcomeImage {
+    margin-left: 0;
+    margin-top: 20px;
+  }
+
+  .welcomeTitle {
+    font-size: 2rem;
+  }
+
+  .userInfo {
+    justify-content: center;
+  }
+
+  .statsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .mainContentSection {
+    flex-direction: column;
+    gap: 30px;
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+
+  .quickActionsGrid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .quickActionCard {
+    min-height: 140px;
+    padding: 20px;
+  }
+
+  .quickActionIcon {
+    width: 60px;
+    height: 60px;
+    font-size: 2rem;
+  }
+
+  .headerSection,
+  .statsSection {
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+
+  .eldersSection {
+    margin-left: 15px;
+    margin-right: 15px;
+  }
+
   .eldersGrid {
     grid-template-columns: 1fr;
     gap: 16px;
@@ -641,5 +499,267 @@
   
   .elderCard {
     padding: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .welcomeTitle {
+    font-size: 1.8rem;
+  }
+
+  .welcomeSubtitle {
+    font-size: 1rem;
+  }
+
+  .userInfo {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .statCard {
+    padding: 20px;
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .quickActionCard {
+    min-height: 120px;
+    padding: 15px;
+  }
+
+  .quickActionTitle {
+    font-size: 1rem;
+  }
+
+  .quickActionDescription {
+    font-size: 0.8rem;
+  }
+
+  .activityItem {
+    flex-direction: column;
+    text-align: center;
+    gap: 10px;
+  }
+
+  .sectionTitle {
+    font-size: 1.5rem;
+  }
+}
+
+/* Additional Animations */
+/* Additional Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.welcomeCard,
+.statCard,
+.quickActionCard,
+.activityCard {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.statCard:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.statCard:nth-child(3) {
+  animation-delay: 0.2s;
+}
+
+.statCard:nth-child(4) {
+  animation-delay: 0.3s;
+}
+
+.quickActionCard:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.quickActionCard:nth-child(3) {
+  animation-delay: 0.2s;
+}
+
+.quickActionCard:nth-child(4) {
+  animation-delay: 0.3s;
+}
+
+/* Glassmorphism Effect */
+.welcomeCard,
+.statCard,
+.quickActionCard,
+.activityCard {
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.quickActionCard:hover,
+.statCard:hover {
+  background: rgba(255, 255, 255, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+/* Gradient Text Effects */
+.welcomeTitle,
+.sectionTitle {
+  background: black;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.sectionTitle {
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Custom Scrollbar */
+.activityList::-webkit-scrollbar {
+  width: 6px;
+}
+
+.activityList::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+.activityList::-webkit-scrollbar-thumb {
+  background: rgba(102, 126, 234, 0.3);
+  border-radius: 3px;
+}
+
+.activityList::-webkit-scrollbar-thumb:hover {
+  background: rgba(102, 126, 234, 0.5);
+}
+
+/* Hover Effects for Quick Actions */
+.quickActionCard:hover .quickActionIcon {
+  transform: scale(1.1);
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+}
+
+.quickActionCard:hover .quickActionTitle {
+  color: #667eea;
+}
+
+/* Activity Item Hover Effects */
+.activityItem:hover .activityIcon {
+  transform: scale(1.1);
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+/* Loading Animation for Activity Items */
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.activityItem:first-child .activityIcon {
+  animation: pulse 2s infinite;
+}
+
+/* Enhanced Card Shadows */
+.quickActionCard,
+.activityCard {
+  box-shadow: 
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.quickActionCard:hover,
+.activityCard:hover {
+  box-shadow: 
+    0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Smooth Transitions */
+* {
+  transition: all 0.3s ease;
+}
+
+/* Focus States for Accessibility */
+.quickActionCard:focus,
+.elderActionBtn:focus {
+  outline: 2px solid #667eea;
+  outline-offset: 2px;
+}
+
+/* Print Styles */
+@media print {
+  .quickActionCard,
+  .activityCard {
+    box-shadow: none;
+    border: 1px solid #e2e8f0;
+  }
+  
+  .quickActionIcon,
+  .activityIcon {
+    background: #f7fafc !important;
+    color: #2d3748 !important;
+  }
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+  .quickActionCard,
+  .activityCard {
+    border: 2px solid #2d3748;
+  }
+  
+  .quickActionTitle,
+  .activityText {
+    color: #000000;
+    font-weight: 700;
+  }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  .quickActionCard,
+  .activityCard,
+  .statCard {
+    animation: none;
+  }
+  
+  .quickActionCard:hover,
+  .statCard:hover {
+    transform: none;
+  }
+}
+
+/* Dark Mode Support (if needed in future) */
+@media (prefers-color-scheme: dark) {
+  .dashboardContainer {
+    background: #1a202c;
+  }
+  
+  .quickActionCard,
+  .activityCard {
+    background: rgba(45, 55, 72, 0.95);
+    color: #f7fafc;
+  }
+  
+  .quickActionTitle,
+  .activityText {
+    color: #f7fafc;
+  }
+  
+  .quickActionDescription,
+  .activityTime {
+    color: #a0aec0;
   }
 }
