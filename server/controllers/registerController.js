@@ -286,10 +286,10 @@ const createHealthProfessionalRegistration = async (req, res) => {
       return res.status(400).json({ error: 'All required fields must be filled' });
     }
 
-    // Validate email format (Gmail only)
-    const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
-    if (!gmailRegex.test(email)) {
-      return res.status(400).json({ error: 'Please enter a valid Gmail address' });
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ error: 'Please enter a valid email address' });
     }
 
     // Validate phone number format
@@ -317,11 +317,7 @@ const createHealthProfessionalRegistration = async (req, res) => {
 
     // Check if user already exists with this email in any table
     const existingUserQueries = [
-      pool.query('SELECT * FROM HealthReg WHERE email = $1', [email]),
-      pool.query('SELECT * FROM DoctorReg WHERE email = $1', [email]),
-      pool.query('SELECT * FROM register WHERE email = $1', [email]),
-      pool.query('SELECT * FROM registration WHERE email = $1', [email]),
-            pool.query('SELECT * FROM elderreg WHERE email = $1', [email])
+      pool.query('SELECT * FROM "User" WHERE email = $1', [email])
     ];
     
     const existingUserResults = await Promise.all(existingUserQueries);
@@ -333,7 +329,7 @@ const createHealthProfessionalRegistration = async (req, res) => {
 
     // Check if license already exists
     const existingLicense = await pool.query(
-      'SELECT * FROM HealthReg WHERE license = $1',
+      'SELECT * FROM counselor WHERE license_number = $1',
       [licenseRegistrationNumber]
     );
     
@@ -345,44 +341,67 @@ const createHealthProfessionalRegistration = async (req, res) => {
     const saltRounds = 12;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
     
-    // Insert new health professional registration
-    const result = await pool.query(
-      `INSERT INTO HealthReg (
-        name, email, phone, alter_phone, specification, license, 
-        years_experience, institutions, medical_credentials, password, role, status
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) 
-      RETURNING id, name, email, phone, alter_phone, specification, license, 
-                years_experience, institutions, medical_credentials, role, status, created_at`,
-      [
-        name, 
-        email, 
-        phone, 
-        alternativeNumber || null, 
-        areaOfSpecification, 
-        licenseRegistrationNumber, 
-        parseInt(yearOfExperience), 
-        currentInstitutions, 
-        professionalCredentials || null, 
-        hashedPassword, 
-        role, 
-        'pending'
-      ]
-    );
+    // Start transaction
+    const client = await pool.connect();
     
-    res.status(201).json({
-      message: 'Health professional registered successfully. Your registration is pending approval.',
-      healthProfessional: result.rows[0]
-    });
+    try {
+      await client.query('BEGIN');
+      
+      // Insert into User table first
+      const userResult = await client.query(
+        'INSERT INTO "User" (name, email, password, phone, role) VALUES ($1, $2, $3, $4, $5) RETURNING user_id, name, email, phone, role, created_at',
+        [name, email, hashedPassword, phone, role]
+      );
+      
+      const userId = userResult.rows[0].user_id;
+      
+      // Insert into counselor table
+      const counselorResult = await client.query(
+        'INSERT INTO counselor (user_id, specialization, license_number, alternative_number, years_of_experience, current_institution, proof, status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING counselor_id, user_id, specialization, license_number, alternative_number, years_of_experience, current_institution, proof, status',
+        [userId, areaOfSpecification, licenseRegistrationNumber, alternativeNumber || null, parseInt(yearOfExperience), currentInstitutions, professionalCredentials || null, 'pending']
+      );
+      
+      await client.query('COMMIT');
+      
+      // Combine user and counselor data for response
+      const responseData = {
+        user_id: userResult.rows[0].user_id,
+        counselor_id: counselorResult.rows[0].counselor_id,
+        name: userResult.rows[0].name,
+        email: userResult.rows[0].email,
+        phone: userResult.rows[0].phone,
+        role: userResult.rows[0].role,
+        specialization: counselorResult.rows[0].specialization,
+        license_number: counselorResult.rows[0].license_number,
+        alternative_number: counselorResult.rows[0].alternative_number,
+        years_of_experience: counselorResult.rows[0].years_of_experience,
+        current_institution: counselorResult.rows[0].current_institution,
+        proof: counselorResult.rows[0].proof,
+        status: counselorResult.rows[0].status,
+        created_at: userResult.rows[0].created_at
+      };
+      
+      res.status(201).json({
+        message: 'Health professional registered successfully. Your registration is pending approval.',
+        user: responseData
+      });
+      
+    } catch (transactionErr) {
+      await client.query('ROLLBACK');
+      throw transactionErr;
+    } finally {
+      client.release();
+    }
     
   } catch (err) {
     console.error('Health professional registration error:', err);
     
     // Handle specific database errors
     if (err.code === '23505') { // Unique constraint violation
-      if (err.constraint === 'healthreg_email_key') {
+      if (err.constraint === 'User_email_key' || err.constraint === 'users_email_key') {
         return res.status(400).json({ error: 'Email address already registered' });
       }
-      if (err.constraint === 'healthreg_license_key') {
+      if (err.constraint === 'counselor_license_number_key') {
         return res.status(400).json({ error: 'License/Registration number already registered' });
       }
     }
@@ -392,31 +411,32 @@ const createHealthProfessionalRegistration = async (req, res) => {
 };
 
 // CREATE a doctor registration
+// CREATE a doctor registration
 const createDoctorRegistration = async (req, res) => {
   const { 
     name, 
     email, 
     phone, 
     alternativeNumber, 
-    areaOfSpecification, 
-    medicalLicenseNumber, 
+    areaOfSpecification,  // Changed from specialization
+    medicalLicenseNumber, // Changed from licenseNumber
     yearOfExperience, 
-    currentInstitutions, 
-    medicalCredentials, 
+    currentInstitutions,  // Changed from currentInstitution
+    medicalCredentials,   // Changed from proof
     password, 
     role = 'doctor' 
   } = req.body;
   
   try {
-    // Validate required fields
+    // Validate required fields - use the correct field names
     if (!name || !email || !phone || !areaOfSpecification || !medicalLicenseNumber || !yearOfExperience || !currentInstitutions || !password) {
       return res.status(400).json({ error: 'All required fields must be filled' });
     }
 
-    // Validate email format (Gmail only)
-    const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
-    if (!gmailRegex.test(email)) {
-      return res.status(400).json({ error: 'Please enter a valid Gmail address' });
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ error: 'Please enter a valid email address' });
     }
 
     // Validate phone number format
@@ -444,11 +464,7 @@ const createDoctorRegistration = async (req, res) => {
 
     // Check if user already exists with this email in any table
     const existingUserQueries = [
-      pool.query('SELECT * FROM DoctorReg WHERE email = $1', [email]),
-      pool.query('SELECT * FROM HealthReg WHERE email = $1', [email]),
-      pool.query('SELECT * FROM register WHERE email = $1', [email]),
-      pool.query('SELECT * FROM registration WHERE email = $1', [email]),
-      pool.query('SELECT * FROM elderreg WHERE email = $1', [email])
+      pool.query('SELECT * FROM "User" WHERE email = $1', [email])
     ];
     
     const existingUserResults = await Promise.all(existingUserQueries);
@@ -460,7 +476,7 @@ const createDoctorRegistration = async (req, res) => {
 
     // Check if medical license already exists
     const existingLicense = await pool.query(
-      'SELECT * FROM DoctorReg WHERE license = $1',
+      'SELECT * FROM doctor WHERE license_number = $1',
       [medicalLicenseNumber]
     );
     
@@ -472,44 +488,67 @@ const createDoctorRegistration = async (req, res) => {
     const saltRounds = 12;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
     
-    // Insert new doctor registration
-    const result = await pool.query(
-      `INSERT INTO DoctorReg (
-        name, email, phone, alter_phone, specification, license, 
-        years_experience, institutions, medical_credentials, password, role, status
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) 
-      RETURNING id, name, email, phone, alter_phone, specification, license, 
-                years_experience, institutions, medical_credentials, role, status, created_at`,
-      [
-        name, 
-        email, 
-        phone, 
-        alternativeNumber || null, 
-        areaOfSpecification, 
-        medicalLicenseNumber, 
-        parseInt(yearOfExperience), 
-        currentInstitutions, 
-        medicalCredentials || null, 
-        hashedPassword, 
-        role, 
-        'pending'
-      ]
-    );
+    // Start transaction
+    const client = await pool.connect();
     
-    res.status(201).json({
-      message: 'Doctor registered successfully. Your registration is pending approval.',
-      doctor: result.rows[0]
-    });
+    try {
+      await client.query('BEGIN');
+      
+      // Insert into User table first
+      const userResult = await client.query(
+        'INSERT INTO "User" (name, email, password, phone, role) VALUES ($1, $2, $3, $4, $5) RETURNING user_id, name, email, phone, role, created_at',
+        [name, email, hashedPassword, phone, role]
+      );
+      
+      const userId = userResult.rows[0].user_id;
+      
+      // Insert into doctor table - use the correct field mappings
+      const doctorResult = await client.query(
+        'INSERT INTO doctor (user_id, specialization, license_number, alternative_number, current_institution, proof, years_experience, status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING doctor_id, user_id, specialization, license_number, alternative_number, current_institution, proof, years_experience, status',
+        [userId, areaOfSpecification, medicalLicenseNumber, alternativeNumber || null, currentInstitutions, medicalCredentials || null, parseInt(yearOfExperience), 'pending']
+      );
+      
+      await client.query('COMMIT');
+      
+      // Combine user and doctor data for response
+      const responseData = {
+        user_id: userResult.rows[0].user_id,
+        doctor_id: doctorResult.rows[0].doctor_id,
+        name: userResult.rows[0].name,
+        email: userResult.rows[0].email,
+        phone: userResult.rows[0].phone,
+        role: userResult.rows[0].role,
+        specialization: doctorResult.rows[0].specialization,
+        license_number: doctorResult.rows[0].license_number,
+        alternative_number: doctorResult.rows[0].alternative_number,
+        current_institution: doctorResult.rows[0].current_institution,
+        proof: doctorResult.rows[0].proof,
+        years_experience: doctorResult.rows[0].years_experience,
+        status: doctorResult.rows[0].status,
+        created_at: userResult.rows[0].created_at
+      };
+      
+      res.status(201).json({
+        message: 'Doctor registered successfully. Your registration is pending approval.',
+        user: responseData
+      });
+      
+    } catch (transactionErr) {
+      await client.query('ROLLBACK');
+      throw transactionErr;
+    } finally {
+      client.release();
+    }
     
   } catch (err) {
     console.error('Doctor registration error:', err);
     
     // Handle specific database errors
     if (err.code === '23505') { // Unique constraint violation
-      if (err.constraint === 'doctorreg_email_key') {
+      if (err.constraint === 'User_email_key' || err.constraint === 'users_email_key') {
         return res.status(400).json({ error: 'Email address already registered' });
       }
-      if (err.constraint === 'doctorreg_license_key') {
+      if (err.constraint === 'doctor_license_number_key') {
         return res.status(400).json({ error: 'Medical license number already registered' });
       }
     }
@@ -518,11 +557,29 @@ const createDoctorRegistration = async (req, res) => {
   }
 };
 
+
 // CREATE a family member registration
 const createFamilyMemberRegistration = async (req, res) => {
   const { name, email, phone, fixedLine, password, role = 'family_member' } = req.body;
   
   try {
+    // Validate required fields
+    if (!name || !email || !phone || !password) {
+      return res.status(400).json({ error: 'All required fields must be filled' });
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ error: 'Please enter a valid email address' });
+    }
+
+    // Validate phone number format
+    const phoneRegex = /^[0-9]{10}$/;
+    if (!phoneRegex.test(phone)) {
+      return res.status(400).json({ error: 'Phone number must be exactly 10 digits' });
+    }
+
     // Validate password strength on server side
     const passwordValidation = validatePasswordStrength(password);
     if (!passwordValidation.isValid) {
@@ -531,11 +588,7 @@ const createFamilyMemberRegistration = async (req, res) => {
 
     // Check if user already exists with this email in any table
     const existingUserQueries = [
-      pool.query('SELECT * FROM register WHERE email = $1', [email]),
-      pool.query('SELECT * FROM registration WHERE email = $1', [email]),
-      pool.query('SELECT * FROM DoctorReg WHERE email = $1', [email]),
-      pool.query('SELECT * FROM HealthReg WHERE email = $1', [email]),
-      pool.query('SELECT * FROM elderreg WHERE email = $1', [email])
+      pool.query('SELECT * FROM "User" WHERE email = $1', [email])
     ];
     
     const existingUserResults = await Promise.all(existingUserQueries);
@@ -549,28 +602,98 @@ const createFamilyMemberRegistration = async (req, res) => {
     const saltRounds = 12;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
     
-    // Insert new registration
-    const result = await pool.query(
-      'INSERT INTO register (name, email, phone, fixed_line, password, role) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, name, email, phone, fixed_line, role, created_at',
-      [name, email, phone, fixedLine, hashedPassword, role]
-    );
+    // Start transaction
+    const client = await pool.connect();
     
-    res.status(201).json({
-      message: 'Family member registered successfully',
-      user: result.rows[0]
-    });
+    try {
+      await client.query('BEGIN');
+      
+      // Insert into User table first
+      const userResult = await client.query(
+        'INSERT INTO "User" (name, email, password, phone, role) VALUES ($1, $2, $3, $4, $5) RETURNING user_id, name, email, phone, role, created_at',
+        [name, email, hashedPassword, phone, role]
+      );
+      
+      const userId = userResult.rows[0].user_id;
+      
+      // Insert into familymember table
+      const familyMemberResult = await client.query(
+        'INSERT INTO familymember (user_id, phone_fixed) VALUES ($1, $2) RETURNING family_id, user_id, phone_fixed',
+        [userId, fixedLine]
+      );
+      
+      await client.query('COMMIT');
+      
+      // Combine user and family member data for response
+      const responseData = {
+        user_id: userResult.rows[0].user_id,
+        family_id: familyMemberResult.rows[0].family_id,
+        name: userResult.rows[0].name,
+        email: userResult.rows[0].email,
+        phone: userResult.rows[0].phone,
+        role: userResult.rows[0].role,
+        phone_fixed: familyMemberResult.rows[0].phone_fixed,
+        created_at: userResult.rows[0].created_at
+      };
+      
+      res.status(201).json({
+        message: 'Family member registered successfully',
+        user: responseData
+      });
+      
+    } catch (transactionErr) {
+      await client.query('ROLLBACK');
+      throw transactionErr;
+    } finally {
+      client.release();
+    }
     
   } catch (err) {
     console.error('Family member registration error:', err);
-    res.status(500).json({ error: 'Error creating family member registration' });
+    
+    // Handle specific database errors
+    if (err.code === '23505') { // Unique constraint violation
+      if (err.constraint === 'User_email_key' || err.constraint === 'users_email_key') {
+        return res.status(400).json({ error: 'Email address already registered' });
+      }
+    }
+    
+    res.status(500).json({ error: 'Error creating family member registration. Please try again.' });
   }
 };
 
+
+// CREATE a caregiver registration
 // CREATE a caregiver registration
 const createCaregiverRegistration = async (req, res) => {
   const { name, email, phone, fixedLine, district, password, role = 'caregiver' } = req.body;
   
   try {
+    // Validate required fields
+    if (!name || !email || !phone || !password) {
+      return res.status(400).json({ error: 'All required fields must be filled' });
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ error: 'Please enter a valid email address' });
+    }
+
+    // Validate phone number format
+    const phoneRegex = /^[0-9]{10}$/;
+    if (!phoneRegex.test(phone)) {
+      return res.status(400).json({ error: 'Phone number must be exactly 10 digits' });
+    }
+
+    // Validate fixed line if provided
+    if (fixedLine) {
+      const fixedLineRegex = /^[0-9]{10}$/;
+      if (!fixedLineRegex.test(fixedLine)) {
+        return res.status(400).json({ error: 'Fixed line must be exactly 10 digits' });
+      }
+    }
+
     // Validate password strength on server side
     const passwordValidation = validatePasswordStrength(password);
     if (!passwordValidation.isValid) {
@@ -579,11 +702,7 @@ const createCaregiverRegistration = async (req, res) => {
 
     // Check if user already exists with this email in any table
     const existingUserQueries = [
-      pool.query('SELECT * FROM registration WHERE email = $1', [email]),
-      pool.query('SELECT * FROM register WHERE email = $1', [email]),
-      pool.query('SELECT * FROM DoctorReg WHERE email = $1', [email]),
-      pool.query('SELECT * FROM HealthReg WHERE email = $1', [email]),
-      pool.query('SELECT * FROM elderreg WHERE email = $1', [email])
+      pool.query('SELECT * FROM "User" WHERE email = $1', [email])
     ];
     
     const existingUserResults = await Promise.all(existingUserQueries);
@@ -597,22 +716,67 @@ const createCaregiverRegistration = async (req, res) => {
     const saltRounds = 12;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
     
-    // Insert new registration into registration table with district
-    const result = await pool.query(
-      'INSERT INTO registration (name, email, phone, fixed_line, district, password, role) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id, name, email, phone, fixed_line, district, role, created_at',
-      [name, email, phone, fixedLine, district, hashedPassword, role]
-    );
+    // Start transaction
+    const client = await pool.connect();
     
-    res.status(201).json({
-      message: 'Caregiver registered successfully',
-      user: result.rows[0]
-    });
+    try {
+      await client.query('BEGIN');
+      
+      // Insert into User table first
+      const userResult = await client.query(
+        'INSERT INTO "User" (name, email, password, phone, role) VALUES ($1, $2, $3, $4, $5) RETURNING user_id, name, email, phone, role, created_at',
+        [name, email, hashedPassword, phone, role]
+      );
+      
+      const userId = userResult.rows[0].user_id;
+      
+      // Insert into caregiver table
+      const caregiverResult = await client.query(
+        'INSERT INTO caregiver (user_id, fixed_line, district) VALUES ($1, $2, $3) RETURNING caregiver_id, user_id, fixed_line, district',
+        [userId, fixedLine || null, district || null]
+      );
+      
+      await client.query('COMMIT');
+      
+      // Combine user and caregiver data for response
+      const responseData = {
+        user_id: userResult.rows[0].user_id,
+        caregiver_id: caregiverResult.rows[0].caregiver_id,
+        name: userResult.rows[0].name,
+        email: userResult.rows[0].email,
+        phone: userResult.rows[0].phone,
+        role: userResult.rows[0].role,
+        fixed_line: caregiverResult.rows[0].fixed_line,
+        district: caregiverResult.rows[0].district,
+        created_at: userResult.rows[0].created_at
+      };
+      
+      res.status(201).json({
+        message: 'Caregiver registered successfully',
+        user: responseData
+      });
+      
+    } catch (transactionErr) {
+      await client.query('ROLLBACK');
+      throw transactionErr;
+    } finally {
+      client.release();
+    }
     
   } catch (err) {
     console.error('Caregiver registration error:', err);
-    res.status(500).json({ error: 'Error creating caregiver registration' });
+    
+    // Handle specific database errors
+    if (err.code === '23505') { // Unique constraint violation
+      if (err.constraint === 'User_email_key' || err.constraint === 'users_email_key') {
+        return res.status(400).json({ error: 'Email address already registered' });
+      }
+    }
+    
+    res.status(500).json({ error: 'Error creating caregiver registration. Please try again.' });
   }
 };
+
 
 // GET all registrations
 const getRegistrations = async (req, res) => {
