@@ -6,81 +6,103 @@ const loginUser = async (req, res) => {
   const { email, password } = req.body;
   
   try {
-    // Check in all tables for the user
-    let user = null;
-    let userTable = null;
-    
-    // First check in registration table (caregivers)
-    const registrationResult = await pool.query(
-      'SELECT id, name, email, password, role FROM registration WHERE email = $1',
+    // First, check in the User table
+    const userResult = await pool.query(
+      'SELECT user_id, name, email, password, phone, role FROM "User" WHERE email = $1',
       [email]
     );
     
-    if (registrationResult.rows.length > 0) {
-      user = registrationResult.rows[0];
-      userTable = 'registration';
-    } else {
-      // Check in register table (family members)
-      const registerResult = await pool.query(
-        'SELECT id, name, email, password, role FROM register WHERE email = $1',
-        [email]
-      );
+    let user = null;
+    let roleSpecificData = null;
+    
+    if (userResult.rows.length > 0) {
+      user = userResult.rows[0];
       
-      if (registerResult.rows.length > 0) {
-        user = registerResult.rows[0];
-        userTable = 'register';
-        if (user.role === 'admin') {
-          role = 'admin';
-          // Redirect to admin dashboard
-        } else {
-          role = 'family_member';
-          // Redirect to family member dashboard
-        }
-      } else {
-        // Check in DoctorReg table (doctors)
-        const doctorResult = await pool.query(
-          'SELECT id, name, email, password, role, status FROM DoctorReg WHERE email = $1',
-          [email]
-        );
-        
-        if (doctorResult.rows.length > 0) {
-          user = doctorResult.rows[0];
-          userTable = 'doctor';
-          
-          // Check if doctor status is confirmed
-          if (user.status !== 'confirmed') {
-            return res.status(403).json({ 
-              error: 'Your account is pending approval. Please wait for admin confirmation before logging in.' 
-            });
-          }
-        } else {
-          // Check in HealthReg table (health professionals)
-          const healthResult = await pool.query(
-            'SELECT id, name, email, password, role, status FROM HealthReg WHERE email = $1',
-            [email]
+      // Get role-specific data based on user role
+      switch (user.role) {
+        case 'family_member':
+          const familyResult = await pool.query(
+            'SELECT family_id, phone_fixed FROM familymember WHERE user_id = $1',
+            [user.user_id]
           );
+          if (familyResult.rows.length > 0) {
+            roleSpecificData = familyResult.rows[0];
+          }
+          break;
           
-          if (healthResult.rows.length > 0) {
-            user = healthResult.rows[0];
-            userTable = 'health_professional';
-            
-            // Check if health professional status is confirmed
-            if (user.status !== 'confirmed') {
+        case 'caregiver':
+          const caregiverResult = await pool.query(
+            'SELECT caregiver_id, fixed_line, district FROM caregiver WHERE user_id = $1',
+            [user.user_id]
+          );
+          if (caregiverResult.rows.length > 0) {
+            roleSpecificData = caregiverResult.rows[0];
+          }
+          break;
+          
+        case 'doctor':
+          const doctorResult = await pool.query(
+            'SELECT doctor_id, specialization, license_number, alternative_number, current_institution, proof, years_experience, status FROM doctor WHERE user_id = $1',
+            [user.user_id]
+          );
+          if (doctorResult.rows.length > 0) {
+            roleSpecificData = doctorResult.rows[0];
+            // Check if doctor status is confirmed
+            if (roleSpecificData.status !== 'confirmed') {
               return res.status(403).json({ 
                 error: 'Your account is pending approval. Please wait for admin confirmation before logging in.' 
               });
             }
-          } else {
-            // Check in elderreg table (elders)
-            const elderResult = await pool.query(
-              'SELECT id, full_name as name, email, password, role FROM elderreg WHERE email = $1',
-              [email]
-            );
-            
-            if (elderResult.rows.length > 0) {
-              user = elderResult.rows[0];
-              userTable = 'elder';
+          }
+          break;
+          
+        case 'healthprofessional':
+          const counselorResult = await pool.query(
+            'SELECT counselor_id, specialization, license_number, alternative_number, years_of_experience, current_institution, proof, status FROM counselor WHERE user_id = $1',
+            [user.user_id]
+          );
+          if (counselorResult.rows.length > 0) {
+            roleSpecificData = counselorResult.rows[0];
+            // Check if health professional status is confirmed
+            if (roleSpecificData.status !== 'confirmed') {
+              return res.status(403).json({ 
+                error: 'Your account is pending approval. Please wait for admin confirmation before logging in.' 
+              });
             }
+          }
+          break;
+      }
+    } else {
+      // Check in legacy tables for backward compatibility
+      // Check in elderreg table (elders)
+      const elderResult = await pool.query(
+        'SELECT id, full_name as name, email, password, role FROM elderreg WHERE email = $1',
+        [email]
+      );
+      
+      if (elderResult.rows.length > 0) {
+        user = elderResult.rows[0];
+        user.user_id = user.id; // Map id to user_id for consistency
+      } else {
+        // Check in register table (legacy family members/admin)
+        const registerResult = await pool.query(
+          'SELECT id, name, email, password, role FROM register WHERE email = $1',
+          [email]
+        );
+        
+        if (registerResult.rows.length > 0) {
+          user = registerResult.rows[0];
+          user.user_id = user.id; // Map id to user_id for consistency
+        } else {
+          // Check in registration table (legacy caregivers)
+          const registrationResult = await pool.query(
+            'SELECT id, name, email, password, role FROM registration WHERE email = $1',
+            [email]
+          );
+          
+          if (registrationResult.rows.length > 0) {
+            user = registrationResult.rows[0];
+            user.user_id = user.id; // Map id to user_id for consistency
           }
         }
       }
@@ -100,10 +122,9 @@ const loginUser = async (req, res) => {
     // Generate JWT token
     const token = jwt.sign(
       { 
-        userId: user.id, 
+        userId: user.user_id, 
         email: user.email, 
-        role: user.role,
-        table: userTable
+        role: user.role
       },
       process.env.JWT_SECRET || 'silvercare-secret-key-2024',
       { expiresIn: '24h' }
@@ -112,9 +133,15 @@ const loginUser = async (req, res) => {
     // Return user info without password
     const { password: _, ...userWithoutPassword } = user;
     
+    // Combine user data with role-specific data
+    const responseUser = {
+      ...userWithoutPassword,
+      ...roleSpecificData
+    };
+    
     res.json({
       message: 'Login successful',
-      user: userWithoutPassword,
+      user: responseUser,
       token,
       role: user.role
     });

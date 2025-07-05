@@ -4,7 +4,8 @@ const {
   getEldersByFamilyMember, 
   getElderCount, 
   getElderById, 
-  updateElder 
+  updateElder,
+  createElder 
 } = require('../controllers/elderController');
 
 // Get all elders for a specific family member
@@ -18,5 +19,8 @@ router.get('/:elderId', getElderById);
 
 // Update elder details
 router.put('/:elderId', updateElder);
+
+// Create new elder
+router.post('/', createElder);
 
 module.exports = router;
