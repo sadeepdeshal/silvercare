@@ -1,3 +1,6 @@
+body{
+  background: #EDEDFC;
+}
 .dashboardContainer {
   min-height: 100vh;
   background: #EDEDFC;
@@ -319,7 +322,7 @@
 .eldersSection {
   margin: 32px 20px 0;
   padding: 24px;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  background: white;
   border-radius: 16px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   max-width: 1160px;
@@ -335,7 +338,7 @@
 }
 
 .elderCard {
-  background: white;
+  background: #EDEDFC;
   border-radius: 12px;
   padding: 20px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
@@ -592,9 +595,9 @@
 
 /* Glassmorphism Effect */
 .welcomeCard,
-.statCard,
-.quickActionCard,
-.activityCard {
+
+.quickActionCard
+ {
   background: rgba(255, 255, 255, 0.25);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.18);
