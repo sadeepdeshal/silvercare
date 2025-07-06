@@ -6,7 +6,7 @@ const getElderDetails = async (req, res) => {
   console.log('Received email:', email);
   
   try {
-    // Query to join User and elder tables based on email (changed "Elder" to "elder")
+    // Query to join User, elder, familymember tables based on email
     const elderResult = await pool.query(`
       SELECT 
         e.elder_id,
@@ -16,7 +16,7 @@ const getElderDetails = async (req, res) => {
         e.gender,
         e.contact,
         e.address,
-        e.nic as ni,
+        e.nic,
         e.medical_conditions,
         e.profile_photo,
         e.email as elder_email,
@@ -25,9 +25,20 @@ const getElderDetails = async (req, res) => {
         u.name as user_name,
         u.phone as user_phone,
         u.role,
-        u.created_at as user_created_at
+        u.created_at as user_created_at,
+        fm.family_id as fm_family_id,
+        fm.user_id as fm_user_id,
+        fm.address as fm_address,
+        fm.phone_fixed as fm_phone_fixed,
+        fu.user_id as family_user_id,
+        fu.name as family_member_name,
+        fu.email as family_member_email,
+        fu.phone as family_member_phone,
+        fu.created_at as family_member_created_at
       FROM elder e
       INNER JOIN "User" u ON LOWER(e.email) = LOWER(u.email)
+      LEFT JOIN familymember fm ON e.family_id = fm.family_id
+      LEFT JOIN "User" fu ON fm.user_id = fu.user_id
       WHERE LOWER(u.email) = LOWER($1)
     `, [email]);
 
@@ -47,7 +58,7 @@ const getElderDetails = async (req, res) => {
       gender: elderData.gender,
       contact: elderData.contact,
       address: elderData.address,
-      ni: elderData.ni,
+      nic: elderData.nic,
       medical_conditions: elderData.medical_conditions,
       profile_photo: elderData.profile_photo,
       email: elderData.elder_email,
@@ -58,6 +69,14 @@ const getElderDetails = async (req, res) => {
         role: elderData.role,
         user_created_at: elderData.user_created_at
       },
+      family_member: elderData.family_member_name ? {
+        name: elderData.family_member_name,
+        email: elderData.family_member_email,
+        phone: elderData.family_member_phone,
+        phone_fixed: elderData.fm_phone_fixed,
+        address: elderData.fm_address,
+        created_at: elderData.family_member_created_at
+      } : null,
       created_at: elderData.elder_created_at
     };
 

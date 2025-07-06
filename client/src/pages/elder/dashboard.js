@@ -122,7 +122,7 @@ const ElderDashboard = () => {
 
                             <div className={styles.detailItem}>
                                 <label>National ID:</label>
-                                <span>{elderDetails?.ni || 'N/A'}</span>
+                                <span>{elderDetails?.nic || 'N/A'}</span>
                             </div>
 
                             <div className={styles.detailItem}>
@@ -151,6 +151,69 @@ const ElderDashboard = () => {
                         )}
                     </div>
                 </div>
+
+                {/* Family Member Section */}
+                {elderDetails?.family_member && (
+                    <div className={styles.familySection}>
+                        <div className={styles.familyCard}>
+                            <div className={styles.familyHeader}>
+                                <div className={styles.familyIcon}>
+                                    👨‍👩‍👧‍👦
+                                </div>
+                                <div className={styles.familyInfo}>
+                                    <h3>Family Member</h3>
+                                    <p className={styles.familySubtitle}>Your registered family contact</p>
+                                </div>
+                            </div>
+
+                            <div className={styles.familyDetails}>
+                                <div className={styles.familyDetailItem}>
+                                    <label>Name:</label>
+                                    <span>{elderDetails.family_member.name}</span>
+                                </div>
+
+                                <div className={styles.familyDetailItem}>
+                                    <label>Email:</label>
+                                    <span>{elderDetails.family_member.email}</span>
+                                </div>
+
+                                <div className={styles.familyDetailItem}>
+                                    <label>Phone:</label>
+                                    <span>{elderDetails.family_member.phone}</span>
+                                </div>
+
+                                {elderDetails.family_member.phone_fixed && (
+                                    <div className={styles.familyDetailItem}>
+                                        <label>Fixed Line:</label>
+                                        <span>{elderDetails.family_member.phone_fixed}</span>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className={styles.familyActions}>
+                                <button className={styles.contactBtn}>
+                                    📞 Call Family Member
+                                </button>
+                                <button className={styles.emailBtn}>
+                                    ✉️ Send Email
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {!elderDetails?.family_member && (
+                    <div className={styles.noFamilySection}>
+                        <div className={styles.noFamilyCard}>
+                            <div className={styles.noFamilyIcon}>⚠️</div>
+                            <h3>No Family Member Registered</h3>
+                            <p>You don't have a family member registered in the system yet.</p>
+                            <button className={styles.addFamilyBtn}>
+                                Add Family Member
+                            </button>
+                        </div>
+                    </div>
+                )}
 
                 <div className={styles.quickActions}>
                     <h3>Quick Actions</h3>
