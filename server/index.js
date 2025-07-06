@@ -21,6 +21,9 @@ app.use('/api/auth', authRoutes); // Add this line
 app.use('/api/elders', elderRoutes);
 //Indipa Added this line
 app.use('/api/doctor',doctorRoutes);//Indipa added this
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 
 const PORT = process.env.PORT || 5000;
