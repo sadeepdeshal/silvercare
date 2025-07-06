@@ -19,9 +19,7 @@ app.use('/api/users', userRoutes); // Mount the full route
 app.use('/api/register', registerRoutes);
 app.use('/api/auth', authRoutes); // Add this line
 app.use('/api/elders', elderRoutes);
-//Indipa Added this line
-app.use('/api/doctor',doctorRoutes);//Indipa added this
-
+app.use('/api/doctors', doctorRoutes); // Indipa Added this line
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
