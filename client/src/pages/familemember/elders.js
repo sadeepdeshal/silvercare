@@ -31,13 +31,21 @@ const FamilyMemberElders = () => {
   // Fetch elders data
   useEffect(() => {
     const fetchElders = async () => {
-      if (!currentUser?.id) return;
+      // Use user_id instead of id for the new User table structure
+      if (!currentUser?.user_id) {
+        console.log('No user_id found in currentUser:', currentUser);
+        return;
+      }
       
       try {
         setDataLoading(true);
         setError(null);
         
-        const response = await elderApi.getEldersByFamilyMember(currentUser.id);
+        console.log('Fetching elders for family member ID:', currentUser.user_id);
+        
+        const response = await elderApi.getEldersByFamilyMember(currentUser.user_id);
+        
+        console.log('Elders API response:', response);
         
         if (response.success) {
           setElders(response.elders);
@@ -60,9 +68,9 @@ const FamilyMemberElders = () => {
 
   // Filter elders based on search term
   const filteredElders = elders.filter(elder =>
-    elder.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    elder.contact_number.includes(searchTerm) ||
-    elder.email.toLowerCase().includes(searchTerm.toLowerCase())
+    elder.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    elder.contact.includes(searchTerm) ||
+    (elder.email && elder.email.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   const handleAddElder = () => {
@@ -186,26 +194,26 @@ const FamilyMemberElders = () => {
         ) : (
           <div className={styles.eldersGrid}>
             {filteredElders.map((elder) => (
-              <div key={elder.id} className={styles.elderCard}>
+              <div key={elder.elder_id} className={styles.elderCard}>
                 {/* Elder Header */}
                 <div className={styles.elderHeader}>
                   <div className={styles.elderAvatar}>
                     {elder.profile_photo ? (
                       <img 
                         src={`http://localhost:5000/${elder.profile_photo}`} 
-                        alt={elder.full_name}
+                        alt={elder.name}
                         className={styles.elderPhoto}
                       />
                     ) : (
                       <div className={styles.elderInitial}>
-                        {elder.full_name.charAt(0).toUpperCase()}
+                        {elder.name.charAt(0).toUpperCase()}
                       </div>
                     )}
                   </div>
                   <div className={styles.elderBasicInfo}>
-                    <h3 className={styles.elderName}>{elder.full_name}</h3>
+                    <h3 className={styles.elderName}>{elder.name}</h3>
                     <p className={styles.elderAge}>
-                      {elder.gender} • {new Date().getFullYear() - new Date(elder.date_of_birth).getFullYear()} years old
+                      {elder.gender} • {new Date().getFullYear() - new Date(elder.dob).getFullYear()} years old
                     </p>
                   </div>
                 </div>
@@ -216,15 +224,7 @@ const FamilyMemberElders = () => {
                     <span className={styles.detailIcon}>📞</span>
                     <div className={styles.detailContent}>
                       <span className={styles.detailLabel}>Contact</span>
-                      <span className={styles.detailValue}>{elder.contact_number}</span>
-                    </div>
-                  </div>
-                  
-                  <div className={styles.detailRow}>
-                    <span className={styles.detailIcon}>📧</span>
-                    <div className={styles.detailContent}>
-                      <span className={styles.detailLabel}>Email</span>
-                      <span className={styles.detailValue}>{elder.email}</span>
+                      <span className={styles.detailValue}>{elder.contact}</span>
                     </div>
                   </div>
                   
@@ -232,7 +232,7 @@ const FamilyMemberElders = () => {
                     <span className={styles.detailIcon}>🆔</span>
                     <div className={styles.detailContent}>
                       <span className={styles.detailLabel}>NIC/Passport</span>
-                      <span className={styles.detailValue}>{elder.nic_passport}</span>
+                      <span className={styles.detailValue}>{elder.nic}</span>
                     </div>
                   </div>
                   
@@ -252,7 +252,7 @@ const FamilyMemberElders = () => {
                   )}
                   
                   <div className={styles.detailRow}>
-                                        <span className={styles.detailIcon}>📍</span>
+                    <span className={styles.detailIcon}>📍</span>
                     <div className={styles.detailContent}>
                       <span className={styles.detailLabel}>Address</span>
                       <span className={styles.detailValue}>
@@ -267,9 +267,9 @@ const FamilyMemberElders = () => {
                   <div className={styles.detailRow}>
                     <span className={styles.detailIcon}>📅</span>
                     <div className={styles.detailContent}>
-                      <span className={styles.detailLabel}>Registered</span>
+                      <span className={styles.detailLabel}>Date of Birth</span>
                       <span className={styles.detailValue}>
-                        {new Date(elder.created_at).toLocaleDateString()}
+                        {new Date(elder.dob).toLocaleDateString()}
                       </span>
                     </div>
                   </div>
@@ -279,14 +279,14 @@ const FamilyMemberElders = () => {
                 <div className={styles.elderActions}>
                   <button 
                     className={styles.primaryButton}
-                    onClick={() => handleViewElder(elder.id)}
+                    onClick={() => handleViewElder(elder.elder_id)}
                   >
                     <span className={styles.buttonIcon}>👁️</span>
                     View Profile
                   </button>
                   <button 
                     className={styles.secondaryButton}
-                    onClick={() => handleBookAppointment(elder.id)}
+                    onClick={() => handleBookAppointment(elder.elder_id)}
                   >
                     <span className={styles.buttonIcon}>📅</span>
                     Book Appointment
@@ -318,4 +318,3 @@ const FamilyMemberElders = () => {
 };
 
 export default FamilyMemberElders;
-
