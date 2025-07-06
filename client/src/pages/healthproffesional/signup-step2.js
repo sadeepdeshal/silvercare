@@ -89,7 +89,7 @@ export const HealthProfessionalRegStep2 = () => {
     // Validate file
     if (file) {
       const validation = validateFile(file);
-      if (!validation.isValid) {
+            if (!validation.isValid) {
         setErrors(prev => ({
           ...prev,
           professionalCredentials: validation.message
@@ -310,3 +310,4 @@ export const HealthProfessionalRegStep2 = () => {
     </div>
   );
 };
+
