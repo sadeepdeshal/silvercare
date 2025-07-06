@@ -61,6 +61,7 @@ export const elderApi = {
   // Update elder details
   updateElder: async (elderId, elderData) => {
     try {
+      console.log('API: Updating elder:', elderId, elderData);
       const response = await fetch(`${API_BASE}/${elderId}`, {
         method: 'PUT',
         headers: {
@@ -70,6 +71,7 @@ export const elderApi = {
       });
       
       const data = await response.json();
+      console.log('API: Update response:', data);
       
       if (!response.ok) {
         throw new Error(data.error || 'Failed to update elder details');
@@ -77,7 +79,7 @@ export const elderApi = {
       
       return data;
     } catch (error) {
-      console.error('Error updating elder details:', error);
+      console.error('API: Error updating elder details:', error);
       throw error;
     }
   },
@@ -102,6 +104,101 @@ export const elderApi = {
       return data;
     } catch (error) {
       console.error('Error creating elder:', error);
+      throw error;
+    }
+  },
+
+  // Delete elder
+  deleteElder: async (elderId) => {
+    try {
+      const response = await fetch(`${API_BASE}/${elderId}`, {
+        method: 'DELETE',
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to delete elder');
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('Error deleting elder:', error);
+      throw error;
+    }
+  },
+
+  // Get elder statistics
+  getElderStats: async (familyMemberId) => {
+    try {
+      const response = await fetch(`${API_BASE}/stats/${familyMemberId}`);
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to fetch elder statistics');
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('Error fetching elder statistics:', error);
+      throw error;
+    }
+  },
+
+  // Search elders
+  searchElders: async (familyMemberId, query) => {
+    try {
+      const response = await fetch(`${API_BASE}/search/${familyMemberId}?query=${encodeURIComponent(query)}`);
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to search elders');
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('Error searching elders:', error);
+      throw error;
+    }
+  },
+
+  // Get elders with medical conditions
+  getEldersWithMedicalConditions: async (familyMemberId) => {
+    try {
+      const response = await fetch(`${API_BASE}/medical-conditions/${familyMemberId}`);
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to fetch elders with medical conditions');
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('Error fetching elders with medical conditions:', error);
+      throw error;
+    }
+  },
+
+  // Update elder photo
+  updateElderPhoto: async (elderId, photoData) => {
+    try {
+      const response = await fetch(`${API_BASE}/${elderId}/photo`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(photoData),
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to update elder photo');
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('Error updating elder photo:', error);
       throw error;
     }
   }
