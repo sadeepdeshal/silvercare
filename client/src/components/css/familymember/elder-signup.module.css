@@ -1,0 +1,448 @@
+.container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.signupCard {
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  max-width: 800px;
+  width: 100%;
+  overflow: hidden;
+  animation: slideUp 0.6s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.header {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  color: white;
+  padding: 40px;
+  text-align: center;
+}
+
+.title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 0 0 10px 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.subtitle {
+  font-size: 1.1rem;
+  margin: 0;
+  opacity: 0.9;
+}
+
+.form {
+  padding: 40px;
+}
+
+.photoSection {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 30px;
+}
+
+.photoUpload {
+  position: relative;
+}
+
+.fileInput {
+  display: none;
+}
+
+.photoLabel {
+  display: block;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  border: 3px dashed #ddd;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.photoLabel:hover {
+  border-color: #4facfe;
+  transform: scale(1.05);
+}
+
+.profilePreview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.photoPlaceholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.photoIcon {
+  font-size: 2rem;
+  margin-bottom: 5px;
+}
+
+.section {
+  margin-bottom: 30px;
+}
+
+.sectionTitle {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.inputGroup {
+  margin-bottom: 20px;
+}
+
+.label {
+  display: block;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+  font-size: 0.95rem;
+}
+
+.input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #e1e5e9;
+  border-radius: 10px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background-color: #fafafa;
+  box-sizing: border-box;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #4facfe;
+  background-color: white;
+  box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+}
+
+.input::placeholder {
+  color: #999;
+}
+
+.inputError {
+  border-color: #ff4757 !important;
+  background-color: #fff5f5 !important;
+}
+
+.select {
+  cursor: pointer;
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 80px;
+  font-family: inherit;
+}
+
+.passwordWrapper {
+  position: relative;
+}
+
+.passwordInput {
+  padding-right: 50px;
+}
+.passwordToggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.2rem;
+  color: #666;
+  padding: 5px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.passwordToggle:hover {
+  background-color: #f0f0f0;
+  color: #4facfe;
+}
+
+.error {
+  color: #ff4757;
+  font-size: 0.85rem;
+  margin-top: 5px;
+  display: block;
+  font-weight: 500;
+}
+
+.submitSection {
+  text-align: center;
+  margin-top: 40px;
+}
+
+.submitButton {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  color: white;
+  border: none;
+  padding: 16px 40px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+  min-width: 200px;
+}
+
+.submitButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(79, 172, 254, 0.4);
+}
+
+.submitButton:active {
+  transform: translateY(0);
+}
+
+.loginLink {
+  margin-top: 20px;
+  color: #666;
+  font-size: 0.95rem;
+}
+
+.loginLink a {
+  color: #4facfe;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
+
+.loginLink a:hover {
+  color: #00f2fe;
+  text-decoration: underline;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .container {
+    padding: 10px;
+  }
+  
+  .signupCard {
+    margin: 10px;
+    border-radius: 15px;
+  }
+  
+  .header {
+    padding: 30px 20px;
+  }
+  
+  .title {
+    font-size: 2rem;
+  }
+  
+  .subtitle {
+    font-size: 1rem;
+  }
+  
+  .form {
+    padding: 30px 20px;
+  }
+  
+  .row {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  
+  .photoLabel {
+    width: 100px;
+    height: 100px;
+  }
+  
+  .photoIcon {
+    font-size: 1.5rem;
+  }
+  
+  .sectionTitle {
+    font-size: 1.2rem;
+  }
+  
+  .submitButton {
+    width: 100%;
+    padding: 14px 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .title {
+    font-size: 1.8rem;
+  }
+  
+  .form {
+    padding: 20px 15px;
+  }
+  
+  .input {
+    padding: 10px 14px;
+    font-size: 0.95rem;
+  }
+  
+  .photoLabel {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .photoIcon {
+    font-size: 1.2rem;
+  }
+  
+  .photoPlaceholder {
+    font-size: 0.8rem;
+  }
+}
+
+/* Loading state for form submission */
+.submitButton:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.submitButton:disabled:hover {
+  transform: none;
+  box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+}
+
+/* Focus styles for accessibility */
+.input:focus,
+.passwordToggle:focus {
+  outline: 2px solid #4facfe;
+  outline-offset: 2px;
+}
+
+/* Custom scrollbar for textarea */
+.textarea::-webkit-scrollbar {
+  width: 6px;
+}
+
+.textarea::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.textarea::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.textarea::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Animation for error messages */
+.error {
+  animation: fadeInError 0.3s ease-in;
+}
+
+@keyframes fadeInError {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Success state styles (for future use) */
+.inputSuccess {
+  border-color: #2ed573 !important;
+  background-color: #f0fff4 !important;
+}
+
+.success {
+  color: #2ed573;
+  font-size: 0.85rem;
+  margin-top: 5px;
+  display: block;
+  font-weight: 500;
+}
+
+/* File upload hover effect */
+.photoLabel::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(79, 172, 254, 0.1);
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.photoLabel:hover::after {
+  opacity: 1;
+}
+
+/* Form validation styles */
+.form:invalid .submitButton {
+  opacity: 0.8;
+}
+
+/* Print styles */
+@media print {
+  .container {
+    background: white;
+    padding: 0;
+  }
+  
+  .signupCard {
+    box-shadow: none;
+    border: 1px solid #ddd;
+  }
+  
+  .header {
+    background: #f8f9fa !important;
+    color: #333 !important;
+  }
+  
+  .submitButton,
+  .passwordToggle {
+    display: none;
+  }
+}
