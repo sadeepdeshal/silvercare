@@ -177,8 +177,8 @@ const createElderRegistration = async (req, res) => {
 
       // Check if elder already exists with this contact or NIC in the elder table
       const existingElderCheck = await pool.query(
-        'SELECT * FROM elder WHERE contact = $1 OR nic = $2',
-        [contactNumber, nicPassport]
+        'SELECT * FROM elder WHERE contact = $1 OR nic = $2 OR email = $3',
+        [contactNumber, nicPassport, email]
       );
       
       if (existingElderCheck.rows.length > 0) {
@@ -188,6 +188,9 @@ const createElderRegistration = async (req, res) => {
         }
         if (existing.nic === nicPassport) {
           return res.status(400).json({ error: 'NIC/Passport number already registered' });
+        }
+        if (existing.email === email) {
+          return res.status(400).json({ error: 'Email address already registered in elder records' });
         }
       }
 
@@ -223,18 +226,18 @@ const createElderRegistration = async (req, res) => {
         const elderUserId = userResult.rows[0].user_id;
         console.log('Created user with ID:', elderUserId);
         
-        // Insert into elder table with family relationship
-        // Use CAST to ensure proper enum type conversion
+        // Insert into elder table with family relationship - ADDED EMAIL HERE
         const elderResult = await client.query(
           `INSERT INTO elder (
-            family_id, name, dob, gender, contact, address, nic, medical_conditions, profile_photo
-          ) VALUES ($1, $2, $3, $4::gender_type, $5, $6, $7, $8, $9) 
-          RETURNING elder_id, family_id, name, dob, gender, contact, address, nic, medical_conditions, profile_photo`,
+            family_id, name, email, dob, gender, contact, address, nic, medical_conditions, profile_photo, created_at
+          ) VALUES ($1, $2, $3, $4, $5::gender_type, $6, $7, $8, $9, $10, CURRENT_TIMESTAMP) 
+          RETURNING elder_id, family_id, name, email, dob, gender, contact, address, nic, medical_conditions, profile_photo, created_at`,
           [
             familyId,
             fullName,
+            email,              // ADDED EMAIL PARAMETER
             dateOfBirth,
-            normalizedGender, // Use normalized gender
+            normalizedGender,   // Use normalized gender
             contactNumber,
             address,
             nicPassport,
