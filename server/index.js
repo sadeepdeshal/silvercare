@@ -15,6 +15,7 @@ const registerRoutes = require('./routes/registerRoutes');
 const authRoutes = require('./routes/authRoutes'); // Add this line
 const elderRoutes = require('./routes/elderRoutes'); // Add this line
 const doctorRoutes = require('./routes/doctorRoutes'); // Indipa Added this line
+
 app.use('/api/users', userRoutes); // Mount the full route
 app.use('/api/register', registerRoutes);
 app.use('/api/auth', authRoutes); // Add this line
