@@ -22,22 +22,25 @@ const getEldersByFamilyMember = async (req, res) => {
     const familyId = familyMemberResult.rows[0].family_id;
     console.log('Found family_id:', familyId);
     
-    // Now get elders using the family_id
+    // Now get elders using the family_id - include email and created_at
     const result = await pool.query(
       `SELECT 
         elder_id,
         family_id,
         name,
+        email,                    -- ADD EMAIL HERE
         dob,
         gender,
         contact,
         address,
         nic,
         medical_conditions,
-        profile_photo
+        profile_photo,
+        created_at               -- ADD CREATED_AT HERE
+        
       FROM elder 
       WHERE family_id = $1 
-      ORDER BY elder_id DESC`,
+      ORDER BY created_at DESC`,
       [familyId]
     );
     
@@ -57,6 +60,7 @@ const getEldersByFamilyMember = async (req, res) => {
     });
   }
 };
+
 
 const getElderCount = async (req, res) => {
   const { familyMemberId } = req.params;
@@ -108,13 +112,16 @@ const getElderById = async (req, res) => {
         elder_id,
         family_id,
         name as full_name,
+        email,                    -- ADD EMAIL HERE
         dob as date_of_birth,
         gender,
         contact as contact_number,
         address,
         nic as nic_passport,
         medical_conditions,
-        profile_photo
+        profile_photo,
+        created_at              -- ADD CREATED_AT HERE
+        
       FROM elder
       WHERE elder_id = $1`,
       [elderId]
@@ -147,6 +154,7 @@ const updateElder = async (req, res) => {
   const { elderId } = req.params;
   const {
     full_name,
+    email,
     date_of_birth,
     gender,
     nic_passport,
@@ -164,12 +172,42 @@ const updateElder = async (req, res) => {
       });
     }
 
+    // Validate email format if provided
+    if (email) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({
+          success: false,
+          error: 'Please enter a valid email address'
+        });
+      }
+    }
+
     // Validate contact number format
     const phoneRegex = /^[0-9]{10}$/;
     if (!phoneRegex.test(contact_number)) {
       return res.status(400).json({
         success: false,
         error: 'Contact number must be exactly 10 digits'
+      });
+    }
+
+    // Validate date of birth (should be in the past and reasonable age)
+    const birthDate = new Date(date_of_birth);
+    const today = new Date();
+    const age = today.getFullYear() - birthDate.getFullYear();
+    
+    if (birthDate >= today) {
+      return res.status(400).json({
+        success: false,
+        error: 'Date of birth must be in the past'
+      });
+    }
+    
+    if (age < 50) {
+      return res.status(400).json({
+        success: false,
+        error: 'Elder must be at least 50 years old'
       });
     }
 
@@ -180,6 +218,20 @@ const updateElder = async (req, res) => {
         success: false,
         error: 'Elder not found'
       });
+    }
+
+    // Check if email is already used by another elder (excluding current elder)
+    if (email) {
+      const emailCheck = await pool.query(
+        'SELECT * FROM elder WHERE email = $1 AND elder_id != $2',
+        [email, elderId]
+      );
+      if (emailCheck.rows.length > 0) {
+        return res.status(400).json({
+          success: false,
+          error: 'Email address is already registered with another elder'
+        });
+      }
     }
 
     // Check if contact is already used by another elder (excluding current elder)
@@ -206,27 +258,42 @@ const updateElder = async (req, res) => {
       });
     }
 
-    // Normalize gender for enum
-    let normalizedGender = gender;
-    if (gender === 'Male') normalizedGender = 'male';
-    if (gender === 'Female') normalizedGender = 'female';
-    if (gender === 'Other') normalizedGender = 'other';
+    // Validate and normalize gender for enum
+    const validGenders = {
+      'Male': 'male',
+      'Female': 'female',
+      'Other': 'other',
+      'male': 'male',
+      'female': 'female',
+      'other': 'other'
+    };
+    
+    const normalizedGender = validGenders[gender];
+    if (!normalizedGender) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid gender selection. Must be Male, Female, or Other'
+      });
+    }
 
     const updateQuery = `
       UPDATE elder 
       SET name = $1, 
-          dob = $2, 
-          gender = $3::gender_type, 
-          nic = $4, 
-          contact = $5, 
-          medical_conditions = $6, 
-          address = $7
-      WHERE elder_id = $8
-      RETURNING elder_id, name as full_name, dob as date_of_birth, gender, nic as nic_passport, contact as contact_number, medical_conditions, address
+          email = $2,
+          dob = $3, 
+          gender = $4::gender_type, 
+          nic = $5, 
+          contact = $6, 
+          medical_conditions = $7, 
+          address = $8,
+          updated_at = CURRENT_TIMESTAMP
+      WHERE elder_id = $9
+      RETURNING elder_id, name as full_name, email, dob as date_of_birth, gender, nic as nic_passport, contact as contact_number, medical_conditions, address, created_at, updated_at
     `;
     
     const result = await pool.query(updateQuery, [
       full_name,
+      email || null,
       date_of_birth,
       normalizedGender,
       nic_passport,
@@ -247,6 +314,12 @@ const updateElder = async (req, res) => {
     
     // Handle specific database errors
     if (err.code === '23505') { // Unique constraint violation
+      if (err.constraint && err.constraint.includes('email')) {
+        return res.status(400).json({
+          success: false,
+          error: 'Email address is already registered with another elder'
+        });
+      }
       if (err.constraint && err.constraint.includes('contact')) {
         return res.status(400).json({
           success: false,
@@ -261,12 +334,30 @@ const updateElder = async (req, res) => {
       }
     }
     
+    // Handle enum constraint violation
+    if (err.code === '22P02' || err.message.includes('invalid input value for enum')) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid gender value. Please select Male, Female, or Other.'
+      });
+    }
+    
+    // Handle foreign key constraint violation
+    if (err.code === '23503') {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid elder reference'
+      });
+    }
+    
     res.status(500).json({ 
       success: false,
       error: 'Error updating elder data' 
     });
   }
 };
+
+
 
 const createElder = async (req, res) => {
   const {
