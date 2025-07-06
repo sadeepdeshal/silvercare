@@ -157,6 +157,7 @@ export const HealthProfessionalRegStep3 = () => {
         email: step1Data.email,
         phone: step1Data.phone,
         alternativeNumber: step1Data.alternativeNumber,
+        district: step1Data.district, // Include district from step 1
         areaOfSpecification: step2Data.areaOfSpecification,
         licenseRegistrationNumber: step2Data.licenseRegistrationNumber,
         yearOfExperience: step2Data.yearOfExperience,
@@ -174,7 +175,7 @@ export const HealthProfessionalRegStep3 = () => {
       
       // Clear localStorage after successful registration
       localStorage.removeItem('healthProfessionalStep1Data');
-      localStorage.removeItem('healthProfessionalStep2Data');
+            localStorage.removeItem('healthProfessionalStep2Data');
       
       // Show success message and navigate
       alert('Registration successful! Your account is pending approval. You will be notified once approved.');
@@ -364,7 +365,7 @@ export const HealthProfessionalRegStep3 = () => {
                 </div>
               </div>
 
-                            <div className={styles.buttonContainer}>
+              <div className={styles.buttonContainer}>
                 <button 
                   type="button" 
                   className={styles.backBtn}

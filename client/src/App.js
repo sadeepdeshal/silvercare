@@ -49,14 +49,14 @@ function App() {
           {/* Registration Routes - No authentication required */}
           <Route path="/family-member/signup" element={<FamilyMemberReg />} />
           <Route path="/family-member/signup-step2" element={<FamilyMemberReg2 />} />
-                      <Route 
-              path="/family-member/elder-signup" 
-              element={
-                <ProtectedRoute allowedRoles={['family_member']}>
-                  <ElderSignup />
-                </ProtectedRoute>
-              } 
-            />
+          <Route 
+            path="/family-member/elder-signup" 
+            element={
+              <ProtectedRoute allowedRoles={['family_member']}>
+                <ElderSignup />
+              </ProtectedRoute>
+            } 
+          />
           <Route path="/doctor/signup" element={<DoctorReg />} />
           <Route path="/doctor/signup-step2" element={<DoctorRegStep2 />} />
           <Route path="/doctor/signup-step3" element={<DoctorRegStep3 />} />
@@ -73,7 +73,7 @@ function App() {
             </ProtectedRoute>
           } />
 
-                    {/* Add the elders route */}
+          {/* Add the elders route */}
           <Route path="/family-member/elders" element={
             <ProtectedRoute allowedRoles={['family_member']}>
               <FamilyMemberElders />
@@ -81,11 +81,10 @@ function App() {
           } />
 
           <Route path="/family-member/elder/:elderId" element={
-  <ProtectedRoute allowedRoles={['family_member']}>
-    <ElderDetails />
-  </ProtectedRoute>
-} />
-
+            <ProtectedRoute allowedRoles={['family_member']}>
+              <ElderDetails />
+            </ProtectedRoute>
+          } />
           
           <Route path="/doctor/dashboard" element={
             <ProtectedRoute allowedRoles={['doctor']}>
@@ -93,7 +92,8 @@ function App() {
             </ProtectedRoute>
           } />
           
-          <Route path="/healthproffesional/dashboard" element={
+          {/* Fix the health professional route - change from healthproffesional to healthprofessional */}
+          <Route path="/healthprofessional/dashboard" element={
             <ProtectedRoute allowedRoles={['healthprofessional']}>
               <HealthProfessionalDashboard />
             </ProtectedRoute>
@@ -111,7 +111,7 @@ function App() {
             </ProtectedRoute>
           } />
 
-                    <Route path="/elder/dashboard" element={
+          <Route path="/elder/dashboard" element={
             <ProtectedRoute allowedRoles={['elder']}>
               <ElderDashboard />
             </ProtectedRoute>

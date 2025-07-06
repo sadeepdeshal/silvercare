@@ -316,12 +316,14 @@ const createElderRegistration = async (req, res) => {
 
 
 // CREATE a health professional registration
+// CREATE a health professional registration
 const createHealthProfessionalRegistration = async (req, res) => {
   const { 
     name, 
     email, 
     phone, 
     alternativeNumber, 
+    district, // Add district field
     areaOfSpecification, 
     licenseRegistrationNumber, 
     yearOfExperience, 
@@ -332,8 +334,8 @@ const createHealthProfessionalRegistration = async (req, res) => {
   } = req.body;
   
   try {
-    // Validate required fields
-    if (!name || !email || !phone || !areaOfSpecification || !licenseRegistrationNumber || !yearOfExperience || !currentInstitutions || !password) {
+    // Validate required fields - include district
+    if (!name || !email || !phone || !district || !areaOfSpecification || !licenseRegistrationNumber || !yearOfExperience || !currentInstitutions || !password) {
       return res.status(400).json({ error: 'All required fields must be filled' });
     }
 
@@ -358,6 +360,19 @@ const createHealthProfessionalRegistration = async (req, res) => {
     const licenseRegex = /^PSY-\d{5}-SL$/;
     if (!licenseRegex.test(licenseRegistrationNumber)) {
       return res.status(400).json({ error: 'License/Registration must be in format PSY-12345-SL' });
+    }
+
+    // Validate district (ensure it's one of the valid Sri Lankan districts)
+    const validDistricts = [
+      'Colombo', 'Gampaha', 'Kalutara', 'Kandy', 'Matale', 'Nuwara Eliya',
+      'Galle', 'Matara', 'Hambantota', 'Jaffna', 'Kilinochchi', 'Mannar',
+      'Mullaitivu', 'Vavuniya', 'Puttalam', 'Kurunegala', 'Anuradhapura',
+      'Polonnaruwa', 'Badulla', 'Moneragala', 'Ratnapura', 'Kegalle',
+      'Ampara', 'Batticaloa', 'Trincomalee'
+    ];
+    
+    if (!validDistricts.includes(district)) {
+      return res.status(400).json({ error: 'Please select a valid district' });
     }
 
     // Validate password strength on server side
@@ -406,10 +421,10 @@ const createHealthProfessionalRegistration = async (req, res) => {
       
       const userId = userResult.rows[0].user_id;
       
-      // Insert into counselor table
+      // Insert into counselor table - include district
       const counselorResult = await client.query(
-        'INSERT INTO counselor (user_id, specialization, license_number, alternative_number, years_of_experience, current_institution, proof, status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING counselor_id, user_id, specialization, license_number, alternative_number, years_of_experience, current_institution, proof, status',
-        [userId, areaOfSpecification, licenseRegistrationNumber, alternativeNumber || null, parseInt(yearOfExperience), currentInstitutions, professionalCredentials || null, 'pending']
+        'INSERT INTO counselor (user_id, specialization, license_number, alternative_number, years_of_experience, current_institution, proof, district, status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING counselor_id, user_id, specialization, license_number, alternative_number, years_of_experience, current_institution, proof, district, status',
+        [userId, areaOfSpecification, licenseRegistrationNumber, alternativeNumber || null, parseInt(yearOfExperience), currentInstitutions, professionalCredentials || null, district, 'pending']
       );
       
       await client.query('COMMIT');
@@ -428,12 +443,13 @@ const createHealthProfessionalRegistration = async (req, res) => {
         years_of_experience: counselorResult.rows[0].years_of_experience,
         current_institution: counselorResult.rows[0].current_institution,
         proof: counselorResult.rows[0].proof,
+        district: counselorResult.rows[0].district, // Include district in response
         status: counselorResult.rows[0].status,
         created_at: userResult.rows[0].created_at
       };
       
       res.status(201).json({
-        message: 'Health professional registered successfully. Your registration is pending approval.',
+                message: 'Health professional registered successfully. Your registration is pending approval.',
         user: responseData
       });
       
@@ -460,6 +476,8 @@ const createHealthProfessionalRegistration = async (req, res) => {
     res.status(500).json({ error: 'Error creating health professional registration. Please try again.' });
   }
 };
+
+
 
 // CREATE a doctor registration
 // CREATE a doctor registration
