@@ -219,3 +219,30 @@ export const updateElderDetails = (elderId, elderData) => {
 };
 
 
+// New appointment-related functions
+export const getUpcomingAppointments = (elderId) => {
+  return axios.get(`${API_BASE}/${elderId}/appointments/upcoming`);
+};
+
+export const getPastAppointments = (elderId) => {
+  return axios.get(`${API_BASE}/${elderId}/appointments/past`);
+};
+
+export const getAllAppointments = (elderId) => {
+  return axios.get(`${API_BASE}/${elderId}/appointments`);
+};
+
+export const getAppointmentById = (elderId, appointmentId) => {
+  return axios.get(`${API_BASE}/${elderId}/appointments/${appointmentId}`);
+};
+
+export const cancelAppointment = (elderId, appointmentId) => {
+  return axios.put(`${API_BASE}/${elderId}/appointments/${appointmentId}/cancel`);
+};
+
+export const rescheduleAppointment = (elderId, appointmentId, newDateTime) => {
+  return axios.put(`${API_BASE}/${elderId}/appointments/${appointmentId}/reschedule`, {
+    newDateTime
+  });
+};
+
