@@ -17,7 +17,8 @@ export const DoctorReg = () => {
     name: '',
     email: '',
     phone: '',
-    alternativeNumber: ''
+    alternativeNumber: '',
+    district: ''
   });
 
   // Add error states
@@ -228,6 +229,47 @@ export const DoctorReg = () => {
                     />
                   </div>
                   {errors.alternativeNumber && <span className={styles.errorMessage}>{errors.alternativeNumber}</span>}
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label className={styles.formLabel}>District</label>
+                  <div className={styles.inputContainer}>
+                    <img className={styles.inputIcon} alt="District icon" src={group41} />
+                    <select
+                      name="district"
+                      value={formData.district}
+                      onChange={handleInputChange}
+                      className={styles.formInput}
+                      required
+                    >
+                      <option value="">Select District</option>
+                      <option value="Colombo">Colombo</option>
+                      <option value="Gampaha">Gampaha</option>
+                      <option value="Kalutara">Kalutara</option>
+                      <option value="Kandy">Kandy</option>
+                      <option value="Matale">Matale</option>
+                      <option value="Nuwara Eliya">Nuwara Eliya</option>
+                      <option value="Galle">Galle</option>
+                      <option value="Matara">Matara</option>
+                      <option value="Hambantota">Hambantota</option>
+                      <option value="Jaffna">Jaffna</option>
+                      <option value="Kilinochchi">Kilinochchi</option>
+                      <option value="Mannar">Mannar</option>
+                      <option value="Mullaitivu">Mullaitivu</option>
+                      <option value="Vavuniya">Vavuniya</option>
+                      <option value="Puttalam">Puttalam</option>
+                      <option value="Kurunegala">Kurunegala</option>
+                      <option value="Anuradhapura">Anuradhapura</option>
+                      <option value="Polonnaruwa">Polonnaruwa</option>
+                      <option value="Badulla">Badulla</option>
+                      <option value="Moneragala">Moneragala</option>
+                      <option value="Ratnapura">Ratnapura</option>
+                      <option value="Kegalle">Kegalle</option>
+                      <option value="Ampara">Ampara</option>
+                      <option value="Batticaloa">Batticaloa</option>
+                      <option value="Trincomalee">Trincomalee</option>
+                    </select>
+                  </div>
                 </div>
               </div>
 

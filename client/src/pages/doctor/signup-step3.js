@@ -157,6 +157,7 @@ export const DoctorRegStep3 = () => {
         email: step1Data.email,
         phone: step1Data.phone,
         alternativeNumber: step1Data.alternativeNumber,
+        district: step1Data.district, // Include district from step 1
         areaOfSpecification: step2Data.areaOfSpecification,
         medicalLicenseNumber: step2Data.medicalLicenseNumber,
         yearOfExperience: step2Data.yearOfExperience,
@@ -183,7 +184,7 @@ export const DoctorRegStep3 = () => {
     } catch (error) {
       console.error('Registration failed:', error);
       
-      // Handle different types of errors
+            // Handle different types of errors
       if (error.response) {
         // Server responded with error status
         const errorMessage = error.response.data?.error || 'Registration failed. Please try again.';
@@ -365,24 +366,24 @@ export const DoctorRegStep3 = () => {
               </div>
 
               <div className={styles.buttonContainer}>
-                  <button 
-    type="button" 
-    className={styles.backBtn}
-                                      style={{
-                                    backgroundColor: '#f8f9fa',
-                                    color: '#6c757d',
-                                    border: '1px solid #dee2e6',
-                                    padding: '12px 24px',
-                                    borderRadius: '8px',
-                                    cursor: 'pointer',
-                                    fontSize: '14px',
-                                    fontWeight: '500',
-                                    marginRight: '12px'
-                                  }}
-    onClick={() => navigate('/doctor/signup-step2')}
-  >
-    <span className={styles.buttonText}>Back to Step 1</span>
-  </button>
+                <button 
+                  type="button" 
+                  className={styles.backBtn}
+                  style={{
+                    backgroundColor: '#f8f9fa',
+                    color: '#6c757d',
+                    border: '1px solid #dee2e6',
+                    padding: '12px 24px',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    marginRight: '12px'
+                  }}
+                  onClick={() => navigate('/doctor/signup-step2')}
+                >
+                  <span className={styles.buttonText}>Back to Step 2</span>
+                </button>
                 <button 
                   type="submit" 
                   className={`${styles.registerBtnCentered} ${isSubmitting ? styles.loading : ''}`}
@@ -405,3 +406,4 @@ export const DoctorRegStep3 = () => {
     </div>
   );
 };
+

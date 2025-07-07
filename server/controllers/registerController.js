@@ -487,6 +487,7 @@ const createDoctorRegistration = async (req, res) => {
     email, 
     phone, 
     alternativeNumber, 
+    district, // Add district field
     areaOfSpecification,  // Changed from specialization
     medicalLicenseNumber, // Changed from licenseNumber
     yearOfExperience, 
@@ -497,8 +498,8 @@ const createDoctorRegistration = async (req, res) => {
   } = req.body;
   
   try {
-    // Validate required fields - use the correct field names
-    if (!name || !email || !phone || !areaOfSpecification || !medicalLicenseNumber || !yearOfExperience || !currentInstitutions || !password) {
+    // Validate required fields - use the correct field names and include district
+    if (!name || !email || !phone || !district || !areaOfSpecification || !medicalLicenseNumber || !yearOfExperience || !currentInstitutions || !password) {
       return res.status(400).json({ error: 'All required fields must be filled' });
     }
 
@@ -523,6 +524,19 @@ const createDoctorRegistration = async (req, res) => {
     const licenseRegex = /^SLMC\/\d{5}$/;
     if (!licenseRegex.test(medicalLicenseNumber)) {
       return res.status(400).json({ error: 'Medical license must be in format SLMC/12345' });
+    }
+
+    // Validate district (ensure it's one of the valid Sri Lankan districts)
+    const validDistricts = [
+      'Colombo', 'Gampaha', 'Kalutara', 'Kandy', 'Matale', 'Nuwara Eliya',
+      'Galle', 'Matara', 'Hambantota', 'Jaffna', 'Kilinochchi', 'Mannar',
+      'Mullaitivu', 'Vavuniya', 'Puttalam', 'Kurunegala', 'Anuradhapura',
+      'Polonnaruwa', 'Badulla', 'Moneragala', 'Ratnapura', 'Kegalle',
+      'Ampara', 'Batticaloa', 'Trincomalee'
+    ];
+    
+    if (!validDistricts.includes(district)) {
+      return res.status(400).json({ error: 'Please select a valid district' });
     }
 
     // Validate password strength on server side
@@ -571,10 +585,10 @@ const createDoctorRegistration = async (req, res) => {
       
       const userId = userResult.rows[0].user_id;
       
-      // Insert into doctor table - use the correct field mappings
+      // Insert into doctor table - use the correct field mappings and include district
       const doctorResult = await client.query(
-        'INSERT INTO doctor (user_id, specialization, license_number, alternative_number, current_institution, proof, years_experience, status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING doctor_id, user_id, specialization, license_number, alternative_number, current_institution, proof, years_experience, status',
-        [userId, areaOfSpecification, medicalLicenseNumber, alternativeNumber || null, currentInstitutions, medicalCredentials || null, parseInt(yearOfExperience), 'pending']
+        'INSERT INTO doctor (user_id, specialization, license_number, alternative_number, current_institution, proof, years_experience, district, status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING doctor_id, user_id, specialization, license_number, alternative_number, current_institution, proof, years_experience, district, status',
+        [userId, areaOfSpecification, medicalLicenseNumber, alternativeNumber || null, currentInstitutions, medicalCredentials || null, parseInt(yearOfExperience), district, 'pending']
       );
       
       await client.query('COMMIT');
@@ -593,6 +607,7 @@ const createDoctorRegistration = async (req, res) => {
         current_institution: doctorResult.rows[0].current_institution,
         proof: doctorResult.rows[0].proof,
         years_experience: doctorResult.rows[0].years_experience,
+        district: doctorResult.rows[0].district, // Include district in response
         status: doctorResult.rows[0].status,
         created_at: userResult.rows[0].created_at
       };
@@ -615,7 +630,7 @@ const createDoctorRegistration = async (req, res) => {
     // Handle specific database errors
     if (err.code === '23505') { // Unique constraint violation
       if (err.constraint === 'User_email_key' || err.constraint === 'users_email_key') {
-        return res.status(400).json({ error: 'Email address already registered' });
+                return res.status(400).json({ error: 'Email address already registered' });
       }
       if (err.constraint === 'doctor_license_number_key') {
         return res.status(400).json({ error: 'Medical license number already registered' });
