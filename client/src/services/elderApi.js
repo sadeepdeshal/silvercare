@@ -1,4 +1,7 @@
+import axios from 'axios';
 const API_BASE = 'http://localhost:5000/api/elders';
+
+
 
 export const elderApi = {
   // Get all elders for a family member
@@ -203,3 +206,16 @@ export const elderApi = {
     }
   }
 };
+
+
+export const getElderDetailsByEmail = (email) => {
+  return axios.get(`${API_BASE}/elderDetails`, {
+    params: { email }
+  });
+};
+
+export const updateElderDetails = (elderId, elderData) => {
+  return axios.put(`${API_BASE}/${elderId}`, elderData);
+};
+
+
