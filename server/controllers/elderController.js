@@ -1,4 +1,5 @@
 const pool = require('../db');
+const bcrypt = require('bcrypt');
 
 const getEldersByFamilyMember = async (req, res) => {
   const { familyMemberId } = req.params;
@@ -28,7 +29,7 @@ const getEldersByFamilyMember = async (req, res) => {
         elder_id,
         family_id,
         name,
-        email,                    -- ADD EMAIL HERE
+        email,
         dob,
         gender,
         contact,
@@ -36,8 +37,7 @@ const getEldersByFamilyMember = async (req, res) => {
         nic,
         medical_conditions,
         profile_photo,
-        created_at               -- ADD CREATED_AT HERE
-        
+        created_at
       FROM elder 
       WHERE family_id = $1 
       ORDER BY created_at DESC`,
@@ -60,7 +60,6 @@ const getEldersByFamilyMember = async (req, res) => {
     });
   }
 };
-
 
 const getElderCount = async (req, res) => {
   const { familyMemberId } = req.params;
@@ -112,7 +111,7 @@ const getElderById = async (req, res) => {
         elder_id,
         family_id,
         name as full_name,
-        email,                    -- ADD EMAIL HERE
+        email,
         dob as date_of_birth,
         gender,
         contact as contact_number,
@@ -120,8 +119,7 @@ const getElderById = async (req, res) => {
         nic as nic_passport,
         medical_conditions,
         profile_photo,
-        created_at              -- ADD CREATED_AT HERE
-        
+        created_at
       FROM elder
       WHERE elder_id = $1`,
       [elderId]
@@ -160,12 +158,28 @@ const updateElder = async (req, res) => {
     nic_passport,
     contact_number,
     medical_conditions,
-    address
+    address,
+    password,
+    confirm_password
   } = req.body;
   
   try {
+    console.log('Update elder request received:', {
+      elderId,
+      full_name,
+      email,
+      date_of_birth,
+      gender,
+      nic_passport,
+      contact_number,
+      address: address ? 'provided' : 'not provided',
+      medical_conditions: medical_conditions ? 'provided' : 'not provided',
+      password: password ? 'provided' : 'not provided'
+    });
+
     // Validate required fields
     if (!full_name || !date_of_birth || !gender || !nic_passport || !contact_number) {
+      console.log('Validation failed: Missing required fields');
       return res.status(400).json({
         success: false,
         error: 'All required fields must be filled'
@@ -176,6 +190,7 @@ const updateElder = async (req, res) => {
     if (email) {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email)) {
+        console.log('Validation failed: Invalid email format');
         return res.status(400).json({
           success: false,
           error: 'Please enter a valid email address'
@@ -186,6 +201,7 @@ const updateElder = async (req, res) => {
     // Validate contact number format
     const phoneRegex = /^[0-9]{10}$/;
     if (!phoneRegex.test(contact_number)) {
+      console.log('Validation failed: Invalid contact number format');
       return res.status(400).json({
         success: false,
         error: 'Contact number must be exactly 10 digits'
@@ -198,6 +214,7 @@ const updateElder = async (req, res) => {
     const age = today.getFullYear() - birthDate.getFullYear();
     
     if (birthDate >= today) {
+      console.log('Validation failed: Invalid birth date');
       return res.status(400).json({
         success: false,
         error: 'Date of birth must be in the past'
@@ -205,6 +222,7 @@ const updateElder = async (req, res) => {
     }
     
     if (age < 50) {
+      console.log('Validation failed: Age too young');
       return res.status(400).json({
         success: false,
         error: 'Elder must be at least 50 years old'
@@ -212,50 +230,82 @@ const updateElder = async (req, res) => {
     }
 
     // Check if elder exists
+    console.log('Checking if elder exists with ID:', elderId);
     const elderCheck = await pool.query('SELECT * FROM elder WHERE elder_id = $1', [elderId]);
     if (elderCheck.rows.length === 0) {
+      console.log('Elder not found with ID:', elderId);
       return res.status(404).json({
         success: false,
         error: 'Elder not found'
       });
     }
 
+    const currentElder = elderCheck.rows[0];
+    console.log('Current elder data:', {
+      elder_id: currentElder.elder_id,
+      name: currentElder.name,
+      email: currentElder.email,
+      contact: currentElder.contact
+    });
+
     // Check if email is already used by another elder (excluding current elder)
-    if (email) {
+    if (email && email !== currentElder.email) {
       const emailCheck = await pool.query(
         'SELECT * FROM elder WHERE email = $1 AND elder_id != $2',
         [email, elderId]
       );
       if (emailCheck.rows.length > 0) {
+        console.log('Email already in use by another elder');
         return res.status(400).json({
           success: false,
           error: 'Email address is already registered with another elder'
         });
       }
+
+      // Also check User table if email is provided
+      if (email) {
+        const userEmailCheck = await pool.query(
+          'SELECT * FROM "User" WHERE email = $1 AND email != $2',
+          [email, currentElder.email || '']
+        );
+        if (userEmailCheck.rows.length > 0) {
+          console.log('Email already in use in User table');
+          return res.status(400).json({
+            success: false,
+            error: 'Email address is already registered in the system'
+          });
+        }
+      }
     }
 
     // Check if contact is already used by another elder (excluding current elder)
-    const contactCheck = await pool.query(
-      'SELECT * FROM elder WHERE contact = $1 AND elder_id != $2',
-      [contact_number, elderId]
-    );
-    if (contactCheck.rows.length > 0) {
-      return res.status(400).json({
-        success: false,
-        error: 'Contact number is already registered with another elder'
-      });
+    if (contact_number !== currentElder.contact) {
+      const contactCheck = await pool.query(
+        'SELECT * FROM elder WHERE contact = $1 AND elder_id != $2',
+        [contact_number, elderId]
+      );
+      if (contactCheck.rows.length > 0) {
+        console.log('Contact already in use by another elder');
+        return res.status(400).json({
+          success: false,
+          error: 'Contact number is already registered with another elder'
+        });
+      }
     }
 
     // Check if NIC is already used by another elder (excluding current elder)
-    const nicCheck = await pool.query(
-      'SELECT * FROM elder WHERE nic = $1 AND elder_id != $2',
-      [nic_passport, elderId]
-    );
-    if (nicCheck.rows.length > 0) {
-      return res.status(400).json({
-        success: false,
-        error: 'NIC is already registered with another elder'
-      });
+    if (nic_passport !== currentElder.nic) {
+      const nicCheck = await pool.query(
+        'SELECT * FROM elder WHERE nic = $1 AND elder_id != $2',
+        [nic_passport, elderId]
+      );
+      if (nicCheck.rows.length > 0) {
+        console.log('NIC already in use by another elder');
+        return res.status(400).json({
+          success: false,
+          error: 'NIC is already registered with another elder'
+        });
+      }
     }
 
     // Validate and normalize gender for enum
@@ -270,50 +320,133 @@ const updateElder = async (req, res) => {
     
     const normalizedGender = validGenders[gender];
     if (!normalizedGender) {
+      console.log('Invalid gender value:', gender);
       return res.status(400).json({
         success: false,
         error: 'Invalid gender selection. Must be Male, Female, or Other'
       });
     }
 
-    const updateQuery = `
-      UPDATE elder 
-      SET name = $1, 
-          email = $2,
-          dob = $3, 
-          gender = $4::gender_type, 
-          nic = $5, 
-          contact = $6, 
-          medical_conditions = $7, 
-          address = $8,
-          updated_at = CURRENT_TIMESTAMP
-      WHERE elder_id = $9
-      RETURNING elder_id, name as full_name, email, dob as date_of_birth, gender, nic as nic_passport, contact as contact_number, medical_conditions, address, created_at, updated_at
-    `;
+    // Start transaction
+    const client = await pool.connect();
     
-    const result = await pool.query(updateQuery, [
-      full_name,
-      email || null,
-      date_of_birth,
-      normalizedGender,
-      nic_passport,
-      contact_number,
-      medical_conditions || null,
-      address || null,
-      elderId
-    ]);
-    
-    res.json({
-      success: true,
-      message: 'Elder details updated successfully',
-      elder: result.rows[0]
-    });
+    try {
+      await client.query('BEGIN');
+      console.log('Transaction started');
+
+      // Update elder table - REMOVED updated_at reference
+      const elderUpdateQuery = `
+        UPDATE elder 
+        SET name = $1, 
+            email = $2,
+            dob = $3, 
+            gender = $4::gender_type, 
+            nic = $5, 
+            contact = $6, 
+            medical_conditions = $7, 
+            address = $8
+        WHERE elder_id = $9
+        RETURNING elder_id, name as full_name, email, dob as date_of_birth, gender, nic as nic_passport, contact as contact_number, medical_conditions, address, created_at
+      `;
+      
+      console.log('Updating elder table with query:', elderUpdateQuery);
+      console.log('Parameters:', [
+        full_name,
+        email || null,
+        date_of_birth,
+        normalizedGender,
+        nic_passport,
+        contact_number,
+        medical_conditions || null,
+        address || null,
+        elderId
+      ]);
+
+      const elderResult = await client.query(elderUpdateQuery, [
+        full_name,
+        email || null,
+        date_of_birth,
+        normalizedGender,
+        nic_passport,
+        contact_number,
+        medical_conditions || null,
+        address || null,
+        elderId
+      ]);
+
+      console.log('Elder table updated successfully');
+
+      // Update User table if elder has an account
+      if (currentElder.email) {
+        console.log('Updating User table for elder with email:', currentElder.email);
+        
+        let userUpdateQuery = `
+          UPDATE "User" 
+          SET name = $1, 
+              phone = $2
+        `;
+        let userParams = [full_name, contact_number];
+        let paramIndex = 3;
+
+        // Only update email if it's provided and different
+        if (email && email !== currentElder.email) {
+          userUpdateQuery += `, email = $${paramIndex}`;
+          userParams.push(email);
+          paramIndex++;
+        }
+
+        // Only update password if provided
+        if (password && password.trim() !== '') {
+          console.log('Password update requested');
+          
+          // Validate password confirmation
+          if (password !== confirm_password) {
+            throw new Error('Passwords do not match');
+          }
+
+          // Hash the new password
+          const saltRounds = 12;
+          const hashedPassword = await bcrypt.hash(password, saltRounds);
+          
+          userUpdateQuery += `, password = $${paramIndex}`;
+          userParams.push(hashedPassword);
+          paramIndex++;
+        }
+
+        userUpdateQuery += ` WHERE email = $${paramIndex} AND role = 'elder' RETURNING user_id, name, email, phone`;
+        userParams.push(currentElder.email);
+
+        console.log('User update query:', userUpdateQuery);
+        console.log('User update params:', userParams.map((p, i) => i === userParams.length - 2 && password ? '[HASHED_PASSWORD]' : p));
+
+        const userResult = await client.query(userUpdateQuery, userParams);
+        console.log('User table updated, affected rows:', userResult.rowCount);
+      }
+
+      await client.query('COMMIT');
+      console.log('Transaction committed successfully');
+      
+      res.json({
+        success: true,
+        message: 'Elder details updated successfully',
+        elder: elderResult.rows[0]
+      });
+      
+    } catch (transactionErr) {
+      await client.query('ROLLBACK');
+      console.error('Transaction error:', transactionErr);
+      throw transactionErr;
+    } finally {
+      client.release();
+    }
     
   } catch (err) {
     console.error('Error updating elder:', err);
+    console.error('Error stack:', err.stack);
     
     // Handle specific database errors
     if (err.code === '23505') { // Unique constraint violation
+      console.log('Unique constraint violation:', err.constraint);
       if (err.constraint && err.constraint.includes('email')) {
         return res.status(400).json({
           success: false,
@@ -336,6 +469,7 @@ const updateElder = async (req, res) => {
     
     // Handle enum constraint violation
     if (err.code === '22P02' || err.message.includes('invalid input value for enum')) {
+      console.log('Enum constraint violation');
       return res.status(400).json({
         success: false,
         error: 'Invalid gender value. Please select Male, Female, or Other.'
@@ -344,6 +478,7 @@ const updateElder = async (req, res) => {
     
     // Handle foreign key constraint violation
     if (err.code === '23503') {
+      console.log('Foreign key constraint violation');
       return res.status(400).json({
         success: false,
         error: 'Invalid elder reference'
@@ -352,32 +487,43 @@ const updateElder = async (req, res) => {
     
     res.status(500).json({ 
       success: false,
-      error: 'Error updating elder data' 
+      error: 'Error updating elder data',
+      details: process.env.NODE_ENV === 'development' ? err.message : undefined
     });
   }
 };
-
 
 
 const createElder = async (req, res) => {
   const {
     family_id,
     name,
+    email,
     dob,
     gender,
     contact,
     address,
     nic,
     medical_conditions,
-    profile_photo
+    profile_photo,
+    password
   } = req.body;
   
   try {
     // Validate required fields
-    if (!family_id || !name || !dob || !gender || !contact || !nic) {
+    if (!family_id || !name || !email || !dob || !gender || !contact || !nic || !password) {
       return res.status(400).json({ 
         success: false,
         error: 'All required fields must be filled' 
+      });
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ 
+        success: false,
+        error: 'Please enter a valid email address' 
       });
     }
 
@@ -409,6 +555,14 @@ const createElder = async (req, res) => {
       });
     }
 
+    // Validate password
+    if (password.length < 6) {
+      return res.status(400).json({ 
+        success: false,
+        error: 'Password must be at least 6 characters long' 
+      });
+    }
+
     // Check if contact already exists
     const existingContact = await pool.query(
       'SELECT * FROM elder WHERE contact = $1',
@@ -435,36 +589,76 @@ const createElder = async (req, res) => {
       });
     }
 
+    // Check if email already exists in User table
+    const existingEmail = await pool.query(
+      'SELECT * FROM "User" WHERE email = $1',
+      [email]
+    );
+    
+    if (existingEmail.rows.length > 0) {
+      return res.status(400).json({ 
+        success: false,
+        error: 'Email address already registered' 
+      });
+    }
+
     // Normalize gender for enum
     let normalizedGender = gender;
     if (gender === 'Male') normalizedGender = 'male';
     if (gender === 'Female') normalizedGender = 'female';
     if (gender === 'Other') normalizedGender = 'other';
 
-    // Insert new elder
-    const result = await pool.query(
-      `INSERT INTO elder (
-        family_id, name, dob, gender, contact, address, nic, medical_conditions, profile_photo
-      ) VALUES ($1, $2, $3, $4::gender_type, $5, $6, $7, $8, $9) 
-      RETURNING elder_id, family_id, name, dob, gender, contact, address, nic, medical_conditions, profile_photo`,
-      [
-        family_id,
-        name,
-        dob,
-        normalizedGender,
-        contact,
-        address || null,
-        nic,
-        medical_conditions || null,
-        profile_photo || null
-      ]
-    );
+    // Hash password
+    const saltRounds = 12;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+    // Start transaction to create in both tables
+    const client = await pool.connect();
     
-    res.status(201).json({
-      success: true,
-      message: 'Elder registered successfully',
-      elder: result.rows[0]
-    });
+    try {
+      await client.query('BEGIN');
+      
+      // Insert into User table first
+      const userResult = await client.query(
+        'INSERT INTO "User" (name, email, password, phone, role, created_at) VALUES ($1, $2, $3, $4, $5, CURRENT_TIMESTAMP) RETURNING user_id, name, email, phone, role, created_at',
+        [name, email, hashedPassword, contact, 'elder']
+      );
+      
+      // Insert into elder table
+      const elderResult = await client.query(
+        `INSERT INTO elder (
+          family_id, name, email, dob, gender, contact, address, nic, medical_conditions, profile_photo, created_at
+        ) VALUES ($1, $2, $3, $4, $5::gender_type, $6, $7, $8, $9, $10, CURRENT_TIMESTAMP) 
+        RETURNING elder_id, family_id, name, email, dob, gender, contact, address, nic, medical_conditions, profile_photo, created_at`,
+        [
+          family_id,
+          name,
+          email,
+          dob,
+          normalizedGender,
+          contact,
+          address || null,
+          nic,
+          medical_conditions || null,
+          profile_photo || null
+        ]
+      );
+      
+      await client.query('COMMIT');
+      
+      res.status(201).json({
+        success: true,
+        message: 'Elder registered successfully',
+        elder: elderResult.rows[0],
+        user: userResult.rows[0]
+      });
+      
+    } catch (transactionErr) {
+      await client.query('ROLLBACK');
+      throw transactionErr;
+    } finally {
+      client.release();
+    }
     
   } catch (err) {
     console.error('Error creating elder:', err);
@@ -481,6 +675,12 @@ const createElder = async (req, res) => {
         return res.status(400).json({ 
           success: false,
           error: 'NIC already registered' 
+        });
+      }
+      if (err.constraint && err.constraint.includes('email')) {
+        return res.status(400).json({ 
+          success: false,
+          error: 'Email address already registered' 
         });
       }
     }
@@ -504,8 +704,8 @@ const deleteElder = async (req, res) => {
   const { elderId } = req.params;
   
   try {
-    // Check if elder exists
-    const elderCheck = await pool.query('SELECT * FROM elder WHERE elder_id = $1', [elderId]);
+    // Check if elder exists and get email
+    const elderCheck = await pool.query('SELECT email FROM elder WHERE elder_id = $1', [elderId]);
     if (elderCheck.rows.length === 0) {
       return res.status(404).json({
         success: false,
@@ -513,13 +713,33 @@ const deleteElder = async (req, res) => {
       });
     }
 
-    // Delete the elder
-    await pool.query('DELETE FROM elder WHERE elder_id = $1', [elderId]);
+    const elderEmail = elderCheck.rows[0].email;
+
+    // Start transaction to delete from both tables
+    const client = await pool.connect();
     
-    res.json({
-      success: true,
-      message: 'Elder deleted successfully'
-    });
+    try {
+      await client.query('BEGIN');
+      
+      // Delete from elder table
+      await client.query('DELETE FROM elder WHERE elder_id = $1', [elderId]);
+      
+      // Delete from User table if exists
+      await client.query('DELETE FROM "User" WHERE email = $1 AND role = $2', [elderEmail, 'elder']);
+      
+      await client.query('COMMIT');
+      
+      res.json({
+        success: true,
+        message: 'Elder deleted successfully'
+      });
+      
+    } catch (transactionErr) {
+      await client.query('ROLLBACK');
+      throw transactionErr;
+    } finally {
+      client.release();
+    }
     
   } catch (err) {
     console.error('Error deleting elder:', err);
@@ -570,7 +790,7 @@ const getElderStats = async (req, res) => {
           WHEN EXTRACT(YEAR FROM AGE(dob)) > 80 THEN '80+'
           ELSE 'Unknown'
         END as age_group,
-                COUNT(*) as count
+        COUNT(*) as count
       FROM elder 
       WHERE family_id = $1 
       GROUP BY age_group`,
@@ -645,6 +865,7 @@ const searchElders = async (req, res) => {
         elder_id,
         family_id,
         name,
+        email,
         dob,
         gender,
         contact,
@@ -704,6 +925,7 @@ const getEldersWithMedicalConditions = async (req, res) => {
       `SELECT 
         elder_id,
         name,
+        email,
         dob,
         gender,
         contact,
@@ -750,7 +972,7 @@ const updateElderPhoto = async (req, res) => {
     // Update profile photo
     const result = await pool.query(
       'UPDATE elder SET profile_photo = $1 WHERE elder_id = $2 RETURNING elder_id, name, profile_photo',
-      [profile_photo, elderId]
+            [profile_photo, elderId]
     );
     
     res.json({
@@ -834,17 +1056,31 @@ const bulkUpdateElders = async (req, res) => {
         const { elder_id, field, value } = update;
         
         // Validate allowed fields
-        const allowedFields = ['name', 'dob', 'gender', 'contact', 'address', 'nic', 'medical_conditions'];
+        const allowedFields = ['name', 'email', 'dob', 'gender', 'contact', 'address', 'nic', 'medical_conditions'];
         if (!allowedFields.includes(field)) {
           throw new Error(`Field '${field}' is not allowed for bulk update`);
         }
         
-        // Build dynamic query
-        const query = `UPDATE elder SET ${field} = $1 WHERE elder_id = $2 RETURNING elder_id, ${field}`;
-        const result = await client.query(query, [value, elder_id]);
+        // Build dynamic query for elder table
+        const elderQuery = `UPDATE elder SET ${field} = $1 WHERE elder_id = $2 RETURNING elder_id, ${field}`;
+        const elderResult = await client.query(elderQuery, [value, elder_id]);
         
-        if (result.rows.length > 0) {
-          results.push(result.rows[0]);
+        // If updating name, email, or contact, also update User table
+        if (['name', 'email', 'contact'].includes(field) && elderResult.rows.length > 0) {
+          const elderEmail = await client.query('SELECT email FROM elder WHERE elder_id = $1', [elder_id]);
+          if (elderEmail.rows.length > 0) {
+            const currentEmail = elderEmail.rows[0].email;
+            
+            let userField = field;
+            if (field === 'contact') userField = 'phone';
+            
+            const userQuery = `UPDATE "User" SET ${userField} = $1 WHERE email = $2 AND role = 'elder'`;
+            await client.query(userQuery, [value, currentEmail]);
+          }
+        }
+        
+        if (elderResult.rows.length > 0) {
+          results.push(elderResult.rows[0]);
         }
       }
       
@@ -886,4 +1122,5 @@ module.exports = {
   getElderEmergencyContacts,
   bulkUpdateElders
 };
+
 
