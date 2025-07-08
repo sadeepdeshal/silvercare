@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { elderApi } from '../../services/elderApi';
 import Navbar from '../../components/navbar';
 import styles from '../../components/css/familymember/dashboard.module.css';
+import FamilyMemberSidebar from '../../components/familymember_sidebar';
 
 const FamilyMemberDashboard = () => {
   const { currentUser, logout, loading, isAuthenticated } = useAuth();
@@ -109,6 +110,7 @@ useEffect(() => {
   return (
     <div className={styles.dashboardContainer}>
       <Navbar />
+      <FamilyMemberSidebar />
 
       {/* Header Section */}
       <div className={styles.headerSection}>
