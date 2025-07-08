@@ -80,7 +80,8 @@ const createElderRegistration = async (req, res) => {
       nicPassport, 
       contactNumber, 
       medicalConditions, 
-      address, 
+      address,
+      district, // Added district field
       password, 
       confirmPassword,
       familyMemberId, // This will be the user_id from the family member
@@ -96,12 +97,13 @@ const createElderRegistration = async (req, res) => {
         nicPassport,
         contactNumber,
         address,
+        district, // Added district to logging
         familyMemberId,
         role
       });
 
-      // Validate required fields
-      if (!fullName || !email || !dateOfBirth || !gender || !nicPassport || !contactNumber || !address || !password || !confirmPassword) {
+      // Validate required fields - Added district to validation
+      if (!fullName || !email || !dateOfBirth || !gender || !nicPassport || !contactNumber || !address || !district || !password || !confirmPassword) {
         return res.status(400).json({ error: 'All required fields must be filled' });
       }
 
@@ -138,6 +140,19 @@ const createElderRegistration = async (req, res) => {
       const phoneRegex = /^[0-9]{10}$/;
       if (!phoneRegex.test(contactNumber)) {
         return res.status(400).json({ error: 'Contact number must be exactly 10 digits' });
+      }
+
+      // Validate district (ensure it's one of the valid Sri Lankan districts)
+      const validDistricts = [
+        'Colombo', 'Gampaha', 'Kalutara', 'Kandy', 'Matale', 'Nuwara Eliya',
+        'Galle', 'Matara', 'Hambantota', 'Jaffna', 'Kilinochchi', 'Mannar',
+        'Mullaitivu', 'Vavuniya', 'Puttalam', 'Kurunegala', 'Anuradhapura',
+        'Polonnaruwa', 'Badulla', 'Moneragala', 'Ratnapura', 'Kegalle',
+        'Ampara', 'Batticaloa', 'Trincomalee'
+      ];
+      
+      if (!validDistricts.includes(district)) {
+        return res.status(400).json({ error: 'Please select a valid district' });
       }
 
       // Validate and normalize gender for enum
@@ -226,20 +241,21 @@ const createElderRegistration = async (req, res) => {
         const elderUserId = userResult.rows[0].user_id;
         console.log('Created user with ID:', elderUserId);
         
-        // Insert into elder table with family relationship - ADDED EMAIL HERE
+        // Insert into elder table with family relationship - ADDED DISTRICT
         const elderResult = await client.query(
           `INSERT INTO elder (
-            family_id, name, email, dob, gender, contact, address, nic, medical_conditions, profile_photo, created_at
-          ) VALUES ($1, $2, $3, $4, $5::gender_type, $6, $7, $8, $9, $10, CURRENT_TIMESTAMP) 
-          RETURNING elder_id, family_id, name, email, dob, gender, contact, address, nic, medical_conditions, profile_photo, created_at`,
+            family_id, name, email, dob, gender, contact, address, district, nic, medical_conditions, profile_photo, created_at
+          ) VALUES ($1, $2, $3, $4, $5::gender_type, $6, $7, $8, $9, $10, $11, CURRENT_TIMESTAMP) 
+          RETURNING elder_id, family_id, name, email, dob, gender, contact, address, district, nic, medical_conditions, profile_photo, created_at`,
           [
             familyId,
             fullName,
-            email,              // ADDED EMAIL PARAMETER
+            email,
             dateOfBirth,
-            normalizedGender,   // Use normalized gender
+            normalizedGender,
             contactNumber,
             address,
+            district, // Added district parameter
             nicPassport,
             medicalConditions || null,
             profilePhotoPath

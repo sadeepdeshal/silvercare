@@ -17,6 +17,7 @@ const ElderSignup = () => {
     contactNumber: '',
     medicalConditions: '',
     address: '',
+    district: '', // Added district field
     profilePhoto: null,
     password: '',
     confirmPassword: ''
@@ -105,6 +106,7 @@ const ElderSignup = () => {
     }
     
     if (!formData.address.trim()) newErrors.address = 'Address is required';
+    if (!formData.district) newErrors.district = 'District is required'; // Added district validation
     if (!formData.password) newErrors.password = 'Password is required';
     if (formData.password.length < 6) newErrors.password = 'Password must be at least 6 characters';
     if (!formData.confirmPassword) newErrors.confirmPassword = 'Please confirm your password';
@@ -141,6 +143,7 @@ const ElderSignup = () => {
       submitData.append('contactNumber', formData.contactNumber);
       submitData.append('medicalConditions', formData.medicalConditions);
       submitData.append('address', formData.address);
+      submitData.append('district', formData.district); // Added district to form data
       submitData.append('password', formData.password);
       submitData.append('confirmPassword', formData.confirmPassword);
       submitData.append('familyMemberId', familyMemberId);
@@ -335,6 +338,45 @@ const ElderSignup = () => {
                 {errors.address && <span className={styles.error}>{errors.address}</span>}
               </div>
 
+              {/* Added District Field */}
+              <div className={styles.inputGroup}>
+                <label className={styles.label}>District *</label>
+                <select
+                  name="district"
+                  value={formData.district}
+                  onChange={handleInputChange}
+                  className={`${styles.input} ${styles.select} ${errors.district ? styles.inputError : ''}`}
+                >
+                  <option value="">Select District</option>
+                  <option value="Colombo">Colombo</option>
+                  <option value="Gampaha">Gampaha</option>
+                  <option value="Kalutara">Kalutara</option>
+                  <option value="Kandy">Kandy</option>
+                  <option value="Matale">Matale</option>
+                  <option value="Nuwara Eliya">Nuwara Eliya</option>
+                  <option value="Galle">Galle</option>
+                  <option value="Matara">Matara</option>
+                  <option value="Hambantota">Hambantota</option>
+                  <option value="Jaffna">Jaffna</option>
+                  <option value="Kilinochchi">Kilinochchi</option>
+                  <option value="Mannar">Mannar</option>
+                  <option value="Mullaitivu">Mullaitivu</option>
+                  <option value="Vavuniya">Vavuniya</option>
+                  <option value="Puttalam">Puttalam</option>
+                  <option value="Kurunegala">Kurunegala</option>
+                  <option value="Anuradhapura">Anuradhapura</option>
+                  <option value="Polonnaruwa">Polonnaruwa</option>
+                  <option value="Badulla">Badulla</option>
+                  <option value="Moneragala">Moneragala</option>
+                  <option value="Ratnapura">Ratnapura</option>
+                  <option value="Kegalle">Kegalle</option>
+                  <option value="Ampara">Ampara</option>
+                  <option value="Batticaloa">Batticaloa</option>
+                  <option value="Trincomalee">Trincomalee</option>
+                                  </select>
+                {errors.district && <span className={styles.error}>{errors.district}</span>}
+              </div>
+
               <div className={styles.inputGroup}>
                 <label className={styles.label}>Medical Conditions</label>
                 <textarea
@@ -342,33 +384,33 @@ const ElderSignup = () => {
                   value={formData.medicalConditions}
                   onChange={handleInputChange}
                   className={`${styles.input} ${styles.textarea}`}
-                  placeholder="List any medical conditions or medications (optional)"
+                  placeholder="Enter any medical conditions or leave blank if none"
                   rows="3"
                 />
               </div>
             </div>
 
-            {/* Security Information */}
+            {/* Account Security */}
             <div className={styles.section}>
-              <h3 className={styles.sectionTitle}>Security Information</h3>
+              <h3 className={styles.sectionTitle}>Account Security</h3>
               
               <div className={styles.inputGroup}>
                 <label className={styles.label}>Password *</label>
-                <div className={styles.passwordWrapper}>
+                <div className={styles.passwordContainer}>
                   <input
                     type={showPassword ? "text" : "password"}
                     name="password"
                     value={formData.password}
                     onChange={handleInputChange}
-                    className={`${styles.input} ${styles.passwordInput} ${errors.password ? styles.inputError : ''}`}
-                    placeholder="Enter password (min. 6 characters)"
+                    className={`${styles.input} ${errors.password ? styles.inputError : ''}`}
+                    placeholder="Enter password (minimum 6 characters)"
                   />
                   <button
                     type="button"
                     className={styles.passwordToggle}
                     onClick={() => setShowPassword(!showPassword)}
                   >
-                    {showPassword ? '👁️' : '👁️‍🗨️'}
+                    {showPassword ? "Hide" : "Show"}
                   </button>
                 </div>
                 {errors.password && <span className={styles.error}>{errors.password}</span>}
@@ -376,13 +418,13 @@ const ElderSignup = () => {
 
               <div className={styles.inputGroup}>
                 <label className={styles.label}>Confirm Password *</label>
-                <div className={styles.passwordWrapper}>
+                <div className={styles.passwordContainer}>
                   <input
                     type={showConfirmPassword ? "text" : "password"}
                     name="confirmPassword"
                     value={formData.confirmPassword}
                     onChange={handleInputChange}
-                    className={`${styles.input} ${styles.passwordInput} ${errors.confirmPassword ? styles.inputError : ''}`}
+                    className={`${styles.input} ${errors.confirmPassword ? styles.inputError : ''}`}
                     placeholder="Confirm your password"
                   />
                   <button
@@ -390,32 +432,20 @@ const ElderSignup = () => {
                     className={styles.passwordToggle}
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   >
-                                        {showConfirmPassword ? '👁️' : '👁️‍🗨️'}
+                    {showConfirmPassword ? "Hide" : "Show"}
                   </button>
                 </div>
                 {errors.confirmPassword && <span className={styles.error}>{errors.confirmPassword}</span>}
               </div>
             </div>
 
-            {/* Submit Button */}
-            <div className={styles.buttonSection}>
-              <button
-                type="button"
-                onClick={() => navigate('/family-member/dashboard')}
-                className={styles.cancelButton}
-                disabled={isSubmitting}
-              >
-                Cancel
-              </button>
-              
-              <button
-                type="submit"
-                className={`${styles.submitButton} ${isSubmitting ? styles.loading : ''}`}
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? 'Registering...' : 'Register Elder'}
-              </button>
-            </div>
+            <button
+              type="submit"
+              className={`${styles.submitButton} ${isSubmitting ? styles.submitting : ''}`}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Registering...' : 'Register Elder'}
+            </button>
           </form>
         </div>
       </div>
