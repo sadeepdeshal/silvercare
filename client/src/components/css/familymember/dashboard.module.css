@@ -1,8 +1,9 @@
 
 .dashboardContainer {
   min-height: 100vh;
-  background: #EDEDFC;
+  
   padding-bottom: 40px;
+  margin-left: 120px;
 }
 
 /* Loading States */
