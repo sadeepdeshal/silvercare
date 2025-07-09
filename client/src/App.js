@@ -7,6 +7,7 @@ import ElderSignup from './pages/familemember/elder-signup';
 import FamilyMemberDashboard from './pages/familemember/dashboard';
 import FamilyMemberElders from './pages/familemember/elders'; // Add this import
 import ElderDetails from './pages/familemember/elder-details';
+import CaregiverDetails from './pages/familemember/caregiver-details';
 
 import { CaregiverReg } from './pages/caregiver/signup';
 import { CaregiverRegStep2 } from './pages/caregiver/signup-step2';
@@ -116,6 +117,12 @@ function App() {
               <ElderDashboard />
             </ProtectedRoute>
           } />
+
+          <Route path="/family-member/caregivers" element={
+  <ProtectedRoute allowedRoles={['family_member']}>
+    <CaregiverDetails />
+  </ProtectedRoute>
+} />
           
           {/* Other Protected Routes */}
           <Route path="/users" element={
