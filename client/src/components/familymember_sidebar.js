@@ -67,7 +67,7 @@ const FamilyMemberSidebar = ({ onItemClick }) => {
         navigate('/family-member/caregiver-chat');
         break;
       case 'find-caregivers':
-        navigate('/family-member/find-caregivers');
+        navigate('/family-member/caregivers');
         break;
       case 'assigned-caregivers':
         navigate('/family-member/assigned-caregivers');
@@ -158,8 +158,8 @@ const FamilyMemberSidebar = ({ onItemClick }) => {
       icon: '🧑‍💼',
       hasSubmenu: true,
       submenu: [
-        { key: 'find-caregivers', label: 'Find Caregivers', path: '/family-member/find-caregivers' },
-        { key: 'assigned-caregivers', label: 'Assigned Caregivers', path: '/family-member/assigned-caregivers' },
+        { key: 'find-caregivers', label: 'Find Caregivers', path: '/family-member/caregivers' },
+        { key: 'assigned-caregivers', label: 'Assigned Caregivers', path: 'assigned-caregivers' },
         { key: 'care-reports', label: 'Care Reports', path: '/family-member/care-reports' }
       ]
     },
@@ -202,8 +202,8 @@ const FamilyMemberSidebar = ({ onItemClick }) => {
       {/* Sidebar Header */}
       <div className={styles.sidebarHeader}>
         <div className={styles.logo}>
-          <span className={styles.logoIcon}>🩺</span>
-          {!sidebarCollapsed && <span className={styles.logoText}>SilverCare</span>}
+          
+          {!sidebarCollapsed && <span className={styles.logoText}></span>}
         </div>
         <button 
           className={styles.toggleButton}
