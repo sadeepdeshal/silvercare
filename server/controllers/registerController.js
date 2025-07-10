@@ -80,8 +80,7 @@ const createElderRegistration = async (req, res) => {
       nicPassport, 
       contactNumber, 
       medicalConditions, 
-      address,
-      district, // Added district field
+      address, 
       password, 
       confirmPassword,
       familyMemberId, // This will be the user_id from the family member
@@ -97,13 +96,12 @@ const createElderRegistration = async (req, res) => {
         nicPassport,
         contactNumber,
         address,
-        district, // Added district to logging
         familyMemberId,
         role
       });
 
-      // Validate required fields - Added district to validation
-      if (!fullName || !email || !dateOfBirth || !gender || !nicPassport || !contactNumber || !address || !district || !password || !confirmPassword) {
+      // Validate required fields
+      if (!fullName || !email || !dateOfBirth || !gender || !nicPassport || !contactNumber || !address || !password || !confirmPassword) {
         return res.status(400).json({ error: 'All required fields must be filled' });
       }
 
@@ -140,19 +138,6 @@ const createElderRegistration = async (req, res) => {
       const phoneRegex = /^[0-9]{10}$/;
       if (!phoneRegex.test(contactNumber)) {
         return res.status(400).json({ error: 'Contact number must be exactly 10 digits' });
-      }
-
-      // Validate district (ensure it's one of the valid Sri Lankan districts)
-      const validDistricts = [
-        'Colombo', 'Gampaha', 'Kalutara', 'Kandy', 'Matale', 'Nuwara Eliya',
-        'Galle', 'Matara', 'Hambantota', 'Jaffna', 'Kilinochchi', 'Mannar',
-        'Mullaitivu', 'Vavuniya', 'Puttalam', 'Kurunegala', 'Anuradhapura',
-        'Polonnaruwa', 'Badulla', 'Moneragala', 'Ratnapura', 'Kegalle',
-        'Ampara', 'Batticaloa', 'Trincomalee'
-      ];
-      
-      if (!validDistricts.includes(district)) {
-        return res.status(400).json({ error: 'Please select a valid district' });
       }
 
       // Validate and normalize gender for enum
@@ -241,21 +226,20 @@ const createElderRegistration = async (req, res) => {
         const elderUserId = userResult.rows[0].user_id;
         console.log('Created user with ID:', elderUserId);
         
-        // Insert into elder table with family relationship - ADDED DISTRICT
+        // Insert into elder table with family relationship - ADDED EMAIL HERE
         const elderResult = await client.query(
           `INSERT INTO elder (
-            family_id, name, email, dob, gender, contact, address, district, nic, medical_conditions, profile_photo, created_at
-          ) VALUES ($1, $2, $3, $4, $5::gender_type, $6, $7, $8, $9, $10, $11, CURRENT_TIMESTAMP) 
-          RETURNING elder_id, family_id, name, email, dob, gender, contact, address, district, nic, medical_conditions, profile_photo, created_at`,
+            family_id, name, email, dob, gender, contact, address, nic, medical_conditions, profile_photo, created_at
+          ) VALUES ($1, $2, $3, $4, $5::gender_type, $6, $7, $8, $9, $10, CURRENT_TIMESTAMP) 
+          RETURNING elder_id, family_id, name, email, dob, gender, contact, address, nic, medical_conditions, profile_photo, created_at`,
           [
             familyId,
             fullName,
-            email,
+            email,              // ADDED EMAIL PARAMETER
             dateOfBirth,
-            normalizedGender,
+            normalizedGender,   // Use normalized gender
             contactNumber,
             address,
-            district, // Added district parameter
             nicPassport,
             medicalConditions || null,
             profilePhotoPath
@@ -498,24 +482,30 @@ const createHealthProfessionalRegistration = async (req, res) => {
 // CREATE a doctor registration
 // CREATE a doctor registration
 const createDoctorRegistration = async (req, res) => {
+  // If file is uploaded, get its path
+  let medicalCredentialsPath = null;
+  if (req.file) {
+    medicalCredentialsPath = req.file.path;
+  }
+
+  // Use req.body for other fields (multer parses them)
   const { 
     name, 
     email, 
     phone, 
     alternativeNumber, 
-    district, // Add district field
-    areaOfSpecification,  // Changed from specialization
-    medicalLicenseNumber, // Changed from licenseNumber
-    yearOfExperience, 
-    currentInstitutions,  // Changed from currentInstitution
-    medicalCredentials,   // Changed from proof
+    district,
+    areaOfSpecification,
+    medicalLicenseNumber,
+    yearOfExperience,
+    currentInstitutions,
     password, 
     role = 'doctor' 
   } = req.body;
-  
+
   try {
-    // Validate required fields - use the correct field names and include district
-    if (!name || !email || !phone || !district || !areaOfSpecification || !medicalLicenseNumber || !yearOfExperience || !currentInstitutions || !password) {
+    // Validate required fields - use the correct field names
+    if (!name || !email || !phone || !areaOfSpecification || !medicalLicenseNumber || !yearOfExperience || !currentInstitutions || !password) {
       return res.status(400).json({ error: 'All required fields must be filled' });
     }
 
@@ -540,19 +530,6 @@ const createDoctorRegistration = async (req, res) => {
     const licenseRegex = /^SLMC\/\d{5}$/;
     if (!licenseRegex.test(medicalLicenseNumber)) {
       return res.status(400).json({ error: 'Medical license must be in format SLMC/12345' });
-    }
-
-    // Validate district (ensure it's one of the valid Sri Lankan districts)
-    const validDistricts = [
-      'Colombo', 'Gampaha', 'Kalutara', 'Kandy', 'Matale', 'Nuwara Eliya',
-      'Galle', 'Matara', 'Hambantota', 'Jaffna', 'Kilinochchi', 'Mannar',
-      'Mullaitivu', 'Vavuniya', 'Puttalam', 'Kurunegala', 'Anuradhapura',
-      'Polonnaruwa', 'Badulla', 'Moneragala', 'Ratnapura', 'Kegalle',
-      'Ampara', 'Batticaloa', 'Trincomalee'
-    ];
-    
-    if (!validDistricts.includes(district)) {
-      return res.status(400).json({ error: 'Please select a valid district' });
     }
 
     // Validate password strength on server side
@@ -601,10 +578,10 @@ const createDoctorRegistration = async (req, res) => {
       
       const userId = userResult.rows[0].user_id;
       
-      // Insert into doctor table - use the correct field mappings and include district
+      // Insert into doctor table - use the correct field mappings
       const doctorResult = await client.query(
         'INSERT INTO doctor (user_id, specialization, license_number, alternative_number, current_institution, proof, years_experience, district, status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING doctor_id, user_id, specialization, license_number, alternative_number, current_institution, proof, years_experience, district, status',
-        [userId, areaOfSpecification, medicalLicenseNumber, alternativeNumber || null, currentInstitutions, medicalCredentials || null, parseInt(yearOfExperience), district, 'pending']
+        [userId, areaOfSpecification, medicalLicenseNumber, alternativeNumber || null, currentInstitutions, medicalCredentialsPath, parseInt(yearOfExperience), district, 'pending']
       );
       
       await client.query('COMMIT');
@@ -623,7 +600,6 @@ const createDoctorRegistration = async (req, res) => {
         current_institution: doctorResult.rows[0].current_institution,
         proof: doctorResult.rows[0].proof,
         years_experience: doctorResult.rows[0].years_experience,
-        district: doctorResult.rows[0].district, // Include district in response
         status: doctorResult.rows[0].status,
         created_at: userResult.rows[0].created_at
       };
@@ -646,7 +622,7 @@ const createDoctorRegistration = async (req, res) => {
     // Handle specific database errors
     if (err.code === '23505') { // Unique constraint violation
       if (err.constraint === 'User_email_key' || err.constraint === 'users_email_key') {
-                return res.status(400).json({ error: 'Email address already registered' });
+        return res.status(400).json({ error: 'Email address already registered' });
       }
       if (err.constraint === 'doctor_license_number_key') {
         return res.status(400).json({ error: 'Medical license number already registered' });
