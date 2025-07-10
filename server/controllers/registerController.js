@@ -482,20 +482,27 @@ const createHealthProfessionalRegistration = async (req, res) => {
 // CREATE a doctor registration
 // CREATE a doctor registration
 const createDoctorRegistration = async (req, res) => {
+  // If file is uploaded, get its path
+  let medicalCredentialsPath = null;
+  if (req.file) {
+    medicalCredentialsPath = req.file.path;
+  }
+
+  // Use req.body for other fields (multer parses them)
   const { 
     name, 
     email, 
     phone, 
     alternativeNumber, 
-    areaOfSpecification,  // Changed from specialization
-    medicalLicenseNumber, // Changed from licenseNumber
-    yearOfExperience, 
-    currentInstitutions,  // Changed from currentInstitution
-    medicalCredentials,   // Changed from proof
+    district,
+    areaOfSpecification,
+    medicalLicenseNumber,
+    yearOfExperience,
+    currentInstitutions,
     password, 
     role = 'doctor' 
   } = req.body;
-  
+
   try {
     // Validate required fields - use the correct field names
     if (!name || !email || !phone || !areaOfSpecification || !medicalLicenseNumber || !yearOfExperience || !currentInstitutions || !password) {
@@ -573,8 +580,8 @@ const createDoctorRegistration = async (req, res) => {
       
       // Insert into doctor table - use the correct field mappings
       const doctorResult = await client.query(
-        'INSERT INTO doctor (user_id, specialization, license_number, alternative_number, current_institution, proof, years_experience, status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING doctor_id, user_id, specialization, license_number, alternative_number, current_institution, proof, years_experience, status',
-        [userId, areaOfSpecification, medicalLicenseNumber, alternativeNumber || null, currentInstitutions, medicalCredentials || null, parseInt(yearOfExperience), 'pending']
+        'INSERT INTO doctor (user_id, specialization, license_number, alternative_number, current_institution, proof, years_experience, district, status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING doctor_id, user_id, specialization, license_number, alternative_number, current_institution, proof, years_experience, district, status',
+        [userId, areaOfSpecification, medicalLicenseNumber, alternativeNumber || null, currentInstitutions, medicalCredentialsPath, parseInt(yearOfExperience), district, 'pending']
       );
       
       await client.query('COMMIT');
