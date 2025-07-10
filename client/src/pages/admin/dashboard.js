@@ -14,6 +14,7 @@ const AdminDashboard = () => {
     newBookings: 0,
     monthlySignups: 0,
     pendingDoctors: [],
+    pendingHealthProfessionals: [],
     recentRegistrations: [],
     stats: {
       family_members: 0,
@@ -27,6 +28,9 @@ const AdminDashboard = () => {
   
   const [dataLoading, setDataLoading] = useState(true);
   const [error, setError] = useState(null);
+  
+  // Add state for modal
+  const [showPendingDoctorsModal, setShowPendingDoctorsModal] = useState(false);
 
   // Protect the dashboard route
   useEffect(() => {
@@ -52,14 +56,21 @@ const AdminDashboard = () => {
         setDataLoading(true);
         setError(null);
         
+        console.log('Fetching dashboard data...');
         const response = await adminApi.getDashboardData();
+        console.log('Dashboard API response:', response);
         
+
+
         if (response.success) {
+
+
           // Ensure all required properties exist with default values
           const safeData = {
             newBookings: response.data.newBookings || 0,
             monthlySignups: response.data.monthlySignups || 0,
             pendingDoctors: response.data.pendingDoctors || [],
+            pendingHealthProfessionals: response.data.pendingHealthProfessionals || [],
             recentRegistrations: response.data.recentRegistrations || [],
             stats: {
               family_members: response.data.stats?.family_members || 0,
@@ -70,6 +81,10 @@ const AdminDashboard = () => {
               upcoming_appointments: response.data.stats?.upcoming_appointments || 0
             }
           };
+          
+
+          console.log('Safe data:', safeData);
+          console.log('Pending doctors count:', safeData.pendingDoctors.length);
           setDashboardData(safeData);
         } else {
           setError('Failed to load dashboard data');
@@ -90,6 +105,7 @@ const AdminDashboard = () => {
   // Handle professional approval
   const handleApproveProfessional = async (type, professionalId) => {
     try {
+      console.log(`Approving ${type} with ID:`, professionalId);
       const response = await adminApi.approveProfessional(type, professionalId);
       
       if (response.success) {
@@ -100,6 +116,7 @@ const AdminDashboard = () => {
             newBookings: updatedData.data.newBookings || 0,
             monthlySignups: updatedData.data.monthlySignups || 0,
             pendingDoctors: updatedData.data.pendingDoctors || [],
+            pendingHealthProfessionals: updatedData.data.pendingHealthProfessionals || [],
             recentRegistrations: updatedData.data.recentRegistrations || [],
             stats: {
               family_members: updatedData.data.stats?.family_members || 0,
@@ -125,6 +142,7 @@ const AdminDashboard = () => {
   // Handle professional rejection
   const handleRejectProfessional = async (type, professionalId) => {
     try {
+      console.log(`Rejecting ${type} with ID:`, professionalId);
       const response = await adminApi.rejectProfessional(type, professionalId);
       
       if (response.success) {
@@ -135,6 +153,7 @@ const AdminDashboard = () => {
             newBookings: updatedData.data.newBookings || 0,
             monthlySignups: updatedData.data.monthlySignups || 0,
             pendingDoctors: updatedData.data.pendingDoctors || [],
+            pendingHealthProfessionals: updatedData.data.pendingHealthProfessionals || [],
             recentRegistrations: updatedData.data.recentRegistrations || [],
             stats: {
               family_members: updatedData.data.stats?.family_members || 0,
@@ -174,6 +193,52 @@ const AdminDashboard = () => {
     navigate('/admin/settings');
   };
 
+  // Add this new function to fetch pending doctors separately
+  const fetchPendingDoctors = async () => {
+    try {
+      // You might need to create this API endpoint if it doesn't exist
+      const response = await adminApi.getPendingDoctors();
+      if (response.success) {
+        return response.data.pendingDoctors || response.data || [];
+      }
+      return [];
+    } catch (error) {
+      console.error('Error fetching pending doctors:', error);
+      return [];
+    }
+  };
+
+  // Modify the handlePendingDoctorsClick function
+  const handlePendingDoctorsClick = async () => {
+    console.log('Pending doctors clicked!');
+    setShowPendingDoctorsModal(true);
+    
+    // If we don't have pending doctors data, fetch it separately
+    if (pendingDoctors.length === 0 && stats.pending_doctors > 0) {
+      console.log('Fetching pending doctors separately...');
+      setDataLoading(true);
+      
+      try {
+        const pendingDoctorsData = await fetchPendingDoctors();
+        console.log('Fetched pending doctors:', pendingDoctorsData);
+        
+        // Update the dashboard data with the fetched pending doctors
+        setDashboardData(prev => ({
+          ...prev,
+          pendingDoctors: pendingDoctorsData
+        }));
+      } catch (error) {
+        console.error('Error fetching pending doctors:', error);
+      } finally {
+        setDataLoading(false);
+      }
+    }
+  };
+
+  const closePendingDoctorsModal = () => {
+    setShowPendingDoctorsModal(false);
+  };
+
   // Show loading while checking authentication
   if (loading) {
     return (
@@ -197,6 +262,7 @@ const AdminDashboard = () => {
 
   // Safe access to arrays with default empty arrays
   const pendingDoctors = dashboardData.pendingDoctors || [];
+  const pendingHealthProfessionals = dashboardData.pendingHealthProfessionals || [];
   const recentRegistrations = dashboardData.recentRegistrations || [];
   const stats = dashboardData.stats || {};
 
@@ -240,13 +306,17 @@ const AdminDashboard = () => {
               <p className={styles.statLabel}>Monthly Signups</p>
             </div>
           </div>
-          <div className={styles.statCard}>
+          {/* Make this stat card clickable */}
+          <div 
+            className={`${styles.statCard} ${styles.clickableCard}`} 
+            onClick={handlePendingDoctorsClick}
+          >
             <div className={styles.statIcon}>⏳</div>
             <div className={styles.statContent}>
               <h3 className={styles.statNumber}>
                 {dataLoading ? '...' : stats.pending_doctors}
               </h3>
-              <p className={styles.statLabel}>Pending Doctor Approvals</p>
+              <p className={styles.statLabel}>Pending Doctor Approvals (Click to view)</p>
             </div>
           </div>
           <div className={styles.statCard}>
@@ -267,6 +337,7 @@ const AdminDashboard = () => {
           <p>⚠️ {error}</p>
         </div>
       )}
+
 
       {/* Main Content Section - Quick Actions and Recent Activity Side by Side */}
       <div className={styles.mainContentSection}>
@@ -428,6 +499,80 @@ const AdminDashboard = () => {
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Pending Doctors Modal */}
+      {showPendingDoctorsModal && (
+        <div className={styles.modalOverlay} onClick={closePendingDoctorsModal}>
+          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <h2>⏳ Pending Doctor Approvals</h2>
+              <button className={styles.closeButton} onClick={closePendingDoctorsModal}>
+                ✕
+              </button>
+            </div>
+            
+            <div className={styles.modalBody}>
+              {dataLoading ? (
+                <div className={styles.modalLoading}>
+                  <div className={styles.loadingSpinner}></div>
+                  <p>Loading pending doctors...</p>
+                </div>
+              ) : pendingDoctors.length > 0 ? (
+                <div className={styles.modalDoctorsList}>
+                  {pendingDoctors.map((doctor, index) => (
+                    <div key={doctor.doctor_id || doctor.user_id || index} className={styles.modalDoctorCard}>
+                      <div className={styles.modalDoctorInfo}>
+                        <div className={styles.modalDoctorHeader}>
+                          <h3>{doctor.name || doctor.doctor_name || 'Unknown Name'}</h3>
+                          <span className={styles.modalDoctorBadge}>👨‍⚕️ Doctor</span>
+                        </div>
+                        <div className={styles.modalDoctorDetails}>
+                          <p><strong>📧 Email:</strong> {doctor.email || doctor.doctor_email || 'N/A'}</p>
+                          <p><strong>📞 Phone:</strong> {doctor.phone || doctor.doctor_phone || 'N/A'}</p>
+                          <p><strong>🏥 Specialization:</strong> {doctor.specialization || doctor.area_of_specification || 'N/A'}</p>
+                          <p><strong>📋 License:</strong> {doctor.license_number || doctor.medical_license_number || 'N/A'}</p>
+                          <p><strong>🎓 Experience:</strong> {doctor.years_experience || doctor.year_of_experience || 'N/A'} years</p>
+                          <p><strong>🏢 Institution:</strong> {doctor.current_institution || doctor.current_institutions || 'N/A'}</p>
+                          <p><strong>📅 Applied:</strong> {doctor.created_at ? new Date(doctor.created_at).toLocaleDateString() : 'N/A'}</p>
+                          <p><strong>📋 Status:</strong> {doctor.status || 'Pending'}</p>
+                        </div>
+                      </div>
+                      <div className={styles.modalDoctorActions}>
+                        <button 
+                          className={styles.modalApproveBtn}
+                          onClick={() => {
+                            handleApproveProfessional('doctor', doctor.doctor_id || doctor.user_id);
+                            closePendingDoctorsModal();
+                          }}
+                        >
+                          ✅ Approve
+                        </button>
+                        <button 
+                          className={styles.modalRejectBtn}
+                          onClick={() => {
+                            handleRejectProfessional('doctor', doctor.doctor_id || doctor.user_id);
+                            closePendingDoctorsModal();
+                          }}
+                        >
+                          ❌ Reject
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className={styles.modalEmptyState}>
+                  <div className={styles.emptyStateIcon}>📝</div>
+                  <h3>No Pending Doctors</h3>
+                  <p>All doctor applications have been processed.</p>
+                  <p><small>Debug: pendingDoctors.length = {pendingDoctors.length}</small></p>
+                  <p><small>Debug: stats.pending_doctors = {stats.pending_doctors}</small></p>
+                </div>
+              )}
             </div>
           </div>
         </div>

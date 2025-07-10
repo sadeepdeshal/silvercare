@@ -1,245 +1,188 @@
-const pool = require('../db');
+// Try to import pool the same way as your other files
+// Check your doctorController.js or other controllers to see the correct import
+const pool = require('../db'); // Update this based on your other controllers
 
 const getAdminDashboard = async (req, res) => {
-  console.log('Admin dashboard endpoint hit');
-  
   try {
-    // Fetch all dashboard data in parallel
-    const [
-      newBookingsResult,
-      monthlySignupsResult,
-      pendingDoctorsResult,
-      recentRegistrationsResult,
-      dashboardStatsResult
-    ] = await Promise.all([
-      // New bookings (last 7 days)
-      pool.query(`
-        SELECT COUNT(*) as count 
-        FROM appointment 
-        WHERE created_at >= NOW() - INTERVAL '7 days'
-      `).catch(() => ({ rows: [{ count: 0 }] })),
-      
-      // Monthly signups
-      pool.query(`
-        SELECT COUNT(*) as count 
-        FROM "User" 
-        WHERE created_at >= DATE_TRUNC('month', CURRENT_DATE)
-      `),
-      
-      // Pending doctors for approval
-      pool.query(`
-        SELECT d.*, u.name, u.email, u.phone 
-        FROM doctor d 
-        JOIN "User" u ON d.user_id = u.user_id 
-        WHERE d.status = 'pending' 
-        ORDER BY d.created_at DESC 
-        LIMIT 10
-      `).catch(() => ({ rows: [] })),
-      
-      // Recent registrations (simplified without CASE statement)
-      pool.query(`
-        SELECT u.user_id, u.name, u.email, u.role, u.created_at
-        FROM "User" u
-        WHERE u.role != 'admin'
-        ORDER BY u.created_at DESC 
-        LIMIT 15
-      `),
-      
-      // Dashboard statistics
-      pool.query(`
-        SELECT 
-          (SELECT COUNT(*) FROM "User" WHERE role = 'family_member') as family_members,
-          (SELECT COUNT(*) FROM "User" WHERE role = 'elder') as elders,
-          (SELECT COUNT(*) FROM "User" WHERE role = 'caregiver') as caregivers,
-          (SELECT COUNT(*) FROM doctor WHERE status = 'confirmed') as active_doctors,
-          (SELECT COUNT(*) FROM doctor WHERE status = 'pending') as pending_doctors,
-          0 as upcoming_appointments
-      `).catch(() => ({
-        rows: [{
-          family_members: 0,
-          elders: 0,
-          caregivers: 0,
-          active_doctors: 0,
-          pending_doctors: 0,
-          upcoming_appointments: 0
-        }]
-      }))
-    ]);
+    console.log('=== ADMIN DASHBOARD DEBUG START ===');
+    
+    // Get basic stats using the correct status values
+    const statsQuery = `
+      SELECT 
+        (SELECT COUNT(*) FROM "User" WHERE role = 'family_member') as family_members,
+        (SELECT COUNT(*) FROM "User" WHERE role = 'elder') as elders,
+        (SELECT COUNT(*) FROM "User" WHERE role = 'caregiver') as caregivers,
+        (SELECT COUNT(*) FROM doctor WHERE status = 'confirmed') as active_doctors,
+        (SELECT COUNT(*) FROM doctor WHERE status = 'pending') as pending_doctors,
+        (SELECT COUNT(*) FROM appointment WHERE date_time >= CURRENT_TIMESTAMP) as upcoming_appointments
+    `;
+    
+    const statsResult = await pool.query(statsQuery);
+    const stats = statsResult.rows[0];
+    console.log('Stats result:', stats);
 
-    // Add status information separately for recent registrations
-    const recentRegistrationsWithStatus = await Promise.all(
-      recentRegistrationsResult.rows.map(async (user) => {
-        let status = 'active';
-        
-        if (user.role === 'doctor') {
-          try {
-            const doctorStatus = await pool.query(
-              'SELECT status FROM doctor WHERE user_id = $1',
-              [user.user_id]
-            );
-            if (doctorStatus.rows.length > 0) {
-              status = doctorStatus.rows[0].status;
-            }
-          } catch (err) {
-            console.log('Error fetching doctor status:', err.message);
-          }
-        }
-        
-        return {
-          ...user,
-          status: status
-        };
-      })
-    );
+    // Get pending doctors with full details
+    const pendingDoctorsQuery = `
+      SELECT 
+        d.doctor_id,
+        d.user_id,
+        d.specialization,
+        d.license_number,
+        d.alternative_number,
+        d.current_institution,
+        d.years_experience,
+        d.status,
+        u.name,
+        u.email,
+        u.phone,
+        u.created_at
+      FROM doctor d
+      JOIN "User" u ON d.user_id = u.user_id
+      WHERE d.status = 'pending'
+      ORDER BY u.created_at DESC
+    `;
+    
+    const pendingResult = await pool.query(pendingDoctorsQuery);
+    console.log('Pending doctors found:', pendingResult.rows.length);
+    console.log('Pending doctors data:', pendingResult.rows);
+    
+    const pendingDoctors = pendingResult.rows;
 
-    const dashboardData = {
-      newBookings: parseInt(newBookingsResult.rows[0].count || 0),
-      monthlySignups: parseInt(monthlySignupsResult.rows[0].count || 0),
-      pendingDoctors: pendingDoctorsResult.rows || [],
-      recentRegistrations: recentRegistrationsWithStatus || [],
-      stats: dashboardStatsResult.rows[0] || {
-        family_members: 0,
-        elders: 0,
-        caregivers: 0,
-        active_doctors: 0,
-        pending_doctors: 0,
-        upcoming_appointments: 0
+    // Get recent registrations
+    const recentRegistrationsQuery = `
+      SELECT user_id, name, email, role, created_at
+      FROM "User"
+      WHERE created_at >= CURRENT_DATE - INTERVAL '7 days'
+      ORDER BY created_at DESC
+      LIMIT 10
+    `;
+    
+    const recentRegistrationsResult = await pool.query(recentRegistrationsQuery);
+    const recentRegistrations = recentRegistrationsResult.rows;
+
+    // Get new bookings (appointments in last 7 days)
+    const newBookingsQuery = `
+      SELECT COUNT(*) as count
+      FROM appointment
+      WHERE created_at >= CURRENT_DATE - INTERVAL '7 days'
+    `;
+    
+    let newBookings = 0;
+    try {
+      const newBookingsResult = await pool.query(newBookingsQuery);
+      newBookings = parseInt(newBookingsResult.rows[0]?.count || 0);
+    } catch (bookingError) {
+      console.log('Error getting new bookings:', bookingError.message);
+    }
+
+    // Get monthly signups
+    const monthlySignupsQuery = `
+      SELECT COUNT(*) as count
+      FROM "User"
+      WHERE created_at >= CURRENT_DATE - INTERVAL '30 days'
+    `;
+    
+    const monthlySignupsResult = await pool.query(monthlySignupsQuery);
+    const monthlySignups = parseInt(monthlySignupsResult.rows[0]?.count || 0);
+
+    const responseData = {
+      success: true,
+      data: {
+        stats: stats,
+        pendingDoctors: pendingDoctors,
+        pendingHealthProfessionals: [], // Add empty array for health professionals
+        recentRegistrations: recentRegistrations,
+        newBookings: newBookings,
+        monthlySignups: monthlySignups
       }
     };
 
-    console.log('Dashboard data prepared:', dashboardData);
+    console.log('Final response:');
+    console.log('- Pending doctors count:', pendingDoctors.length);
+    console.log('- Stats pending_doctors:', stats.pending_doctors);
+    console.log('=== ADMIN DASHBOARD DEBUG END ===');
 
-    res.json({
-      success: true,
-      data: dashboardData
-    });
+    res.json(responseData);
 
   } catch (error) {
     console.error('Error fetching admin dashboard data:', error);
     res.status(500).json({ 
       success: false, 
-      error: 'Error fetching dashboard data', 
+      error: 'Failed to fetch dashboard data',
       details: error.message 
     });
   }
 };
 
 const approveProfessional = async (req, res) => {
-  const { professionalId, type } = req.params;
-  console.log('Approving professional:', type, professionalId);
-  
   try {
-    let query;
-    if (type === 'doctor') {
-      query = 'UPDATE doctor SET status = $1 WHERE doctor_id = $2 RETURNING *';
-    } else {
-      return res.status(400).json({ success: false, error: 'Invalid professional type' });
-    }
-
-    const result = await pool.query(query, ['confirmed', professionalId]);
+    const { type, id } = req.params;
+    console.log(`Approving ${type} with ID: ${id}`);
     
-    if (result.rows.length === 0) {
-      return res.status(404).json({ success: false, error: 'Professional not found' });
+    if (type === 'doctor') {
+      // Use 'confirmed' as the approved status
+      const result = await pool.query(
+        'UPDATE doctor SET status = $1 WHERE doctor_id = $2 RETURNING *', 
+        ['confirmed', id]
+      );
+      
+      if (result.rows.length === 0) {
+        return res.status(404).json({ 
+          success: false, 
+          error: 'Doctor not found' 
+        });
+      }
+      
+      console.log('Doctor approved successfully:', result.rows[0]);
     }
-
-    res.json({
-      success: true,
-      message: `${type} approved successfully`,
-      data: result.rows[0]
+    
+    res.json({ 
+      success: true, 
+      message: `${type} approved successfully` 
     });
-
+    
   } catch (error) {
     console.error('Error approving professional:', error);
     res.status(500).json({ 
       success: false, 
-      error: 'Error approving professional', 
+      error: 'Failed to approve professional',
       details: error.message 
     });
   }
 };
 
 const rejectProfessional = async (req, res) => {
-  const { professionalId, type } = req.params;
-  console.log('Rejecting professional:', type, professionalId);
-  
   try {
-    let query;
-    if (type === 'doctor') {
-      query = 'UPDATE doctor SET status = $1 WHERE doctor_id = $2 RETURNING *';
-    } else {
-      return res.status(400).json({ success: false, error: 'Invalid professional type' });
-    }
-
-    const result = await pool.query(query, ['rejected', professionalId]);
+    const { type, id } = req.params;
+    console.log(`Rejecting ${type} with ID: ${id}`);
     
-    if (result.rows.length === 0) {
-      return res.status(404).json({ success: false, error: 'Professional not found' });
+    if (type === 'doctor') {
+      // Use 'rejected' as the rejected status
+      const result = await pool.query(
+        'UPDATE doctor SET status = $1 WHERE doctor_id = $2 RETURNING *', 
+        ['rejected', id]
+      );
+      
+      if (result.rows.length === 0) {
+        return res.status(404).json({ 
+          success: false, 
+          error: 'Doctor not found' 
+        });
+      }
+      
+      console.log('Doctor rejected successfully:', result.rows[0]);
     }
-
-    res.json({
-      success: true,
-      message: `${type} rejected successfully`,
-      data: result.rows[0]
+    
+    res.json({ 
+      success: true, 
+      message: `${type} rejected successfully` 
     });
-
+    
   } catch (error) {
     console.error('Error rejecting professional:', error);
     res.status(500).json({ 
       success: false, 
-      error: 'Error rejecting professional', 
-      details: error.message 
-    });
-  }
-};
-
-const getAllUsers = async (req, res) => {
-  console.log('Getting all users');
-  
-  try {
-    // Get users without the problematic CASE statement
-    const usersResult = await pool.query(`
-      SELECT u.user_id, u.name, u.email, u.role, u.created_at
-      FROM "User" u
-      WHERE u.role != 'admin'
-      ORDER BY u.created_at DESC
-    `);
-
-    // Add status information separately
-    const usersWithStatus = await Promise.all(
-      usersResult.rows.map(async (user) => {
-        let status = 'active';
-        
-        if (user.role === 'doctor') {
-          try {
-            const doctorStatus = await pool.query(
-              'SELECT status FROM doctor WHERE user_id = $1',
-              [user.user_id]
-            );
-            if (doctorStatus.rows.length > 0) {
-              status = doctorStatus.rows[0].status;
-            }
-          } catch (err) {
-            console.log('Error fetching doctor status:', err.message);
-          }
-        }
-        
-        return {
-          ...user,
-          status: status
-        };
-      })
-    );
-
-    res.json({
-      success: true,
-      data: usersWithStatus
-    });
-
-  } catch (error) {
-    console.error('Error fetching all users:', error);
-    res.status(500).json({ 
-      success: false, 
-      error: 'Error fetching users', 
+      error: 'Failed to reject professional',
       details: error.message 
     });
   }
@@ -248,6 +191,5 @@ const getAllUsers = async (req, res) => {
 module.exports = {
   getAdminDashboard,
   approveProfessional,
-  rejectProfessional,
-  getAllUsers
+  rejectProfessional
 };

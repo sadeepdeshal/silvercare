@@ -523,3 +523,254 @@
     font-size: 1rem;
   }
 }
+
+/* Clickable stat card */
+.clickableCard {
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.clickableCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  border-color: #007bff;
+}
+
+/* Modal styles */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.modalContent {
+  background: white;
+  border-radius: 12px;
+  max-width: 800px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 30px;
+  border-bottom: 1px solid #eee;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 12px 12px 0 0;
+}
+
+.modalHeader h2 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: white;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 50%;
+  width: 35px;
+  height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s ease;
+}
+
+.closeButton:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.modalBody {
+  padding: 30px;
+}
+
+.modalLoading {
+  text-align: center;
+  padding: 40px;
+}
+
+.modalDoctorsList {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.modalDoctorCard {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 20px;
+  background: #f9f9f9;
+  transition: all 0.3s ease;
+}
+
+.modalDoctorCard:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.modalDoctorInfo {
+  margin-bottom: 15px;
+}
+
+.modalDoctorHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.modalDoctorHeader h3 {
+  margin: 0;
+  color: #333;
+  font-size: 1.2rem;
+}
+
+.modalDoctorBadge {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.modalDoctorDetails {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.modalDoctorDetails p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.modalDoctorDetails strong {
+  color: #333;
+}
+
+.modalDoctorActions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.modalApproveBtn,
+.modalRejectBtn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+}
+
+.modalApproveBtn {
+  background: linear-gradient(135deg, #28a745, #20c997);
+  color: white;
+}
+
+.modalApproveBtn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+.modalRejectBtn {
+  background: linear-gradient(135deg, #dc3545, #fd7e14);
+  color: white;
+}
+
+.modalRejectBtn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+}
+
+.modalEmptyState {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+}
+
+.emptyStateIcon {
+  font-size: 3rem;
+  margin-bottom: 15px;
+}
+
+.modalEmptyState h3 {
+  margin: 0 0 10px 0;
+  color: #333;
+}
+
+.modalEmptyState p {
+  margin: 5px 0;
+}
+
+.modalEmptyState small {
+  color: #999;
+  font-size: 0.8rem;
+}
+
+/* Loading spinner */
+.loadingSpinner {
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #667eea;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 15px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .modalContent {
+    margin: 10px;
+    max-height: 95vh;
+  }
+  
+  .modalHeader {
+    padding: 15px 20px;
+  }
+  
+  .modalBody {
+    padding: 20px;
+  }
+  
+  .modalDoctorDetails {
+    grid-template-columns: 1fr;
+  }
+  
+  .modalDoctorActions {
+    flex-direction: column;
+  }
+  
+  .modalApproveBtn,
+  .modalRejectBtn {
+    width: 100%;
+  }
+}
