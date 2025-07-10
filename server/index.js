@@ -15,12 +15,18 @@ const registerRoutes = require('./routes/registerRoutes');
 const authRoutes = require('./routes/authRoutes'); // Add this line
 const elderRoutes = require('./routes/elderRoutes'); // Add this line
 const doctorRoutes = require('./routes/doctorRoutes'); // Indipa Added this line
+const adminRoutes = require('./routes/adminRoutes'); // Add this line by Nimal
+const caregiverRoutes = require('./routes/caregiverRoutes');
+
 
 app.use('/api/users', userRoutes); // Mount the full route
 app.use('/api/register', registerRoutes);
 app.use('/api/auth', authRoutes); // Add this line
 app.use('/api/elders', elderRoutes);
 app.use('/api/doctor', doctorRoutes); // Indipa Added this line
+app.use('/api/admin', adminRoutes); // Add this line by Nimal
+app.use('/api/caregivers', caregiverRoutes);
+
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

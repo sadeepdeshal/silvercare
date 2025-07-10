@@ -42,7 +42,7 @@ const loginUser = async (req, res) => {
           
         case 'doctor':
           const doctorResult = await pool.query(
-            'SELECT doctor_id, specialization, license_number, alternative_number, current_institution, proof, years_experience, status FROM doctor WHERE user_id = $1',
+            'SELECT doctor_id, specialization, license_number, alternative_number, current_institution, proof, years_experience, district, status FROM doctor WHERE user_id = $1',
             [user.user_id]
           );
           if (doctorResult.rows.length > 0) {
@@ -58,7 +58,7 @@ const loginUser = async (req, res) => {
           
         case 'healthprofessional':
           const counselorResult = await pool.query(
-            'SELECT counselor_id, specialization, license_number, alternative_number, years_of_experience, current_institution, proof, status FROM counselor WHERE user_id = $1',
+            'SELECT counselor_id, specialization, license_number, alternative_number, years_of_experience, current_institution, proof, district, status FROM counselor WHERE user_id = $1',
             [user.user_id]
           );
           if (counselorResult.rows.length > 0) {
@@ -71,40 +71,22 @@ const loginUser = async (req, res) => {
             }
           }
           break;
-      }
-    } else {
-      // Check in legacy tables for backward compatibility
-      // Check in elderreg table (elders)
-      const elderResult = await pool.query(
-        'SELECT id, full_name as name, email, password, role FROM elderreg WHERE email = $1',
-        [email]
-      );
-      
-      if (elderResult.rows.length > 0) {
-        user = elderResult.rows[0];
-        user.user_id = user.id; // Map id to user_id for consistency
-      } else {
-        // Check in register table (legacy family members/admin)
-        const registerResult = await pool.query(
-          'SELECT id, name, email, password, role FROM register WHERE email = $1',
-          [email]
-        );
-        
-        if (registerResult.rows.length > 0) {
-          user = registerResult.rows[0];
-          user.user_id = user.id; // Map id to user_id for consistency
-        } else {
-          // Check in registration table (legacy caregivers)
-          const registrationResult = await pool.query(
-            'SELECT id, name, email, password, role FROM registration WHERE email = $1',
+
+        case 'elder':
+          // Check in the elder table for elders registered through the new system
+          const elderResult = await pool.query(
+            'SELECT elder_id, family_id, name, email, dob, gender, contact, address, nic, medical_conditions, profile_photo FROM elder WHERE email = $1',
             [email]
           );
-          
-          if (registrationResult.rows.length > 0) {
-            user = registrationResult.rows[0];
-            user.user_id = user.id; // Map id to user_id for consistency
+          if (elderResult.rows.length > 0) {
+            roleSpecificData = elderResult.rows[0];
           }
-        }
+          break;
+
+        case 'admin':
+          // Admin users don't need additional role-specific data
+          roleSpecificData = {};
+          break;
       }
     }
     
