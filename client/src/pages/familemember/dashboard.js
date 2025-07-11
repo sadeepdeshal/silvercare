@@ -109,7 +109,7 @@ useEffect(() => {
 
   return (
     
-    <div className={styles.dashboardContainer}>
+    <div >
       
       <Navbar />
        <FamilyMemberLayout>
