@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { elderApi } from '../../services/elderApi';
+import { caregiverApi } from '../../services/caregiverApi';
 import Navbar from '../../components/navbar';
 import styles from '../../components/css/familymember/dashboard.module.css';
 import FamilyMemberLayout from '../../components/FamilyMemberLayout';
@@ -13,8 +14,10 @@ const FamilyMemberDashboard = () => {
   const [elders, setElders] = useState([]);
   const [appointments, setAppointments] = useState([]);
   const [appointmentCount, setAppointmentCount] = useState(0);
+  const [activeCaregiverCount, setActiveCaregiverCount] = useState(0);
   const [dataLoading, setDataLoading] = useState(true);
   const [appointmentsLoading, setAppointmentsLoading] = useState(true);
+  const [caregiversLoading, setCaregiversLoading] = useState(true);
   const [error, setError] = useState(null);
 
   // Protect the dashboard route
@@ -67,6 +70,30 @@ const FamilyMemberDashboard = () => {
       fetchEldersData();
     }
   }, [currentUser]);
+
+  // Fetch caregivers data
+  useEffect(() => {
+    const fetchCaregiversData = async () => {
+      try {
+        setCaregiversLoading(true);
+        
+        // Fetch active caregiver count
+        const countResponse = await caregiverApi.getActiveCaregiverCount();
+        
+        if (countResponse.success) {
+          setActiveCaregiverCount(countResponse.count);
+        }
+        
+      } catch (err) {
+        console.error('Error fetching caregivers data:', err);
+        // Don't set error for caregivers as it's not critical
+      } finally {
+        setCaregiversLoading(false);
+      }
+    };
+
+    fetchCaregiversData();
+  }, []);
 
   // Fetch appointments data
   useEffect(() => {
@@ -172,7 +199,7 @@ const FamilyMemberDashboard = () => {
       <div className={styles.loadingContainer}>
         <div className={styles.loadingSpinner}></div>
         <h2>Loading...</h2>
-        <p>Checking authentication...</p>
+                <p>Checking authentication...</p>
       </div>
     );
   }
@@ -196,7 +223,7 @@ const FamilyMemberDashboard = () => {
         <div className={styles.headerSection}>
           <div className={styles.welcomeCard}>
             <div className={styles.welcomeContent}>
-              <h1 className={styles.welcomeTitle}>Welcome, {currentUser.name}!</h1>
+              <h1 className={styles.welcomeTitle}>Welcome back, {currentUser.name}!</h1>
               <p className={styles.welcomeSubtitle}>Manage your elderly care services from your dashboard</p>
               <div className={styles.userInfo}>
                 <span className={styles.userEmail}>📧 {currentUser.email}</span>
@@ -229,13 +256,15 @@ const FamilyMemberDashboard = () => {
                 <h3 className={styles.statNumber}>
                   {appointmentsLoading ? '...' : appointmentCount}
                 </h3>
-                                <p className={styles.statLabel}>Upcoming Appointments</p>
+                <p className={styles.statLabel}>Upcoming Appointments</p>
               </div>
             </div>
             <div className={styles.statCard}>
               <div className={styles.statIcon}>🏥</div>
               <div className={styles.statContent}>
-                <h3 className={styles.statNumber}>5</h3>
+                <h3 className={styles.statNumber}>
+                  {caregiversLoading ? '...' : activeCaregiverCount}
+                </h3>
                 <p className={styles.statLabel}>Active Caregivers</p>
               </div>
             </div>
@@ -355,8 +384,13 @@ const FamilyMemberDashboard = () => {
           {elders.length > 0 && (
             <div className={styles.eldersSection}>
               <div className={styles.eldersSectionHeader}>
-                <h2 className={styles.sectionTitle}>My Elders</h2>
-
+                <h2 className={styles.sectionTitle}>Your Registered Elders</h2>
+                <p className={styles.eldersSubtitle}>
+                  {elders.length <= 2 
+                    ? "Click on any elder to view their detailed information" 
+                    : `Showing 2 of ${elderCount} registered elders. Click "View All Elders" to see more.`
+                  }
+                </p>
               </div>
               
               <div className={styles.eldersLinkContainer}>
@@ -521,7 +555,7 @@ const FamilyMemberDashboard = () => {
               )}
             </div>
             
-            {/* Show "View All Appointments" button if there are more than 2 appointments */}
+                        {/* Show "View All Appointments" button if there are more than 2 appointments */}
             {appointments.length > 2 && (
               <div className={styles.viewAllAppointments}>
                 <button 
@@ -541,4 +575,5 @@ const FamilyMemberDashboard = () => {
 };
 
 export default FamilyMemberDashboard;
+
 
