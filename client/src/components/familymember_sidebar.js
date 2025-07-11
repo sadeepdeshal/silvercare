@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import styles from './../components/css/familymember_sidebar.module.css';
 
 const FamilyMemberSidebar = ({ onItemClick }) => {
   const [expandedMenus, setExpandedMenus] = useState({});
   const [activeMenuItem, setActiveMenuItem] = useState('dashboard'); // Internal state
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false); // Internal state
+  const { currentUser } = useAuth(); // Get current user from AuthContext
   const navigate = useNavigate();
 
   const toggleSubmenu = (menuKey) => {
@@ -219,8 +221,9 @@ const FamilyMemberSidebar = ({ onItemClick }) => {
         <div className={styles.userInfo}>
           <div className={styles.userAvatar}>👨‍👩‍👧‍👦</div>
           <div className={styles.userDetails}>
-            <span className={styles.userName}>Family Member</span>
-            <span className={styles.userRole}>Guardian</span>
+            <span className={styles.userName}>
+              Hi {currentUser?.name || 'User'}!
+            </span>
           </div>
         </div>
       )}

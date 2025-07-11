@@ -4,8 +4,9 @@ import { useAuth } from '../../context/AuthContext';
 import { caregiverApi } from '../../services/caregiverApi';
 import { elderApi } from '../../services/elderApi';
 import Navbar from '../../components/navbar';
-import FamilyMemberSidebar from '../../components/familymember_sidebar';
+
 import styles from '../../components/css/familymember/caregiver-details.module.css';
+import FamilyMemberLayout from '../../components/FamilyMemberLayout';
 
 const CaregiverDetails = () => {
   const { currentUser, loading, isAuthenticated } = useAuth();
@@ -230,7 +231,7 @@ const CaregiverDetails = () => {
   return (
     <div className={styles.caregiverDetailsContainer}>
       <Navbar />
-      <FamilyMemberSidebar />
+     <FamilyMemberLayout>
       
       <div className={styles.mainContent}>
         {/* Header Section */}
@@ -577,10 +578,15 @@ const CaregiverDetails = () => {
                 </button>
               </div>
             </form>
+            
           </div>
+           
         </div>
+        
       )}
+      </FamilyMemberLayout>
     </div>
+    
   );
 };
 

@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { elderApi } from '../../services/elderApi';
 import Navbar from '../../components/navbar';
 import styles from '../../components/css/familymember/dashboard.module.css';
-import FamilyMemberSidebar from '../../components/familymember_sidebar';
+import FamilyMemberLayout from '../../components/FamilyMemberLayout';
 
 const FamilyMemberDashboard = () => {
   const { currentUser, logout, loading, isAuthenticated } = useAuth();
@@ -108,9 +108,12 @@ useEffect(() => {
   }
 
   return (
-    <div className={styles.dashboardContainer}>
+    
+    <div >
+      
       <Navbar />
-      <FamilyMemberSidebar />
+       <FamilyMemberLayout>
+     
 
       {/* Header Section */}
       <div className={styles.headerSection}>
@@ -322,8 +325,11 @@ useEffect(() => {
             ))}
           </div>
         </div>
+        
       )}
+      </FamilyMemberLayout>
     </div>
+    
   );
 };
 

@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { elderApi } from '../../services/elderApi';
 import Navbar from '../../components/navbar';
 import styles from '../../components/css/familymember/elders.module.css';
+import FamilyMemberLayout from '../../components/FamilyMemberLayout';
 
 const FamilyMemberElders = () => {
   const { currentUser, loading, isAuthenticated } = useAuth();
@@ -108,6 +109,7 @@ const FamilyMemberElders = () => {
   return (
     <div className={styles.container}>
       <Navbar />
+      <FamilyMemberLayout>
       
       <div className={styles.content}>
         {/* Header Section */}
@@ -313,6 +315,7 @@ const FamilyMemberElders = () => {
           </button>
         </div>
       </div>
+      </FamilyMemberLayout>
     </div>
   );
 };

@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { registerElder } from '../../services/registerApi';
 import styles from '../../components/css/familymember/elder-signup.module.css';
 import Navbar from '../../components/navbar';
+import FamilyMemberLayout from '../../components/FamilyMemberLayout';
 
 const ElderSignup = () => {
   const navigate = useNavigate();
@@ -202,8 +203,11 @@ const ElderSignup = () => {
   }
 
   return (
-    <div>
+    
+    <div className={styles.pageWrapper}>
       <Navbar />
+      <FamilyMemberLayout>
+      
       <div className={styles.container}>
         <div className={styles.signupCard}>
           <div className={styles.header}>
@@ -449,6 +453,7 @@ const ElderSignup = () => {
           </form>
         </div>
       </div>
+      </FamilyMemberLayout>
     </div>
   );
 };
