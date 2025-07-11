@@ -1,6 +1,6 @@
-// Try to import pool the same way as your other files
-// Check your doctorController.js or other controllers to see the correct import
-const pool = require('../db'); // Update this based on your other controllers
+const pool = require('../db');
+const bcrypt = require('bcryptjs'); // Add this import
+const { sendDoctorApprovalEmail } = require('../services/emailservice'); // Add this import
 
 const getAdminDashboard = async (req, res) => {
   try {
@@ -120,29 +120,100 @@ const approveProfessional = async (req, res) => {
     console.log(`Approving ${type} with ID: ${id}`);
     
     if (type === 'doctor') {
-      // Use 'confirmed' as the approved status
-      const result = await pool.query(
-        'UPDATE doctor SET status = $1 WHERE doctor_id = $2 RETURNING *', 
-        ['confirmed', id]
-      );
+      // First, get the doctor's details including user information
+      const doctorQuery = `
+        SELECT 
+          d.doctor_id,
+          d.user_id,
+          d.specialization,
+          d.license_number,
+          d.alternative_number,
+          d.current_institution,
+          d.years_experience,
+          d.status,
+          u.name,
+          u.email,
+          u.phone
+        FROM doctor d
+        JOIN "User" u ON d.user_id = u.user_id
+        WHERE d.doctor_id = $1
+      `;
       
-      if (result.rows.length === 0) {
+      const doctorResult = await pool.query(doctorQuery, [id]);
+      
+      if (doctorResult.rows.length === 0) {
         return res.status(404).json({ 
           success: false, 
           error: 'Doctor not found' 
         });
       }
       
-      console.log('Doctor approved successfully:', result.rows[0]);
+      const doctorData = doctorResult.rows[0];
+      console.log('Doctor data found:', doctorData);
+      
+      // Send approval email and get the temporary password
+      const emailResult = await sendDoctorApprovalEmail(doctorData);
+      
+      if (emailResult.success) {
+        // Hash the temporary password
+        const hashedPassword = await bcrypt.hash(emailResult.tempPassword, 10);
+        
+        // Begin transaction
+        await pool.query('BEGIN');
+        
+        try {
+          // Update doctor status to confirmed
+          const updateDoctorResult = await pool.query(
+            'UPDATE doctor SET status = $1 WHERE doctor_id = $2 RETURNING *', 
+            ['confirmed', id]
+          );
+          
+          // Update user password with the temporary password
+          const updateUserResult = await pool.query(
+            'UPDATE "User" SET password = $1 WHERE user_id = $2 RETURNING *',
+            [hashedPassword, doctorData.user_id]
+          );
+          
+          // Commit transaction
+          await pool.query('COMMIT');
+          
+          console.log('Doctor approved successfully:', updateDoctorResult.rows[0]);
+          console.log('User password updated successfully');
+          
+          res.json({ 
+            success: true, 
+            message: 'Doctor approved successfully. Approval email sent with temporary password.',
+            emailSent: true,
+            messageId: emailResult.messageId
+          });
+          
+        } catch (dbError) {
+          // Rollback transaction
+          await pool.query('ROLLBACK');
+          throw dbError;
+        }
+        
+      } else {
+        throw new Error('Failed to send approval email');
+      }
+      
+    } else {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Invalid professional type' 
+      });
     }
-    
-    res.json({ 
-      success: true, 
-      message: `${type} approved successfully` 
-    });
     
   } catch (error) {
     console.error('Error approving professional:', error);
+    
+    // Rollback transaction if it was started
+    try {
+      await pool.query('ROLLBACK');
+    } catch (rollbackError) {
+      console.error('Error rolling back transaction:', rollbackError);
+    }
+    
     res.status(500).json({ 
       success: false, 
       error: 'Failed to approve professional',
@@ -171,6 +242,15 @@ const rejectProfessional = async (req, res) => {
       }
       
       console.log('Doctor rejected successfully:', result.rows[0]);
+      
+      // TODO: Optionally send rejection email to doctor
+      // You can implement this similar to the approval email
+      
+    } else {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Invalid professional type' 
+      });
     }
     
     res.json({ 
