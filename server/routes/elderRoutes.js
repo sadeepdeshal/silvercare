@@ -5,7 +5,8 @@ const {
   getElderCount, 
   getElderById, 
   updateElder,
-  createElder 
+  createElder,
+  getDoctorsByElderDistrict  // Add this import
 } = require('../controllers/elderController');
 
 const { 
@@ -27,6 +28,9 @@ router.get('/count/:familyMemberId', getElderCount);
 
 // Fetch elder details - MUST BE BEFORE /:elderId route
 router.get('/elderDetails', getElderDetails);
+
+// Get doctors by elder's district - MUST BE BEFORE /:elderId route
+router.get('/:elderId/doctors', getDoctorsByElderDistrict);
 
 // Appointment routes for elders - MUST BE BEFORE /:elderId route
 router.get('/:elderId/appointments/upcoming', getUpcomingAppointments);

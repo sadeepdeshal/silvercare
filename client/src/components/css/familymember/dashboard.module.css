@@ -158,9 +158,10 @@
   font-size: 0.9rem;
 }
 
-/* Main Content Section */
+/* Main Content Section - Updated for Grid Layout */
 .mainContentSection {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 30px;
   padding: 0 20px 40px;
   max-width: 1200px;
@@ -168,7 +169,6 @@
 }
 
 .quickActionsContainer, .recentActivityContainer {
-  flex: 1;
   min-width: 0;
 }
 
@@ -311,18 +311,444 @@
   margin-right: auto;
 }
 
-/* Elders Section */
-.eldersSection {
-  margin: 32px 20px 0;
-  padding: 24px;
-  background: white;
-  border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  max-width: 1160px;
-  margin-left: auto;
-  margin-right: auto;
+/* Bottom Grid Section - For Elders and Appointments */
+.bottomGridSection {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  padding: 0 20px 40px;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
+/* Updated Elders Section - Now in Grid */
+.eldersSection {
+  padding: 15px 20px 15px 20px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  font-size: 5px;
+}
+
+.eldersSectionHeader {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.eldersSubtitle {
+  color: #718096;
+  font-size: 1rem;
+  margin-top: 10px;
+  font-weight: 400;
+}
+
+.eldersLinkContainer {
+  width: 100%;
+}
+
+.loadingElders {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  color: #718096;
+}
+
+.eldersLinkList {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  
+}
+
+.elderLinkItem {
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #EDEDFC;
+  border: 1px solid #e2e8f0;
+  margin-bottom: 5px;
+  
+}
+
+.elderLinkItem:hover {
+  background: #f8fafc;
+  border-color: #667eea;
+  transform: translateX(5px);
+  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.1);
+}
+
+.elderLinkContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 25px;
+  min-height: 100px;
+}
+
+.elderLinkLeft {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex: 1;
+}
+
+.elderLinkAvatar {
+  flex-shrink: 0;
+}
+
+.elderLinkPhoto {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #667eea;
+}
+
+.elderLinkInitial {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.elderLinkInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.elderLinkName {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #2d3748;
+  margin: 0 0 8px 0;
+}
+
+.elderLinkDetails {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.elderLinkDetail {
+  font-size: 0.9rem;
+  color: #4a5568;
+  background: #f7fafc;
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+}
+
+.elderLinkMedical {
+  font-size: 0.85rem;
+  color: #718096;
+  margin: 0;
+  font-style: italic;
+  line-height: 1.4;
+}
+
+.elderLinkRight {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex-shrink: 0;
+}
+
+.elderLinkArrow {
+  font-size: 1.5rem;
+  color: #667eea;
+  transition: transform 0.3s ease;
+}
+
+.elderLinkItem:hover .elderLinkArrow {
+  transform: translateX(5px);
+}
+
+.elderLinkAction {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.elderLinkItem:hover .elderLinkAction {
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+  transform: scale(1.05);
+}
+
+.elderLinkDivider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #e2e8f0, transparent);
+  margin: 0 25px;
+}
+
+.elderLinkItem:last-child .elderLinkDivider {
+  display: none;
+}
+
+.viewAllElders {
+  text-align: center;
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.viewAllButton {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+    border: none;
+  padding: 12px 30px;
+  border-radius: 25px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.viewAllButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+}
+
+/* Upcoming Appointments Section */
+.appointmentsSection {
+  padding: 30px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.appointmentsSectionHeader {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.appointmentsSubtitle {
+  color: #718096;
+  font-size: 1rem;
+  margin-top: 10px;
+  font-weight: 400;
+}
+
+.appointmentsContainer {
+  width: 100%;
+}
+
+.loadingAppointments {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  color: #718096;
+}
+
+.appointmentsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.appointmentItem {
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-radius: 12px;
+  overflow: hidden;
+  background: white;
+  border: 1px solid #e2e8f0;
+  margin-bottom: 2px;
+}
+
+.appointmentItem:hover {
+  background: #f8fafc;
+  border-color: #667eea;
+  transform: translateX(5px);
+  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.1);
+}
+
+.appointmentContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 25px;
+  min-height: 100px;
+}
+
+.appointmentLeft {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex: 1;
+}
+
+.appointmentIcon {
+  flex-shrink: 0;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.appointmentInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.appointmentTitle {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #2d3748;
+  margin: 0 0 8px 0;
+}
+
+.appointmentDetails {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.appointmentDetail {
+  font-size: 0.9rem;
+  color: #4a5568;
+  background: #f7fafc;
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+}
+
+.appointmentNotes {
+  font-size: 0.85rem;
+  color: #718096;
+  margin: 0;
+  font-style: italic;
+  line-height: 1.4;
+}
+
+.appointmentRight {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex-shrink: 0;
+}
+
+.appointmentStatus {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.appointmentStatus.scheduled {
+  background: #e6fffa;
+  color: #38a169;
+  border: 1px solid #38a169;
+}
+
+.appointmentStatus.confirmed {
+  background: #e6f7ff;
+  color: #1890ff;
+  border: 1px solid #1890ff;
+}
+
+.appointmentStatus.pending {
+  background: #fff7e6;
+  color: #fa8c16;
+  border: 1px solid #fa8c16;
+}
+
+.appointmentArrow {
+  font-size: 1.5rem;
+  color: #667eea;
+  transition: transform 0.3s ease;
+}
+
+.appointmentItem:hover .appointmentArrow {
+  transform: translateX(5px);
+}
+
+.appointmentDivider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #e2e8f0, transparent);
+  margin: 0 25px;
+}
+
+.appointmentItem:last-child .appointmentDivider {
+  display: none;
+}
+
+.viewAllAppointments {
+  text-align: center;
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.viewAllAppointmentsButton {
+  background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 25px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(72, 187, 120, 0.3);
+}
+
+.viewAllAppointmentsButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(72, 187, 120, 0.4);
+  background: linear-gradient(135deg, #38a169 0%, #48bb78 100%);
+}
+
+.noAppointments {
+  text-align: center;
+  padding: 40px 20px;
+  color: #718096;
+}
+
+.noAppointmentsIcon {
+  font-size: 3rem;
+  margin-bottom: 15px;
+  opacity: 0.5;
+}
+
+.noAppointmentsText {
+  font-size: 1.1rem;
+  margin-bottom: 10px;
+}
+
+.noAppointmentsSubtext {
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+/* Legacy Elder Card Styles - Keep for backward compatibility */
 .eldersGrid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -435,7 +861,7 @@
   50% { opacity: 0.5; }
 }
 
-.welcomeCard, .statCard, .quickActionsCard, .activityCard {
+.welcomeCard, .statCard, .quickActionsCard, .activityCard, .eldersSection, .appointmentsSection {
   animation: fadeInUp 0.6s ease-out;
 }
 
@@ -450,6 +876,14 @@
 .activityItem:first-child .activityIcon {
   animation: pulse 2s infinite;
 }
+
+.elderLinkItem, .appointmentItem {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.elderLinkItem:nth-child(2), .appointmentItem:nth-child(2) { animation-delay: 0.1s; }
+.elderLinkItem:nth-child(3), .appointmentItem:nth-child(3) { animation-delay: 0.2s; }
+.elderLinkItem:nth-child(4), .appointmentItem:nth-child(4) { animation-delay: 0.3s; }
 
 /* Hover Effects */
 .quickActionCard:hover .quickActionIcon {
@@ -466,39 +900,46 @@
   box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
 }
 
-.quickActionsCard:hover, .activityCard:hover {
+.quickActionsCard:hover, .activityCard:hover, .eldersSection:hover, .appointmentsSection:hover {
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
 /* Scrollbar */
-.activityList::-webkit-scrollbar {
+.activityList::-webkit-scrollbar, .eldersLinkList::-webkit-scrollbar, .appointmentsList::-webkit-scrollbar {
   width: 6px;
 }
 
-.activityList::-webkit-scrollbar-track {
+.activityList::-webkit-scrollbar-track, .eldersLinkList::-webkit-scrollbar-track, .appointmentsList::-webkit-scrollbar-track {
   background: rgba(255, 255, 255, 0.1);
   border-radius: 3px;
 }
 
-.activityList::-webkit-scrollbar-thumb {
+.activityList::-webkit-scrollbar-thumb, .eldersLinkList::-webkit-scrollbar-thumb, .appointmentsList::-webkit-scrollbar-thumb {
   background: rgba(102, 126, 234, 0.3);
   border-radius: 3px;
 }
 
-.activityList::-webkit-scrollbar-thumb:hover {
+.activityList::-webkit-scrollbar-thumb:hover, .eldersLinkList::-webkit-scrollbar-thumb:hover, .appointmentsList::-webkit-scrollbar-thumb:hover {
   background: rgba(102, 126, 234, 0.5);
 }
 
 /* Responsive Design */
-/* Responsive Design */
 @media (max-width: 1024px) {
-  .mainContentSection {
-    flex-direction: column;
+  .mainContentSection, .bottomGridSection {
+    grid-template-columns: 1fr;
     gap: 40px;
   }
   
   .quickActionsGrid {
     grid-template-columns: 1fr 1fr;
+  }
+
+  .elderLinkContent, .appointmentContent {
+    padding: 15px 20px;
+  }
+
+  .elderLinkDetails, .appointmentDetails {
+    gap: 15px;
   }
 }
 
@@ -526,8 +967,8 @@
     grid-template-columns: 1fr;
   }
 
-  .mainContentSection {
-    flex-direction: column;
+  .mainContentSection, .bottomGridSection {
+    grid-template-columns: 1fr;
     gap: 30px;
     padding-left: 15px;
     padding-right: 15px;
@@ -554,9 +995,35 @@
     padding-right: 15px;
   }
 
-  .eldersSection {
-    margin-left: 15px;
-    margin-right: 15px;
+  .eldersSection, .appointmentsSection {
+    padding: 20px;
+  }
+  
+  .elderLinkContent, .appointmentContent {
+    flex-direction: column;
+    gap: 15px;
+    padding: 20px;
+    text-align: center;
+  }
+
+  .elderLinkLeft, .appointmentLeft {
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+  }
+
+  .elderLinkDetails, .appointmentDetails {
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .elderLinkRight, .appointmentRight {
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .elderLinkItem:hover, .appointmentItem:hover {
+    transform: none;
   }
 
   .eldersGrid {
@@ -611,46 +1078,89 @@
   .sectionTitle {
     font-size: 1.5rem;
   }
+
+  .elderLinkContent, .appointmentContent {
+    padding: 15px;
+  }
+
+  .elderLinkName, .appointmentTitle {
+    font-size: 1.1rem;
+  }
+
+  .elderLinkDetails, .appointmentDetails {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .elderLinkDetail, .appointmentDetail {
+    font-size: 0.8rem;
+  }
+
+  .elderLinkArrow, .appointmentArrow {
+    display: none;
+  }
 }
 
 /* Accessibility */
-.quickActionCard:focus, .elderActionBtn:focus {
+.quickActionCard:focus, .elderActionBtn:focus, .elderLinkItem:focus, .appointmentItem:focus, .viewAllButton:focus, .viewAllAppointmentsButton:focus {
   outline: 2px solid #667eea;
   outline-offset: 2px;
 }
 
+.elderLinkItem:focus, .appointmentItem:focus {
+  background: #f8fafc;
+  border-color: #667eea;
+}
+
 /* Print Styles */
 @media print {
-  .quickActionsCard, .activityCard {
+  .quickActionsCard, .activityCard, .eldersSection, .appointmentsSection {
     box-shadow: none;
     border: 1px solid #e2e8f0;
   }
   
-  .quickActionIcon, .activityIcon {
+  .quickActionIcon, .activityIcon, .elderLinkInitial, .appointmentIcon {
     background: #f7fafc !important;
     color: #2d3748 !important;
+  }
+
+  .elderLinkItem:hover, .appointmentItem:hover {
+    transform: none;
+    background: white;
   }
 }
 
 /* High Contrast Mode */
 @media (prefers-contrast: high) {
-  .quickActionsCard, .activityCard {
+  .quickActionsCard, .activityCard, .eldersSection, .appointmentsSection {
     border: 2px solid #2d3748;
   }
   
-  .quickActionTitle, .activityText {
+  .quickActionTitle, .activityText, .elderLinkName, .appointmentTitle {
     color: #000000;
     font-weight: 700;
+  }
+
+  .elderLinkItem, .appointmentItem {
+    border: 2px solid #2d3748;
   }
 }
 
 /* Reduced Motion */
 @media (prefers-reduced-motion: reduce) {
-  .quickActionCard, .activityCard, .statCard {
+  .quickActionCard, .activityCard, .statCard, .elderLinkItem, .appointmentItem {
     animation: none;
   }
   
-  .quickActionCard:hover, .statCard:hover {
+  .quickActionCard:hover, .statCard:hover, .elderLinkItem:hover, .appointmentItem:hover {
+    transform: none;
+  }
+
+  .elderLinkArrow, .appointmentArrow {
+    transition: none;
+  }
+
+  .elderLinkItem:hover .elderLinkArrow, .appointmentItem:hover .appointmentArrow {
     transform: none;
   }
 }
@@ -661,16 +1171,69 @@
     background: #1a202c;
   }
   
-  .quickActionsCard, .activityCard {
+  .quickActionsCard, .activityCard, .eldersSection, .appointmentsSection {
     background: rgba(45, 55, 72, 0.95);
     color: #f7fafc;
   }
   
-  .quickActionTitle, .activityText {
+  .quickActionTitle, .activityText, .elderLinkName, .appointmentTitle {
     color: #f7fafc;
   }
   
-  .quickActionDescription, .activityTime {
+  .quickActionDescription, .activityTime, .elderLinkMedical, .appointmentNotes {
     color: #a0aec0;
   }
+
+  .elderLinkItem, .appointmentItem {
+    background: rgba(45, 55, 72, 0.8);
+    border-color: #4a5568;
+  }
+
+  .elderLinkItem:hover, .appointmentItem:hover {
+    background: rgba(45, 55, 72, 0.9);
+    border-color: #667eea;
+  }
+
+  .elderLinkDetail, .appointmentDetail {
+    background: rgba(74, 85, 104, 0.5);
+    border-color: #4a5568;
+    color: #e2e8f0;
+  }
 }
+
+/* Loading States for Elder Links and Appointments */
+.loadingElders .loadingSpinner, .loadingAppointments .loadingSpinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(102, 126, 234, 0.3);
+  border-top: 3px solid #667eea;
+  margin-bottom: 15px;
+}
+
+/* Interactive States */
+.elderLinkItem:active, .appointmentItem:active {
+  transform: scale(0.98);
+}
+
+.viewAllButton:active, .viewAllAppointmentsButton:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* Smooth Transitions */
+* {
+  transition: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Focus Visible for Better Accessibility */
+.elderLinkItem:focus-visible, .appointmentItem:focus-visible {
+  outline: 3px solid #667eea;
+  outline-offset: 2px;
+  border-color: #667eea;
+}
+
+.viewAllButton:focus-visible, .viewAllAppointmentsButton:focus-visible {
+  outline: 3px solid #ffffff;
+  outline-offset: 2px;
+}
+
+

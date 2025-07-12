@@ -82,8 +82,24 @@ const FamilyMemberElders = () => {
     navigate(`/family-member/elder/${elderId}`);
   };
 
+  // FIXED: Updated handleBookAppointment function to redirect to doctors page
   const handleBookAppointment = (elderId) => {
-    navigate(`/family-member/elder/${elderId}/appointments`);
+    // Check if elder has district information
+    const elder = elders.find(e => e.elder_id === elderId);
+    
+    if (!elder) {
+      alert('Elder information not found');
+      return;
+    }
+
+    if (!elder.district) {
+      alert('Elder district information is required to find doctors. Please update the elder profile with district information.');
+      return;
+    }
+
+    // Navigate to doctors page with elder ID
+    console.log('Navigating to doctors page for elder:', elderId);
+    navigate(`/family-member/elder/${elderId}/doctors`);
   };
 
   // Show loading while checking authentication
@@ -238,6 +254,17 @@ const FamilyMemberElders = () => {
                     </div>
                   </div>
                   
+                  {/* District Information */}
+                  <div className={styles.detailRow}>
+                    <span className={styles.detailIcon}>🏘️</span>
+                    <div className={styles.detailContent}>
+                      <span className={styles.detailLabel}>District</span>
+                      <span className={styles.detailValue}>
+                        {elder.district || 'Not specified'}
+                      </span>
+                    </div>
+                  </div>
+                  
                   {elder.medical_conditions && (
                     <div className={styles.detailRow}>
                       <span className={styles.detailIcon}>🏥</span>
@@ -289,6 +316,8 @@ const FamilyMemberElders = () => {
                   <button 
                     className={styles.secondaryButton}
                     onClick={() => handleBookAppointment(elder.elder_id)}
+                    disabled={!elder.district}
+                    title={!elder.district ? 'District information required' : 'Book appointment with doctors in the same district'}
                   >
                     <span className={styles.buttonIcon}>📅</span>
                     Book Appointment

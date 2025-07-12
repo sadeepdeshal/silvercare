@@ -42,7 +42,7 @@ const FamilyMemberSidebar = ({ onItemClick }) => {
         navigate('/family-member/medical-history');
         break;
       case 'book-appointment':
-        navigate('/family-member/appointments');
+        navigate('/family-member/elders');
         break;
       case 'upcoming-appointments':
         navigate('/family-member/upcoming-appointments');

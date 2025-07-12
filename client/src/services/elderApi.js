@@ -1,8 +1,6 @@
 import axios from 'axios';
 const API_BASE = 'http://localhost:5000/api/elders';
 
-
-
 export const elderApi = {
   // Get all elders for a family member
   getEldersByFamilyMember: async (familyMemberId) => {
@@ -57,6 +55,26 @@ export const elderApi = {
       return data;
     } catch (error) {
       console.error('API: Error fetching elder details:', error);
+      throw error;
+    }
+  },
+
+  // Get doctors by elder's district - NEW FUNCTION
+  getDoctorsByElderDistrict: async (elderId) => {
+    try {
+      console.log('API: Fetching doctors for elder ID:', elderId);
+      const response = await fetch(`${API_BASE}/${elderId}/doctors`);
+      const data = await response.json();
+      
+      console.log('API: Doctors response:', data);
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to fetch doctors');
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('API: Error fetching doctors:', error);
       throw error;
     }
   },
@@ -207,7 +225,6 @@ export const elderApi = {
   }
 };
 
-
 export const getElderDetailsByEmail = (email) => {
   return axios.get(`${API_BASE}/elderDetails`, {
     params: { email }
@@ -217,7 +234,6 @@ export const getElderDetailsByEmail = (email) => {
 export const updateElderDetails = (elderId, elderData) => {
   return axios.put(`${API_BASE}/${elderId}`, elderData);
 };
-
 
 // New appointment-related functions
 export const getUpcomingAppointments = (elderId) => {
@@ -245,4 +261,3 @@ export const rescheduleAppointment = (elderId, appointmentId, newDateTime) => {
     newDateTime
   });
 };
-

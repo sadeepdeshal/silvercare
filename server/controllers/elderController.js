@@ -1,6 +1,7 @@
 const pool = require('../db');
 const bcrypt = require('bcrypt');
 
+// Update the getEldersByFamilyMember function to include district
 const getEldersByFamilyMember = async (req, res) => {
   const { familyMemberId } = req.params;
   
@@ -23,7 +24,7 @@ const getEldersByFamilyMember = async (req, res) => {
     const familyId = familyMemberResult.rows[0].family_id;
     console.log('Found family_id:', familyId);
     
-    // Now get elders using the family_id - include email and created_at
+    // Now get elders using the family_id - include district field
     const result = await pool.query(
       `SELECT 
         elder_id,
@@ -37,6 +38,7 @@ const getEldersByFamilyMember = async (req, res) => {
         nic,
         medical_conditions,
         profile_photo,
+        district,
         created_at
       FROM elder 
       WHERE family_id = $1 
@@ -60,6 +62,7 @@ const getEldersByFamilyMember = async (req, res) => {
     });
   }
 };
+
 
 const getElderCount = async (req, res) => {
   const { familyMemberId } = req.params;
@@ -990,6 +993,83 @@ const updateElderPhoto = async (req, res) => {
   }
 };
 
+const getDoctorsByElderDistrict = async (req, res) => {
+  const { elderId } = req.params;
+  
+  try {
+    console.log('Getting doctors for elder ID:', elderId);
+    
+    // First, get the elder's district
+    const elderResult = await pool.query(
+      'SELECT district, name FROM elder WHERE elder_id = $1',
+      [elderId]
+    );
+    
+    if (elderResult.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: 'Elder not found'
+      });
+    }
+    
+    const elderDistrict = elderResult.rows[0].district;
+    const elderName = elderResult.rows[0].name;
+    
+    console.log('Elder district:', elderDistrict);
+    
+    if (!elderDistrict) {
+      return res.status(400).json({
+        success: false,
+        error: 'Elder district not specified'
+      });
+    }
+    
+    // Get doctors in the same district with approved status
+    const doctorsResult = await pool.query(
+      `SELECT 
+        d.doctor_id,
+        d.user_id,
+        d.specialization,
+        d.license_number,
+        d.alternative_number,
+        d.current_institution,
+        d.years_experience,
+        d.district,
+        u.name as doctor_name,
+        u.email as doctor_email,
+        u.phone as doctor_phone,
+        u.created_at
+      FROM doctor d
+      INNER JOIN "User" u ON d.user_id = u.user_id
+      WHERE LOWER(d.district) = LOWER($1) 
+      AND d.status = 'confirmed'
+      AND u.role = 'doctor'
+      ORDER BY d.years_experience DESC, u.name ASC`,
+      [elderDistrict]
+    );
+    
+    console.log('Found doctors:', doctorsResult.rows.length);
+    
+    res.json({
+      success: true,
+      doctors: doctorsResult.rows,
+      count: doctorsResult.rows.length,
+      elderInfo: {
+        elder_id: elderId,
+        name: elderName,
+        district: elderDistrict
+      }
+    });
+    
+  } catch (err) {
+    console.error('Error fetching doctors by elder district:', err);
+    res.status(500).json({ 
+      success: false,
+      error: 'Error fetching doctors data' 
+    });
+  }
+};
+
 // Get elder's emergency contacts (if you have a separate table for this)
 const getElderEmergencyContacts = async (req, res) => {
   const { elderId } = req.params;
@@ -1120,6 +1200,7 @@ module.exports = {
   getEldersWithMedicalConditions,
   updateElderPhoto,
   getElderEmergencyContacts,
+  getDoctorsByElderDistrict,
   bulkUpdateElders
 };
 

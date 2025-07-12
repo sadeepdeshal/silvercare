@@ -41,6 +41,75 @@ const getAllCaregivers = async (req, res) => {
   }
 };
 
+// Get active caregiver count
+const getActiveCaregiverCount = async (req, res) => {
+  try {
+    console.log('Fetching active caregiver count');
+    
+    const result = await pool.query(`
+      SELECT COUNT(*) as count
+      FROM caregiver c
+      INNER JOIN "User" u ON c.user_id = u.user_id
+      WHERE u.role = 'caregiver' AND c.availability = 'available'
+    `);
+    
+    const count = parseInt(result.rows[0].count);
+    console.log('Active caregiver count:', count);
+    
+    res.json({
+      success: true,
+      count: count
+    });
+    
+  } catch (err) {
+    console.error('Error fetching active caregiver count:', err);
+    res.status(500).json({ 
+      success: false,
+      error: 'Error fetching active caregiver count' 
+    });
+  }
+};
+
+// Get caregiver statistics
+const getCaregiverStats = async (req, res) => {
+  try {
+    console.log('Fetching caregiver statistics');
+    
+    const result = await pool.query(`
+      SELECT 
+        COUNT(*) as total_caregivers,
+        COUNT(CASE WHEN c.availability = 'available' THEN 1 END) as active_caregivers,
+        COUNT(CASE WHEN c.availability = 'busy' THEN 1 END) as busy_caregivers,
+        COUNT(CASE WHEN c.availability = 'unavailable' THEN 1 END) as unavailable_caregivers,
+        COUNT(DISTINCT c.district) as districts_covered
+      FROM caregiver c
+      INNER JOIN "User" u ON c.user_id = u.user_id
+      WHERE u.role = 'caregiver'
+    `);
+    
+    const stats = result.rows[0];
+    console.log('Caregiver statistics:', stats);
+    
+    res.json({
+      success: true,
+      stats: {
+        total_caregivers: parseInt(stats.total_caregivers),
+        active_caregivers: parseInt(stats.active_caregivers),
+        busy_caregivers: parseInt(stats.busy_caregivers),
+        unavailable_caregivers: parseInt(stats.unavailable_caregivers),
+        districts_covered: parseInt(stats.districts_covered)
+      }
+    });
+    
+  } catch (err) {
+    console.error('Error fetching caregiver statistics:', err);
+    res.status(500).json({ 
+      success: false,
+      error: 'Error fetching caregiver statistics' 
+    });
+  }
+};
+
 // Get caregiver by ID
 const getCaregiverById = async (req, res) => {
   const { caregiverId } = req.params;
@@ -197,7 +266,7 @@ const createCareRequest = async (req, res) => {
       });
     }
 
-    // Insert care request
+        // Insert care request
     const result = await pool.query(`
       INSERT INTO carerequest (
         family_id,
@@ -410,9 +479,12 @@ const updateCareRequestStatus = async (req, res) => {
 
 module.exports = {
   getAllCaregivers,
+  getActiveCaregiverCount,
+  getCaregiverStats,
   getCaregiverById,
   createCareRequest,
   getCareRequestsByFamily,
   searchCaregivers,
   updateCareRequestStatus
 };
+
