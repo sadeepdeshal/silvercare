@@ -5,7 +5,7 @@ import { FamilyMemberReg } from './pages/familemember/signup';
 import { FamilyMemberReg2 } from './pages/familemember/signup-step2';
 import ElderSignup from './pages/familemember/elder-signup';
 import FamilyMemberDashboard from './pages/familemember/dashboard';
-import FamilyMemberElders from './pages/familemember/elders'; // Add this import
+import FamilyMemberElders from './pages/familemember/elders';
 import ElderDetails from './pages/familemember/elder-details';
 import CaregiverDetails from './pages/familemember/caregiver-details';
 import FamilyMemberLayout from './components/FamilyMemberLayout';
@@ -19,13 +19,16 @@ import { HealthProfessionalRegStep2 } from './pages/healthproffesional/signup-st
 import { HealthProfessionalRegStep3 } from './pages/healthproffesional/signup-step3';
 import HealthProfessionalDashboard from './pages/healthproffesional/dashboard';
 import { DoctorRegStep2 } from './pages/doctor/signup-step2';
-import { DoctorRegStep3  } from './pages/doctor/signup-step3';
+
 import DoctorDashboard from './pages/doctor/dashboard';
 import ElderDashboard from './pages/elder/dashboard';
 import { Login } from './pages/login';
 import { Roles } from './pages/roles';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
+
+// Import ElderDoctors component
+import ElderDoctors from './pages/familemember/elder-doctors';
 
 // Optional: Create an Unauthorized component
 const Unauthorized = () => (
@@ -60,14 +63,14 @@ function App() {
           />
           <Route path="/doctor/signup" element={<DoctorReg />} />
           <Route path="/doctor/signup-step2" element={<DoctorRegStep2 />} />
-          <Route path="/doctor/signup-step3" element={<DoctorRegStep3 />} />
+          
           <Route path="/healthproffesional/signup" element={<MentalHealthProfessionalReg />} />
           <Route path="/healthproffesional/signup-step2" element={<HealthProfessionalRegStep2 />} />
           <Route path="/healthproffesional/signup-step3" element={<HealthProfessionalRegStep3 />} />
           <Route path="/caregiver/signup" element={<CaregiverReg />} />
           <Route path="/caregiver/signup-step2" element={<CaregiverRegStep2 />} />
           
-                    {/* Family Member Routes with Layout - All protected routes use the layout */}
+          {/* Family Member Routes with Layout - All protected routes use the layout */}
           <Route path="/family-member/elder-signup" element={
             <ProtectedRoute allowedRoles={['family_member']}>
               <FamilyMemberLayout>
@@ -75,7 +78,6 @@ function App() {
               </FamilyMemberLayout>
             </ProtectedRoute>
           } />
-
 
           {/* Protected Dashboard Routes - Authentication required */}
           <Route path="/family-member/dashboard" element={
@@ -94,6 +96,13 @@ function App() {
           <Route path="/family-member/elder/:elderId" element={
             <ProtectedRoute allowedRoles={['family_member']}>
               <ElderDetails />
+            </ProtectedRoute>
+          } />
+
+          {/* Add the elder doctors route - THIS IS THE IMPORTANT ONE */}
+          <Route path="/family-member/elder/:elderId/doctors" element={
+            <ProtectedRoute allowedRoles={['family_member']}>
+              <ElderDoctors />
             </ProtectedRoute>
           } />
           
@@ -129,10 +138,10 @@ function App() {
           } />
 
           <Route path="/family-member/caregivers" element={
-  <ProtectedRoute allowedRoles={['family_member']}>
-    <CaregiverDetails />
-  </ProtectedRoute>
-} />
+            <ProtectedRoute allowedRoles={['family_member']}>
+              <CaregiverDetails />
+            </ProtectedRoute>
+          } />
           
           {/* Other Protected Routes */}
           <Route path="/users" element={
