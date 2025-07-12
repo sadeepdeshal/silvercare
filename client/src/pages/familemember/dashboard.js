@@ -159,11 +159,17 @@ const FamilyMemberDashboard = () => {
   };
 
   const handleViewElders = () => {
-    navigate('/family-member/elders');
+  
+     navigate('/family-member/appointments');
+  };
+
+    const handleMentalSessions = () => {
+  
+     navigate('/family-member/sessions');
   };
 
   const handleBookAppointment = () => {
-    navigate('/family-member/appointments');
+     navigate('/family-member/elders');
   };
 
   const handleViewReports = () => {
@@ -223,7 +229,7 @@ const FamilyMemberDashboard = () => {
         <div className={styles.headerSection}>
           <div className={styles.welcomeCard}>
             <div className={styles.welcomeContent}>
-              <h1 className={styles.welcomeTitle}>Welcome back, {currentUser.name}!</h1>
+              <h1 className={styles.welcomeTitle}>Welcome, {currentUser.name}!</h1>
               <p className={styles.welcomeSubtitle}>Manage your elderly care services from your dashboard</p>
               <div className={styles.userInfo}>
                 <span className={styles.userEmail}>📧 {currentUser.email}</span>
@@ -300,21 +306,22 @@ const FamilyMemberDashboard = () => {
                   </div>
                 </div>
 
-                <div className={styles.quickActionCard} onClick={handleViewElders}>
+                <div className={styles.quickActionCard} onClick={handleBookAppointment}>
                   <div className={styles.quickActionIcon}>👥</div>
                   <div className={styles.quickActionContent}>
-                    <h3 className={styles.quickActionTitle}>View My Elders</h3>
+                    <h3 className={styles.quickActionTitle}>Book Appointment</h3>
                     <p className={styles.quickActionDescription}>
                       Manage {elderCount} registered elder{elderCount !== 1 ? 's' : ''}
                     </p>
+                    <p className={styles.quickActionDescription}>Schedule medical appointments and care services</p>
                   </div>
                 </div>
 
-                <div className={styles.quickActionCard} onClick={handleBookAppointment}>
+                <div className={styles.quickActionCard} onClick={handleMentalSessions}>
                   <div className={styles.quickActionIcon}>📅</div>
                   <div className={styles.quickActionContent}>
-                    <h3 className={styles.quickActionTitle}>Book Appointment</h3>
-                    <p className={styles.quickActionDescription}>Schedule medical appointments and care services</p>
+                    <h3 className={styles.quickActionTitle}>Book mental sessions </h3>
+                    <p className={styles.quickActionDescription}>Schedule mental sessions and care services</p>
                   </div>
                 </div>
 
