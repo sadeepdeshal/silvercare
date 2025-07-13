@@ -1070,6 +1070,73 @@ const getDoctorsByElderDistrict = async (req, res) => {
   }
 };
 
+// NEW FUNCTION: Get all doctors for online meetings
+const getAllDoctorsForOnlineMeeting = async (req, res) => {
+  const { elderId } = req.params;
+  
+  try {
+    console.log('Getting all doctors for online meeting, elder ID:', elderId);
+    
+    // First, get the elder's info
+    const elderResult = await pool.query(
+      'SELECT name FROM elder WHERE elder_id = $1',
+      [elderId]
+    );
+    
+    if (elderResult.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: 'Elder not found'
+      });
+    }
+    
+    const elderName = elderResult.rows[0].name;
+    
+    // Get all approved doctors (no district restriction for online meetings)
+    const doctorsResult = await pool.query(
+      `SELECT 
+        d.doctor_id,
+        d.user_id,
+        d.specialization,
+        d.license_number,
+        d.alternative_number,
+        d.current_institution,
+        d.years_experience,
+        d.district,
+        u.name as doctor_name,
+        u.email as doctor_email,
+        u.phone as doctor_phone,
+        u.created_at
+      FROM doctor d
+      INNER JOIN "User" u ON d.user_id = u.user_id
+      WHERE d.status = 'confirmed'
+      AND u.role = 'doctor'
+      ORDER BY d.years_experience DESC, u.name ASC`
+    );
+    
+    console.log('Found all doctors for online meeting:', doctorsResult.rows.length);
+    
+    res.json({
+      success: true,
+      doctors: doctorsResult.rows,
+      count: doctorsResult.rows.length,
+      elderInfo: {
+        elder_id: elderId,
+        name: elderName,
+        district: 'All Districts (Online Meeting)'
+      },
+      meetingType: 'online'
+    });
+    
+  } catch (err) {
+    console.error('Error fetching all doctors for online meeting:', err);
+    res.status(500).json({ 
+      success: false,
+      error: 'Error fetching doctors data' 
+    });
+  }
+};
+
 // Get elder's emergency contacts (if you have a separate table for this)
 const getElderEmergencyContacts = async (req, res) => {
   const { elderId } = req.params;
@@ -1201,6 +1268,7 @@ module.exports = {
   updateElderPhoto,
   getElderEmergencyContacts,
   getDoctorsByElderDistrict,
+  getAllDoctorsForOnlineMeeting,
   bulkUpdateElders
 };
 

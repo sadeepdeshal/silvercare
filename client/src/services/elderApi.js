@@ -59,7 +59,7 @@ export const elderApi = {
     }
   },
 
-  // Get doctors by elder's district - NEW FUNCTION
+  // Get doctors by elder's district for physical meetings
   getDoctorsByElderDistrict: async (elderId) => {
     try {
       console.log('API: Fetching doctors for elder ID:', elderId);
@@ -75,6 +75,26 @@ export const elderApi = {
       return data;
     } catch (error) {
       console.error('API: Error fetching doctors:', error);
+      throw error;
+    }
+  },
+
+  // NEW FUNCTION: Get all doctors for online meetings
+  getAllDoctorsForOnlineMeeting: async (elderId) => {
+    try {
+      console.log('API: Fetching all doctors for online meeting, elder ID:', elderId);
+      const response = await fetch(`${API_BASE}/${elderId}/doctors/online`);
+      const data = await response.json();
+      
+      console.log('API: Online doctors response:', data);
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to fetch doctors for online meeting');
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('API: Error fetching doctors for online meeting:', error);
       throw error;
     }
   },
@@ -222,7 +242,7 @@ export const elderApi = {
       console.error('Error updating elder photo:', error);
       throw error;
     }
-  }
+      }
 };
 
 export const getElderDetailsByEmail = (email) => {
@@ -261,3 +281,4 @@ export const rescheduleAppointment = (elderId, appointmentId, newDateTime) => {
     newDateTime
   });
 };
+
