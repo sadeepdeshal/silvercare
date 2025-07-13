@@ -66,7 +66,7 @@ export const elderApi = {
       const response = await fetch(`${API_BASE}/${elderId}/doctors`);
       const data = await response.json();
       
-      console.log('API: Doctors response:', data);
+            console.log('API: Doctors response:', data);
       
       if (!response.ok) {
         throw new Error(data.error || 'Failed to fetch doctors');
@@ -99,7 +99,7 @@ export const elderApi = {
     }
   },
 
-  // NEW: Get doctor information by ID
+  // Get doctor information by ID
   getDoctorById: async (doctorId) => {
     try {
       console.log('API: Fetching doctor by ID:', doctorId);
@@ -119,7 +119,7 @@ export const elderApi = {
     }
   },
 
-  // NEW: Get appointment booking info (both elder and doctor)
+  // Get appointment booking info (both elder and doctor)
   getAppointmentBookingInfo: async (elderId, doctorId) => {
     try {
       console.log('API: Fetching appointment booking info for elder:', elderId, 'doctor:', doctorId);
@@ -135,6 +135,59 @@ export const elderApi = {
       return data;
     } catch (error) {
       console.error('API: Error fetching appointment booking info:', error);
+      throw error;
+    }
+  },
+
+  // NEW: Create appointment
+    createAppointment: async (elderId, appointmentData) => {
+    try {
+      console.log('API: Creating appointment for elder:', elderId, 'with data:', appointmentData);
+      const response = await fetch(`${API_BASE}/${elderId}/appointments`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(appointmentData),
+      });
+      
+      const data = await response.json();
+      console.log('API: Create appointment response:', data);
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to create appointment');
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('API: Error creating appointment:', error);
+      throw error;
+    }
+  },
+
+  // NEW: Get elder appointments
+  getElderAppointments: async (elderId, filters = {}) => {
+    try {
+      console.log('API: Fetching appointments for elder:', elderId, 'with filters:', filters);
+      
+      const queryParams = new URLSearchParams();
+      if (filters.status) queryParams.append('status', filters.status);
+      if (filters.type) queryParams.append('type', filters.type);
+      if (filters.limit) queryParams.append('limit', filters.limit);
+      
+      const url = `${API_BASE}/${elderId}/appointments${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
+      const response = await fetch(url);
+      const data = await response.json();
+      
+      console.log('API: Elder appointments response:', data);
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to fetch appointments');
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('API: Error fetching elder appointments:', error);
       throw error;
     }
   },
@@ -157,7 +210,8 @@ export const elderApi = {
       if (!response.ok) {
         throw new Error(data.error || 'Failed to update elder details');
       }
-            return data;
+      
+      return data;
     } catch (error) {
       console.error('API: Error updating elder details:', error);
       throw error;

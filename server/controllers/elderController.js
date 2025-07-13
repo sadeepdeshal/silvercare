@@ -1179,13 +1179,12 @@ const getElderEmergencyContacts = async (req, res) => {
     });
   }
 };
-
-// Get doctor information by doctor ID
+// Get doctor by ID
 const getDoctorById = async (req, res) => {
   const { doctorId } = req.params;
   
   try {
-    console.log('Getting doctor info for ID:', doctorId);
+    console.log('Getting doctor by ID:', doctorId);
     
     const result = await pool.query(
       `SELECT 
@@ -1204,9 +1203,7 @@ const getDoctorById = async (req, res) => {
         u.created_at
       FROM doctor d
       INNER JOIN "User" u ON d.user_id = u.user_id
-      WHERE d.doctor_id = $1 
-      AND d.status = 'confirmed'
-      AND u.role = 'doctor'`,
+      WHERE d.doctor_id = $1 AND d.status = 'confirmed'`,
       [doctorId]
     );
     
@@ -1219,35 +1216,30 @@ const getDoctorById = async (req, res) => {
     
     const doctor = result.rows[0];
     
-    // Format doctor info for appointment booking
-    const doctorInfo = {
-      doctor_id: doctor.doctor_id,
-      name: doctor.doctor_name,
-      specialization: doctor.specialization,
-      institution: doctor.current_institution,
-      district: doctor.district,
-      email: doctor.doctor_email,
-      phone: doctor.doctor_phone,
-      years_experience: doctor.years_experience,
-      license_number: doctor.license_number,
-      alternative_number: doctor.alternative_number,
-      // Mock fees for now - you can add a fee column to doctor table later
-      physical_fee: 2500,
-      online_fee: 1800
-    };
-    
-    console.log('Doctor info retrieved:', doctorInfo);
-    
     res.json({
       success: true,
-      doctor: doctorInfo
+      doctor: {
+        doctor_id: doctor.doctor_id,
+        user_id: doctor.user_id,
+        name: doctor.doctor_name,
+        email: doctor.doctor_email,
+        phone: doctor.doctor_phone,
+        specialization: doctor.specialization,
+        license_number: doctor.license_number,
+        alternative_number: doctor.alternative_number,
+        institution: doctor.current_institution,
+        years_experience: doctor.years_experience,
+        district: doctor.district,
+        status: doctor.status,
+        created_at: doctor.created_at
+      }
     });
     
   } catch (err) {
-    console.error('Error fetching doctor info:', err);
-    res.status(500).json({ 
+    console.error('Error fetching doctor by ID:', err);
+    res.status(500).json({
       success: false,
-      error: 'Error fetching doctor information' 
+      error: 'Error fetching doctor data'
     });
   }
 };
@@ -1264,14 +1256,13 @@ const getAppointmentBookingInfo = async (req, res) => {
       `SELECT 
         elder_id,
         name,
-        email,
         dob,
         gender,
         contact,
-        address,
         district,
-        medical_conditions
-      FROM elder
+        medical_conditions,
+        EXTRACT(YEAR FROM AGE(dob)) as age
+      FROM elder 
       WHERE elder_id = $1`,
       [elderId]
     );
@@ -1300,9 +1291,7 @@ const getAppointmentBookingInfo = async (req, res) => {
         u.phone as doctor_phone
       FROM doctor d
       INNER JOIN "User" u ON d.user_id = u.user_id
-      WHERE d.doctor_id = $1 
-      AND d.status = 'confirmed'
-      AND u.role = 'doctor'`,
+      WHERE d.doctor_id = $1 AND d.status = 'confirmed'`,
       [doctorId]
     );
     
@@ -1316,64 +1305,375 @@ const getAppointmentBookingInfo = async (req, res) => {
     const elder = elderResult.rows[0];
     const doctor = doctorResult.rows[0];
     
-    // Calculate age from date of birth
-    const calculateAge = (dob) => {
-      const today = new Date();
-      const birthDate = new Date(dob);
-      let age = today.getFullYear() - birthDate.getFullYear();
-      const monthDiff = today.getMonth() - birthDate.getMonth();
-      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-        age--;
-      }
-      return age;
-    };
-    
-    // Format elder info
-    const elderInfo = {
-      elder_id: elder.elder_id,
-      name: elder.name,
-      age: calculateAge(elder.dob),
-      gender: elder.gender,
-      district: elder.district,
-      contact: elder.contact,
-      email: elder.email,
-      address: elder.address,
-      medical_conditions: elder.medical_conditions
-    };
-    
-    // Format doctor info
-    const doctorInfo = {
-      doctor_id: doctor.doctor_id,
-      name: doctor.doctor_name,
-      specialization: doctor.specialization,
-      institution: doctor.current_institution,
-      district: doctor.district,
-      email: doctor.doctor_email,
-      phone: doctor.doctor_phone,
-      years_experience: doctor.years_experience,
-      license_number: doctor.license_number,
-      alternative_number: doctor.alternative_number,
-      // Mock fees - you can add fee columns to doctor table later
-      physical_fee: 2500,
-      online_fee: 1800
-    };
-    
-    console.log('Appointment booking info retrieved successfully');
+    // Mock fees - you can add these to your doctor table later
+    const physicalFee = 2500;
+    const onlineFee = 1800;
     
     res.json({
       success: true,
-      elder: elderInfo,
-      doctor: doctorInfo
+      elder: {
+        elder_id: elder.elder_id,
+        name: elder.name,
+        age: elder.age,
+        gender: elder.gender,
+        contact: elder.contact,
+        district: elder.district,
+        medical_conditions: elder.medical_conditions
+      },
+      doctor: {
+        doctor_id: doctor.doctor_id,
+        user_id: doctor.user_id,
+        name: doctor.doctor_name,
+        email: doctor.doctor_email,
+        phone: doctor.doctor_phone,
+        specialization: doctor.specialization,
+        license_number: doctor.license_number,
+        alternative_number: doctor.alternative_number,
+        institution: doctor.current_institution,
+        years_experience: doctor.years_experience,
+        district: doctor.district,
+        status: doctor.status,
+        physical_fee: physicalFee,
+        online_fee: onlineFee
+      }
     });
     
   } catch (err) {
     console.error('Error fetching appointment booking info:', err);
-    res.status(500).json({ 
+    res.status(500).json({
       success: false,
-      error: 'Error fetching appointment booking information' 
+      error: 'Error fetching appointment booking information'
     });
   }
 };
+// Create new appointment
+// Create new appointment
+const createAppointment = async (req, res) => {
+  const { elderId } = req.params;
+  
+  try {
+    const {
+      doctorId,
+      appointmentDate,
+      appointmentTime,
+      appointmentType, // 'physical' or 'online'
+      patientName,
+      contactNumber,
+      symptoms,
+      notes,
+      emergencyContact,
+      preferredPlatform // for online appointments
+    } = req.body;
+
+    console.log('Creating appointment with data:', {
+      elderId,
+      doctorId,
+      appointmentDate,
+      appointmentTime,
+      appointmentType,
+      patientName,
+      contactNumber,
+      symptoms,
+      notes,
+      emergencyContact,
+      preferredPlatform
+    });
+
+    // Validate required fields
+    if (!doctorId || !appointmentDate || !appointmentTime || !appointmentType || !patientName || !contactNumber || !symptoms) {
+      console.log('Validation failed: Missing required fields');
+      return res.status(400).json({
+        success: false,
+        error: 'All required fields must be filled'
+      });
+    }
+
+    // Validate appointment type
+    if (!['physical', 'online'].includes(appointmentType)) {
+      console.log('Validation failed: Invalid appointment type');
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid appointment type. Must be "physical" or "online"'
+      });
+    }
+
+    // Get elder information to get family_id
+    console.log('Fetching elder information for ID:', elderId);
+    const elderResult = await pool.query(
+      'SELECT family_id, name FROM elder WHERE elder_id = $1',
+      [elderId]
+    );
+
+    if (elderResult.rows.length === 0) {
+      console.log('Elder not found with ID:', elderId);
+      return res.status(404).json({
+        success: false,
+        error: 'Elder not found'
+      });
+    }
+
+    const familyId = elderResult.rows[0].family_id;
+    console.log('Found family_id:', familyId);
+
+    // Verify doctor exists and is approved
+    console.log('Verifying doctor with ID:', doctorId);
+    const doctorResult = await pool.query(
+      `SELECT d.doctor_id, u.name as doctor_name 
+       FROM doctor d 
+       INNER JOIN "User" u ON d.user_id = u.user_id 
+       WHERE d.doctor_id = $1 AND d.status = 'confirmed'`,
+      [doctorId]
+    );
+
+    if (doctorResult.rows.length === 0) {
+      console.log('Doctor not found or not approved with ID:', doctorId);
+      return res.status(404).json({
+        success: false,
+        error: 'Doctor not found or not approved'
+      });
+    }
+
+    console.log('Doctor verified:', doctorResult.rows[0]);
+
+    // Combine date and time into a timestamp
+    const dateTimeString = `${appointmentDate} ${appointmentTime}:00`;
+    const appointmentDateTime = new Date(dateTimeString);
+    
+    console.log('Appointment date/time:', {
+      dateTimeString,
+      appointmentDateTime: appointmentDateTime.toISOString()
+    });
+
+    // Check if the appointment time is in the future
+    const now = new Date();
+    if (appointmentDateTime <= now) {
+      console.log('Appointment time validation failed: time is in the past');
+      return res.status(400).json({
+        success: false,
+        error: 'Appointment date and time must be in the future'
+      });
+    }
+
+    // Check for conflicting appointments (same doctor, same time)
+    console.log('Checking for appointment conflicts...');
+    const conflictCheck = await pool.query(
+      `SELECT appointment_id FROM appointment 
+       WHERE doctor_id = $1 
+       AND date_time = $2 
+       AND status IN ('pending', 'approved')`,
+      [doctorId, appointmentDateTime]
+    );
+
+    if (conflictCheck.rows.length > 0) {
+      console.log('Appointment conflict found:', conflictCheck.rows[0]);
+      return res.status(400).json({
+        success: false,
+        error: 'This time slot is already booked. Please select a different time.'
+      });
+    }
+
+    // Prepare notes with additional information
+    let appointmentNotes = notes || '';
+    
+    // Add appointment-specific information to notes
+    const additionalInfo = [];
+    additionalInfo.push(`Patient: ${patientName}`);
+    additionalInfo.push(`Contact: ${contactNumber}`);
+    additionalInfo.push(`Emergency Contact: ${emergencyContact}`);
+    additionalInfo.push(`Symptoms: ${symptoms}`);
+    
+    if (appointmentType === 'online' && preferredPlatform) {
+      additionalInfo.push(`Preferred Platform: ${preferredPlatform}`);
+    }
+    
+    if (appointmentNotes) {
+      additionalInfo.push(`Additional Notes: ${appointmentNotes}`);
+    }
+    
+    const finalNotes = additionalInfo.join('\n');
+
+    console.log('Inserting appointment into database...');
+    console.log('Insert parameters:', {
+      elderId: parseInt(elderId),
+      familyId: parseInt(familyId),
+      doctorId: parseInt(doctorId),
+      appointmentDateTime: appointmentDateTime.toISOString(),
+      status: 'pending',
+      finalNotes,
+      appointmentType
+    });
+
+    // Insert appointment into database
+    const insertResult = await pool.query(
+      `INSERT INTO appointment (
+        elder_id, 
+        family_id, 
+        doctor_id, 
+        date_time, 
+        status, 
+        notes, 
+        appointment_type,
+        created_at,
+        updated_at
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      RETURNING 
+        appointment_id,
+        elder_id,
+        family_id,
+        doctor_id,
+        date_time,
+        status,
+        notes,
+        appointment_type,
+        created_at`,
+      [
+        parseInt(elderId),
+        parseInt(familyId),
+        parseInt(doctorId),
+        appointmentDateTime,
+        'pending',
+        finalNotes,
+        appointmentType
+      ]
+    );
+
+    const newAppointment = insertResult.rows[0];
+    console.log('Appointment created successfully:', newAppointment);
+
+    // Return success response with appointment details
+    res.status(201).json({
+      success: true,
+      message: 'Appointment booked successfully',
+      appointment: {
+        appointment_id: newAppointment.appointment_id,
+        elder_id: newAppointment.elder_id,
+        family_id: newAppointment.family_id,
+        doctor_id: newAppointment.doctor_id,
+        date_time: newAppointment.date_time,
+        status: newAppointment.status,
+        appointment_type: newAppointment.appointment_type,
+        created_at: newAppointment.created_at,
+        elder_name: elderResult.rows[0].name,
+        doctor_name: doctorResult.rows[0].doctor_name,
+        patient_name: patientName,
+        contact_number: contactNumber,
+        emergency_contact: emergencyContact,
+        symptoms: symptoms,
+        notes: notes,
+        preferred_platform: preferredPlatform
+      }
+    });
+
+  } catch (err) {
+    console.error('Error creating appointment:', err);
+    console.error('Error stack:', err.stack);
+    console.error('Error details:', {
+      code: err.code,
+      detail: err.detail,
+      constraint: err.constraint,
+      table: err.table,
+      column: err.column
+    });
+    
+    // Handle specific database errors
+    if (err.code === '23503') { // Foreign key constraint violation
+      console.log('Foreign key constraint violation');
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid elder, family, or doctor reference'
+      });
+    }
+    
+    if (err.code === '23505') { // Unique constraint violation
+      console.log('Unique constraint violation');
+      return res.status(400).json({
+        success: false,
+        error: 'An appointment already exists for this time slot'
+      });
+    }
+
+    if (err.code === '42703') { // Undefined column
+      console.log('Column does not exist error');
+      return res.status(500).json({
+        success: false,
+        error: 'Database schema error - missing column'
+      });
+    }
+
+    if (err.code === '42P01') { // Undefined table
+      console.log('Table does not exist error');
+      return res.status(500).json({
+        success: false,
+        error: 'Database schema error - missing table'
+      });
+    }
+
+    if (err.code === '22P02') { // Invalid text representation
+      console.log('Invalid data type error - possibly invalid enum value');
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid data format provided. Please check appointment status and type values.'
+      });
+    }
+    
+    res.status(500).json({
+      success: false,
+      error: 'Error creating appointment',
+      details: process.env.NODE_ENV === 'development' ? err.message : undefined
+    });
+  }
+};
+
+
+
+// Get appointments for an elder
+const getElderAppointments = async (req, res) => {
+  const { elderId } = req.params;
+  
+  try {
+    console.log('Getting appointments for elder ID:', elderId);
+    
+    const result = await pool.query(
+      `SELECT 
+        a.appointment_id,
+        a.elder_id,
+        a.family_id,
+        a.doctor_id,
+        a.date_time,
+        a.status,
+        a.notes,
+        a.appointment_type,
+        a.created_at,
+        a.updated_at,
+        u.name as doctor_name,
+        d.specialization,
+        d.current_institution,
+        e.name as elder_name
+      FROM appointment a       INNER JOIN doctor d ON a.doctor_id = d.doctor_id
+      INNER JOIN "User" u ON d.user_id = u.user_id
+      INNER JOIN elder e ON a.elder_id = e.elder_id
+      WHERE a.elder_id = $1
+      ORDER BY a.date_time DESC`,
+      [elderId]
+    );
+    
+    console.log('Found appointments:', result.rows.length);
+    
+    res.json({
+      success: true,
+      appointments: result.rows,
+      count: result.rows.length
+    });
+    
+  } catch (err) {
+    console.error('Error fetching elder appointments:', err);
+    res.status(500).json({
+      success: false,
+      error: 'Error fetching appointments'
+    });
+  }
+};
+
 
 // Bulk update elders (for batch operations)
 const bulkUpdateElders = async (req, res) => {
@@ -1466,7 +1766,9 @@ module.exports = {
   getAllDoctorsForOnlineMeeting,
   getDoctorById,           // Add this
   getAppointmentBookingInfo,
-  bulkUpdateElders
+  bulkUpdateElders,
+  createAppointment,        // Add this
+  getElderAppointments  
 };
 
 

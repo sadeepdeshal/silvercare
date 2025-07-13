@@ -26,6 +26,8 @@ const PhysicalAppointment = () => {
   const [elderInfo, setElderInfo] = useState(null);
   const [dataLoading, setDataLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState(null);
 
   // Fetch appointment booking info from backend
   useEffect(() => {
@@ -143,7 +145,7 @@ const PhysicalAppointment = () => {
   // Generate available time slots
   const generateTimeSlots = () => {
     const slots = [];
-    // Morning slots (9 AM - 12 PM)
+        // Morning slots (9 AM - 12 PM)
     for (let hour = 9; hour < 12; hour++) {
       slots.push(`${hour.toString().padStart(2, '0')}:00`);
       slots.push(`${hour.toString().padStart(2, '0')}:30`);
@@ -164,19 +166,56 @@ const PhysicalAppointment = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle form submission - will implement later
-    console.log('Physical appointment booking data:', {
-      elderId,
-      doctorId,
-      meetingType,
-      selectedDate,
-      selectedTime,
-      appointmentDetails,
-      doctorInfo,
-      elderInfo
-    });
+    
+    try {
+      setSubmitting(true);
+      setSubmitError(null);
+      
+      // Validate required fields
+      if (!selectedDate || !selectedTime || !appointmentDetails.patientName || 
+          !appointmentDetails.contactNumber || !appointmentDetails.symptoms || 
+          !appointmentDetails.emergencyContact) {
+        throw new Error('Please fill in all required fields');
+      }
+      
+      // Prepare appointment data
+      const appointmentData = {
+        doctorId: parseInt(doctorId),
+        appointmentDate: selectedDate,
+        appointmentTime: selectedTime,
+        appointmentType: 'physical',
+        patientName: appointmentDetails.patientName,
+        contactNumber: appointmentDetails.contactNumber,
+        symptoms: appointmentDetails.symptoms,
+        notes: appointmentDetails.notes,
+        emergencyContact: appointmentDetails.emergencyContact
+      };
+      
+      console.log('Submitting physical appointment:', appointmentData);
+      
+      // Create appointment
+      const response = await elderApi.createAppointment(elderId, appointmentData);
+      
+      if (response.success) {
+        console.log('Appointment created successfully:', response.appointment);
+        
+        // Show success message and redirect
+        alert(`Appointment booked successfully!\n\nAppointment ID: ${response.appointment.appointment_id}\nStatus: ${response.appointment.status}\nDate: ${new Date(response.appointment.date_time).toLocaleString()}`);
+        
+        // Redirect to appointments page or elder dashboard
+        navigate(`/family-member/elder/${elderId}/appointments`);
+      } else {
+        throw new Error(response.error || 'Failed to create appointment');
+      }
+      
+    } catch (err) {
+      console.error('Error creating appointment:', err);
+      setSubmitError(err.message || 'Failed to book appointment. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const calendarDays = generateCalendarDays();
@@ -275,6 +314,13 @@ const PhysicalAppointment = () => {
             </button>
           </div>
 
+          {/* Show submit error if any */}
+          {submitError && (
+            <div className={styles.errorAlert}>
+              <p>❌ {submitError}</p>
+            </div>
+          )}
+
           {/* Appointment Info Cards */}
           <div className={styles.infoCards}>
             <div className={styles.infoCard}>
@@ -291,7 +337,7 @@ const PhysicalAppointment = () => {
                     <p>📧 {doctorInfo.email}</p>
                     <p>🎓 {doctorInfo.years_experience} years experience</p>
                   </>
-                                  )}
+                )}
               </div>
             </div>
 
@@ -409,7 +455,7 @@ const PhysicalAppointment = () => {
               <form onSubmit={handleSubmit} className={styles.appointmentDetailsForm}>
                 <div className={styles.formRow}>
                   <div className={styles.formGroup}>
-                    <label htmlFor="patientName">Patient Name</label>
+                    <label htmlFor="patientName">Patient Name *</label>
                     <input
                       type="text"
                       id="patientName"
@@ -421,7 +467,7 @@ const PhysicalAppointment = () => {
                     />
                   </div>
                   <div className={styles.formGroup}>
-                    <label htmlFor="contactNumber">Contact Number</label>
+                    <label htmlFor="contactNumber">Contact Number *</label>
                     <input
                       type="tel"
                       id="contactNumber"
@@ -435,7 +481,7 @@ const PhysicalAppointment = () => {
                 </div>
 
                 <div className={styles.formGroup}>
-                  <label htmlFor="symptoms">Symptoms / Reason for Visit</label>
+                  <label htmlFor="symptoms">Symptoms / Reason for Visit *</label>
                   <textarea
                     id="symptoms"
                     name="symptoms"
@@ -448,7 +494,7 @@ const PhysicalAppointment = () => {
                 </div>
 
                 <div className={styles.formGroup}>
-                  <label htmlFor="emergencyContact">Emergency Contact</label>
+                  <label htmlFor="emergencyContact">Emergency Contact *</label>
                   <input
                     type="tel"
                     id="emergencyContact"
@@ -482,6 +528,7 @@ const PhysicalAppointment = () => {
                       <p><strong>Duration:</strong> 2 hours</p>
                       <p><strong>Type:</strong> Physical Meeting</p>
                       <p><strong>Fee:</strong> Rs. {doctorInfo?.fee || 2500}</p>
+                      <p><strong>Status:</strong> Pending (awaiting doctor confirmation)</p>
                     </div>
                   </div>
                 )}
@@ -491,9 +538,16 @@ const PhysicalAppointment = () => {
                   <button
                     type="submit"
                     className={styles.submitButton}
-                    disabled={!selectedDate || !selectedTime || !appointmentDetails.patientName}
+                    disabled={!selectedDate || !selectedTime || !appointmentDetails.patientName || submitting}
                   >
-                    📅 Book Physical Appointment
+                    {submitting ? (
+                      <>
+                        <span className={styles.spinner}></span>
+                        Booking Appointment...
+                      </>
+                    ) : (
+                      '📅 Book Physical Appointment'
+                    )}
                   </button>
                 </div>
               </form>

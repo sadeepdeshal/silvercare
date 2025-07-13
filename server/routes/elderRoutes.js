@@ -8,13 +8,14 @@ const {
   createElder,
   getDoctorsByElderDistrict,
   getAllDoctorsForOnlineMeeting,
-  getDoctorById,           // Add this import
-  getAppointmentBookingInfo // Add this import
+  getDoctorById,
+  getAppointmentBookingInfo,
+  createAppointment,        // Add this import
+  getElderAppointments      // Add this import
 } = require('../controllers/elderController');
 
 const { 
   getElderDetails,
-  getElderAppointments,
   getUpcomingAppointments,
   getPastAppointments,
   getAllAppointments,
@@ -43,6 +44,12 @@ router.get('/:elderId/doctors', getDoctorsByElderDistrict);
 
 // Get all doctors for online meetings - MUST BE BEFORE /:elderId route
 router.get('/:elderId/doctors/online', getAllDoctorsForOnlineMeeting);
+
+// Create new appointment - MUST BE BEFORE /:elderId route
+router.post('/:elderId/appointments', createAppointment);
+
+// Get elder appointments - MUST BE BEFORE /:elderId route
+router.get('/:elderId/appointments', getElderAppointments);
 
 // Appointment routes for elders - MUST BE BEFORE /:elderId route
 router.get('/:elderId/appointments/upcoming', getUpcomingAppointments);
