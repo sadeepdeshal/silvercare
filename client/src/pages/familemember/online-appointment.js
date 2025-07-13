@@ -30,6 +30,37 @@ const OnlineAppointment = () => {
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState('');
 
+  // Alternative simple approach for date formatting
+  const formatDateForDisplay = (dateString) => {
+    if (!dateString) return '';
+    
+    // Split the date string and create month names array
+    const [year, month, day] = dateString.split('-');
+    const monthNames = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    
+    // Create date object and get day of week
+    const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+    const dayOfWeek = dayNames[date.getDay()];
+    
+    return `${dayOfWeek}, ${monthNames[parseInt(month) - 1]} ${parseInt(day)}, ${year}`;
+  };
+
+  // Alternative simple approach for time formatting
+  const formatTimeForDisplay = (timeString) => {
+    if (!timeString) return '';
+    
+    const [hours, minutes] = timeString.split(':');
+    const hour12 = parseInt(hours) > 12 ? parseInt(hours) - 12 : parseInt(hours);
+    const ampm = parseInt(hours) >= 12 ? 'PM' : 'AM';
+    const displayHour = hour12 === 0 ? 12 : hour12;
+    
+    return `${displayHour}:${minutes} ${ampm}`;
+  };
+
   // Fetch appointment booking info from backend
   useEffect(() => {
     const fetchAppointmentInfo = async () => {
@@ -106,7 +137,7 @@ const OnlineAppointment = () => {
     }
   }, [currentUser, isAuthenticated, loading, navigate]);
 
-  // Generate calendar days for current month
+  // FIXED: Generate calendar days for current month without timezone issues
   const generateCalendarDays = () => {
     const today = new Date();
     const currentMonth = today.getMonth();
@@ -123,15 +154,19 @@ const OnlineAppointment = () => {
       days.push(null);
     }
     
-    // Add days of the month
+    // Add days of the month - FIXED: Create date string manually to avoid timezone conversion
     for (let day = 1; day <= daysInMonth; day++) {
+      // Create date string manually in YYYY-MM-DD format
+      const dateString = `${currentYear}-${(currentMonth + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+      
+      // Create date object for comparison (using local timezone consistently)
       const date = new Date(currentYear, currentMonth, day);
       const isToday = date.toDateString() === today.toDateString();
       const isPast = date < today;
       
       days.push({
         day,
-        date: date.toISOString().split('T')[0],
+        date: dateString, // Use manually created string instead of toISOString()
         isToday,
         isPast,
         isAvailable: !isPast // Online appointments available all days
@@ -186,6 +221,8 @@ const OnlineAppointment = () => {
       };
 
       console.log('Submitting appointment data:', appointmentData);
+      console.log('Selected date for display:', formatDateForDisplay(selectedDate));
+      console.log('Selected time for display:', formatTimeForDisplay(selectedTime));
 
       const response = await elderApi.createAppointment(elderId, appointmentData);
       
@@ -362,7 +399,7 @@ const OnlineAppointment = () => {
                     <p><strong>{elderInfo.name}</strong></p>
                     <p>Age: {elderInfo.age} years</p>
                     <p>Gender: {elderInfo.gender}</p>
-                                        <p>📍 {elderInfo.district}</p>
+                    <p>📍 {elderInfo.district}</p>
                     <p>📞 {elderInfo.contact}</p>
                     {elderInfo.medical_conditions && (
                       <p><strong>Medical Conditions:</strong> {elderInfo.medical_conditions}</p>
@@ -376,7 +413,7 @@ const OnlineAppointment = () => {
               <div className={styles.cardIcon}>💰</div>
               <div className={styles.cardContent}>
                 <h3>Appointment Details</h3>
-                <p><strong>Meeting Type:</strong> Online</p>
+                                <p><strong>Meeting Type:</strong> Online</p>
                 <p><strong>Duration:</strong> 1 hour</p>
                 <p><strong>Consultation Fee:</strong> Rs. {doctorInfo?.fee || 1800}</p>
                 <p><strong>Platform:</strong> Video Call</p>
@@ -413,6 +450,10 @@ const OnlineAppointment = () => {
                         onClick={() => {
                           if (dayInfo && dayInfo.isAvailable) {
                             setSelectedDate(dayInfo.date);
+                            console.log('Calendar day clicked:', dayInfo.day);
+                            console.log('Date string created:', dayInfo.date);
+                            console.log('Selected date set to:', dayInfo.date);
+                            console.log('Formatted for display:', formatDateForDisplay(dayInfo.date));
                           }
                         }}
                       >
@@ -448,7 +489,11 @@ const OnlineAppointment = () => {
                     className={`${styles.timeSlot} ${
                       selectedTime === time ? styles.selectedTime : ''
                     }`}
-                    onClick={() => setSelectedTime(time)}
+                    onClick={() => {
+                      setSelectedTime(time);
+                      console.log('Selected time:', time);
+                      console.log('Formatted for display:', formatTimeForDisplay(time));
+                    }}
                     disabled={!selectedDate}
                   >
                     {time}
@@ -566,18 +611,20 @@ const OnlineAppointment = () => {
                   </div>
                 </div>
 
-                {/* Summary Section */}
+                {/* Summary Section - FIXED DATE DISPLAY WITH ALTERNATIVE APPROACH */}
                 {selectedDate && selectedTime && (
                   <div className={styles.appointmentSummary}>
                     <h3>📋 Appointment Summary</h3>
                     <div className={styles.summaryContent}>
-                      <p><strong>Date:</strong> {new Date(selectedDate).toLocaleDateString()}</p>
-                      <p><strong>Time:</strong> {selectedTime}</p>
+                      <p><strong>Date:</strong> {formatDateForDisplay(selectedDate)}</p>
+                      <p><strong>Time:</strong> {formatTimeForDisplay(selectedTime)}</p>
                       <p><strong>Duration:</strong> 1 hour</p>
                       <p><strong>Type:</strong> Online Meeting</p>
                       <p><strong>Platform:</strong> {appointmentDetails.preferredPlatform}</p>
                       <p><strong>Fee:</strong> Rs. {doctorInfo?.fee || 1800}</p>
                     </div>
+                    
+ 
                   </div>
                 )}
 
@@ -608,4 +655,3 @@ const OnlineAppointment = () => {
 };
 
 export default OnlineAppointment;
-
