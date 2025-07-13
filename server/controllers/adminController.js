@@ -1,6 +1,6 @@
 const pool = require('../db');
 const bcrypt = require('bcryptjs'); // Add this import
-const { sendDoctorApprovalEmail } = require('../services/emailservice'); // Add this import
+const { sendDoctorApprovalEmail, sendHealthProfessionalApprovalEmail } = require('../services/emailservice'); // Add this import
 
 const getAdminDashboard = async (req, res) => {
   try {
@@ -14,6 +14,8 @@ const getAdminDashboard = async (req, res) => {
         (SELECT COUNT(*) FROM "User" WHERE role = 'caregiver') as caregivers,
         (SELECT COUNT(*) FROM doctor WHERE status = 'confirmed') as active_doctors,
         (SELECT COUNT(*) FROM doctor WHERE status = 'pending') as pending_doctors,
+        (SELECT COUNT(*) FROM counselor WHERE status = 'confirmed') as active_health_professionals,
+        (SELECT COUNT(*) FROM counselor WHERE status = 'pending') as pending_health_professionals,
         (SELECT COUNT(*) FROM appointment WHERE date_time >= CURRENT_TIMESTAMP) as upcoming_appointments
     `;
     
@@ -47,6 +49,33 @@ const getAdminDashboard = async (req, res) => {
     console.log('Pending doctors data:', pendingResult.rows);
     
     const pendingDoctors = pendingResult.rows;
+
+    // Get pending health professionals with full details
+    const pendingHealthProfessionalsQuery = `
+      SELECT 
+        c.counselor_id as health_professional_id,
+        c.user_id,
+        c.specialization,
+        c.license_number,
+        c.alternative_number,
+        c.current_institution,
+        c.years_of_experience,
+        c.status,
+        u.name,
+        u.email,
+        u.phone,
+        u.created_at
+      FROM counselor c
+      JOIN "User" u ON c.user_id = u.user_id
+      WHERE c.status = 'pending'
+      ORDER BY u.created_at DESC
+    `;
+    
+    const pendingHealthProfessionalsResult = await pool.query(pendingHealthProfessionalsQuery);
+    console.log('Pending health professionals found:', pendingHealthProfessionalsResult.rows.length);
+    console.log('Pending health professionals data:', pendingHealthProfessionalsResult.rows);
+    
+    const pendingHealthProfessionals = pendingHealthProfessionalsResult.rows;
 
     // Get recent registrations
     const recentRegistrationsQuery = `
@@ -90,7 +119,7 @@ const getAdminDashboard = async (req, res) => {
       data: {
         stats: stats,
         pendingDoctors: pendingDoctors,
-        pendingHealthProfessionals: [], // Add empty array for health professionals
+        pendingHealthProfessionals: pendingHealthProfessionals, // Add health professionals data
         recentRegistrations: recentRegistrations,
         newBookings: newBookings,
         monthlySignups: monthlySignups
@@ -100,6 +129,8 @@ const getAdminDashboard = async (req, res) => {
     console.log('Final response:');
     console.log('- Pending doctors count:', pendingDoctors.length);
     console.log('- Stats pending_doctors:', stats.pending_doctors);
+    console.log('- Pending health professionals count:', pendingHealthProfessionals.length);
+    console.log('- Stats pending_health_professionals:', stats.pending_health_professionals);
     console.log('=== ADMIN DASHBOARD DEBUG END ===');
 
     res.json(responseData);
@@ -197,6 +228,84 @@ const approveProfessional = async (req, res) => {
         throw new Error('Failed to send approval email');
       }
       
+    } else if (type === 'healthprofessional') {
+      // First, get the health professional's details including user information
+      const healthProfessionalQuery = `
+        SELECT 
+          c.counselor_id,
+          c.user_id,
+          c.specialization,
+          c.license_number,
+          c.alternative_number,
+          c.current_institution,
+          c.years_of_experience,
+          c.status,
+          u.name,
+          u.email,
+          u.phone
+        FROM counselor c
+        JOIN "User" u ON c.user_id = u.user_id
+        WHERE c.counselor_id = $1
+      `;
+      
+      const healthProfessionalResult = await pool.query(healthProfessionalQuery, [id]);
+      
+      if (healthProfessionalResult.rows.length === 0) {
+        return res.status(404).json({ 
+          success: false, 
+          error: 'Health professional not found' 
+        });
+      }
+      
+      const healthProfessionalData = healthProfessionalResult.rows[0];
+      console.log('Health professional data found:', healthProfessionalData);
+      
+      // Send approval email and get the temporary password
+      const emailResult = await sendHealthProfessionalApprovalEmail(healthProfessionalData);
+      
+      if (emailResult.success) {
+        // Hash the temporary password
+        const hashedPassword = await bcrypt.hash(emailResult.tempPassword, 10);
+        
+        // Begin transaction
+        await pool.query('BEGIN');
+        
+        try {
+          // Update health professional status to confirmed
+          const updateHealthProfessionalResult = await pool.query(
+            'UPDATE counselor SET status = $1 WHERE counselor_id = $2 RETURNING *', 
+            ['confirmed', id]
+          );
+          
+          // Update user password with the temporary password
+          const updateUserResult = await pool.query(
+            'UPDATE "User" SET password = $1 WHERE user_id = $2 RETURNING *',
+            [hashedPassword, healthProfessionalData.user_id]
+          );
+          
+          // Commit transaction
+          await pool.query('COMMIT');
+          
+          console.log('Health professional approved successfully:', updateHealthProfessionalResult.rows[0]);
+          console.log('User password updated successfully');
+          
+          res.json({ 
+            success: true, 
+            message: 'Health professional approved successfully. Approval email sent with temporary password.',
+            emailSent: true,
+            messageId: emailResult.messageId
+          });
+          
+        } catch (dbError) {
+          // Rollback transaction
+          await pool.query('ROLLBACK');
+          throw dbError;
+        }
+        
+      } else {
+        throw new Error('Failed to send approval email');
+      }
+      
     } else {
       return res.status(400).json({ 
         success: false, 
@@ -244,6 +353,25 @@ const rejectProfessional = async (req, res) => {
       console.log('Doctor rejected successfully:', result.rows[0]);
       
       // TODO: Optionally send rejection email to doctor
+      // You can implement this similar to the approval email
+      
+    } else if (type === 'healthprofessional') {
+      // Use 'rejected' as the rejected status
+      const result = await pool.query(
+        'UPDATE counselor SET status = $1 WHERE counselor_id = $2 RETURNING *', 
+        ['rejected', id]
+      );
+      
+      if (result.rows.length === 0) {
+        return res.status(404).json({ 
+          success: false, 
+          error: 'Health professional not found' 
+        });
+      }
+      
+      console.log('Health professional rejected successfully:', result.rows[0]);
+      
+      // TODO: Optionally send rejection email to health professional
       // You can implement this similar to the approval email
       
     } else {

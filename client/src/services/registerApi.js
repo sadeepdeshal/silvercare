@@ -10,12 +10,16 @@ export const registerCaregiver = (userData) => {
   return axios.post(`${API_BASE}/caregiver`, userData);
 };
 
-export const registerDoctor = (userData) => {
-  return axios.post(`${API_BASE}/doctor`, userData);
+export const registerDoctor = (userData, isMultipart = false) => {
+  return axios.post(`${API_BASE}/doctor`, userData, {
+    headers: isMultipart ? { 'Content-Type': 'multipart/form-data' } : {}
+  });
 };
 
-export const registerHealthProfessional = (userData) => {
-  return axios.post(`${API_BASE}/health-professional`, userData);
+export const registerHealthProfessional = (userData, isMultipart = false) => {
+  return axios.post(`${API_BASE}/health-professional`, userData, {
+    headers: isMultipart ? { 'Content-Type': 'multipart/form-data' } : {}
+  });
 };
 
 export const registerElder = (userData) => {

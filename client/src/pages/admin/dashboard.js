@@ -328,6 +328,24 @@ const AdminDashboard = () => {
               <p className={styles.statLabel}>Active Doctors</p>
             </div>
           </div>
+          <div className={styles.statCard}>
+            <div className={styles.statIcon}>🧠</div>
+            <div className={styles.statContent}>
+              <h3 className={styles.statNumber}>
+                {dataLoading ? '...' : stats.pending_health_professionals}
+              </h3>
+              <p className={styles.statLabel}>Pending Health Professional Approvals</p>
+            </div>
+          </div>
+          <div className={styles.statCard}>
+            <div className={styles.statIcon}>🩺</div>
+            <div className={styles.statContent}>
+              <h3 className={styles.statNumber}>
+                {dataLoading ? '...' : stats.active_health_professionals}
+              </h3>
+              <p className={styles.statLabel}>Active Health Professionals</p>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -433,7 +451,7 @@ const AdminDashboard = () => {
       </div>
 
       {/* Pending Approvals Section */}
-      {pendingDoctors.length > 0 && (
+      {(pendingDoctors.length > 0 || pendingHealthProfessionals.length > 0) && (
         <div className={styles.pendingApprovalsSection}>
           <div className={styles.approvalsContainer}>
             <h2 className={styles.sectionTitle}>⏳ Pending Approvals</h2>

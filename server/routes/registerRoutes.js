@@ -43,6 +43,34 @@ const doctorUpload = multer({
     }
   }
 });
+
+// --- Add this block for health professional credentials upload ---
+const healthProfessionalStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const uploadDir = 'uploads/health_professional_credentials/';
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    cb(null, uploadDir);
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, 'health-professional-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+const healthProfessionalUpload = multer({
+  storage: healthProfessionalStorage,
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: function (req, file, cb) {
+    // Accept pdf, jpg, jpeg, png
+    const allowed = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
+    if (allowed.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only PDF, JPG, or PNG files are allowed'));
+    }
+  }
+});
 // ----------------------------------------------------
 
 // General registration routes
@@ -53,7 +81,8 @@ router.post('/caregiver', createCaregiverRegistration);
 // Use multer for doctor registration
 router.post('/doctor', doctorUpload.single('medicalCredentials'), createDoctorRegistration);
 
-router.post('/health-professional', createHealthProfessionalRegistration);
+// Use multer for health professional registration
+router.post('/health-professional', healthProfessionalUpload.single('professionalCredentials'), createHealthProfessionalRegistration);
 router.post('/elder', createElderRegistration);
 
 // Elder-specific routes

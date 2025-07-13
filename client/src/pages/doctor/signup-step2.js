@@ -29,8 +29,6 @@ export const DoctorRegStep2 = () => {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  // Add state to store and display the generated password
-  const [generatedPassword, setGeneratedPassword] = useState('');
 
   // Medical license validation function
   const validateMedicalLicense = (license) => {
@@ -165,11 +163,6 @@ export const DoctorRegStep2 = () => {
 
       // Prepare form data for API
       const tempPassword = generateTempPassword();
-      // Store the password in state to display it
-      setGeneratedPassword(tempPassword);
-      
-      // Show the password in console for debugging
-      console.log('Generated temporary password:', tempPassword);
 
       // If you need to send file, use FormData, else send as JSON
       let apiData;
@@ -211,7 +204,7 @@ export const DoctorRegStep2 = () => {
       localStorage.removeItem('doctorStep1Data');
       localStorage.removeItem('doctorStep2Data');
 
-      alert(`Registration successful! Your account is pending approval. Your temporary password is: ${tempPassword}`);
+      alert('Registration successful! Your account is pending approval. A temporary password has been assigned and will be sent to your email.');
 
       navigate('/login');
     } catch (error) {
@@ -288,33 +281,6 @@ export const DoctorRegStep2 = () => {
                 {errors.submit && (
                   <div className={styles.submitError}>
                     <span className={styles.errorMessage}>{errors.submit}</span>
-                  </div>
-                )}
-
-                {/* Display generated password if available */}
-                {generatedPassword && (
-                  <div style={{
-                    backgroundColor: '#d4edda',
-                    border: '1px solid #c3e6cb',
-                    borderRadius: '8px',
-                    padding: '12px',
-                    marginBottom: '16px'
-                  }}>
-                    <strong>Generated Temporary Password:</strong>
-                    <div style={{
-                      fontFamily: 'monospace',
-                      fontSize: '14px',
-                      backgroundColor: '#f8f9fa',
-                      padding: '8px',
-                      borderRadius: '4px',
-                      marginTop: '8px',
-                      border: '1px solid #dee2e6'
-                    }}>
-                      {generatedPassword}
-                    </div>
-                    <small style={{ color: '#6c757d', fontSize: '12px' }}>
-                      Please save this password as it will be used for login.
-                    </small>
                   </div>
                 )}
 
