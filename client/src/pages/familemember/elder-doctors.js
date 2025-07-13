@@ -95,9 +95,13 @@ const ElderDoctors = () => {
     doctor.district?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // UPDATED: Handle book appointment - navigate to specific appointment pages
   const handleBookAppointment = (doctorId) => {
-    // Navigate to appointment booking page with doctor and elder IDs
-    navigate(`/family-member/book-appointment/${elderId}/${doctorId}?meetingType=${meetingType}`);
+    if (meetingType === 'physical') {
+      navigate(`/family-member/book-appointment/${elderId}/${doctorId}/physical?meetingType=${meetingType}`);
+    } else if (meetingType === 'online') {
+      navigate(`/family-member/book-appointment/${elderId}/${doctorId}/online?meetingType=${meetingType}`);
+    }
   };
 
   const handleViewDoctorProfile = (doctorId) => {
@@ -155,6 +159,7 @@ const ElderDoctors = () => {
                     <span className={styles.feature}>✓ In-person consultation</span>
                     <span className={styles.feature}>✓ Physical examination</span>
                     <span className={styles.feature}>✓ Local doctors only</span>
+                    <span className={styles.feature}>✓ 2 hours duration</span>
                   </div>
                   <button className={styles.selectButton}>
                     Select Physical Meeting
@@ -175,6 +180,7 @@ const ElderDoctors = () => {
                     <span className={styles.feature}>✓ Video consultation</span>
                     <span className={styles.feature}>✓ All doctors available</span>
                     <span className={styles.feature}>✓ Convenient from home</span>
+                    <span className={styles.feature}>✓ 1 hour duration</span>
                   </div>
                   <button className={styles.selectButton}>
                     Select Online Meeting
@@ -244,7 +250,7 @@ const ElderDoctors = () => {
                   />
                   <div className={styles.searchIcon}>🔍</div>
                 </div>
-                <div className={styles.doctorCount}>
+                               <div className={styles.doctorCount}>
                   {dataLoading ? 'Loading...' : `${filteredDoctors.length} doctor${filteredDoctors.length !== 1 ? 's' : ''} found`}
                 </div>
               </div>
@@ -349,7 +355,7 @@ const ElderDoctors = () => {
                             <span className={styles.detailIcon}>📱</span>
                             <div className={styles.detailContent}>
                               <span className={styles.detailLabel}>Alternative</span>
-                                                            <span className={styles.detailValue}>{doctor.alternative_number}</span>
+                              <span className={styles.detailValue}>{doctor.alternative_number}</span>
                             </div>
                           </div>
                         )}
@@ -375,6 +381,17 @@ const ElderDoctors = () => {
                           <div className={styles.detailContent}>
                             <span className={styles.detailLabel}>License</span>
                             <span className={styles.detailValue}>{doctor.license_number}</span>
+                          </div>
+                        </div>
+
+                        {/* Duration Info */}
+                        <div className={styles.detailRow}>
+                          <span className={styles.detailIcon}>⏱️</span>
+                          <div className={styles.detailContent}>
+                            <span className={styles.detailLabel}>Duration</span>
+                            <span className={styles.detailValue}>
+                              {meetingType === 'physical' ? '2 hours' : '1 hour'}
+                            </span>
                           </div>
                         </div>
                       </div>
@@ -438,4 +455,3 @@ const ElderDoctors = () => {
 
 export default ElderDoctors;
 
-                                

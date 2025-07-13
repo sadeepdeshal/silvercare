@@ -19,6 +19,9 @@ import { HealthProfessionalRegStep2 } from './pages/healthproffesional/signup-st
 import { HealthProfessionalRegStep3 } from './pages/healthproffesional/signup-step3';
 import HealthProfessionalDashboard from './pages/healthproffesional/dashboard';
 import { DoctorRegStep2 } from './pages/doctor/signup-step2';
+// Import new appointment components
+import PhysicalAppointment from './pages/familemember/physical-appointment';
+import OnlineAppointment from './pages/familemember/online-appointment';
 
 import DoctorDashboard from './pages/doctor/dashboard';
 import ElderDashboard from './pages/elder/dashboard';
@@ -83,6 +86,19 @@ function App() {
           <Route path="/family-member/dashboard" element={
             <ProtectedRoute allowedRoles={['family_member']}>
               <FamilyMemberDashboard />
+            </ProtectedRoute>
+          } />
+
+                    {/* NEW: Add the appointment booking routes */}
+          <Route path="/family-member/book-appointment/:elderId/:doctorId/physical" element={
+            <ProtectedRoute allowedRoles={['family_member']}>
+              <PhysicalAppointment />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/family-member/book-appointment/:elderId/:doctorId/online" element={
+            <ProtectedRoute allowedRoles={['family_member']}>
+              <OnlineAppointment />
             </ProtectedRoute>
           } />
 
