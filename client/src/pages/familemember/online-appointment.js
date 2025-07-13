@@ -26,9 +26,9 @@ const OnlineAppointment = () => {
   const [doctorInfo, setDoctorInfo] = useState(null);
   const [elderInfo, setElderInfo] = useState(null);
   const [dataLoading, setDataLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState(null);
+  const [error, setError] = useState(null);
+  const [successMessage, setSuccessMessage] = useState('');
 
   // Fetch appointment booking info from backend
   useEffect(() => {
@@ -163,18 +163,15 @@ const OnlineAppointment = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    if (!selectedDate || !selectedTime) {
+      setError('Please select both date and time for the appointment');
+      return;
+    }
+
     try {
       setSubmitting(true);
-      setSubmitError(null);
+      setError(null);
       
-      // Validate required fields
-      if (!selectedDate || !selectedTime || !appointmentDetails.patientName || 
-          !appointmentDetails.contactNumber || !appointmentDetails.symptoms || 
-          !appointmentDetails.emergencyContact || !appointmentDetails.preferredPlatform) {
-        throw new Error('Please fill in all required fields');
-      }
-      
-      // Prepare appointment data
       const appointmentData = {
         doctorId: parseInt(doctorId),
         appointmentDate: selectedDate,
@@ -187,27 +184,26 @@ const OnlineAppointment = () => {
         emergencyContact: appointmentDetails.emergencyContact,
         preferredPlatform: appointmentDetails.preferredPlatform
       };
-      
-      console.log('Submitting online appointment:', appointmentData);
-      
-      // Create appointment
+
+      console.log('Submitting appointment data:', appointmentData);
+
       const response = await elderApi.createAppointment(elderId, appointmentData);
       
       if (response.success) {
-        console.log('Appointment created successfully:', response.appointment);
+        setSuccessMessage('Online appointment booked successfully!');
+        console.log('Appointment created:', response.appointment);
         
-        // Show success message and redirect
-        alert(`Online appointment booked successfully!\n\nAppointment ID: ${response.appointment.appointment_id}\nStatus: ${response.appointment.status}\nDate: ${new Date(response.appointment.date_time).toLocaleString()}\nPlatform: ${appointmentDetails.preferredPlatform}`);
-        
-        // Redirect to appointments page or elder dashboard
-        navigate(`/family-member/elder/${elderId}/appointments`);
+        // Redirect to appointments page after 2 seconds
+        setTimeout(() => {
+          navigate(`/family-member/elder/${elderId}/appointments`);
+        }, 2000);
       } else {
-        throw new Error(response.error || 'Failed to create appointment');
+        throw new Error(response.error || 'Failed to book appointment');
       }
       
     } catch (err) {
       console.error('Error creating appointment:', err);
-      setSubmitError(err.message || 'Failed to book appointment. Please try again.');
+      setError(err.message || 'Failed to book appointment. Please try again.');
     } finally {
       setSubmitting(false);
     }
@@ -258,7 +254,7 @@ const OnlineAppointment = () => {
   }
 
   // Show error if failed to load data
-  if (error) {
+  if (error && !doctorInfo) {
     return (
       <div className={styles.container}>
         <Navbar />
@@ -279,6 +275,26 @@ const OnlineAppointment = () => {
               >
                 ← Back to Doctors
               </button>
+            </div>
+          </div>
+        </FamilyMemberLayout>
+      </div>
+    );
+  }
+
+  // Show success message
+  if (successMessage) {
+    return (
+      <div className={styles.container}>
+        <Navbar />
+        <FamilyMemberLayout>
+          <div className={styles.content}>
+            <div className={styles.successContainer}>
+              <div className={styles.successIcon}>✅</div>
+              <h2>Appointment Booked Successfully!</h2>
+              <p>{successMessage}</p>
+              <p>Redirecting to appointments page...</p>
+              <div className={styles.loadingSpinner}></div>
             </div>
           </div>
         </FamilyMemberLayout>
@@ -309,10 +325,11 @@ const OnlineAppointment = () => {
             </button>
           </div>
 
-          {/* Show submit error if any */}
-          {submitError && (
-            <div className={styles.errorAlert}>
-              <p>❌ {submitError}</p>
+          {/* Error Message */}
+          {error && (
+            <div className={styles.errorMessage}>
+              <span className={styles.errorIcon}>⚠️</span>
+              {error}
             </div>
           )}
 
@@ -345,7 +362,7 @@ const OnlineAppointment = () => {
                     <p><strong>{elderInfo.name}</strong></p>
                     <p>Age: {elderInfo.age} years</p>
                     <p>Gender: {elderInfo.gender}</p>
-                    <p>📍 {elderInfo.district}</p>
+                                        <p>📍 {elderInfo.district}</p>
                     <p>📞 {elderInfo.contact}</p>
                     {elderInfo.medical_conditions && (
                       <p><strong>Medical Conditions:</strong> {elderInfo.medical_conditions}</p>
@@ -412,7 +429,7 @@ const OnlineAppointment = () => {
                   <div className={styles.legendItem}>
                     <div className={styles.legendColor + ' ' + styles.selectedColor}></div>
                     <span>Selected</span>
-                                      </div>
+                  </div>
                   <div className={styles.legendItem}>
                     <div className={styles.legendColor + ' ' + styles.pastColor}></div>
                     <span>Past</span>
@@ -446,7 +463,7 @@ const OnlineAppointment = () => {
               <form onSubmit={handleSubmit} className={styles.appointmentDetailsForm}>
                 <div className={styles.formRow}>
                   <div className={styles.formGroup}>
-                    <label htmlFor="patientName">Patient Name *</label>
+                    <label htmlFor="patientName">Patient Name</label>
                     <input
                       type="text"
                       id="patientName"
@@ -458,7 +475,7 @@ const OnlineAppointment = () => {
                     />
                   </div>
                   <div className={styles.formGroup}>
-                    <label htmlFor="contactNumber">Contact Number *</label>
+                    <label htmlFor="contactNumber">Contact Number</label>
                     <input
                       type="tel"
                       id="contactNumber"
@@ -473,7 +490,7 @@ const OnlineAppointment = () => {
 
                 <div className={styles.formRow}>
                   <div className={styles.formGroup}>
-                    <label htmlFor="emergencyContact">Emergency Contact *</label>
+                    <label htmlFor="emergencyContact">Emergency Contact</label>
                     <input
                       type="tel"
                       id="emergencyContact"
@@ -485,7 +502,7 @@ const OnlineAppointment = () => {
                     />
                   </div>
                   <div className={styles.formGroup}>
-                    <label htmlFor="preferredPlatform">Preferred Platform *</label>
+                    <label htmlFor="preferredPlatform">Preferred Platform</label>
                     <select
                       id="preferredPlatform"
                       name="preferredPlatform"
@@ -502,7 +519,7 @@ const OnlineAppointment = () => {
                 </div>
 
                 <div className={styles.formGroup}>
-                  <label htmlFor="symptoms">Symptoms / Reason for Visit *</label>
+                  <label htmlFor="symptoms">Symptoms / Reason for Visit</label>
                   <textarea
                     id="symptoms"
                     name="symptoms"
@@ -560,7 +577,6 @@ const OnlineAppointment = () => {
                       <p><strong>Type:</strong> Online Meeting</p>
                       <p><strong>Platform:</strong> {appointmentDetails.preferredPlatform}</p>
                       <p><strong>Fee:</strong> Rs. {doctorInfo?.fee || 1800}</p>
-                      <p><strong>Status:</strong> Pending (awaiting doctor confirmation)</p>
                     </div>
                   </div>
                 )}
@@ -574,7 +590,7 @@ const OnlineAppointment = () => {
                   >
                     {submitting ? (
                       <>
-                        <span className={styles.spinner}></span>
+                        <div className={styles.buttonSpinner}></div>
                         Booking Appointment...
                       </>
                     ) : (
