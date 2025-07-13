@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { elderApi } from '../../services/elderApi';
 import Navbar from '../../components/navbar';
 import FamilyMemberLayout from '../../components/FamilyMemberLayout';
 import styles from '../../components/css/familymember/online-appointment.module.css';
@@ -24,24 +25,68 @@ const OnlineAppointment = () => {
   });
   const [doctorInfo, setDoctorInfo] = useState(null);
   const [elderInfo, setElderInfo] = useState(null);
-  const [dataLoading, setDataLoading] = useState(false);
+  const [dataLoading, setDataLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Mock data - replace with actual API calls later
+  // Fetch appointment booking info from backend
   useEffect(() => {
-    // Mock doctor and elder info
-    setDoctorInfo({
-      name: 'Dr. Sarah Wilson',
-      specialization: 'General Medicine',
-      institution: 'Online Medical Center',
-      district: 'All Districts',
-      fee: 1800
-    });
-    
-    setElderInfo({
-      name: 'Robert Anderson',
-      age: 68,
-      district: 'Kandy'
-    });
+    const fetchAppointmentInfo = async () => {
+      if (!elderId || !doctorId) return;
+      
+      try {
+        setDataLoading(true);
+        setError(null);
+        
+        console.log('Fetching appointment booking info for elder:', elderId, 'doctor:', doctorId);
+        
+        const response = await elderApi.getAppointmentBookingInfo(elderId, doctorId);
+        
+        if (response.success) {
+          console.log('Appointment booking info received:', response);
+          
+          // Set doctor info
+          setDoctorInfo({
+            name: `Dr. ${response.doctor.name}`,
+            specialization: response.doctor.specialization,
+            institution: response.doctor.institution,
+            district: response.doctor.district,
+            fee: response.doctor.online_fee,
+            email: response.doctor.email,
+            phone: response.doctor.phone,
+            years_experience: response.doctor.years_experience
+          });
+          
+          // Set elder info
+          setElderInfo({
+            name: response.elder.name,
+            age: response.elder.age,
+            district: response.elder.district,
+            gender: response.elder.gender,
+            contact: response.elder.contact,
+            medical_conditions: response.elder.medical_conditions
+          });
+          
+          // Pre-fill form with elder's information
+          setAppointmentDetails(prev => ({
+            ...prev,
+            patientName: response.elder.name,
+            contactNumber: response.elder.contact,
+            emergencyContact: response.elder.contact // Default to same contact
+          }));
+          
+        } else {
+          throw new Error(response.error || 'Failed to fetch appointment information');
+        }
+        
+      } catch (err) {
+        console.error('Error fetching appointment info:', err);
+        setError(err.message || 'Failed to load appointment information');
+      } finally {
+        setDataLoading(false);
+      }
+    };
+
+    fetchAppointmentInfo();
   }, [elderId, doctorId]);
 
   // Protect the route
@@ -122,7 +167,9 @@ const OnlineAppointment = () => {
       meetingType,
       selectedDate,
       selectedTime,
-      appointmentDetails
+      appointmentDetails,
+      doctorInfo,
+      elderInfo
     });
   };
 
@@ -149,6 +196,52 @@ const OnlineAppointment = () => {
       <div className={styles.accessDenied}>
         <h2>Access Denied</h2>
         <p>Redirecting to login...</p>
+      </div>
+    );
+  }
+
+  // Show loading while fetching appointment data
+  if (dataLoading) {
+    return (
+      <div className={styles.container}>
+        <Navbar />
+        <FamilyMemberLayout>
+                    <div className={styles.content}>
+            <div className={styles.loadingContainer}>
+              <div className={styles.loadingSpinner}></div>
+              <h2>Loading appointment information...</h2>
+            </div>
+          </div>
+        </FamilyMemberLayout>
+      </div>
+    );
+  }
+
+  // Show error if failed to load data
+  if (error) {
+    return (
+      <div className={styles.container}>
+        <Navbar />
+        <FamilyMemberLayout>
+          <div className={styles.content}>
+            <div className={styles.errorContainer}>
+              <h2>Error Loading Appointment Information</h2>
+              <p>{error}</p>
+              <button 
+                className={styles.retryButton}
+                onClick={() => window.location.reload()}
+              >
+                Retry
+              </button>
+              <button 
+                className={styles.backButton}
+                onClick={() => navigate(`/family-member/elder/${elderId}/doctors`)}
+              >
+                ← Back to Doctors
+              </button>
+            </div>
+          </div>
+        </FamilyMemberLayout>
       </div>
     );
   }
@@ -188,6 +281,9 @@ const OnlineAppointment = () => {
                     <p>{doctorInfo.specialization}</p>
                     <p>{doctorInfo.institution}</p>
                     <p>🌐 {doctorInfo.district}</p>
+                    <p>📞 {doctorInfo.phone}</p>
+                    <p>📧 {doctorInfo.email}</p>
+                    <p>🎓 {doctorInfo.years_experience} years experience</p>
                   </>
                 )}
               </div>
@@ -201,7 +297,12 @@ const OnlineAppointment = () => {
                   <>
                     <p><strong>{elderInfo.name}</strong></p>
                     <p>Age: {elderInfo.age} years</p>
+                    <p>Gender: {elderInfo.gender}</p>
                     <p>📍 {elderInfo.district}</p>
+                    <p>📞 {elderInfo.contact}</p>
+                    {elderInfo.medical_conditions && (
+                      <p><strong>Medical Conditions:</strong> {elderInfo.medical_conditions}</p>
+                    )}
                   </>
                 )}
               </div>
@@ -410,7 +511,7 @@ const OnlineAppointment = () => {
                       <p><strong>Time:</strong> {selectedTime}</p>
                       <p><strong>Duration:</strong> 1 hour</p>
                       <p><strong>Type:</strong> Online Meeting</p>
-                                           <p><strong>Platform:</strong> {appointmentDetails.preferredPlatform}</p>
+                      <p><strong>Platform:</strong> {appointmentDetails.preferredPlatform}</p>
                       <p><strong>Fee:</strong> Rs. {doctorInfo?.fee || 1800}</p>
                     </div>
                   </div>

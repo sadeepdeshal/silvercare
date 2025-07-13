@@ -79,7 +79,7 @@ export const elderApi = {
     }
   },
 
-  // NEW FUNCTION: Get all doctors for online meetings
+  // Get all doctors for online meetings
   getAllDoctorsForOnlineMeeting: async (elderId) => {
     try {
       console.log('API: Fetching all doctors for online meeting, elder ID:', elderId);
@@ -95,6 +95,46 @@ export const elderApi = {
       return data;
     } catch (error) {
       console.error('API: Error fetching doctors for online meeting:', error);
+      throw error;
+    }
+  },
+
+  // NEW: Get doctor information by ID
+  getDoctorById: async (doctorId) => {
+    try {
+      console.log('API: Fetching doctor by ID:', doctorId);
+      const response = await fetch(`${API_BASE}/doctor/${doctorId}`);
+      const data = await response.json();
+      
+      console.log('API: Doctor details response:', data);
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to fetch doctor details');
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('API: Error fetching doctor details:', error);
+      throw error;
+    }
+  },
+
+  // NEW: Get appointment booking info (both elder and doctor)
+  getAppointmentBookingInfo: async (elderId, doctorId) => {
+    try {
+      console.log('API: Fetching appointment booking info for elder:', elderId, 'doctor:', doctorId);
+      const response = await fetch(`${API_BASE}/${elderId}/appointment-booking/${doctorId}`);
+      const data = await response.json();
+      
+      console.log('API: Appointment booking info response:', data);
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to fetch appointment booking information');
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('API: Error fetching appointment booking info:', error);
       throw error;
     }
   },
@@ -117,8 +157,7 @@ export const elderApi = {
       if (!response.ok) {
         throw new Error(data.error || 'Failed to update elder details');
       }
-      
-      return data;
+            return data;
     } catch (error) {
       console.error('API: Error updating elder details:', error);
       throw error;
@@ -242,7 +281,7 @@ export const elderApi = {
       console.error('Error updating elder photo:', error);
       throw error;
     }
-      }
+  }
 };
 
 export const getElderDetailsByEmail = (email) => {

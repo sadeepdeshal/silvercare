@@ -1180,6 +1180,201 @@ const getElderEmergencyContacts = async (req, res) => {
   }
 };
 
+// Get doctor information by doctor ID
+const getDoctorById = async (req, res) => {
+  const { doctorId } = req.params;
+  
+  try {
+    console.log('Getting doctor info for ID:', doctorId);
+    
+    const result = await pool.query(
+      `SELECT 
+        d.doctor_id,
+        d.user_id,
+        d.specialization,
+        d.license_number,
+        d.alternative_number,
+        d.current_institution,
+        d.years_experience,
+        d.district,
+        d.status,
+        u.name as doctor_name,
+        u.email as doctor_email,
+        u.phone as doctor_phone,
+        u.created_at
+      FROM doctor d
+      INNER JOIN "User" u ON d.user_id = u.user_id
+      WHERE d.doctor_id = $1 
+      AND d.status = 'confirmed'
+      AND u.role = 'doctor'`,
+      [doctorId]
+    );
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: 'Doctor not found or not approved'
+      });
+    }
+    
+    const doctor = result.rows[0];
+    
+    // Format doctor info for appointment booking
+    const doctorInfo = {
+      doctor_id: doctor.doctor_id,
+      name: doctor.doctor_name,
+      specialization: doctor.specialization,
+      institution: doctor.current_institution,
+      district: doctor.district,
+      email: doctor.doctor_email,
+      phone: doctor.doctor_phone,
+      years_experience: doctor.years_experience,
+      license_number: doctor.license_number,
+      alternative_number: doctor.alternative_number,
+      // Mock fees for now - you can add a fee column to doctor table later
+      physical_fee: 2500,
+      online_fee: 1800
+    };
+    
+    console.log('Doctor info retrieved:', doctorInfo);
+    
+    res.json({
+      success: true,
+      doctor: doctorInfo
+    });
+    
+  } catch (err) {
+    console.error('Error fetching doctor info:', err);
+    res.status(500).json({ 
+      success: false,
+      error: 'Error fetching doctor information' 
+    });
+  }
+};
+
+// Get appointment booking info (both doctor and elder info)
+const getAppointmentBookingInfo = async (req, res) => {
+  const { elderId, doctorId } = req.params;
+  
+  try {
+    console.log('Getting appointment booking info for elder:', elderId, 'doctor:', doctorId);
+    
+    // Get elder information
+    const elderResult = await pool.query(
+      `SELECT 
+        elder_id,
+        name,
+        email,
+        dob,
+        gender,
+        contact,
+        address,
+        district,
+        medical_conditions
+      FROM elder
+      WHERE elder_id = $1`,
+      [elderId]
+    );
+    
+    if (elderResult.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: 'Elder not found'
+      });
+    }
+    
+    // Get doctor information
+    const doctorResult = await pool.query(
+      `SELECT 
+        d.doctor_id,
+        d.user_id,
+        d.specialization,
+        d.license_number,
+        d.alternative_number,
+        d.current_institution,
+        d.years_experience,
+        d.district,
+        d.status,
+        u.name as doctor_name,
+        u.email as doctor_email,
+        u.phone as doctor_phone
+      FROM doctor d
+      INNER JOIN "User" u ON d.user_id = u.user_id
+      WHERE d.doctor_id = $1 
+      AND d.status = 'confirmed'
+      AND u.role = 'doctor'`,
+      [doctorId]
+    );
+    
+    if (doctorResult.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: 'Doctor not found or not approved'
+      });
+    }
+    
+    const elder = elderResult.rows[0];
+    const doctor = doctorResult.rows[0];
+    
+    // Calculate age from date of birth
+    const calculateAge = (dob) => {
+      const today = new Date();
+      const birthDate = new Date(dob);
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+      }
+      return age;
+    };
+    
+    // Format elder info
+    const elderInfo = {
+      elder_id: elder.elder_id,
+      name: elder.name,
+      age: calculateAge(elder.dob),
+      gender: elder.gender,
+      district: elder.district,
+      contact: elder.contact,
+      email: elder.email,
+      address: elder.address,
+      medical_conditions: elder.medical_conditions
+    };
+    
+    // Format doctor info
+    const doctorInfo = {
+      doctor_id: doctor.doctor_id,
+      name: doctor.doctor_name,
+      specialization: doctor.specialization,
+      institution: doctor.current_institution,
+      district: doctor.district,
+      email: doctor.doctor_email,
+      phone: doctor.doctor_phone,
+      years_experience: doctor.years_experience,
+      license_number: doctor.license_number,
+      alternative_number: doctor.alternative_number,
+      // Mock fees - you can add fee columns to doctor table later
+      physical_fee: 2500,
+      online_fee: 1800
+    };
+    
+    console.log('Appointment booking info retrieved successfully');
+    
+    res.json({
+      success: true,
+      elder: elderInfo,
+      doctor: doctorInfo
+    });
+    
+  } catch (err) {
+    console.error('Error fetching appointment booking info:', err);
+    res.status(500).json({ 
+      success: false,
+      error: 'Error fetching appointment booking information' 
+    });
+  }
+};
+
 // Bulk update elders (for batch operations)
 const bulkUpdateElders = async (req, res) => {
   const { updates } = req.body; // Array of {elder_id, field, value}
@@ -1269,6 +1464,8 @@ module.exports = {
   getElderEmergencyContacts,
   getDoctorsByElderDistrict,
   getAllDoctorsForOnlineMeeting,
+  getDoctorById,           // Add this
+  getAppointmentBookingInfo,
   bulkUpdateElders
 };
 
