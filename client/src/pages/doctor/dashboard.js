@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import Navbar from '../../components/navbar';
-import '../../components/css/doctor/dashboard.css';
+import styles from '../../components/css/doctor/dashboard.module.css';
 
 const API_BASE = "http://localhost:5000"; // Change if your backend runs elsewhere
 
@@ -151,121 +151,246 @@ const DoctorDashboard = () => {
     { id: 3, title: "Family call follow-up", time: "03:00 PM" },
   ];
 
-  if (loading) return <div style={{textAlign: 'center', marginTop: '2rem'}}>Loading...</div>;
-  if (error) return <div style={{color: 'red', textAlign: 'center', marginTop: '2rem'}}>Error: {error}</div>;
+  // Show loading while checking authentication
+  if (loading) {
+    return (
+      <div className={styles.loadingContainer}>
+        <div className={styles.loadingSpinner}></div>
+        <h2>Loading...</h2>
+        <p>Fetching your dashboard data...</p>
+      </div>
+    );
+  }
+
+  // Don't render if error
+  if (error) {
+    return (
+      <div className={styles.errorContainer}>
+        <h2>⚠️ Error</h2>
+        <p>{error}</p>
+        <button onClick={() => window.location.reload()} className={styles.retryBtn}>
+          🔄 Retry
+        </button>
+      </div>
+    );
+  }
 
   return (
-    <div className="doctor-dashboard eldercare-theme">
+    <div className={styles.dashboardContainer}>
       <Navbar />
-      <div className="dashboard-header">
-        <h2>
-          Welcome <span className="doctor-name">Dr. {currentUser.name || "Doe"}!</span>
-        </h2>
-      </div>
-      <div className="dashboard-main">
-        {/* Left Column */}
-        <div className="dashboard-left">
-          <div className="card daily-read">
-            <img src="https://images.unsplash.com/photo-1588776814546-ec7e8c8b4c2a?auto=format&fit=crop&w=400&q=80" alt="Daily Read" className="daily-read-img" />
-            <div>
-              <h4>Daily Read</h4>
-              <p>DNA origami vaccine: DoNAs pave way for personalized cancer immunotherapy.</p>
-              <button className="read-more-btn">Read more</button>
+      
+      {/* Header Section */}
+      <div className={styles.headerSection}>
+        <div className={styles.welcomeCard}>
+          <div className={styles.welcomeContent}>
+            <h1 className={styles.welcomeTitle}>Welcome back, Dr. {currentUser.name}!</h1>
+            <p className={styles.welcomeSubtitle}>Manage your patients and appointments from your medical dashboard</p>
+            <div className={styles.userInfo}>
+              <span className={styles.userEmail}>📧 {currentUser.email}</span>
+              <span className={styles.userRole}>👨‍⚕️ {currentUser.role.replace('_', ' ').toUpperCase()}</span>
             </div>
           </div>
-          <div className="card calendar">
-            <div className="calendar-header">
-              <span>{new Date().toLocaleString('default', { month: 'long', year: 'numeric' })}</span>
-              <button className="add-reminder-btn">+ Add reminder</button>
+          <div className={styles.welcomeImage}>
+            <div className={styles.avatarPlaceholder}>
+              <span className={styles.avatarIcon}>🩺</span>
             </div>
-            <div className="calendar-dates">
-              {[...Array(4)].map((_, i) => (
-                <span key={i} className={`calendar-day${i === 0 ? ' active' : ''}`}>{new Date().getDate() + i}</span>
-              ))}
-            </div>
-            <ul className="calendar-events">
-              {(dashboardData.todaysAppointments || []).slice(0, 3).map((app, idx) => (
-                <li key={idx}>
-                  <strong>{app.elder_name}</strong> <span>{formatTime(app.date_time)}</span>
-                </li>
-              ))}
-            </ul>
           </div>
         </div>
+      </div>
 
-        {/* Center Column */}
-        <div className="dashboard-center">
-          <div className="card tasks">
-            <div className="tasks-header">
-              <h4>Today's Tasks</h4>
-              <span className="tasks-count">{tasks.length}</span>
+      {/* Quick Stats Section */}
+      <div className={styles.statsSection}>
+        <div className={styles.statsGrid}>
+          <div className={styles.statCard}>
+            <div className={styles.statIcon}>📅</div>
+            <div className={styles.statContent}>
+              <h3 className={styles.statNumber}>{dashboardData.counts?.todaysAppointments || 0}</h3>
+              <p className={styles.statLabel}>Today's Appointments</p>
             </div>
-            <ul className="tasks-list">
-              {tasks.map(task => (
-                <li key={task.id} className="task-item">
-                  <span>{task.title}</span>
-                  <span className="task-time">{task.time}</span>
-                </li>
-              ))}
-            </ul>
-            <a href="#" className="view-all-tasks">View All</a>
           </div>
-          <div className="card next-patient">
-            <div className="next-patient-header">
-              <h4>Next patient's details</h4>
-              <span className="next-patient-icon" title="Elderly patient">&#128104;&#8205;&#127979;</span>
+          <div className={styles.statCard}>
+            <div className={styles.statIcon}>⏰</div>
+            <div className={styles.statContent}>
+              <h3 className={styles.statNumber}>{dashboardData.counts?.upcomingAppointments || 0}</h3>
+              <p className={styles.statLabel}>Upcoming Appointments</p>
             </div>
+          </div>
+          <div className={styles.statCard}>
+            <div className={styles.statIcon}>👥</div>
+            <div className={styles.statContent}>
+              <h3 className={styles.statNumber}>{elders.length}</h3>
+              <p className={styles.statLabel}>Total Patients</p>
+            </div>
+          </div>
+          <div className={styles.statCard}>
+            <div className={styles.statIcon}>✅</div>
+            <div className={styles.statContent}>
+              <h3 className={styles.statNumber}>{tasks.length}</h3>
+              <p className={styles.statLabel}>Today's Tasks</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content Section */}
+      <div className={styles.mainContentSection}>
+        {/* Next Patient & Tasks Section - Left Half */}
+        <div className={styles.leftContentContainer}>
+          <div className={styles.contentCard}>
+            <h2 className={styles.sectionTitle}>🏥 Next Patient</h2>
             {nextPatient ? (
-              <>
-                <div className="patient-info">
-                  <img src={nextPatient.avatar || "https://randomuser.me/api/portraits/men/1.jpg"} alt={nextPatient.name} className="patient-avatar" />
-                  <div>
-                    <h5>{nextPatient.name}</h5>
-                    <p>Age: {calculateAge(nextPatient.dob) || 'N/A'}</p>
-                    <p>{nextPatient.address || 'N/A'}</p>
+              <div className={styles.nextPatientCard}>
+                <div className={styles.patientHeader}>
+                  <img 
+                    src={nextPatient.avatar || "https://randomuser.me/api/portraits/men/1.jpg"} 
+                    alt={nextPatient.name} 
+                    className={styles.patientAvatar} 
+                  />
+                  <div className={styles.patientInfo}>
+                    <h3 className={styles.patientName}>{nextPatient.name}</h3>
+                    <p className={styles.patientDetails}>Age: {calculateAge(nextPatient.dob) || 'N/A'}</p>
+                    <p className={styles.patientDetails}>{nextPatient.address || 'N/A'}</p>
+                    {nextPatient.appointment && (
+                      <p className={styles.appointmentTime}>
+                        📅 {formatDate(nextPatient.appointment.date_time)} at {formatTime(nextPatient.appointment.date_time)}
+                      </p>
+                    )}
                   </div>
                 </div>
-                <div className="patient-tabs">
-                  <button className="tab active">Summary</button>
-                  <button className="tab">Conditions</button>
-                  <button className="tab">Notes</button>
+                <div className={styles.patientSummary}>
+                  <h4>Medical Conditions:</h4>
+                  <p>{nextPatient.medical_conditions || 'No conditions recorded'}</p>
                 </div>
-                <div className="patient-summary">
-                  <p>
-                    {nextPatient.medical_conditions || 'No summary available for this elder.'}
-                  </p>
+                <div className={styles.patientActions}>
+                  <button className={styles.actionBtn}>📋 View Records</button>
+                  <button className={styles.actionBtn}>💬 Start Consultation</button>
                 </div>
-              </>
+              </div>
             ) : (
-              <div>No next patient found.</div>
+              <div className={styles.emptyState}>
+                <div className={styles.emptyStateIcon}>📅</div>
+                <h3>No Next Patient</h3>
+                <p>You have no upcoming appointments scheduled.</p>
+              </div>
             )}
+          </div>
+
+          {/* Today's Tasks */}
+          <div className={styles.contentCard}>
+            <h2 className={styles.sectionTitle}>✅ Today's Tasks</h2>
+            <div className={styles.tasksList}>
+              {tasks.map(task => (
+                <div key={task.id} className={styles.taskItem}>
+                  <div className={styles.taskContent}>
+                    <span className={styles.taskTitle}>{task.title}</span>
+                    <span className={styles.taskTime}>{task.time}</span>
+                  </div>
+                  <button className={styles.taskCompleteBtn}>✓</button>
+                </div>
+              ))}
+            </div>
+            <button className={styles.viewAllBtn}>View All Tasks</button>
           </div>
         </div>
 
-        {/* Right Column */}
-        <div className="dashboard-right">
-          <div className="card upcoming-consult">
-            <h4>Upcoming Consultations</h4>
+        {/* Upcoming Consultations & Calendar Section - Right Half */}
+        <div className={styles.rightContentContainer}>
+          <div className={styles.contentCard}>
+            <h2 className={styles.sectionTitle}>📊 Upcoming Consultations</h2>
             {consultations.length === 0 ? (
-              <div>No upcoming consultations.</div>
+              <div className={styles.emptyState}>
+                <div className={styles.emptyStateIcon}>📅</div>
+                <h3>No Upcoming Consultations</h3>
+                <p>Your schedule is clear for now.</p>
+              </div>
             ) : (
-              <ul className="consult-list">
+              <div className={styles.consultationsList}>
                 {consultations.map(c => (
-                  <li key={c.id + c.date + c.time} className="consult-item">
-                    <img src={c.avatar || "https://randomuser.me/api/portraits/men/2.jpg"} alt={c.name} className="consult-avatar" />
-                    <div className="consult-info">
-                      <span className="consult-name">{c.name}</span>
-                      <span className="consult-date">{c.date} | {c.time}</span>
+                  <div key={c.id + c.date + c.time} className={styles.consultationItem}>
+                    <img 
+                      src={c.avatar || "https://randomuser.me/api/portraits/men/2.jpg"} 
+                      alt={c.name} 
+                      className={styles.consultationAvatar} 
+                    />
+                    <div className={styles.consultationInfo}>
+                      <h4 className={styles.consultationName}>{c.name}</h4>
+                      <p className={styles.consultationTime}>{c.date} | {c.time}</p>
                     </div>
-                    <button className="clinical-record-btn">Clinical Record</button>
-                  </li>
+                    <button className={styles.consultationBtn}>📋 View Record</button>
+                  </div>
                 ))}
-              </ul>
+              </div>
             )}
+          </div>
+
+          {/* Today's Appointments */}
+          <div className={styles.contentCard}>
+            <h2 className={styles.sectionTitle}>📅 Today's Schedule</h2>
+            <div className={styles.appointmentsList}>
+              {(dashboardData.todaysAppointments || []).length === 0 ? (
+                <div className={styles.emptyState}>
+                  <div className={styles.emptyStateIcon}>📅</div>
+                  <h3>No Appointments Today</h3>
+                  <p>You have a free day!</p>
+                </div>
+              ) : (
+                (dashboardData.todaysAppointments || []).map((app, idx) => (
+                  <div key={idx} className={styles.appointmentItem}>
+                    <div className={styles.appointmentTime}>
+                      <span className={styles.timeLabel}>{formatTime(app.date_time)}</span>
+                    </div>
+                    <div className={styles.appointmentDetails}>
+                      <h4 className={styles.appointmentPatient}>{app.elder_name}</h4>
+                      <p className={styles.appointmentType}>Regular Consultation</p>
+                    </div>
+                    <button className={styles.appointmentAction}>Join</button>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
         </div>
       </div>
-      <button className="logout-btn" onClick={logout}>Logout</button>
+
+      {/* Quick Actions Section */}
+      <div className={styles.quickActionsSection}>
+        <div className={styles.quickActionsContainer}>
+          <h2 className={styles.sectionTitle}>⚡ Quick Actions</h2>
+          <div className={styles.quickActionsGrid}>
+            <div className={styles.quickActionCard}>
+              <div className={styles.quickActionIcon}>📝</div>
+              <div className={styles.quickActionContent}>
+                <h3 className={styles.quickActionTitle}>Write Prescription</h3>
+                <p className={styles.quickActionDescription}>Create new prescriptions for patients</p>
+              </div>
+            </div>
+            
+            <div className={styles.quickActionCard}>
+              <div className={styles.quickActionIcon}>📊</div>
+              <div className={styles.quickActionContent}>
+                <h3 className={styles.quickActionTitle}>View Reports</h3>
+                <p className={styles.quickActionDescription}>Check patient reports and analytics</p>
+              </div>
+            </div>
+            
+            <div className={styles.quickActionCard}>
+              <div className={styles.quickActionIcon}>👥</div>
+              <div className={styles.quickActionContent}>
+                <h3 className={styles.quickActionTitle}>Manage Patients</h3>
+                <p className={styles.quickActionDescription}>View and update patient information</p>
+              </div>
+            </div>
+            
+            <div className={styles.quickActionCard}>
+              <div className={styles.quickActionIcon}>📞</div>
+              <div className={styles.quickActionContent}>
+                <h3 className={styles.quickActionTitle}>Emergency Contacts</h3>
+                <p className={styles.quickActionDescription}>Access emergency contact information</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
