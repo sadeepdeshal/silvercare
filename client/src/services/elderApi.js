@@ -296,6 +296,47 @@ export const elderApi = {
     }
   },
 
+  // NEW: Get upcoming appointments for family member
+  getUpcomingAppointmentsByFamily: async (familyMemberId) => {
+    try {
+      console.log('API: Fetching upcoming appointments for family member:', familyMemberId);
+      const response = await fetch(`${API_BASE}/family-member/${familyMemberId}/appointments/upcoming`);
+      const data = await response.json();
+      
+      console.log('API: Upcoming appointments response:', data);
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to fetch upcoming appointments');
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('API: Error fetching upcoming appointments:', error);
+      throw error;
+    }
+  },
+
+  // NEW: Get appointment count for family member
+  getAppointmentCountByFamily: async (familyMemberId) => {
+    try {
+      console.log('API: Fetching appointment count for family member:', familyMemberId);
+      const response = await fetch(`${API_BASE}/family-member/${familyMemberId}/appointments/count`);
+      const data = await response.json();
+      
+      console.log('API: Appointment count response:', data);
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to fetch appointment count');
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('API: Error fetching appointment count:', error);
+      throw error;
+    }
+  },
+
+
   // Get elders with medical conditions
   getEldersWithMedicalConditions: async (familyMemberId) => {
     try {

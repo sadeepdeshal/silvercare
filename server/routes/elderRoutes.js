@@ -11,7 +11,9 @@ const {
   getDoctorById,
   getAppointmentBookingInfo,
   createAppointment,        // Add this import
-  getElderAppointments      // Add this import
+  getElderAppointments,      // Add this import
+  getUpcomingAppointmentsByFamily,  // Add this import
+  getAppointmentCountByFamily       // Add this import
 } = require('../controllers/elderController');
 
 const { 
@@ -29,6 +31,10 @@ router.get('/family-member/:familyMemberId', getEldersByFamilyMember);
 
 // Get elder count for a specific family member
 router.get('/count/:familyMemberId', getElderCount);
+router.get('/family-member/:familyMemberId/appointments/upcoming', getUpcomingAppointmentsByFamily);
+
+// Get appointment count for a family member - ADD THIS ROUTE
+router.get('/family-member/:familyMemberId/appointments/count', getAppointmentCountByFamily);
 
 // Fetch elder details - MUST BE BEFORE /:elderId route
 router.get('/elderDetails', getElderDetails);

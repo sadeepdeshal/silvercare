@@ -95,7 +95,7 @@ const FamilyMemberDashboard = () => {
     fetchCaregiversData();
   }, []);
 
-  // Fetch appointments data
+  // Fetch appointments data - UPDATED TO USE REAL API
   useEffect(() => {
     const fetchAppointmentsData = async () => {
       if (!currentUser?.user_id) return;
@@ -103,47 +103,25 @@ const FamilyMemberDashboard = () => {
       try {
         setAppointmentsLoading(true);
         
-        // Mock appointments data - replace with actual API call
-        const mockAppointments = [
-          {
-            appointment_id: 1,
-            elder_name: 'John Doe',
-            doctor_name: 'Dr. Smith',
-            date_time: '2024-01-15T10:00:00Z',
-            status: 'scheduled',
-            notes: 'Regular checkup',
-            appointment_type: 'General Consultation'
-          },
-          {
-            appointment_id: 2,
-            elder_name: 'Jane Smith',
-            doctor_name: 'Dr. Johnson',
-            date_time: '2024-01-16T14:30:00Z',
-            status: 'confirmed',
-            notes: 'Follow-up appointment',
-            appointment_type: 'Cardiology'
-          },
-          {
-            appointment_id: 3,
-            elder_name: 'Robert Brown',
-            doctor_name: 'Dr. Williams',
-            date_time: '2024-01-18T09:15:00Z',
-            status: 'pending',
-            notes: 'Blood pressure monitoring',
-            appointment_type: 'General Consultation'
-          }
-        ];
+        // Fetch real upcoming appointments from the database
+        const [appointmentsResponse, countResponse] = await Promise.all([
+          elderApi.getUpcomingAppointmentsByFamily(currentUser.user_id),
+          elderApi.getAppointmentCountByFamily(currentUser.user_id)
+        ]);
         
-        // Filter for upcoming appointments only
-        const upcomingAppointments = mockAppointments.filter(apt => 
-          new Date(apt.date_time) > new Date()
-        );
+        if (appointmentsResponse.success) {
+          setAppointments(appointmentsResponse.appointments);
+        }
         
-        setAppointments(upcomingAppointments);
-        setAppointmentCount(upcomingAppointments.length);
+        if (countResponse.success) {
+          setAppointmentCount(countResponse.count);
+        }
         
       } catch (err) {
         console.error('Error fetching appointments data:', err);
+        // Set fallback data if API fails
+        setAppointments([]);
+        setAppointmentCount(0);
       } finally {
         setAppointmentsLoading(false);
       }
@@ -159,20 +137,18 @@ const FamilyMemberDashboard = () => {
   };
 
   const handleViewElders = () => {
-  
-     navigate('/family-member/elders');
+    navigate('/family-member/elders');
   };
 
-    const handleMentalSessions = () => {
-  
-     navigate('/family-member/sessions');
+  const handleMentalSessions = () => {
+    navigate('/family-member/sessions');
   };
 
   const handleBookAppointment = () => {
-     navigate('/family-member/elders');
+    navigate('/family-member/elders');
   };
 
-  const handleViewReports = () => {
+    const handleViewReports = () => {
     navigate('/family-member/reports');
   };
 
@@ -199,13 +175,40 @@ const FamilyMemberDashboard = () => {
     });
   };
 
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'pending':
+        return '#f39c12'; // Orange
+      case 'approved':
+      case 'confirmed':
+        return '#27ae60'; // Green
+      case 'cancelled':
+        return '#e74c3c'; // Red
+      case 'completed':
+        return '#3498db'; // Blue
+      default:
+        return '#95a5a6'; // Gray
+    }
+  };
+
+  const getAppointmentTypeIcon = (type) => {
+    switch (type) {
+      case 'online':
+        return '💻';
+      case 'physical':
+        return '🏥';
+      default:
+        return '🩺';
+    }
+  };
+
   // Show loading while checking authentication
   if (loading) {
     return (
       <div className={styles.loadingContainer}>
         <div className={styles.loadingSpinner}></div>
         <h2>Loading...</h2>
-                <p>Checking authentication...</p>
+        <p>Checking authentication...</p>
       </div>
     );
   }
@@ -320,7 +323,7 @@ const FamilyMemberDashboard = () => {
                 <div className={styles.quickActionCard} onClick={handleMentalSessions}>
                   <div className={styles.quickActionIcon}>📅</div>
                   <div className={styles.quickActionContent}>
-                    <h3 className={styles.quickActionTitle}>Book mental sessions </h3>
+                    <h3 className={styles.quickActionTitle}>Book mental sessions</h3>
                     <p className={styles.quickActionDescription}>Schedule mental sessions and care services</p>
                   </div>
                 </div>
@@ -363,13 +366,19 @@ const FamilyMemberDashboard = () => {
                         </div>
                       </div>
                     ))}
-                    <div className={styles.activityItem}>
-                      <div className={styles.activityIcon}>📅</div>
-                      <div className={styles.activityContent}>
-                        <p className={styles.activityText}>Appointment scheduled with Dr. Smith</p>
-                        <span className={styles.activityTime}>1 day ago</span>
+                    {appointments.length > 0 && (
+                      <div className={styles.activityItem}>
+                        <div className={styles.activityIcon}>📅</div>
+                        <div className={styles.activityContent}>
+                          <p className={styles.activityText}>
+                            Appointment scheduled with {appointments[0].doctor_name}
+                          </p>
+                          <span className={styles.activityTime}>
+                            {new Date(appointments[0].created_at).toLocaleDateString()}
+                          </span>
+                        </div>
                       </div>
-                    </div>
+                    )}
                   </>
                 ) : (
                   <div className={styles.activityItem}>
@@ -481,7 +490,7 @@ const FamilyMemberDashboard = () => {
             </div>
           )}
 
-          {/* Upcoming Appointments Section - Right Half */}
+          {/* Upcoming Appointments Section - Right Half - UPDATED WITH REAL DATA */}
           <div className={styles.appointmentsSection}>
             <div className={styles.appointmentsSectionHeader}>
               <h2 className={styles.sectionTitle}>Upcoming Appointments</h2>
@@ -514,18 +523,18 @@ const FamilyMemberDashboard = () => {
                   {/* Limit to only 2 appointments */}
                   {appointments.slice(0, 2).map((appointment, index) => (
                     <div 
-                      key={appointment.appointment_id} 
+                                            key={appointment.appointment_id} 
                       className={styles.appointmentItem}
                       onClick={() => handleAppointmentDetails(appointment.appointment_id)}
                     >
                       <div className={styles.appointmentContent}>
                         <div className={styles.appointmentLeft}>
                           <div className={styles.appointmentIcon}>
-                            🩺
+                            {getAppointmentTypeIcon(appointment.appointment_type)}
                           </div>
                           <div className={styles.appointmentInfo}>
                             <h3 className={styles.appointmentTitle}>
-                              {appointment.appointment_type || 'Medical Appointment'}
+                              {appointment.specialization || 'Medical Appointment'}
                             </h3>
                             <div className={styles.appointmentDetails}>
                               <span className={styles.appointmentDetail}>
@@ -537,6 +546,12 @@ const FamilyMemberDashboard = () => {
                               <span className={styles.appointmentDetail}>
                                 📅 {formatAppointmentDate(appointment.date_time)}
                               </span>
+                              <span className={styles.appointmentDetail}>
+                                🏥 {appointment.current_institution}
+                              </span>
+                              <span className={styles.appointmentDetail}>
+                                📍 {appointment.doctor_district}
+                              </span>
                             </div>
                             {appointment.notes && (
                               <p className={styles.appointmentNotes}>
@@ -547,8 +562,11 @@ const FamilyMemberDashboard = () => {
                           </div>
                         </div>
                         <div className={styles.appointmentRight}>
-                          <div className={`${styles.appointmentStatus} ${styles[appointment.status]}`}>
-                            {appointment.status}
+                          <div 
+                            className={`${styles.appointmentStatus} ${styles[appointment.status]}`}
+                            style={{ backgroundColor: getStatusColor(appointment.status) }}
+                          >
+                            {appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}
                           </div>
                           <div className={styles.appointmentArrow}>
                             <span>→</span>
@@ -562,7 +580,7 @@ const FamilyMemberDashboard = () => {
               )}
             </div>
             
-                        {/* Show "View All Appointments" button if there are more than 2 appointments */}
+            {/* Show "View All Appointments" button if there are more than 2 appointments */}
             {appointments.length > 2 && (
               <div className={styles.viewAllAppointments}>
                 <button 

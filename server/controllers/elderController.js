@@ -1346,6 +1346,126 @@ const getAppointmentBookingInfo = async (req, res) => {
     });
   }
 };
+
+// Add this new function to get upcoming appointments for a family member
+const getUpcomingAppointmentsByFamily = async (req, res) => {
+  const { familyMemberId } = req.params;
+  
+  try {
+    console.log('Getting upcoming appointments for family member:', familyMemberId);
+    
+    // First, get the family_id from the familymember table using the user_id
+    const familyMemberResult = await pool.query(
+      'SELECT family_id FROM familymember WHERE user_id = $1',
+      [familyMemberId]
+    );
+    
+    if (familyMemberResult.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: 'Family member not found'
+      });
+    }
+    
+    const familyId = familyMemberResult.rows[0].family_id;
+    console.log('Found family_id:', familyId);
+    
+    // Get upcoming appointments for this family
+    const result = await pool.query(
+      `SELECT 
+        a.appointment_id,
+        a.elder_id,
+        a.family_id,
+        a.doctor_id,
+        a.date_time,
+        a.status,
+        a.notes,
+        a.appointment_type,
+        a.created_at,
+        a.updated_at,
+        e.name as elder_name,
+        e.contact as elder_contact,
+        e.gender as elder_gender,
+        u.name as doctor_name,
+        u.email as doctor_email,
+        u.phone as doctor_phone,
+        d.specialization,
+        d.current_institution,
+        d.district as doctor_district
+      FROM appointment a
+      INNER JOIN elder e ON a.elder_id = e.elder_id
+      INNER JOIN doctor d ON a.doctor_id = d.doctor_id
+      INNER JOIN "User" u ON d.user_id = u.user_id
+      WHERE a.family_id = $1 
+      AND a.date_time > CURRENT_TIMESTAMP
+      AND a.status IN ( 'approved')
+      ORDER BY a.date_time ASC
+      LIMIT 10`,
+      [familyId]
+    );
+    
+    console.log('Found upcoming appointments:', result.rows.length);
+    
+    res.json({
+      success: true,
+      appointments: result.rows,
+      count: result.rows.length
+    });
+    
+  } catch (err) {
+    console.error('Error fetching upcoming appointments:', err);
+    res.status(500).json({ 
+      success: false,
+      error: 'Error fetching upcoming appointments' 
+    });
+  }
+};
+
+// Add this function to get appointment count for a family member
+const getAppointmentCountByFamily = async (req, res) => {
+  const { familyMemberId } = req.params;
+  
+  try {
+    console.log('Getting appointment count for family member:', familyMemberId);
+    
+    // First, get the family_id from the familymember table using the user_id
+    const familyMemberResult = await pool.query(
+      'SELECT family_id FROM familymember WHERE user_id = $1',
+      [familyMemberId]
+    );
+    
+    if (familyMemberResult.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: 'Family member not found'
+      });
+    }
+    
+    const familyId = familyMemberResult.rows[0].family_id;
+    
+    // Count upcoming appointments
+    const result = await pool.query(
+      `SELECT COUNT(*) as count 
+       FROM appointment 
+       WHERE family_id = $1 
+       AND date_time > CURRENT_TIMESTAMP
+       AND status IN ( 'approved')`,
+      [familyId]
+    );
+    
+    res.json({
+      success: true,
+      count: parseInt(result.rows[0].count)
+    });
+    
+  } catch (err) {
+    console.error('Error fetching appointment count:', err);
+    res.status(500).json({ 
+      success: false,
+      error: 'Error fetching appointment count' 
+    });
+  }
+};
 // Create new appointment
 // Simplified appointment creation
 const createAppointment = async (req, res) => {
@@ -1713,7 +1833,9 @@ module.exports = {
   getAppointmentBookingInfo,
   bulkUpdateElders,
   createAppointment,        // Add this
-  getElderAppointments  
+  getElderAppointments ,
+  getUpcomingAppointmentsByFamily,  // Add this
+  getAppointmentCountByFamily   
 };
 
 
