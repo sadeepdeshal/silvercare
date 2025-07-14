@@ -16,7 +16,7 @@ const CaregiverDashboard = () => {
       <button onClick={logout}>Logout</button>
     </div>
       <div style={{
-        padding: '49px',
+        padding: '4px',
       
         fontFamily: 'Arial, sans-serif',
         backgroundColor: '#f8f9fa',
