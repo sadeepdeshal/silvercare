@@ -66,7 +66,7 @@ export const elderApi = {
       const response = await fetch(`${API_BASE}/${elderId}/doctors`);
       const data = await response.json();
       
-            console.log('API: Doctors response:', data);
+      console.log('API: Doctors response:', data);
       
       if (!response.ok) {
         throw new Error(data.error || 'Failed to fetch doctors');
@@ -139,8 +139,8 @@ export const elderApi = {
     }
   },
 
-  // NEW: Create appointment
-    createAppointment: async (elderId, appointmentData) => {
+  // Create appointment (simplified)
+  createAppointment: async (elderId, appointmentData) => {
     try {
       console.log('API: Creating appointment for elder:', elderId, 'with data:', appointmentData);
       const response = await fetch(`${API_BASE}/${elderId}/appointments`, {
@@ -165,7 +165,7 @@ export const elderApi = {
     }
   },
 
-  // NEW: Get elder appointments
+  // Get elder appointments
   getElderAppointments: async (elderId, filters = {}) => {
     try {
       console.log('API: Fetching appointments for elder:', elderId, 'with filters:', filters);
@@ -214,7 +214,7 @@ export const elderApi = {
       return data;
     } catch (error) {
       console.error('API: Error updating elder details:', error);
-      throw error;
+            throw error;
     }
   },
 
@@ -348,7 +348,7 @@ export const updateElderDetails = (elderId, elderData) => {
   return axios.put(`${API_BASE}/${elderId}`, elderData);
 };
 
-// New appointment-related functions
+// Appointment-related functions
 export const getUpcomingAppointments = (elderId) => {
   return axios.get(`${API_BASE}/${elderId}/appointments/upcoming`);
 };

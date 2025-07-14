@@ -1347,26 +1347,12 @@ const getAppointmentBookingInfo = async (req, res) => {
   }
 };
 // Create new appointment
-// Create new appointment
+// Simplified appointment creation
 const createAppointment = async (req, res) => {
   const { elderId } = req.params;
   
   try {
     const {
-      doctorId,
-      appointmentDate,
-      appointmentTime,
-      appointmentType, // 'physical' or 'online'
-      patientName,
-      contactNumber,
-      symptoms,
-      notes,
-      emergencyContact,
-      preferredPlatform // for online appointments
-    } = req.body;
-
-    console.log('Creating appointment with data:', {
-      elderId,
       doctorId,
       appointmentDate,
       appointmentTime,
@@ -1377,14 +1363,24 @@ const createAppointment = async (req, res) => {
       notes,
       emergencyContact,
       preferredPlatform
+    } = req.body;
+
+    console.log('Creating appointment with data:', {
+      elderId,
+      doctorId,
+      appointmentDate,
+      appointmentTime,
+      appointmentType,
+      patientName,
+      contactNumber
     });
 
     // Validate required fields
-    if (!doctorId || !appointmentDate || !appointmentTime || !appointmentType || !patientName || !contactNumber || !symptoms) {
+    if (!doctorId || !appointmentDate || !appointmentTime || !appointmentType) {
       console.log('Validation failed: Missing required fields');
       return res.status(400).json({
         success: false,
-        error: 'All required fields must be filled'
+        error: 'Doctor, date, time, and appointment type are required'
       });
     }
 
@@ -1472,38 +1468,9 @@ const createAppointment = async (req, res) => {
       });
     }
 
-    // Prepare notes with additional information
-    let appointmentNotes = notes || '';
-    
-    // Add appointment-specific information to notes
-    const additionalInfo = [];
-    additionalInfo.push(`Patient: ${patientName}`);
-    additionalInfo.push(`Contact: ${contactNumber}`);
-    additionalInfo.push(`Emergency Contact: ${emergencyContact}`);
-    additionalInfo.push(`Symptoms: ${symptoms}`);
-    
-    if (appointmentType === 'online' && preferredPlatform) {
-      additionalInfo.push(`Preferred Platform: ${preferredPlatform}`);
-    }
-    
-    if (appointmentNotes) {
-      additionalInfo.push(`Additional Notes: ${appointmentNotes}`);
-    }
-    
-    const finalNotes = additionalInfo.join('\n');
-
     console.log('Inserting appointment into database...');
-    console.log('Insert parameters:', {
-      elderId: parseInt(elderId),
-      familyId: parseInt(familyId),
-      doctorId: parseInt(doctorId),
-      appointmentDateTime: appointmentDateTime.toISOString(),
-      status: 'pending',
-      finalNotes,
-      appointmentType
-    });
 
-    // Insert appointment into database
+    // Insert appointment into database with NULL notes
     const insertResult = await pool.query(
       `INSERT INTO appointment (
         elder_id, 
@@ -1532,7 +1499,7 @@ const createAppointment = async (req, res) => {
         parseInt(doctorId),
         appointmentDateTime,
         'pending',
-        finalNotes,
+        null, // Set notes to null instead of the constructed string
         appointmentType
       ]
     );
@@ -1555,11 +1522,11 @@ const createAppointment = async (req, res) => {
         created_at: newAppointment.created_at,
         elder_name: elderResult.rows[0].name,
         doctor_name: doctorResult.rows[0].doctor_name,
-        patient_name: patientName,
+        patient_name: patientName || elderResult.rows[0].name,
         contact_number: contactNumber,
         emergency_contact: emergencyContact,
         symptoms: symptoms,
-        notes: notes,
+        notes: null, // Return null for notes
         preferred_platform: preferredPlatform
       }
     });
@@ -1567,16 +1534,9 @@ const createAppointment = async (req, res) => {
   } catch (err) {
     console.error('Error creating appointment:', err);
     console.error('Error stack:', err.stack);
-    console.error('Error details:', {
-      code: err.code,
-      detail: err.detail,
-      constraint: err.constraint,
-      table: err.table,
-      column: err.column
-    });
     
     // Handle specific database errors
-    if (err.code === '23503') { // Foreign key constraint violation
+    if (err.code === '23503') {
       console.log('Foreign key constraint violation');
       return res.status(400).json({
         success: false,
@@ -1584,7 +1544,7 @@ const createAppointment = async (req, res) => {
       });
     }
     
-    if (err.code === '23505') { // Unique constraint violation
+    if (err.code === '23505') {
       console.log('Unique constraint violation');
       return res.status(400).json({
         success: false,
@@ -1592,27 +1552,11 @@ const createAppointment = async (req, res) => {
       });
     }
 
-    if (err.code === '42703') { // Undefined column
-      console.log('Column does not exist error');
-      return res.status(500).json({
-        success: false,
-        error: 'Database schema error - missing column'
-      });
-    }
-
-    if (err.code === '42P01') { // Undefined table
-      console.log('Table does not exist error');
-      return res.status(500).json({
-        success: false,
-        error: 'Database schema error - missing table'
-      });
-    }
-
-    if (err.code === '22P02') { // Invalid text representation
-      console.log('Invalid data type error - possibly invalid enum value');
+    if (err.code === '22P02') {
+      console.log('Invalid data type error');
       return res.status(400).json({
         success: false,
-        error: 'Invalid data format provided. Please check appointment status and type values.'
+        error: 'Invalid data format provided'
       });
     }
     
@@ -1623,6 +1567,7 @@ const createAppointment = async (req, res) => {
     });
   }
 };
+
 
 
 

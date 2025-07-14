@@ -15,14 +15,6 @@ const OnlineAppointment = () => {
 
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedTime, setSelectedTime] = useState('');
-  const [appointmentDetails, setAppointmentDetails] = useState({
-    patientName: '',
-    contactNumber: '',
-    symptoms: '',
-    notes: '',
-    emergencyContact: '',
-    preferredPlatform: 'zoom'
-  });
   const [doctorInfo, setDoctorInfo] = useState(null);
   const [elderInfo, setElderInfo] = useState(null);
   const [dataLoading, setDataLoading] = useState(true);
@@ -34,7 +26,6 @@ const OnlineAppointment = () => {
   const formatDateForDisplay = (dateString) => {
     if (!dateString) return '';
     
-    // Split the date string and create month names array
     const [year, month, day] = dateString.split('-');
     const monthNames = [
       'January', 'February', 'March', 'April', 'May', 'June',
@@ -42,7 +33,6 @@ const OnlineAppointment = () => {
     ];
     const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     
-    // Create date object and get day of week
     const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
     const dayOfWeek = dayNames[date.getDay()];
     
@@ -77,7 +67,6 @@ const OnlineAppointment = () => {
         if (response.success) {
           console.log('Appointment booking info received:', response);
           
-          // Set doctor info
           setDoctorInfo({
             name: `Dr. ${response.doctor.name}`,
             specialization: response.doctor.specialization,
@@ -89,7 +78,6 @@ const OnlineAppointment = () => {
             years_experience: response.doctor.years_experience
           });
           
-          // Set elder info
           setElderInfo({
             name: response.elder.name,
             age: response.elder.age,
@@ -98,14 +86,6 @@ const OnlineAppointment = () => {
             contact: response.elder.contact,
             medical_conditions: response.elder.medical_conditions
           });
-          
-          // Pre-fill form with elder's information
-          setAppointmentDetails(prev => ({
-            ...prev,
-            patientName: response.elder.name,
-            contactNumber: response.elder.contact,
-            emergencyContact: response.elder.contact // Default to same contact
-          }));
           
         } else {
           throw new Error(response.error || 'Failed to fetch appointment information');
@@ -137,7 +117,7 @@ const OnlineAppointment = () => {
     }
   }, [currentUser, isAuthenticated, loading, navigate]);
 
-  // FIXED: Generate calendar days for current month without timezone issues
+  // Generate calendar days for current month without timezone issues
   const generateCalendarDays = () => {
     const today = new Date();
     const currentMonth = today.getMonth();
@@ -149,27 +129,23 @@ const OnlineAppointment = () => {
 
     const days = [];
     
-    // Add empty cells for days before the first day of the month
     for (let i = 0; i < startingDayOfWeek; i++) {
       days.push(null);
     }
     
-    // Add days of the month - FIXED: Create date string manually to avoid timezone conversion
     for (let day = 1; day <= daysInMonth; day++) {
-      // Create date string manually in YYYY-MM-DD format
       const dateString = `${currentYear}-${(currentMonth + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
       
-      // Create date object for comparison (using local timezone consistently)
       const date = new Date(currentYear, currentMonth, day);
       const isToday = date.toDateString() === today.toDateString();
       const isPast = date < today;
       
       days.push({
         day,
-        date: dateString, // Use manually created string instead of toISOString()
+        date: dateString,
         isToday,
         isPast,
-        isAvailable: !isPast // Online appointments available all days
+        isAvailable: !isPast
       });
     }
     
@@ -179,7 +155,6 @@ const OnlineAppointment = () => {
   // Generate available time slots for online appointments
   const generateTimeSlots = () => {
     const slots = [];
-    // Extended hours for online appointments (8 AM - 8 PM)
     for (let hour = 8; hour < 20; hour++) {
       slots.push(`${hour.toString().padStart(2, '0')}:00`);
       slots.push(`${hour.toString().padStart(2, '0')}:30`);
@@ -187,17 +162,7 @@ const OnlineAppointment = () => {
     return slots;
   };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setAppointmentDetails(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
+  const handleBookAppointment = async () => {
     if (!selectedDate || !selectedTime) {
       setError('Please select both date and time for the appointment');
       return;
@@ -212,17 +177,15 @@ const OnlineAppointment = () => {
         appointmentDate: selectedDate,
         appointmentTime: selectedTime,
         appointmentType: 'online',
-        patientName: appointmentDetails.patientName,
-        contactNumber: appointmentDetails.contactNumber,
-        symptoms: appointmentDetails.symptoms,
-        notes: appointmentDetails.notes,
-        emergencyContact: appointmentDetails.emergencyContact,
-        preferredPlatform: appointmentDetails.preferredPlatform
+        patientName: elderInfo.name,
+        contactNumber: elderInfo.contact,
+        symptoms: 'Online consultation requested',
+        notes: 'Booked through online appointment system',
+        emergencyContact: elderInfo.contact,
+        preferredPlatform: 'zoom'
       };
 
       console.log('Submitting appointment data:', appointmentData);
-      console.log('Selected date for display:', formatDateForDisplay(selectedDate));
-      console.log('Selected time for display:', formatTimeForDisplay(selectedTime));
 
       const response = await elderApi.createAppointment(elderId, appointmentData);
       
@@ -230,7 +193,6 @@ const OnlineAppointment = () => {
         setSuccessMessage('Online appointment booked successfully!');
         console.log('Appointment created:', response.appointment);
         
-        // Redirect to appointments page after 2 seconds
         setTimeout(() => {
           navigate(`/family-member/elder/${elderId}/appointments`);
         }, 2000);
@@ -413,7 +375,7 @@ const OnlineAppointment = () => {
               <div className={styles.cardIcon}>💰</div>
               <div className={styles.cardContent}>
                 <h3>Appointment Details</h3>
-                                <p><strong>Meeting Type:</strong> Online</p>
+                <p><strong>Meeting Type:</strong> Online</p>
                 <p><strong>Duration:</strong> 1 hour</p>
                 <p><strong>Consultation Fee:</strong> Rs. {doctorInfo?.fee || 1800}</p>
                 <p><strong>Platform:</strong> Video Call</p>
@@ -443,7 +405,7 @@ const OnlineAppointment = () => {
                           dayInfo ? (
                             dayInfo.isToday ? styles.today :
                             dayInfo.isPast ? styles.pastDay :
-                            dayInfo.date === selectedDate ? styles.selected :
+                                                        dayInfo.date === selectedDate ? styles.selected :
                             styles.available
                           ) : styles.empty
                         }`}
@@ -502,150 +464,37 @@ const OnlineAppointment = () => {
               </div>
             </div>
 
-            {/* Appointment Form */}
-            <div className={styles.formSection}>
-              <h2 className={styles.sectionTitle}>📝 Appointment Details</h2>
-              <form onSubmit={handleSubmit} className={styles.appointmentDetailsForm}>
-                <div className={styles.formRow}>
-                  <div className={styles.formGroup}>
-                    <label htmlFor="patientName">Patient Name</label>
-                    <input
-                      type="text"
-                      id="patientName"
-                      name="patientName"
-                      value={appointmentDetails.patientName}
-                      onChange={handleInputChange}
-                      placeholder="Enter patient's full name"
-                      required
-                    />
-                  </div>
-                  <div className={styles.formGroup}>
-                    <label htmlFor="contactNumber">Contact Number</label>
-                    <input
-                      type="tel"
-                      id="contactNumber"
-                      name="contactNumber"
-                      value={appointmentDetails.contactNumber}
-                      onChange={handleInputChange}
-                      placeholder="Enter contact number"
-                      required
-                    />
-                  </div>
+            {/* Summary Section */}
+            {selectedDate && selectedTime && (
+              <div className={styles.appointmentSummary}>
+                <h3>📋 Appointment Summary</h3>
+                <div className={styles.summaryContent}>
+                  <p><strong>Date:</strong> {formatDateForDisplay(selectedDate)}</p>
+                  <p><strong>Time:</strong> {formatTimeForDisplay(selectedTime)}</p>
+                  <p><strong>Duration:</strong> 1 hour</p>
+                  <p><strong>Type:</strong> Online Meeting</p>
+                  <p><strong>Platform:</strong> Zoom</p>
+                  <p><strong>Fee:</strong> Rs. {doctorInfo?.fee || 1800}</p>
                 </div>
+              </div>
+            )}
 
-                <div className={styles.formRow}>
-                  <div className={styles.formGroup}>
-                    <label htmlFor="emergencyContact">Emergency Contact</label>
-                    <input
-                      type="tel"
-                      id="emergencyContact"
-                      name="emergencyContact"
-                      value={appointmentDetails.emergencyContact}
-                      onChange={handleInputChange}
-                      placeholder="Emergency contact number"
-                      required
-                    />
-                  </div>
-                  <div className={styles.formGroup}>
-                    <label htmlFor="preferredPlatform">Preferred Platform</label>
-                    <select
-                      id="preferredPlatform"
-                      name="preferredPlatform"
-                      value={appointmentDetails.preferredPlatform}
-                      onChange={handleInputChange}
-                      required
-                    >
-                      <option value="zoom">Zoom</option>
-                      <option value="teams">Microsoft Teams</option>
-                      <option value="meet">Google Meet</option>
-                      <option value="whatsapp">WhatsApp Video</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className={styles.formGroup}>
-                  <label htmlFor="symptoms">Symptoms / Reason for Visit</label>
-                  <textarea
-                    id="symptoms"
-                    name="symptoms"
-                    value={appointmentDetails.symptoms}
-                    onChange={handleInputChange}
-                    placeholder="Describe symptoms or reason for the online consultation"
-                    rows="4"
-                    required
-                  />
-                </div>
-
-                <div className={styles.formGroup}>
-                  <label htmlFor="notes">Additional Notes (Optional)</label>
-                  <textarea
-                    id="notes"
-                    name="notes"
-                    value={appointmentDetails.notes}
-                    onChange={handleInputChange}
-                    placeholder="Any additional information for the doctor (medical history, current medications, etc.)"
-                    rows="3"
-                  />
-                </div>
-
-                {/* Online Meeting Requirements */}
-                <div className={styles.requirementsSection}>
-                  <h3>📋 Online Meeting Requirements</h3>
-                  <div className={styles.requirements}>
-                    <div className={styles.requirement}>
-                      <span className={styles.requirementIcon}>💻</span>
-                      <span>Stable internet connection</span>
-                    </div>
-                    <div className={styles.requirement}>
-                      <span className={styles.requirementIcon}>📹</span>
-                      <span>Working camera and microphone</span>
-                    </div>
-                    <div className={styles.requirement}>
-                      <span className={styles.requirementIcon}>🔇</span>
-                      <span>Quiet environment for consultation</span>
-                    </div>
-                    <div className={styles.requirement}>
-                      <span className={styles.requirementIcon}>📱</span>
-                      <span>Backup contact number available</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Summary Section - FIXED DATE DISPLAY WITH ALTERNATIVE APPROACH */}
-                {selectedDate && selectedTime && (
-                  <div className={styles.appointmentSummary}>
-                    <h3>📋 Appointment Summary</h3>
-                    <div className={styles.summaryContent}>
-                      <p><strong>Date:</strong> {formatDateForDisplay(selectedDate)}</p>
-                      <p><strong>Time:</strong> {formatTimeForDisplay(selectedTime)}</p>
-                      <p><strong>Duration:</strong> 1 hour</p>
-                      <p><strong>Type:</strong> Online Meeting</p>
-                      <p><strong>Platform:</strong> {appointmentDetails.preferredPlatform}</p>
-                      <p><strong>Fee:</strong> Rs. {doctorInfo?.fee || 1800}</p>
-                    </div>
-                    
- 
-                  </div>
+            {/* Book Button */}
+            <div className={styles.submitSection}>
+              <button
+                className={styles.submitButton}
+                onClick={handleBookAppointment}
+                disabled={!selectedDate || !selectedTime || submitting}
+              >
+                {submitting ? (
+                  <>
+                    <div className={styles.buttonSpinner}></div>
+                    Booking Appointment...
+                  </>
+                ) : (
+                  '💻 Book Online Appointment'
                 )}
-
-                {/* Submit Button */}
-                <div className={styles.submitSection}>
-                  <button
-                    type="submit"
-                    className={styles.submitButton}
-                    disabled={!selectedDate || !selectedTime || !appointmentDetails.patientName || submitting}
-                  >
-                    {submitting ? (
-                      <>
-                        <div className={styles.buttonSpinner}></div>
-                        Booking Appointment...
-                      </>
-                    ) : (
-                      '💻 Book Online Appointment'
-                    )}
-                  </button>
-                </div>
-              </form>
+              </button>
             </div>
           </div>
         </div>

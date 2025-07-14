@@ -160,7 +160,7 @@ const FamilyMemberDashboard = () => {
 
   const handleViewElders = () => {
   
-     navigate('/family-member/appointments');
+     navigate('/family-member/elders');
   };
 
     const handleMentalSessions = () => {
