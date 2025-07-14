@@ -1,3 +1,7 @@
+process.env.TZ = 'Asia/Colombo';
+
+console.log('Server timezone set to:', process.env.TZ);
+console.log('Current server time:', new Date().toString());
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();

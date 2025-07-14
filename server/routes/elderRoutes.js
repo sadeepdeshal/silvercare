@@ -6,12 +6,16 @@ const {
   getElderById, 
   updateElder,
   createElder,
-  getDoctorsByElderDistrict  // Add this import
+  getDoctorsByElderDistrict,
+  getAllDoctorsForOnlineMeeting,
+  getDoctorById,
+  getAppointmentBookingInfo,
+  createAppointment,        // Add this import
+  getElderAppointments      // Add this import
 } = require('../controllers/elderController');
 
 const { 
   getElderDetails,
-  getElderAppointments,
   getUpcomingAppointments,
   getPastAppointments,
   getAllAppointments,
@@ -29,8 +33,23 @@ router.get('/count/:familyMemberId', getElderCount);
 // Fetch elder details - MUST BE BEFORE /:elderId route
 router.get('/elderDetails', getElderDetails);
 
-// Get doctors by elder's district - MUST BE BEFORE /:elderId route
+// Get appointment booking info (both elder and doctor) - MUST BE BEFORE /:elderId route
+router.get('/:elderId/appointment-booking/:doctorId', getAppointmentBookingInfo);
+
+// Get doctor info by ID - MUST BE BEFORE /:elderId route
+router.get('/doctor/:doctorId', getDoctorById);
+
+// Get doctors by elder's district for physical meetings - MUST BE BEFORE /:elderId route
 router.get('/:elderId/doctors', getDoctorsByElderDistrict);
+
+// Get all doctors for online meetings - MUST BE BEFORE /:elderId route
+router.get('/:elderId/doctors/online', getAllDoctorsForOnlineMeeting);
+
+// Create new appointment - MUST BE BEFORE /:elderId route
+router.post('/:elderId/appointments', createAppointment);
+
+// Get elder appointments - MUST BE BEFORE /:elderId route
+router.get('/:elderId/appointments', getElderAppointments);
 
 // Appointment routes for elders - MUST BE BEFORE /:elderId route
 router.get('/:elderId/appointments/upcoming', getUpcomingAppointments);
