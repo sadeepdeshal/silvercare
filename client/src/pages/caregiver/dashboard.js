@@ -3,8 +3,6 @@ import Navbar from '../../components/navbar';
 //import { useAuth } from '../../context/AuthContext';
 import styles from "../../components/css/caregiver/dashboard.module.css";
 
-
-
 const CaregiverDashboard = () => {
   
   // Dummy data
@@ -63,9 +61,6 @@ const CaregiverDashboard = () => {
   return (
     <div className={styles.dashboard}>
        <Navbar />
-      <header className={styles.dashboardheader}>
-        <h1>Caregiver Dashboard</h1>
-      </header>
 
       <div className={styles.summarycards}>
         <div className={styles.card}>
@@ -110,8 +105,9 @@ const CaregiverDashboard = () => {
             ))}
           </ul>
         </section>
+      </div>
 
-        <section className={styles.recentelders}>
+        <div className={styles.recentelders}>
           <h2>Recent Elders</h2>
           <div className={styles.elderlist}>
             {elders.map((elder, i) => (
@@ -124,9 +120,9 @@ const CaregiverDashboard = () => {
               </div>
             ))}
           </div>
-        </section>
+        </div>
 
-        <section className={styles.recentmessages}>
+        <div className={styles.recentmessages}>
           <h2>Recent Messages</h2>
           <ul>
             {messages.map((msg, i) => (
@@ -137,8 +133,8 @@ const CaregiverDashboard = () => {
               </li>
             ))}
           </ul>
-        </section>
-      </div>
+        </div>
+        
     </div>
   );
 };
