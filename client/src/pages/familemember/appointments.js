@@ -448,9 +448,7 @@ const Appointments = () => {
                                 Cancel
                               </button>
                             )}
-                            <button className={styles.viewButton}>
-                              Payment →
-                            </button>
+
                           </div>
                         </div>
                       </div>

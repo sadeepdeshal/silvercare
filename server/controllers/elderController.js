@@ -1398,7 +1398,7 @@ const getUpcomingAppointmentsByFamily = async (req, res) => {
       INNER JOIN "User" u ON d.user_id = u.user_id
       WHERE a.family_id = $1 
       AND a.date_time > CURRENT_TIMESTAMP
-      AND a.status IN ( 'approved')
+      AND a.status IN ( 'confirmed')
       ORDER BY a.date_time ASC
       LIMIT 10`,
       [familyId]
@@ -1449,7 +1449,7 @@ const getAppointmentCountByFamily = async (req, res) => {
        FROM appointment 
        WHERE family_id = $1 
        AND date_time > CURRENT_TIMESTAMP
-       AND status IN ( 'approved')`,
+       AND status IN ( 'confirmed')`,
       [familyId]
     );
     

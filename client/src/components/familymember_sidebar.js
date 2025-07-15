@@ -45,7 +45,16 @@ const FamilyMemberSidebar = ({ onItemClick }) => {
         navigate('/family-member/elders');
         break;
       case 'upcoming-appointments':
-        navigate('/family-member/upcoming-appointments');
+        navigate('/family-member/appointments');
+        break;
+              case 'upcoming-appointments':
+        navigate('/family-member/appointments');
+        break;
+      case 'approved-appointment':
+        navigate('/family-member/Approved-appointment');
+        break;
+      case 'cancel-appointment':
+        navigate('/family-member/cancel-appointment');
         break;
       case 'appointment-history':
         navigate('/family-member/appointment-history');
@@ -127,7 +136,10 @@ const FamilyMemberSidebar = ({ onItemClick }) => {
       hasSubmenu: true,
       submenu: [
         { key: 'book-appointment', label: 'Book Appointment', path: '/family-member/appointments' },
-        { key: 'upcoming-appointments', label: 'Upcoming', path: '/family-member/upcoming-appointments' },
+        { key: 'upcoming-appointments', label: 'Upcoming', path: '/family-member/appointments' },
+        { key: 'approved-appointment', label: 'Approved', path: '/family-member/Approved-appointment' },
+        { key: 'pending-appointments', label: 'Pending', path: '/family-member/pending-appointments' },
+        { key: 'cancel-appointment', label: 'Cancel', path: '/family-member/cancel-appointment' },
         { key: 'appointment-history', label: 'History', path: '/family-member/appointment-history' }
       ]
     },

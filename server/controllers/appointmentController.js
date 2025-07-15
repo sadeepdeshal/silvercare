@@ -1,12 +1,12 @@
 const pool = require('../db');
 
-// Get all appointments for a family member (only approved status)
+// Get all appointments for a family member (only confirmed status)
 const getAllAppointmentsByFamily = async (req, res) => {
   const { familyMemberId } = req.params;
   const { type, limit, offset = 0 } = req.query;
   
   try {
-    console.log('Getting approved appointments for family member:', familyMemberId);
+    console.log('Getting confirmed appointments for family member:', familyMemberId);
     
     // First, get the family_id from the familymember table using the user_id
     const familyMemberResult = await pool.query(
@@ -24,7 +24,7 @@ const getAllAppointmentsByFamily = async (req, res) => {
     const familyId = familyMemberResult.rows[0].family_id;
     console.log('Found family_id:', familyId);
     
-    // Build dynamic query - ONLY show approved appointments
+    // Build dynamic query - ONLY show confirmed appointments
     let query = `
       SELECT 
         a.appointment_id,
@@ -53,7 +53,7 @@ const getAllAppointmentsByFamily = async (req, res) => {
       INNER JOIN elder e ON a.elder_id = e.elder_id
       INNER JOIN doctor d ON a.doctor_id = d.doctor_id
       INNER JOIN "User" u ON d.user_id = u.user_id
-      WHERE a.family_id = $1 AND a.status = 'approved'
+      WHERE a.family_id = $1 AND a.status = 'confirmed'
     `;
     
     const queryParams = [familyId];
@@ -83,11 +83,11 @@ const getAllAppointmentsByFamily = async (req, res) => {
     
     const result = await pool.query(query, queryParams);
     
-    // Get total count for pagination (only approved appointments)
+    // Get total count for pagination (only confirmed appointments)
     let countQuery = `
       SELECT COUNT(*) as total
       FROM appointment a
-      WHERE a.family_id = $1 AND a.status = 'approved'
+      WHERE a.family_id = $1 AND a.status = 'confirmed'
     `;
     
     const countParams = [familyId];
@@ -102,7 +102,7 @@ const getAllAppointmentsByFamily = async (req, res) => {
     const countResult = await pool.query(countQuery, countParams);
     const totalCount = parseInt(countResult.rows[0].total);
     
-    console.log('Found approved appointments:', result.rows.length);
+    console.log('Found confirmed appointments:', result.rows.length);
     
     res.json({
       success: true,
@@ -116,7 +116,7 @@ const getAllAppointmentsByFamily = async (req, res) => {
     });
     
   } catch (err) {
-    console.error('Error fetching approved appointments:', err);
+    console.error('Error fetching confirmed appointments:', err);
     res.status(500).json({ 
       success: false,
       error: 'Error fetching appointments' 
@@ -124,12 +124,139 @@ const getAllAppointmentsByFamily = async (req, res) => {
   }
 };
 
-// Get appointment by ID (only if approved)
+// NEW: Get upcoming appointments for dashboard (only confirmed status)
+const getUpcomingAppointmentsByFamily = async (req, res) => {
+  const { familyMemberId } = req.params;
+  const { limit = 5 } = req.query; // Default limit for dashboard
+  
+  try {
+    console.log('Getting upcoming confirmed appointments for family member:', familyMemberId);
+    
+    // First, get the family_id from the familymember table using the user_id
+    const familyMemberResult = await pool.query(
+      'SELECT family_id FROM familymember WHERE user_id = $1',
+      [familyMemberId]
+    );
+    
+    if (familyMemberResult.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: 'Family member not found'
+      });
+    }
+    
+    const familyId = familyMemberResult.rows[0].family_id;
+    console.log('Found family_id for upcoming appointments:', familyId);
+    
+    // Get upcoming confirmed appointments only
+    const query = `
+      SELECT 
+        a.appointment_id,
+        a.elder_id,
+        a.family_id,
+        a.doctor_id,
+        a.date_time,
+        a.status,
+        a.notes,
+        a.appointment_type,
+        a.created_at,
+        a.updated_at,
+        e.name as elder_name,
+        e.contact as elder_contact,
+        e.gender as elder_gender,
+        e.dob as elder_dob,
+        e.district as elder_district,
+        u.name as doctor_name,
+        u.email as doctor_email,
+        u.phone as doctor_phone,
+        d.specialization,
+        d.current_institution,
+        d.district as doctor_district,
+        d.years_experience
+      FROM appointment a
+      INNER JOIN elder e ON a.elder_id = e.elder_id
+      INNER JOIN doctor d ON a.doctor_id = d.doctor_id
+      INNER JOIN "User" u ON d.user_id = u.user_id
+      WHERE a.family_id = $1 
+        AND a.status = 'confirmed'
+        AND a.date_time > CURRENT_TIMESTAMP
+      ORDER BY a.date_time ASC
+      LIMIT $2
+    `;
+    
+    const result = await pool.query(query, [familyId, parseInt(limit)]);
+    
+    console.log('Found upcoming confirmed appointments:', result.rows.length);
+    
+    res.json({
+      success: true,
+      appointments: result.rows
+    });
+    
+  } catch (err) {
+    console.error('Error fetching upcoming confirmed appointments:', err);
+    res.status(500).json({ 
+      success: false,
+      error: 'Error fetching upcoming appointments' 
+    });
+  }
+};
+
+// NEW: Get appointment count for dashboard (only confirmed status)
+const getAppointmentCountByFamily = async (req, res) => {
+  const { familyMemberId } = req.params;
+  
+  try {
+    console.log('Getting confirmed appointment count for family member:', familyMemberId);
+    
+    // First, get the family_id from the familymember table using the user_id
+    const familyMemberResult = await pool.query(
+      'SELECT family_id FROM familymember WHERE user_id = $1',
+      [familyMemberId]
+    );
+    
+    if (familyMemberResult.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: 'Family member not found'
+      });
+    }
+    
+    const familyId = familyMemberResult.rows[0].family_id;
+    
+    // Get count of upcoming confirmed appointments
+    const countResult = await pool.query(
+      `SELECT COUNT(*) as count
+       FROM appointment a
+       WHERE a.family_id = $1 
+         AND a.status = 'confirmed'
+         AND a.date_time > CURRENT_TIMESTAMP`,
+      [familyId]
+    );
+    
+    const count = parseInt(countResult.rows[0].count);
+    console.log('Found confirmed appointment count:', count);
+    
+    res.json({
+      success: true,
+      count: count
+    });
+    
+  } catch (err) {
+    console.error('Error fetching confirmed appointment count:', err);
+    res.status(500).json({ 
+      success: false,
+      error: 'Error fetching appointment count' 
+    });
+  }
+};
+
+// Get appointment by ID (only if confirmed)
 const getAppointmentById = async (req, res) => {
   const { appointmentId } = req.params;
   
   try {
-    console.log('Getting approved appointment by ID:', appointmentId);
+    console.log('Getting confirmed appointment by ID:', appointmentId);
     
     const result = await pool.query(
       `SELECT 
@@ -162,14 +289,14 @@ const getAppointmentById = async (req, res) => {
       INNER JOIN elder e ON a.elder_id = e.elder_id
       INNER JOIN doctor d ON a.doctor_id = d.doctor_id
       INNER JOIN "User" u ON d.user_id = u.user_id
-      WHERE a.appointment_id = $1 AND a.status = 'approved'`,
+      WHERE a.appointment_id = $1 AND a.status = 'confirmed'`,
       [appointmentId]
     );
     
     if (result.rows.length === 0) {
       return res.status(404).json({
         success: false,
-        error: 'Approved appointment not found'
+        error: 'Confirmed appointment not found'
       });
     }
     
@@ -179,7 +306,7 @@ const getAppointmentById = async (req, res) => {
     });
     
   } catch (err) {
-    console.error('Error fetching approved appointment:', err);
+    console.error('Error fetching confirmed appointment:', err);
     res.status(500).json({ 
       success: false,
       error: 'Error fetching appointment details' 
@@ -187,7 +314,7 @@ const getAppointmentById = async (req, res) => {
   }
 };
 
-// Update appointment status (can change from approved to other statuses)
+// Update appointment status (can change from confirmed to other statuses)
 const updateAppointmentStatus = async (req, res) => {
   const { appointmentId } = req.params;
   const { status, notes } = req.body;
@@ -233,24 +360,24 @@ const updateAppointmentStatus = async (req, res) => {
   }
 };
 
-// Cancel appointment (only if currently approved)
+// Cancel appointment (only if currently confirmed)
 const cancelAppointment = async (req, res) => {
   const { appointmentId } = req.params;
   const { reason } = req.body;
   
   try {
-    console.log('Cancelling approved appointment:', appointmentId);
+    console.log('Cancelling confirmed appointment:', appointmentId);
     
-    // First check if appointment exists and is approved
+    // First check if appointment exists and is confirmed
     const appointmentCheck = await pool.query(
       'SELECT * FROM appointment WHERE appointment_id = $1 AND status = $2',
-      [appointmentId, 'approved']
+      [appointmentId, 'confirmed']
     );
     
     if (appointmentCheck.rows.length === 0) {
       return res.status(404).json({
         success: false,
-        error: 'Approved appointment not found or cannot be cancelled'
+        error: 'Confirmed appointment not found or cannot be cancelled'
       });
     }
     
@@ -269,12 +396,12 @@ const cancelAppointment = async (req, res) => {
     
     res.json({
       success: true,
-      message: 'Approved appointment cancelled successfully',
+      message: 'Confirmed appointment cancelled successfully',
       appointment: result.rows[0]
     });
     
   } catch (err) {
-    console.error('Error cancelling approved appointment:', err);
+    console.error('Error cancelling confirmed appointment:', err);
     res.status(500).json({ 
       success: false,
       error: 'Error cancelling appointment' 
@@ -282,12 +409,12 @@ const cancelAppointment = async (req, res) => {
   }
 };
 
-// Get appointment statistics for family member (only approved appointments)
+// Get appointment statistics for family member (only confirmed appointments)
 const getAppointmentStats = async (req, res) => {
   const { familyMemberId } = req.params;
   
   try {
-    console.log('Getting approved appointment stats for family member:', familyMemberId);
+    console.log('Getting confirmed appointment stats for family member:', familyMemberId);
     
     // Get family_id
     const familyMemberResult = await pool.query(
@@ -304,17 +431,17 @@ const getAppointmentStats = async (req, res) => {
     
     const familyId = familyMemberResult.rows[0].family_id;
     
-    // Get statistics (only for approved appointments)
+    // Get statistics (only for confirmed appointments)
     const statsResult = await pool.query(
       `SELECT 
-        COUNT(*) as total_approved_appointments,
+        COUNT(*) as total_confirmed_appointments,
         COUNT(CASE WHEN appointment_type = 'physical' THEN 1 END) as physical_appointments,
         COUNT(CASE WHEN appointment_type = 'online' THEN 1 END) as online_appointments,
         COUNT(CASE WHEN date_time > CURRENT_TIMESTAMP THEN 1 END) as upcoming_appointments,
         COUNT(CASE WHEN date_time < CURRENT_TIMESTAMP THEN 1 END) as past_appointments,
         COUNT(CASE WHEN DATE(date_time) = CURRENT_DATE THEN 1 END) as today_appointments
-      FROM appointment 
-      WHERE family_id = $1 AND status = 'approved'`,
+              FROM appointment 
+      WHERE family_id = $1 AND status = 'confirmed'`,
       [familyId]
     );
     
@@ -323,13 +450,13 @@ const getAppointmentStats = async (req, res) => {
       stats: {
         ...statsResult.rows[0],
         // Add some additional helpful stats
-        status_filter: 'approved_only',
-        message: 'Showing only approved appointments'
+        status_filter: 'confirmed_only',
+        message: 'Showing only confirmed appointments'
       }
     });
     
   } catch (err) {
-    console.error('Error fetching approved appointment stats:', err);
+    console.error('Error fetching confirmed appointment stats:', err);
     res.status(500).json({ 
       success: false,
       error: 'Error fetching appointment statistics' 
@@ -339,6 +466,8 @@ const getAppointmentStats = async (req, res) => {
 
 module.exports = {
   getAllAppointmentsByFamily,
+  getUpcomingAppointmentsByFamily, // NEW: For dashboard upcoming appointments
+  getAppointmentCountByFamily,     // NEW: For dashboard appointment count
   getAppointmentById,
   updateAppointmentStatus,
   cancelAppointment,

@@ -546,9 +546,7 @@ const FamilyMemberDashboard = () => {
                               <span className={styles.appointmentDetail}>
                                 📅 {formatAppointmentDate(appointment.date_time)}
                               </span>
-                              <span className={styles.appointmentDetail}>
-                                🏥 {appointment.current_institution}
-                              </span>
+
                               <span className={styles.appointmentDetail}>
                                 📍 {appointment.doctor_district}
                               </span>
