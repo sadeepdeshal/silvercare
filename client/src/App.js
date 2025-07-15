@@ -22,6 +22,8 @@ import { DoctorRegStep2 } from './pages/doctor/signup-step2';
 // Import new appointment components
 import PhysicalAppointment from './pages/familemember/physical-appointment';
 import OnlineAppointment from './pages/familemember/online-appointment';
+import Appointments from './pages/familemember/appointments';
+
 
 import DoctorDashboard from './pages/doctor/dashboard';
 import ElderDashboard from './pages/elder/dashboard';
@@ -101,6 +103,13 @@ function App() {
               <OnlineAppointment />
             </ProtectedRoute>
           } />
+
+          <Route path="/family-member/appointments" element={
+  <ProtectedRoute allowedRoles={['family_member']}>
+    <Appointments />
+  </ProtectedRoute>
+} />
+
 
           {/* Add the elders route */}
           <Route path="/family-member/elders" element={

@@ -156,9 +156,9 @@ const FamilyMemberDashboard = () => {
     navigate(`/family-member/elder/${elderId}`);
   };
 
-  const handleViewAllAppointments = () => {
-    navigate('/family-member/appointments');
-  };
+ const handleViewAllAppointments = () => {
+  navigate('/family-member/appointments'); // This will now navigate to the new appointments page
+};
 
   const handleAppointmentDetails = (appointmentId) => {
     navigate(`/family-member/appointment/${appointmentId}`);
