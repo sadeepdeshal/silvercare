@@ -33,6 +33,9 @@ import ProtectedRoute from './components/ProtectedRoute';
 // Import ElderDoctors component
 import ElderDoctors from './pages/familemember/elder-doctors';
 
+// Import admin related
+import AdminUsers from './pages/admin/users';
+
 // Optional: Create an Unauthorized component
 const Unauthorized = () => (
   <div style={{ textAlign: 'center', padding: '50px' }}>
@@ -146,6 +149,12 @@ function App() {
               <AdminDashboard />
             </ProtectedRoute>
           } />
+
+          <Route path="/admin/users" element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <AdminUsers />
+              </ProtectedRoute>
+            } />
 
           <Route path="/elder/dashboard" element={
             <ProtectedRoute allowedRoles={['elder']}>

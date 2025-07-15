@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const { getAdminDashboard, approveProfessional, rejectProfessional } = require('../controllers/adminController');
+const { getAdminDashboard, approveProfessional, rejectProfessional ,getAllUsers} = require('../controllers/adminController');
 
 // Admin dashboard route
 router.get('/dashboard', getAdminDashboard);
+router.get('/users', getAllUsers);
 
 // Professional approval routes
 router.put('/approve/:type/:id', approveProfessional);
