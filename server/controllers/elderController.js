@@ -1739,6 +1739,156 @@ const getElderAppointments = async (req, res) => {
   }
 };
 
+const getBlockedTimeSlots = async (req, res) => {
+  const { doctorId, date } = req.params;
+  
+  try {
+    console.log('Getting blocked time slots for doctor:', doctorId, 'date:', date);
+    
+    // Validate date format
+    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!dateRegex.test(date)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid date format. Use YYYY-MM-DD'
+      });
+    }
+    
+    // Verify doctor exists
+    const doctorCheck = await pool.query(
+      'SELECT doctor_id FROM doctor WHERE doctor_id = $1 AND status = $2',
+      [doctorId, 'confirmed']
+    );
+    
+    if (doctorCheck.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: 'Doctor not found or not approved'
+      });
+    }
+    
+    // Get all appointments for this doctor on the specified date with more details
+    const appointmentsResult = await pool.query(
+      `SELECT 
+        appointment_id,
+        DATE_PART('hour', date_time) as hour,
+        DATE_PART('minute', date_time) as minute,
+        appointment_type,
+        status,
+        date_time
+      FROM appointment 
+      WHERE doctor_id = $1 
+      AND DATE(date_time) = $2 
+      AND status IN ('pending', 'confirmed')
+      ORDER BY date_time`,
+      [doctorId, date]
+    );
+    
+    console.log('Raw appointments from database:', appointmentsResult.rows);
+    
+    const blockedSlots = [];
+    const appointmentDetails = []; // For debugging
+    
+    appointmentsResult.rows.forEach(appointment => {
+      const hour = parseInt(appointment.hour);
+      const minute = parseInt(appointment.minute);
+      const appointmentType = appointment.appointment_type;
+      
+      console.log(`Processing appointment ${appointment.appointment_id}: ${hour}:${minute}, type: ${appointmentType}`);
+      
+      // Format the time slot
+      const timeSlot = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+      
+      // Block the appointment time slot
+      blockedSlots.push(timeSlot);
+      
+      appointmentDetails.push({
+        id: appointment.appointment_id,
+        time: timeSlot,
+        type: appointmentType,
+        status: appointment.status
+      });
+      
+      // For physical appointments (2 hours), block additional slots
+      if (appointmentType === 'physical') {
+        console.log('Blocking additional slots for physical appointment');
+        
+        // Block the next 3 slots (1.5 hours more) to make it 2 hours total
+        const additionalSlots = [];
+        
+        // Add 30 minutes
+        let nextHour = hour;
+        let nextMinute = minute + 30;
+        if (nextMinute >= 60) {
+          nextHour += 1;
+          nextMinute -= 60;
+        }
+        additionalSlots.push(`${nextHour.toString().padStart(2, '0')}:${nextMinute.toString().padStart(2, '0')}`);
+        
+        // Add 60 minutes
+        nextMinute = minute + 60;
+        nextHour = hour;
+        if (nextMinute >= 60) {
+          nextHour += 1;
+          nextMinute -= 60;
+        }
+        additionalSlots.push(`${nextHour.toString().padStart(2, '0')}:${nextMinute.toString().padStart(2, '0')}`);
+        
+        // Add 90 minutes
+        nextMinute = minute + 90;
+        nextHour = hour;
+        if (nextMinute >= 60) {
+          nextHour += Math.floor(nextMinute / 60);
+          nextMinute = nextMinute % 60;
+        }
+        additionalSlots.push(`${nextHour.toString().padStart(2, '0')}:${nextMinute.toString().padStart(2, '0')}`);
+        
+        console.log('Additional slots for physical appointment:', additionalSlots);
+        blockedSlots.push(...additionalSlots);
+      }
+      
+      // For online appointments (1 hour), block the next slot
+      if (appointmentType === 'online') {
+        console.log('Blocking additional slot for online appointment');
+        
+        let nextHour = hour;
+        let nextMinute = minute + 30;
+        if (nextMinute >= 60) {
+          nextHour += 1;
+          nextMinute -= 60;
+        }
+        const nextSlot = `${nextHour.toString().padStart(2, '0')}:${nextMinute.toString().padStart(2, '0')}`;
+        console.log('Additional slot for online appointment:', nextSlot);
+        blockedSlots.push(nextSlot);
+      }
+    });
+    
+    // Remove duplicates
+    const uniqueBlockedSlots = [...new Set(blockedSlots)];
+    
+    console.log('Final blocked time slots:', uniqueBlockedSlots);
+    console.log('Appointment details:', appointmentDetails);
+    
+    res.json({
+      success: true,
+      blockedSlots: uniqueBlockedSlots,
+      date: date,
+      doctorId: parseInt(doctorId),
+      appointmentCount: appointmentsResult.rows.length,
+      appointmentDetails: appointmentDetails // Add this for debugging
+    });
+    
+  } catch (err) {
+    console.error('Error fetching blocked time slots:', err);
+    res.status(500).json({
+      success: false,
+      error: 'Error fetching blocked time slots'
+    });
+  }
+};
+
+
+
 
 // Bulk update elders (for batch operations)
 const bulkUpdateElders = async (req, res) => {
@@ -1835,7 +1985,8 @@ module.exports = {
   createAppointment,        // Add this
   getElderAppointments ,
   getUpcomingAppointmentsByFamily,  // Add this
-  getAppointmentCountByFamily   
+  getAppointmentCountByFamily,
+  getBlockedTimeSlots    
 };
 
 

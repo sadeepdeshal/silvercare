@@ -10,10 +10,11 @@ const {
   getAllDoctorsForOnlineMeeting,
   getDoctorById,
   getAppointmentBookingInfo,
-  createAppointment,        // Add this import
-  getElderAppointments,      // Add this import
-  getUpcomingAppointmentsByFamily,  // Add this import
-  getAppointmentCountByFamily       // Add this import
+  createAppointment,
+  getElderAppointments,
+  getUpcomingAppointmentsByFamily,
+  getAppointmentCountByFamily,
+  getBlockedTimeSlots // Add this import
 } = require('../controllers/elderController');
 
 const { 
@@ -33,11 +34,14 @@ router.get('/family-member/:familyMemberId', getEldersByFamilyMember);
 router.get('/count/:familyMemberId', getElderCount);
 router.get('/family-member/:familyMemberId/appointments/upcoming', getUpcomingAppointmentsByFamily);
 
-// Get appointment count for a family member - ADD THIS ROUTE
+// Get appointment count for a family member
 router.get('/family-member/:familyMemberId/appointments/count', getAppointmentCountByFamily);
 
 // Fetch elder details - MUST BE BEFORE /:elderId route
 router.get('/elderDetails', getElderDetails);
+
+// Get blocked time slots for a doctor on a specific date - MUST BE BEFORE /:elderId route
+router.get('/doctor/:doctorId/blocked-slots/:date', getBlockedTimeSlots);
 
 // Get appointment booking info (both elder and doctor) - MUST BE BEFORE /:elderId route
 router.get('/:elderId/appointment-booking/:doctorId', getAppointmentBookingInfo);
@@ -75,3 +79,4 @@ router.put('/:elderId', updateElder);
 router.post('/', createElder);
 
 module.exports = router;
+

@@ -17,6 +17,7 @@ const PhysicalAppointment = () => {
   const [selectedTime, setSelectedTime] = useState('');
   const [doctorInfo, setDoctorInfo] = useState(null);
   const [elderInfo, setElderInfo] = useState(null);
+  const [blockedSlots, setBlockedSlots] = useState([]);
   const [dataLoading, setDataLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
@@ -102,6 +103,33 @@ const PhysicalAppointment = () => {
     fetchAppointmentInfo();
   }, [elderId, doctorId]);
 
+  // Fetch blocked time slots when date is selected
+  useEffect(() => {
+    const fetchBlockedSlots = async () => {
+      if (!selectedDate || !doctorId) return;
+      
+      try {
+        console.log('Fetching blocked slots for doctor:', doctorId, 'date:', selectedDate);
+        
+        const response = await elderApi.getBlockedTimeSlots(doctorId, selectedDate);
+        
+        if (response.success) {
+          console.log('Blocked slots received:', response.blockedSlots);
+          setBlockedSlots(response.blockedSlots || []);
+        } else {
+          console.error('Failed to fetch blocked slots:', response.error);
+          setBlockedSlots([]);
+        }
+        
+      } catch (err) {
+        console.error('Error fetching blocked slots:', err);
+        setBlockedSlots([]);
+      }
+    };
+
+    fetchBlockedSlots();
+  }, [selectedDate, doctorId]);
+
   // Protect the route
   useEffect(() => {
     if (loading) return;
@@ -154,7 +182,7 @@ const PhysicalAppointment = () => {
     return days;
   };
 
-  // Generate available time slots
+  // Generate available time slots for physical appointments (2 hour duration)
   const generateTimeSlots = () => {
     const slots = [];
     // Morning slots (9 AM - 12 PM)
@@ -170,9 +198,32 @@ const PhysicalAppointment = () => {
     return slots;
   };
 
+  // Check if a time slot is blocked
+  const isTimeSlotBlocked = (timeSlot) => {
+    return blockedSlots.includes(timeSlot);
+  };
+
+  const handleDateSelection = (dateString) => {
+    setSelectedDate(dateString);
+    setSelectedTime(''); // Reset selected time when date changes
+    console.log('Calendar day clicked, date set to:', dateString);
+  };
+
+  const handleTimeSelection = (time) => {
+    if (!isTimeSlotBlocked(time)) {
+      setSelectedTime(time);
+      console.log('Selected time:', time);
+    }
+  };
+
   const handleBookAppointment = async () => {
     if (!selectedDate || !selectedTime) {
       setError('Please select both date and time for the appointment');
+      return;
+    }
+
+    if (isTimeSlotBlocked(selectedTime)) {
+      setError('Selected time slot is not available. Please choose a different time.');
       return;
     }
 
@@ -180,7 +231,7 @@ const PhysicalAppointment = () => {
       setSubmitting(true);
       setError(null);
       
-      const appointmentData = {
+            const appointmentData = {
         doctorId: parseInt(doctorId),
         appointmentDate: selectedDate,
         appointmentTime: selectedTime,
@@ -314,7 +365,7 @@ const PhysicalAppointment = () => {
       <FamilyMemberLayout>
         <div className={styles.content}>
           {/* Header */}
-                   <div className={styles.header}>
+          <div className={styles.header}>
             <div className={styles.headerContent}>
               <h1 className={styles.title}>
                 🏥 Book Physical Appointment
@@ -418,11 +469,7 @@ const PhysicalAppointment = () => {
                         }`}
                         onClick={() => {
                           if (dayInfo && dayInfo.isAvailable) {
-                            setSelectedDate(dayInfo.date);
-                            console.log('Calendar day clicked:', dayInfo.day);
-                            console.log('Date string created:', dayInfo.date);
-                            console.log('Selected date set to:', dayInfo.date);
-                            console.log('Formatted for display:', formatDateForDisplay(dayInfo.date));
+                            handleDateSelection(dayInfo.date);
                           }
                         }}
                       >
@@ -455,23 +502,45 @@ const PhysicalAppointment = () => {
             {/* Time Selection */}
             <div className={styles.timeSection}>
               <h2 className={styles.sectionTitle}>🕐 Select Time</h2>
+              {selectedDate && blockedSlots.length > 0 && (
+                <div className={styles.blockedSlotsInfo}>
+                  <p className={styles.infoText}>
+                    ⚠️ Some time slots are unavailable due to existing appointments (2-hour blocks for physical appointments)
+                  </p>
+                </div>
+              )}
               <div className={styles.timeSlots}>
-                {timeSlots.map(time => (
-                  <button
-                    key={time}
-                    className={`${styles.timeSlot} ${
-                      selectedTime === time ? styles.selectedTime : ''
-                    }`}
-                    onClick={() => {
-                      setSelectedTime(time);
-                      console.log('Selected time:', time);
-                      console.log('Formatted for display:', formatTimeForDisplay(time));
-                    }}
-                    disabled={!selectedDate}
-                  >
-                    {time}
-                  </button>
-                ))}
+                {timeSlots.map(time => {
+                  const isBlocked = isTimeSlotBlocked(time);
+                  return (
+                    <button
+                      key={time}
+                      className={`${styles.timeSlot} ${
+                        selectedTime === time ? styles.selectedTime : ''
+                      } ${isBlocked ? styles.blockedTime : ''}`}
+                      onClick={() => handleTimeSelection(time)}
+                      disabled={!selectedDate || isBlocked}
+                      title={isBlocked ? 'This time slot is not available (conflicts with existing appointment)' : ''}
+                    >
+                      {time}
+                      {isBlocked && <span className={styles.blockedIcon}>🚫</span>}
+                    </button>
+                  );
+                })}
+              </div>
+              <div className={styles.timeSlotLegend}>
+                <div className={styles.legendItem}>
+                  <div className={styles.legendColor + ' ' + styles.availableTimeColor}></div>
+                  <span>Available</span>
+                </div>
+                <div className={styles.legendItem}>
+                  <div className={styles.legendColor + ' ' + styles.selectedTimeColor}></div>
+                  <span>Selected</span>
+                </div>
+                <div className={styles.legendItem}>
+                  <div className={styles.legendColor + ' ' + styles.blockedTimeColor}></div>
+                  <span>Blocked</span>
+                </div>
               </div>
             </div>
 
@@ -494,7 +563,7 @@ const PhysicalAppointment = () => {
               <button
                 className={styles.submitButton}
                 onClick={handleBookAppointment}
-                disabled={!selectedDate || !selectedTime || submitting}
+                disabled={!selectedDate || !selectedTime || submitting || isTimeSlotBlocked(selectedTime)}
               >
                 {submitting ? (
                   <>

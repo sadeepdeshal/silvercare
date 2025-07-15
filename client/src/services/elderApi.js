@@ -139,6 +139,26 @@ export const elderApi = {
     }
   },
 
+  // NEW: Get blocked time slots for a doctor on a specific date
+  getBlockedTimeSlots: async (doctorId, date) => {
+    try {
+      console.log('API: Fetching blocked time slots for doctor:', doctorId, 'date:', date);
+      const response = await fetch(`${API_BASE}/doctor/${doctorId}/blocked-slots/${date}`);
+      const data = await response.json();
+      
+      console.log('API: Blocked time slots response:', data);
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to fetch blocked time slots');
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('API: Error fetching blocked time slots:', error);
+      throw error;
+    }
+  },
+
   // Create appointment (simplified)
   createAppointment: async (elderId, appointmentData) => {
     try {
@@ -214,7 +234,7 @@ export const elderApi = {
       return data;
     } catch (error) {
       console.error('API: Error updating elder details:', error);
-            throw error;
+      throw error;
     }
   },
 
@@ -296,7 +316,7 @@ export const elderApi = {
     }
   },
 
-  // NEW: Get upcoming appointments for family member
+  // Get upcoming appointments for family member
   getUpcomingAppointmentsByFamily: async (familyMemberId) => {
     try {
       console.log('API: Fetching upcoming appointments for family member:', familyMemberId);
@@ -316,7 +336,7 @@ export const elderApi = {
     }
   },
 
-  // NEW: Get appointment count for family member
+  // Get appointment count for family member
   getAppointmentCountByFamily: async (familyMemberId) => {
     try {
       console.log('API: Fetching appointment count for family member:', familyMemberId);
@@ -335,7 +355,6 @@ export const elderApi = {
       throw error;
     }
   },
-
 
   // Get elders with medical conditions
   getEldersWithMedicalConditions: async (familyMemberId) => {
@@ -415,4 +434,3 @@ export const rescheduleAppointment = (elderId, appointmentId, newDateTime) => {
     newDateTime
   });
 };
-
