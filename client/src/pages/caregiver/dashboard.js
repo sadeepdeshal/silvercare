@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Navbar from '../../components/navbar';
 //import { useAuth } from '../../context/AuthContext';
 import styles from "../../components/css/caregiver/dashboard.module.css";
+import CaregiverLayout from '../../components/CaregiverLayout';
 
 const CaregiverDashboard = () => {
   
@@ -61,24 +62,44 @@ const CaregiverDashboard = () => {
   return (
     <div className={styles.dashboard}>
        <Navbar />
+       {/*<CaregiverLayout/>*/}
 
       <div className={styles.summarycards}>
+
         <div className={styles.card}>
-          <h3>Assigned Elders</h3>
-          <p>{elders.length}</p>
+          <div className={styles.cardIcon}>👥</div>
+          <div className={styles.cardContent}>
+            <p className={styles.cardLabel}>Assigned Elders</p>
+            <span className={styles.cardNumber}>{elders.length}</span>
+          </div>
+          {/*<h3> Assigned Elders</h3>*/}
+          {/*<p>{elders.length}</p>*/}
         </div>
+
         <div className={styles.card}>
-          <h3>Pending Alerts</h3>
-          <p>{alerts.length}</p>
+          <div className={styles.cardIcon}>🚨</div>
+          <div className={styles.cardContent}>
+            <p className={styles.cardLabel}>Pending Alerts</p>
+            <span className={styles.cardNumber}>{alerts.length}</span>
+          </div>
         </div>
+
         <div className={styles.card}>
-          <h3>Messages</h3>
-          <p>{messages.length}</p>
+          <div className={styles.cardIcon}>💬</div>
+          <div className={styles.cardContent}>
+            <p className={styles.cardLabel}>Messages</p>
+            <span className={styles.cardNumber}>{messages.length}</span>
+          </div>
         </div>
+
         <div className={styles.card}>
-          <h3>Med Reminders</h3>
-          <p>{medReminders.length}</p>
+          <div className={styles.cardIcon}>⏰</div>
+          <div className={styles.cardContent}>
+            <p className={styles.cardLabel}>Med Reminders</p>
+            <span className={styles.cardNumber}>{medReminders.length}</span>
+          </div>
         </div>
+
       </div>
 
       <div className={styles.dashboardgrid}>
