@@ -62,7 +62,7 @@ const CaregiverDashboard = () => {
   return (
     <div className={styles.dashboard}>
        <Navbar />
-       {/*<CaregiverLayout/>*/}
+       <CaregiverLayout/>
 
       <div className={styles.summarycards}>
 
