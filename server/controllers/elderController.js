@@ -1741,9 +1741,10 @@ const getElderAppointments = async (req, res) => {
 
 const getBlockedTimeSlots = async (req, res) => {
   const { doctorId, date } = req.params;
+  const { appointmentType: requestedType } = req.query; // Get the requested appointment type
   
   try {
-    console.log('Getting blocked time slots for doctor:', doctorId, 'date:', date);
+    console.log('Getting blocked time slots for doctor:', doctorId, 'date:', date, 'requested type:', requestedType);
     
     // Validate date format
     const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
@@ -1767,7 +1768,7 @@ const getBlockedTimeSlots = async (req, res) => {
       });
     }
     
-    // Get all appointments for this doctor on the specified date with more details
+    // Get all appointments for this doctor on the specified date
     const appointmentsResult = await pool.query(
       `SELECT 
         appointment_id,
@@ -1779,92 +1780,110 @@ const getBlockedTimeSlots = async (req, res) => {
       FROM appointment 
       WHERE doctor_id = $1 
       AND DATE(date_time) = $2 
-      AND status IN ('pending', 'confirmed')
+      AND status IN ('confirmed')
       ORDER BY date_time`,
       [doctorId, date]
     );
     
-    console.log('Raw appointments from database:', appointmentsResult.rows);
+    console.log('Existing appointments:', appointmentsResult.rows);
     
     const blockedSlots = [];
-    const appointmentDetails = []; // For debugging
+    const appointmentDetails = [];
+    
+    // Generate all possible time slots for the day
+    const allTimeSlots = [];
+    for (let hour = 8; hour < 20; hour++) {
+      allTimeSlots.push(`${hour.toString().padStart(2, '0')}:00`);
+      allTimeSlots.push(`${hour.toString().padStart(2, '0')}:30`);
+    }
     
     appointmentsResult.rows.forEach(appointment => {
       const hour = parseInt(appointment.hour);
       const minute = parseInt(appointment.minute);
-      const appointmentType = appointment.appointment_type;
+      const existingType = appointment.appointment_type;
       
-      console.log(`Processing appointment ${appointment.appointment_id}: ${hour}:${minute}, type: ${appointmentType}`);
+      console.log(`Processing existing appointment: ${hour}:${minute}, type: ${existingType}`);
       
-      // Format the time slot
-      const timeSlot = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+      const appointmentStartTime = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
       
-      // Block the appointment time slot
-      blockedSlots.push(timeSlot);
+      // Calculate the end time of the existing appointment
+      let endHour = hour;
+      let endMinute = minute;
+      
+      if (existingType === 'online') {
+        // Online appointment: 1 hour duration
+        endMinute += 60;
+        if (endMinute >= 60) {
+          endHour += Math.floor(endMinute / 60);
+          endMinute = endMinute % 60;
+        }
+      } else if (existingType === 'physical') {
+        // Physical appointment: 2 hours duration
+        endMinute += 120;
+        if (endMinute >= 60) {
+          endHour += Math.floor(endMinute / 60);
+          endMinute = endMinute % 60;
+        }
+      }
+      
+      const appointmentEndTime = `${endHour.toString().padStart(2, '0')}:${endMinute.toString().padStart(2, '0')}`;
+      
+      console.log(`Existing appointment: ${appointmentStartTime} - ${appointmentEndTime} (${existingType})`);
       
       appointmentDetails.push({
         id: appointment.appointment_id,
-        time: timeSlot,
-        type: appointmentType,
+        startTime: appointmentStartTime,
+        endTime: appointmentEndTime,
+        type: existingType,
         status: appointment.status
       });
       
-      // For physical appointments (2 hours), block additional slots
-      if (appointmentType === 'physical') {
-        console.log('Blocking additional slots for physical appointment');
+      // Now check each possible time slot for conflicts
+      allTimeSlots.forEach(timeSlot => {
+        const [slotHour, slotMinute] = timeSlot.split(':').map(Number);
         
-        // Block the next 3 slots (1.5 hours more) to make it 2 hours total
-        const additionalSlots = [];
+        // Calculate what the end time would be if someone books this slot
+        let newEndHour = slotHour;
+        let newEndMinute = slotMinute;
         
-        // Add 30 minutes
-        let nextHour = hour;
-        let nextMinute = minute + 30;
-        if (nextMinute >= 60) {
-          nextHour += 1;
-          nextMinute -= 60;
+        if (requestedType === 'online') {
+          // Requested online appointment: 1 hour duration
+          newEndMinute += 60;
+          if (newEndMinute >= 60) {
+            newEndHour += Math.floor(newEndMinute / 60);
+            newEndMinute = newEndMinute % 60;
+          }
+        } else if (requestedType === 'physical') {
+          // Requested physical appointment: 2 hours duration
+          newEndMinute += 120;
+          if (newEndMinute >= 60) {
+            newEndHour += Math.floor(newEndMinute / 60);
+            newEndMinute = newEndMinute % 60;
+          }
         }
-        additionalSlots.push(`${nextHour.toString().padStart(2, '0')}:${nextMinute.toString().padStart(2, '0')}`);
         
-        // Add 60 minutes
-        nextMinute = minute + 60;
-        nextHour = hour;
-        if (nextMinute >= 60) {
-          nextHour += 1;
-          nextMinute -= 60;
+        const newEndTime = `${newEndHour.toString().padStart(2, '0')}:${newEndMinute.toString().padStart(2, '0')}`;
+        
+        // Check for time conflicts
+        const slotStartMinutes = slotHour * 60 + slotMinute;
+        const slotEndMinutes = newEndHour * 60 + newEndMinute;
+        const existingStartMinutes = hour * 60 + minute;
+        const existingEndMinutes = endHour * 60 + endMinute;
+        
+        // Check if there's any overlap
+        const hasConflict = (
+          (slotStartMinutes < existingEndMinutes && slotEndMinutes > existingStartMinutes)
+        );
+        
+        if (hasConflict) {
+          console.log(`Blocking ${timeSlot} because it conflicts with existing ${existingType} appointment ${appointmentStartTime}-${appointmentEndTime}`);
+          blockedSlots.push(timeSlot);
         }
-        additionalSlots.push(`${nextHour.toString().padStart(2, '0')}:${nextMinute.toString().padStart(2, '0')}`);
-        
-        // Add 90 minutes
-        nextMinute = minute + 90;
-        nextHour = hour;
-        if (nextMinute >= 60) {
-          nextHour += Math.floor(nextMinute / 60);
-          nextMinute = nextMinute % 60;
-        }
-        additionalSlots.push(`${nextHour.toString().padStart(2, '0')}:${nextMinute.toString().padStart(2, '0')}`);
-        
-        console.log('Additional slots for physical appointment:', additionalSlots);
-        blockedSlots.push(...additionalSlots);
-      }
-      
-      // For online appointments (1 hour), block the next slot
-      if (appointmentType === 'online') {
-        console.log('Blocking additional slot for online appointment');
-        
-        let nextHour = hour;
-        let nextMinute = minute + 30;
-        if (nextMinute >= 60) {
-          nextHour += 1;
-          nextMinute -= 60;
-        }
-        const nextSlot = `${nextHour.toString().padStart(2, '0')}:${nextMinute.toString().padStart(2, '0')}`;
-        console.log('Additional slot for online appointment:', nextSlot);
-        blockedSlots.push(nextSlot);
-      }
+      });
     });
     
-    // Remove duplicates
-    const uniqueBlockedSlots = [...new Set(blockedSlots)];
+    // Remove duplicates and sort
+    const uniqueBlockedSlots = [...new Set(blockedSlots)].sort();
     
     console.log('Final blocked time slots:', uniqueBlockedSlots);
     console.log('Appointment details:', appointmentDetails);
@@ -1874,8 +1893,9 @@ const getBlockedTimeSlots = async (req, res) => {
       blockedSlots: uniqueBlockedSlots,
       date: date,
       doctorId: parseInt(doctorId),
+      requestedType: requestedType,
       appointmentCount: appointmentsResult.rows.length,
-      appointmentDetails: appointmentDetails // Add this for debugging
+      appointmentDetails: appointmentDetails
     });
     
   } catch (err) {
@@ -1886,6 +1906,7 @@ const getBlockedTimeSlots = async (req, res) => {
     });
   }
 };
+
 
 
 

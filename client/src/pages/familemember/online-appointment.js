@@ -104,31 +104,33 @@ const OnlineAppointment = () => {
   }, [elderId, doctorId]);
 
   // Fetch blocked time slots when date is selected
-  useEffect(() => {
-    const fetchBlockedSlots = async () => {
-      if (!selectedDate || !doctorId) return;
+ // Update the fetchBlockedSlots useEffect
+useEffect(() => {
+  const fetchBlockedSlots = async () => {
+    if (!selectedDate || !doctorId) return;
+    
+    try {
+      console.log('Fetching blocked slots for doctor:', doctorId, 'date:', selectedDate, 'type: online');
       
-      try {
-        console.log('Fetching blocked slots for doctor:', doctorId, 'date:', selectedDate);
-        
-        const response = await elderApi.getBlockedTimeSlots(doctorId, selectedDate);
-        
-        if (response.success) {
-          console.log('Blocked slots received:', response.blockedSlots);
-          setBlockedSlots(response.blockedSlots || []);
-        } else {
-          console.error('Failed to fetch blocked slots:', response.error);
-          setBlockedSlots([]);
-        }
-        
-      } catch (err) {
-        console.error('Error fetching blocked slots:', err);
+      const response = await elderApi.getBlockedTimeSlots(doctorId, selectedDate, 'online');
+      
+      if (response.success) {
+        console.log('Blocked slots received:', response.blockedSlots);
+        console.log('Appointment details:', response.appointmentDetails);
+        setBlockedSlots(response.blockedSlots || []);
+      } else {
+        console.error('Failed to fetch blocked slots:', response.error);
         setBlockedSlots([]);
       }
-    };
+      
+    } catch (err) {
+      console.error('Error fetching blocked slots:', err);
+      setBlockedSlots([]);
+    }
+  };
 
-    fetchBlockedSlots();
-  }, [selectedDate, doctorId]);
+  fetchBlockedSlots();
+}, [selectedDate, doctorId]);
 
   // Protect the route
   useEffect(() => {

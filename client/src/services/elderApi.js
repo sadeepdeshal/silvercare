@@ -140,10 +140,12 @@ export const elderApi = {
   },
 
   // NEW: Get blocked time slots for a doctor on a specific date
-  getBlockedTimeSlots: async (doctorId, date) => {
+   getBlockedTimeSlots: async (doctorId, date, appointmentType) => {
     try {
-      console.log('API: Fetching blocked time slots for doctor:', doctorId, 'date:', date);
-      const response = await fetch(`${API_BASE}/doctor/${doctorId}/blocked-slots/${date}`);
+      console.log('API: Fetching blocked time slots for doctor:', doctorId, 'date:', date, 'type:', appointmentType);
+      
+      const url = `${API_BASE}/doctor/${doctorId}/blocked-slots/${date}?appointmentType=${appointmentType}`;
+      const response = await fetch(url);
       const data = await response.json();
       
       console.log('API: Blocked time slots response:', data);
@@ -158,6 +160,7 @@ export const elderApi = {
       throw error;
     }
   },
+
 
   // Create appointment (simplified)
   createAppointment: async (elderId, appointmentData) => {
