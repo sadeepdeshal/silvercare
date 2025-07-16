@@ -140,6 +140,153 @@
   justify-content: center;
   color: white;
   font-size: 2.5rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+
+  .profileContainer {
+  min-height: 100vh;
+  background: #f8fafc;
+}
+
+.profileContent {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+/* Header Section */
+.profileHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+  padding: 24px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
+}
+
+.backBtn {
+  background: #f1f5f9;
+  color: #475569;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.backBtn:hover {
+  background: #e2e8f0;
+  color: #334155;
+}
+
+.headerContent {
+  text-align: center;
+  flex: 1;
+}
+
+.headerContent h1 {
+  color: #1e293b;
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+}
+
+.headerContent p {
+  color: #64748b;
+  font-size: 1rem;
+  margin: 0;
+}
+
+.headerActions {
+  display: flex;
+  gap: 12px;
+}
+
+.editBtn {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.editBtn:hover {
+  background: #2563eb;
+}
+
+.logoutBtn {
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.logoutBtn:hover {
+  background: #dc2626;
+}
+
+/* Profile Card */
+.profileCard {
+  background: white;
+  border-radius: 12px;
+  padding: 32px;
+  margin-bottom: 32px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+
+.profileImageSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.imageContainer {
+  position: relative;
+}
+
+.profileImage {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid #e2e8f0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.profilePlaceholder {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 2.5rem;
   font-weight: 700;
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
@@ -386,66 +533,6 @@
   background: #2563eb;
 }
 
-/* Medical Information */
-.medicalInfo {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.medicalConditions {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.medicalConditions label {
-  color: #ef4444;
-  font-size: 1rem;
-  font-weight: 600;
-}
-
-.conditionsContent {
-  background: #fef2f2;
-  border: 1px solid #fecaca;
-  border-radius: 8px;
-  padding: 16px;
-}
-
-.conditionsContent p {
-  color: #991b1b;
-  margin: 0;
-  line-height: 1.6;
-}
-
-.medicalStats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 16px;
-}
-
-.statItem {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px;
-  background: #f8fafc;
-  border-radius: 6px;
-  border: 1px solid #e2e8f0;
-}
-
-.statLabel {
-  color: #64748b;
-  font-size: 0.875rem;
-  font-weight: 500;
-}
-
-.statValue {
-  color: #1e293b;
-  font-size: 0.875rem;
-  font-weight: 600;
-}
-
 /* Settings */
 .settingsGrid {
   display: flex;
@@ -630,7 +717,7 @@
     text-align: center;
     gap: 24px;
   }
-  
+
   .profileMeta {
     justify-content: center;
   }
@@ -688,10 +775,6 @@
   }
   
   .familyInfo {
-    grid-template-columns: 1fr;
-  }
-  
-  .medicalStats {
     grid-template-columns: 1fr;
   }
   
@@ -802,8 +885,7 @@
   .metaValue,
   .infoItem span,
   .familyDetail span,
-  .settingLabel,
-  .statValue {
+  .settingLabel {
     color: #f1f5f9;
   }
   
@@ -811,8 +893,7 @@
   .metaLabel,
   .infoItem label,
   .familyDetail label,
-  .settingDesc,
-  .statLabel {
+  .settingDesc {
     color: #cbd5e1;
   }
   
@@ -831,15 +912,9 @@
   
   .infoItem span,
   .familyCard,
-  .conditionsContent,
-  .statItem,
   .settingItem {
     background: #0f172a;
     border-color: #334155;
-  }
-  
-  .conditionsContent p {
-    color: #fca5a5;
   }
 }
 
@@ -1053,10 +1128,6 @@
   animation-delay: 0.4s;
 }
 
-.infoSection:nth-child(5) {
-  animation-delay: 0.5s;
-}
-
 /* Fade in animation */
 @keyframes fadeInUp {
   from {
@@ -1103,10 +1174,6 @@
 }
 
 .infoSection:nth-child(4) {
-  background: linear-gradient(135deg, #ffffff 0%, #fef2f2 100%);
-}
-
-.infoSection:nth-child(5) {
   background: linear-gradient(135deg, #ffffff 0%, #fffbeb 100%);
 }
 
@@ -1195,7 +1262,6 @@
 
 /* Card hover effects */
 .familyCard:hover,
-.statItem:hover,
 .settingItem:hover {
   background: #f1f5f9;
   transition: background-color 0.2s;
@@ -1211,10 +1277,6 @@
     gap: 12px;
   }
   
-  .medicalStats {
-    gap: 12px;
-  }
-  
   .settingsGrid {
     gap: 12px;
   }
@@ -1224,3 +1286,5 @@
     padding: 20px;
   }
 }
+
+

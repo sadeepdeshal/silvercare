@@ -11,6 +11,11 @@ export const updateElderDetails = (elderId, elderData) => {
   return axios.put(`${API_BASE}/${elderId}`, elderData);
 };
 
+// Dashboard stats function
+export const getElderDashboardStats = (elderId) => {
+  return axios.get(`${API_BASE}/${elderId}/dashboard-stats`);
+};
+
 // Appointment-related functions
 export const getUpcomingAppointments = (elderId) => {
   return axios.get(`${API_BASE}/${elderId}/appointments/upcoming`);

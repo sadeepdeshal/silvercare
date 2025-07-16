@@ -221,6 +221,13 @@ const ElderProfile = () => {
                 <label>District</label>
                 <span>{elderDetails?.district}</span>
               </div>
+
+              {elderDetails?.medical_conditions && (
+                <div className={styles.infoItem}>
+                  <label>Medical Conditions</label>
+                  <span>{elderDetails.medical_conditions}</span>
+                </div>
+              )}
             </div>
           </div>
 
@@ -242,11 +249,6 @@ const ElderProfile = () => {
               <div className={styles.infoItem}>
                 <label>Phone Number</label>
                 <span>{elderDetails?.contact}</span>
-              </div>
-              
-              <div className={styles.infoItem}>
-                <label>Emergency Contact</label>
-                <span>{elderDetails?.emergency_contact || 'Not provided'}</span>
               </div>
             </div>
           </div>
@@ -274,11 +276,6 @@ const ElderProfile = () => {
                     <label>Phone</label>
                     <span>{elderDetails.family_member.phone}</span>
                   </div>
-                  
-                  <div className={styles.familyDetail}>
-                    <label>Family ID</label>
-                    <span>{elderDetails?.family_id}</span>
-                  </div>
                 </div>
                 
                 <div className={styles.familyActions}>
@@ -288,44 +285,6 @@ const ElderProfile = () => {
                   <button className={styles.messageBtn}>
                     💬 Message
                   </button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Medical Information */}
-          {elderDetails?.medical_conditions && (
-            <div className={styles.infoSection}>
-              <div className={styles.sectionHeader}>
-                <h3>🏥 Medical Information</h3>
-                {isEditing && (
-                  <button className={styles.sectionEditBtn}>Edit</button>
-                )}
-              </div>
-              
-              <div className={styles.medicalInfo}>
-                <div className={styles.medicalConditions}>
-                  <label>Medical Conditions</label>
-                  <div className={styles.conditionsContent}>
-                    <p>{elderDetails.medical_conditions}</p>
-                  </div>
-                </div>
-                
-                <div className={styles.medicalStats}>
-                  <div className={styles.statItem}>
-                    <span className={styles.statLabel}>Blood Type</span>
-                    <span className={styles.statValue}>Not specified</span>
-                  </div>
-                  
-                  <div className={styles.statItem}>
-                    <span className={styles.statLabel}>Allergies</span>
-                    <span className={styles.statValue}>Not specified</span>
-                  </div>
-                  
-                  <div className={styles.statItem}>
-                    <span className={styles.statLabel}>Emergency Medicine</span>
-                    <span className={styles.statValue}>Not specified</span>
-                  </div>
                 </div>
               </div>
             </div>
@@ -385,4 +344,3 @@ const ElderProfile = () => {
 };
 
 export default ElderProfile;
-

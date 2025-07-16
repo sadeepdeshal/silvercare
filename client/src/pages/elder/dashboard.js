@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "../../components/navbar";
 import {
   getElderDetailsByEmail,
+  getElderDashboardStats,
   getUpcomingAppointments,
   getPastAppointments,
   cancelAppointment,
@@ -21,13 +22,14 @@ const ElderDashboard = () => {
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("upcoming");
   const [appointmentsLoading, setAppointmentsLoading] = useState(false);
+  const [statsLoading, setStatsLoading] = useState(false);
 
-  // Dummy data for the stats cards
-  const [statsData] = useState({
-    upcomingAppointments: 3,
-    upcomingSessions: 2,
-    upcomingCampaigns: 1,
-    assignedCaregivers: 2,
+  // Real stats data from backend
+  const [statsData, setStatsData] = useState({
+    upcomingAppointments: 0,
+    upcomingSessions: 0,
+    upcomingCampaigns: 0,
+    assignedCaregivers: 0,
   });
 
   useEffect(() => {
@@ -39,9 +41,12 @@ const ElderDashboard = () => {
         const response = await getElderDetailsByEmail(currentUser.email);
         setElderDetails(response.data);
 
-        // Fetch appointments after getting elder details
+        // Fetch appointments and stats after getting elder details
         if (response.data?.elder_id) {
-          await fetchAppointments(response.data.elder_id);
+          await Promise.all([
+            fetchAppointments(response.data.elder_id),
+            fetchDashboardStats(response.data.elder_id),
+          ]);
         }
       } catch (error) {
         console.error("Error fetching elder details:", error);
@@ -57,6 +62,25 @@ const ElderDashboard = () => {
       fetchElderDetails();
     }
   }, [currentUser.email]);
+
+  const fetchDashboardStats = async (elderId) => {
+    try {
+      setStatsLoading(true);
+      console.log("Fetching dashboard stats for elder:", elderId);
+
+      const response = await getElderDashboardStats(elderId);
+      console.log("Dashboard stats response:", response.data);
+
+      if (response.data.success) {
+        setStatsData(response.data.stats);
+      }
+    } catch (error) {
+      console.error("Error fetching dashboard stats:", error);
+      // Keep default values if stats fetch fails
+    } finally {
+      setStatsLoading(false);
+    }
+  };
 
   const fetchAppointments = async (elderId) => {
     try {
@@ -79,8 +103,11 @@ const ElderDashboard = () => {
   const handleCancelAppointment = async (appointmentId, reason) => {
     try {
       await cancelAppointment(elderDetails.elder_id, appointmentId, { reason });
-      // Refresh appointments
-      await fetchAppointments(elderDetails.elder_id);
+      // Refresh appointments and stats
+      await Promise.all([
+        fetchAppointments(elderDetails.elder_id),
+        fetchDashboardStats(elderDetails.elder_id),
+      ]);
       alert("Appointment cancelled successfully");
     } catch (error) {
       console.error("Error cancelling appointment:", error);
@@ -98,8 +125,11 @@ const ElderDashboard = () => {
         newDateTime,
         reason,
       });
-      // Refresh appointments
-      await fetchAppointments(elderDetails.elder_id);
+      // Refresh appointments and stats
+      await Promise.all([
+        fetchAppointments(elderDetails.elder_id),
+        fetchDashboardStats(elderDetails.elder_id),
+      ]);
       alert("Appointment rescheduled successfully");
     } catch (error) {
       console.error("Error rescheduling appointment:", error);
@@ -108,7 +138,7 @@ const ElderDashboard = () => {
   };
 
   const handleViewProfile = () => {
-    navigate('/elder/profile');
+    navigate("/elder/profile");
   };
 
   const formatDate = (dateString) => {
@@ -155,10 +185,16 @@ const ElderDashboard = () => {
       (monthDiff === 0 && today.getDate() < birthDate.getDate())
     ) {
       age--;
-
-
     }
     return age;
+  };
+
+  const formatMemberSince = (dateString) => {
+    if (!dateString) return "N/A";
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+    });
   };
 
   const renderAppointmentCard = (appointment) => (
@@ -303,11 +339,11 @@ const ElderDashboard = () => {
         {/* Stats Cards */}
         <div className={styles.statsGrid}>
           <div className={styles.statsCard}>
-            <div className={styles.statsIcon}>📅</div>
+            <div className={styles.statsIcon}>🩺</div>
             <div className={styles.statsContent}>
               <h3>Upcoming Appointments</h3>
               <p className={styles.statsNumber}>
-                {statsData.upcomingAppointments}
+                {statsLoading ? "..." : statsData.upcomingAppointments}
               </p>
             </div>
           </div>
@@ -316,97 +352,99 @@ const ElderDashboard = () => {
             <div className={styles.statsIcon}>🧠</div>
             <div className={styles.statsContent}>
               <h3>Upcoming Sessions</h3>
-              <p className={styles.statsNumber}>{statsData.upcomingSessions}</p>
+              <p className={styles.statsNumber}>
+                {statsLoading ? "..." : statsData.upcomingSessions}
+              </p>
             </div>
           </div>
 
           <div className={styles.statsCard}>
             <div className={styles.statsIcon}>📢</div>
             <div className={styles.statsContent}>
-              <h3>Upcoming Campaigns</h3>
+              <h3>Upcoming Activities</h3>
               <p className={styles.statsNumber}>
-                {statsData.upcomingCampaigns}
+                {statsLoading ? "..." : statsData.upcomingCampaigns}
               </p>
             </div>
           </div>
 
           <div className={styles.statsCard}>
-            <div className={styles.statsIcon}>👥</div>
+            <div className={styles.statsIcon}>📅</div>
             <div className={styles.statsContent}>
-              <h3>Caregivers Assigned</h3>
+              <h3>Caregiver Visits</h3>
               <p className={styles.statsNumber}>
-                {statsData.assignedCaregivers}
+                {statsLoading ? "..." : statsData.assignedCaregivers}
               </p>
             </div>
           </div>
         </div>
 
-        {/* Profile Summary Card */}
-        <div className={styles.profileSummaryCard}>
-          <div className={styles.profileSummaryContent}>
-            <div className={styles.profileImageSection}>
-              {elderDetails?.profile_photo ? (
-                <img
-                  src={`http://localhost:5000/uploads/profiles/${elderDetails.profile_photo}`}
-                  alt="Profile"
-                  className={styles.profileImage}
-                />
-              ) : (
-                <div className={styles.profilePlaceholder}>
-                  <span>{elderDetails?.name?.charAt(0) || "E"}</span>
+        {/* Profile and Family Cards Container */}
+        <div className={styles.profileFamilyContainer}>
+          {/* Profile Summary Card */}
+          <div className={styles.profileSummaryCard}>
+            <div className={styles.profileSummaryContent}>
+              <div className={styles.profileImageSection}>
+                {elderDetails?.profile_photo ? (
+                  <img
+                    src={`http://localhost:5000/uploads/profiles/${elderDetails.profile_photo}`}
+                    alt="Profile"
+                    className={styles.profileImage}
+                  />
+                ) : (
+                  <div className={styles.profilePlaceholder}>
+                    <span>{elderDetails?.name?.charAt(0) || "E"}</span>
+                  </div>
+                )}
+                <div className={styles.statusIndicator}></div>
+              </div>
+
+              <div className={styles.profileInfo}>
+                <h2>Welcome {elderDetails?.name}</h2>
+                <div className={styles.profileMeta}>
+                  <span className={styles.age}>
+                    Age: {getAge(elderDetails?.dob)}
+                  </span>
+                  <span className={styles.gender}>{elderDetails?.gender}</span>
                 </div>
-              )}
-              <div className={styles.statusIndicator}></div>
-            </div>
-
-            <div className={styles.profileInfo}>
-              <h2>Welcome {elderDetails?.name}</h2>
-              <div className={styles.profileMeta}>
-                <span className={styles.age}>
-                  Age: {getAge(elderDetails?.dob)}
-                </span>
-                <span className={styles.gender}>{elderDetails?.gender}</span>
+                <div className={styles.memberSince}>
+                  Member since {formatMemberSince(elderDetails?.created_at)}
+                </div>
               </div>
-              <div className={styles.contactInfo}>
-                <span>📧 {elderDetails?.email}</span>
-                <span>📱 {elderDetails?.contact}</span>
-              </div>
-            </div>
 
-            <div className={styles.profileActions}>
-              <button
-                className={styles.viewProfileBtn}
-                onClick={handleViewProfile}
-              >
-                View Full Profile
-              </button>
+              <div className={styles.profileActions}>
+                <button
+                  className={styles.viewProfileBtn}
+                  onClick={handleViewProfile}
+                >
+                  View Profile
+                </button>
+              </div>
             </div>
           </div>
+
+          {/* Family Member Card */}
+          {elderDetails?.family_member && (
+            <div className={styles.familyMemberCard}>
+              <div className={styles.familyMemberHeader}>
+                <div className={styles.familyIcon}>👨‍👩‍👧‍👦</div>
+                <div>
+                  <h3>Your Family Contact</h3>
+                  <p>Always here to help you</p>
+                </div>
+              </div>
+              <div className={styles.familyMemberInfo}>
+                <div className={styles.familyDetail}>
+                  <strong>{elderDetails.family_member.name}</strong>
+                </div>
+                <div className={styles.familyActions}>
+                  <button className={styles.callBtn}>📞</button>
+                  <button className={styles.messageBtn}>💬</button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
-
-        {/* Family Member Card */}
-        {elderDetails?.family_member && (
-          <div className={styles.familyMemberCard}>
-            <div className={styles.familyMemberHeader}>
-              <div className={styles.familyIcon}>👨‍👩‍👧‍👦</div>
-              <div>
-                <h3>Your Family Contact</h3>
-                <p>Always here to help you</p>
-              </div>
-            </div>
-            <div className={styles.familyMemberInfo}>
-              <div className={styles.familyDetail}>
-                <strong>{elderDetails.family_member.name}</strong>
-                <span>{elderDetails.family_member.email}</span>
-                <span>{elderDetails.family_member.phone}</span>
-              </div>
-              <div className={styles.familyActions}>
-                <button className={styles.callBtn}>📞</button>
-                <button className={styles.messageBtn}>💬</button>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* Appointments Section */}
         <div className={styles.appointmentsSection}>
