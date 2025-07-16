@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import Navbar from '../../components/navbar';
-//import { useAuth } from '../../context/AuthContext';
 import styles from "../../components/css/caregiver/dashboard.module.css";
 import CaregiverLayout from '../../components/CaregiverLayout';
 
@@ -58,22 +57,16 @@ const CaregiverDashboard = () => {
     setMedReminders(dummyMedReminders);
   }, []);
 
- 
-  return (
+  // Content that will be wrapped by CaregiverLayout
+  const dashboardContent = (
     <div className={styles.dashboard}>
-       <Navbar />
-       <CaregiverLayout/>
-
       <div className={styles.summarycards}>
-
         <div className={styles.card}>
           <div className={styles.cardIcon}>👥</div>
           <div className={styles.cardContent}>
             <p className={styles.cardLabel}>Assigned Elders</p>
             <span className={styles.cardNumber}>{elders.length}</span>
           </div>
-          {/*<h3> Assigned Elders</h3>*/}
-          {/*<p>{elders.length}</p>*/}
         </div>
 
         <div className={styles.card}>
@@ -99,7 +92,6 @@ const CaregiverDashboard = () => {
             <span className={styles.cardNumber}>{medReminders.length}</span>
           </div>
         </div>
-
       </div>
 
       <div className={styles.dashboardgrid}>
@@ -108,8 +100,15 @@ const CaregiverDashboard = () => {
           <ul>
             {activities.map((act, i) => (
               <li key={i}>
-                <span>{act.description}</span>
-                <span className={styles.time}>{act.timeAgo}</span>
+                <div className={`${styles.activityIcon} ${styles[act.type]}`}>
+                  {act.type === 'report' && '📋'}
+                  {act.type === 'doctor' && '👨‍⚕️'}
+                  {act.type === 'chat' && '💬'}
+                </div>
+                <div className={styles.activityContent}>
+                  <div className={styles.activityDescription}>{act.description}</div>
+                  <div className={styles.activityTime}>{act.timeAgo}</div>
+                </div>
               </li>
             ))}
           </ul>
@@ -121,43 +120,80 @@ const CaregiverDashboard = () => {
             {schedule.map((item, i) => (
               <li key={i}>
                 <span className={styles.time}>{item.time}</span>
-                <span>{item.title}</span>
+                <span className={styles.scheduleTitle}>{item.title}</span>
               </li>
             ))}
           </ul>
         </section>
       </div>
 
-        <div className={styles.recentelders}>
-          <h2>Recent Elders</h2>
-          <div className={styles.elderlist}>
-            {elders.map((elder, i) => (
-              <div className={styles.eldercard} key={i}>
-                <h4>{elder.name}</h4>
-                <p>Age: {elder.age}</p>
-                <p>Last Visit: {elder.lastVisit}</p>
-                <p>Duration: {elder.duration}</p>
-                <p>Next Med: <strong>{elder.nextMedication}</strong></p>
+      <div className={styles.recentelders}>
+        <h2>Recent Elders</h2>
+        <div className={styles.elderlist}>
+          {elders.map((elder, i) => (
+            <div className={styles.eldercard} key={i}>
+              <div className={styles.elderHeader}>
+                <div className={styles.elderAvatar}>
+                  {elder.name.split(' ').map(n => n[0]).join('')}
+                </div>
+                <div className={styles.elderInfo}>
+                  <h4>{elder.name}</h4>
+                  <div className={styles.elderAge}>Age {elder.age}</div>
+                </div>
               </div>
-            ))}
-          </div>
+              <div className={styles.elderDetails}>
+                <div className={styles.elderDetail}>
+                  <span className={styles.label}>Last Visit :</span>
+                  <span className={styles.value}>{elder.lastVisit}</span>
+                </div>
+                <div className={styles.elderDetail}>
+                  <span className={styles.label}>Duration :</span>
+                  <span className={styles.value}>{elder.duration}</span>
+                </div>
+                <div className={styles.elderDetail}>
+                  <span className={styles.label}>Next Med :</span>
+                  <span className={`${styles.value} ${elder.nextMedication === 'Completed' ? styles.completed : elder.nextMedication.includes('hours') ? styles.urgent : ''}`}>
+                    {elder.nextMedication}
+                  </span>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
+      </div>
 
-        <div className={styles.recentmessages}>
-          <h2>Recent Messages</h2>
-          <ul>
-            {messages.map((msg, i) => (
-              <li key={i}>
-                <strong>{msg.sender}</strong>
-                <p>{msg.content}</p>
-                <span className={styles.time}>{msg.timeAgo}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-        
+      <div className={styles.recentmessages}>
+        <h2>Recent Messages</h2>
+        <ul>
+          {messages.map((msg, i) => (
+            <li key={i}>
+              <div className={styles.messageAvatar}>
+                {msg.sender.split(' ').map(n => n[0]).join('').substring(0, 2)}
+              </div>
+              <div className={styles.messageContent}>
+                <div className={styles.messageSender}>{msg.sender}</div>
+                <p className={styles.messageText}>{msg.content}</p>
+              </div>
+              <span className={styles.messageTime}>{msg.timeAgo}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
     </div>
+  );
+
+  return (
+    <>
+      <Navbar />
+      <CaregiverLayout>
+        {dashboardContent}
+      </CaregiverLayout>
+    </>
   );
 };
 
 export default CaregiverDashboard;
+
+
+
