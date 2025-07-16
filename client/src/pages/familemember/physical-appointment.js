@@ -15,15 +15,9 @@ const PhysicalAppointment = () => {
 
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedTime, setSelectedTime] = useState('');
-  const [appointmentDetails, setAppointmentDetails] = useState({
-    patientName: '',
-    contactNumber: '',
-    symptoms: '',
-    notes: '',
-    emergencyContact: ''
-  });
   const [doctorInfo, setDoctorInfo] = useState(null);
   const [elderInfo, setElderInfo] = useState(null);
+  const [blockedSlots, setBlockedSlots] = useState([]);
   const [dataLoading, setDataLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
@@ -33,7 +27,6 @@ const PhysicalAppointment = () => {
   const formatDateForDisplay = (dateString) => {
     if (!dateString) return '';
     
-    // Split the date string and create month names array
     const [year, month, day] = dateString.split('-');
     const monthNames = [
       'January', 'February', 'March', 'April', 'May', 'June',
@@ -41,7 +34,6 @@ const PhysicalAppointment = () => {
     ];
     const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     
-    // Create date object and get day of week
     const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
     const dayOfWeek = dayNames[date.getDay()];
     
@@ -76,7 +68,6 @@ const PhysicalAppointment = () => {
         if (response.success) {
           console.log('Appointment booking info received:', response);
           
-          // Set doctor info
           setDoctorInfo({
             name: `Dr. ${response.doctor.name}`,
             specialization: response.doctor.specialization,
@@ -88,7 +79,6 @@ const PhysicalAppointment = () => {
             years_experience: response.doctor.years_experience
           });
           
-          // Set elder info
           setElderInfo({
             name: response.elder.name,
             age: response.elder.age,
@@ -97,14 +87,6 @@ const PhysicalAppointment = () => {
             contact: response.elder.contact,
             medical_conditions: response.elder.medical_conditions
           });
-          
-          // Pre-fill form with elder's information
-          setAppointmentDetails(prev => ({
-            ...prev,
-            patientName: response.elder.name,
-            contactNumber: response.elder.contact,
-            emergencyContact: response.elder.contact // Default to same contact
-          }));
           
         } else {
           throw new Error(response.error || 'Failed to fetch appointment information');
@@ -121,6 +103,36 @@ const PhysicalAppointment = () => {
     fetchAppointmentInfo();
   }, [elderId, doctorId]);
 
+  // Fetch blocked time slots when date is selected
+  // Update the fetchBlockedSlots useEffect
+useEffect(() => {
+  const fetchBlockedSlots = async () => {
+    if (!selectedDate || !doctorId) return;
+    
+    try {
+      console.log('Fetching blocked slots for doctor:', doctorId, 'date:', selectedDate, 'type: physical');
+      
+      const response = await elderApi.getBlockedTimeSlots(doctorId, selectedDate, 'physical');
+      
+      if (response.success) {
+        console.log('Blocked slots received:', response.blockedSlots);
+        console.log('Appointment details:', response.appointmentDetails);
+        setBlockedSlots(response.blockedSlots || []);
+      } else {
+        console.error('Failed to fetch blocked slots:', response.error);
+        setBlockedSlots([]);
+      }
+      
+    } catch (err) {
+      console.error('Error fetching blocked slots:', err);
+      setBlockedSlots([]);
+    }
+  };
+
+  fetchBlockedSlots();
+}, [selectedDate, doctorId]);
+
+
   // Protect the route
   useEffect(() => {
     if (loading) return;
@@ -136,7 +148,7 @@ const PhysicalAppointment = () => {
     }
   }, [currentUser, isAuthenticated, loading, navigate]);
 
-  // FIXED: Generate calendar days for current month without timezone issues
+  // Generate calendar days for current month without timezone issues
   const generateCalendarDays = () => {
     const today = new Date();
     const currentMonth = today.getMonth();
@@ -148,17 +160,13 @@ const PhysicalAppointment = () => {
 
     const days = [];
     
-    // Add empty cells for days before the first day of the month
     for (let i = 0; i < startingDayOfWeek; i++) {
       days.push(null);
     }
     
-    // Add days of the month - FIXED: Create date string manually to avoid timezone conversion
     for (let day = 1; day <= daysInMonth; day++) {
-      // Create date string manually in YYYY-MM-DD format
       const dateString = `${currentYear}-${(currentMonth + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
       
-      // Create date object for comparison (using local timezone consistently)
       const date = new Date(currentYear, currentMonth, day);
       const isToday = date.toDateString() === today.toDateString();
       const isPast = date < today;
@@ -166,7 +174,7 @@ const PhysicalAppointment = () => {
       
       days.push({
         day,
-        date: dateString, // Use manually created string instead of toISOString()
+        date: dateString,
         isToday,
         isPast,
         isWeekend,
@@ -177,7 +185,7 @@ const PhysicalAppointment = () => {
     return days;
   };
 
-  // Generate available time slots
+  // Generate available time slots for physical appointments (2 hour duration)
   const generateTimeSlots = () => {
     const slots = [];
     // Morning slots (9 AM - 12 PM)
@@ -193,19 +201,32 @@ const PhysicalAppointment = () => {
     return slots;
   };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setAppointmentDetails(prev => ({
-      ...prev,
-      [name]: value
-    }));
+  // Check if a time slot is blocked
+  const isTimeSlotBlocked = (timeSlot) => {
+    return blockedSlots.includes(timeSlot);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
+  const handleDateSelection = (dateString) => {
+    setSelectedDate(dateString);
+    setSelectedTime(''); // Reset selected time when date changes
+    console.log('Calendar day clicked, date set to:', dateString);
+  };
+
+  const handleTimeSelection = (time) => {
+    if (!isTimeSlotBlocked(time)) {
+      setSelectedTime(time);
+      console.log('Selected time:', time);
+    }
+  };
+
+  const handleBookAppointment = async () => {
     if (!selectedDate || !selectedTime) {
       setError('Please select both date and time for the appointment');
+      return;
+    }
+
+    if (isTimeSlotBlocked(selectedTime)) {
+      setError('Selected time slot is not available. Please choose a different time.');
       return;
     }
 
@@ -213,25 +234,19 @@ const PhysicalAppointment = () => {
       setSubmitting(true);
       setError(null);
       
-      // Create proper datetime string for Sri Lankan timezone
-      const appointmentDateTime = `${selectedDate}T${selectedTime}:00`;
-      
-      const appointmentData = {
+            const appointmentData = {
         doctorId: parseInt(doctorId),
         appointmentDate: selectedDate,
         appointmentTime: selectedTime,
-        appointmentDateTime: appointmentDateTime,
         appointmentType: 'physical',
-        patientName: appointmentDetails.patientName,
-        contactNumber: appointmentDetails.contactNumber,
-        symptoms: appointmentDetails.symptoms,
-        notes: appointmentDetails.notes,
-        emergencyContact: appointmentDetails.emergencyContact
+        patientName: elderInfo.name,
+        contactNumber: elderInfo.contact,
+        symptoms: 'Physical consultation requested',
+        notes: 'Booked through physical appointment system',
+        emergencyContact: elderInfo.contact
       };
 
       console.log('Submitting appointment data:', appointmentData);
-      console.log('Selected date for display:', formatDateForDisplay(selectedDate));
-      console.log('Selected time for display:', formatTimeForDisplay(selectedTime));
 
       const response = await elderApi.createAppointment(elderId, appointmentData);
       
@@ -239,7 +254,6 @@ const PhysicalAppointment = () => {
         setSuccessMessage('Physical appointment booked successfully!');
         console.log('Appointment created:', response.appointment);
         
-        // Redirect to appointments page after 2 seconds
         setTimeout(() => {
           navigate(`/family-member/elder/${elderId}/appointments`);
         }, 2000);
@@ -408,7 +422,7 @@ const PhysicalAppointment = () => {
                     <p><strong>{elderInfo.name}</strong></p>
                     <p>Age: {elderInfo.age} years</p>
                     <p>Gender: {elderInfo.gender}</p>
-                                        <p>📍 {elderInfo.district}</p>
+                    <p>📍 {elderInfo.district}</p>
                     <p>📞 {elderInfo.contact}</p>
                     {elderInfo.medical_conditions && (
                       <p><strong>Medical Conditions:</strong> {elderInfo.medical_conditions}</p>
@@ -458,11 +472,7 @@ const PhysicalAppointment = () => {
                         }`}
                         onClick={() => {
                           if (dayInfo && dayInfo.isAvailable) {
-                            setSelectedDate(dayInfo.date);
-                            console.log('Calendar day clicked:', dayInfo.day);
-                            console.log('Date string created:', dayInfo.date);
-                            console.log('Selected date set to:', dayInfo.date);
-                            console.log('Formatted for display:', formatDateForDisplay(dayInfo.date));
+                            handleDateSelection(dayInfo.date);
                           }
                         }}
                       >
@@ -495,129 +505,78 @@ const PhysicalAppointment = () => {
             {/* Time Selection */}
             <div className={styles.timeSection}>
               <h2 className={styles.sectionTitle}>🕐 Select Time</h2>
+              {selectedDate && blockedSlots.length > 0 && (
+                <div className={styles.blockedSlotsInfo}>
+                  <p className={styles.infoText}>
+                    ⚠️ Some time slots are unavailable due to existing appointments (2-hour blocks for physical appointments)
+                  </p>
+                </div>
+              )}
               <div className={styles.timeSlots}>
-                {timeSlots.map(time => (
-                  <button
-                    key={time}
-                    className={`${styles.timeSlot} ${
-                      selectedTime === time ? styles.selectedTime : ''
-                    }`}
-                    onClick={() => {
-                      setSelectedTime(time);
-                      console.log('Selected time:', time);
-                      console.log('Formatted for display:', formatTimeForDisplay(time));
-                    }}
-                    disabled={!selectedDate}
-                  >
-                    {time}
-                  </button>
-                ))}
+                {timeSlots.map(time => {
+                  const isBlocked = isTimeSlotBlocked(time);
+                  return (
+                    <button
+                      key={time}
+                      className={`${styles.timeSlot} ${
+                        selectedTime === time ? styles.selectedTime : ''
+                      } ${isBlocked ? styles.blockedTime : ''}`}
+                      onClick={() => handleTimeSelection(time)}
+                      disabled={!selectedDate || isBlocked}
+                      title={isBlocked ? 'This time slot is not available (conflicts with existing appointment)' : ''}
+                    >
+                      {time}
+                      {isBlocked && <span className={styles.blockedIcon}>🚫</span>}
+                    </button>
+                  );
+                })}
+              </div>
+              <div className={styles.timeSlotLegend}>
+                <div className={styles.legendItem}>
+                  <div className={styles.legendColor + ' ' + styles.availableTimeColor}></div>
+                  <span>Available</span>
+                </div>
+                <div className={styles.legendItem}>
+                  <div className={styles.legendColor + ' ' + styles.selectedTimeColor}></div>
+                  <span>Selected</span>
+                </div>
+                <div className={styles.legendItem}>
+                  <div className={styles.legendColor + ' ' + styles.blockedTimeColor}></div>
+                  <span>Blocked</span>
+                </div>
               </div>
             </div>
 
-            {/* Appointment Form */}
-            <div className={styles.formSection}>
-              <h2 className={styles.sectionTitle}>📝 Appointment Details</h2>
-              <form onSubmit={handleSubmit} className={styles.appointmentDetailsForm}>
-                <div className={styles.formRow}>
-                  <div className={styles.formGroup}>
-                    <label htmlFor="patientName">Patient Name</label>
-                    <input
-                      type="text"
-                      id="patientName"
-                      name="patientName"
-                      value={appointmentDetails.patientName}
-                      onChange={handleInputChange}
-                      placeholder="Enter patient's full name"
-                      required
-                    />
-                  </div>
-                  <div className={styles.formGroup}>
-                    <label htmlFor="contactNumber">Contact Number</label>
-                    <input
-                      type="tel"
-                      id="contactNumber"
-                      name="contactNumber"
-                      value={appointmentDetails.contactNumber}
-                      onChange={handleInputChange}
-                      placeholder="Enter contact number"
-                      required
-                    />
-                  </div>
+            {/* Summary Section */}
+            {selectedDate && selectedTime && (
+              <div className={styles.appointmentSummary}>
+                <h3>📋 Appointment Summary</h3>
+                <div className={styles.summaryContent}>
+                  <p><strong>Date:</strong> {formatDateForDisplay(selectedDate)}</p>
+                  <p><strong>Time:</strong> {formatTimeForDisplay(selectedTime)}</p>
+                  <p><strong>Duration:</strong> 2 hours</p>
+                  <p><strong>Type:</strong> Physical Meeting</p>
+                  <p><strong>Fee:</strong> Rs. {doctorInfo?.fee || 2500}</p>
                 </div>
+              </div>
+            )}
 
-                <div className={styles.formGroup}>
-                  <label htmlFor="symptoms">Symptoms / Reason for Visit</label>
-                  <textarea
-                    id="symptoms"
-                    name="symptoms"
-                    value={appointmentDetails.symptoms}
-                    onChange={handleInputChange}
-                    placeholder="Describe symptoms or reason for the appointment"
-                    rows="4"
-                    required
-                  />
-                </div>
-
-                <div className={styles.formGroup}>
-                  <label htmlFor="emergencyContact">Emergency Contact</label>
-                  <input
-                    type="tel"
-                    id="emergencyContact"
-                    name="emergencyContact"
-                    value={appointmentDetails.emergencyContact}
-                    onChange={handleInputChange}
-                    placeholder="Emergency contact number"
-                    required
-                  />
-                </div>
-
-                <div className={styles.formGroup}>
-                  <label htmlFor="notes">Additional Notes (Optional)</label>
-                  <textarea
-                    id="notes"
-                    name="notes"
-                    value={appointmentDetails.notes}
-                    onChange={handleInputChange}
-                    placeholder="Any additional information for the doctor"
-                    rows="3"
-                  />
-                </div>
-
-                {/* Summary Section - FIXED DATE DISPLAY WITH ALTERNATIVE APPROACH */}
-                {selectedDate && selectedTime && (
-                  <div className={styles.appointmentSummary}>
-                    <h3>📋 Appointment Summary</h3>
-                    <div className={styles.summaryContent}>
-                      <p><strong>Date:</strong> {formatDateForDisplay(selectedDate)}</p>
-                      <p><strong>Time:</strong> {formatTimeForDisplay(selectedTime)}</p>
-                      <p><strong>Duration:</strong> 2 hours</p>
-                      <p><strong>Type:</strong> Physical Meeting</p>
-                      <p><strong>Fee:</strong> Rs. {doctorInfo?.fee || 2500}</p>
-                    </div>
-                    
-
-                  </div>
+            {/* Book Button */}
+            <div className={styles.submitSection}>
+              <button
+                className={styles.submitButton}
+                onClick={handleBookAppointment}
+                disabled={!selectedDate || !selectedTime || submitting || isTimeSlotBlocked(selectedTime)}
+              >
+                {submitting ? (
+                  <>
+                    <div className={styles.buttonSpinner}></div>
+                    Booking Appointment...
+                  </>
+                ) : (
+                  '📅 Book Physical Appointment'
                 )}
-
-                {/* Submit Button */}
-                <div className={styles.submitSection}>
-                  <button
-                    type="submit"
-                    className={styles.submitButton}
-                    disabled={!selectedDate || !selectedTime || !appointmentDetails.patientName || submitting}
-                  >
-                    {submitting ? (
-                      <>
-                        <div className={styles.buttonSpinner}></div>
-                        Booking Appointment...
-                      </>
-                    ) : (
-                      '📅 Book Physical Appointment'
-                    )}
-                  </button>
-                </div>
-              </form>
+              </button>
             </div>
           </div>
         </div>
