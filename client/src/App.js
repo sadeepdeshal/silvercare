@@ -22,6 +22,8 @@ import { DoctorRegStep2 } from './pages/doctor/signup-step2';
 // Import new appointment components
 import PhysicalAppointment from './pages/familemember/physical-appointment';
 import OnlineAppointment from './pages/familemember/online-appointment';
+import Appointments from './pages/familemember/appointments';
+
 
 import DoctorDashboard from './pages/doctor/dashboard';
 import ElderDashboard from './pages/elder/dashboard';
@@ -32,6 +34,16 @@ import ProtectedRoute from './components/ProtectedRoute';
 
 // Import ElderDoctors component
 import ElderDoctors from './pages/familemember/elder-doctors';
+import CaregiverProfile from './pages/familemember/profile';
+import DoctorProfile from './pages/doctor/profile';
+import FamilyMemberProfile from './pages/familemember/profile';
+import HealthProfessionalProfile from './pages/healthproffesional/profile';
+import ElderProfile from './pages/elder/profile';
+
+
+
+// Import admin related
+import AdminUsers from './pages/admin/users';
 
 // Optional: Create an Unauthorized component
 const Unauthorized = () => (
@@ -89,6 +101,12 @@ function App() {
             </ProtectedRoute>
           } />
 
+                    <Route path="/family-member/profile" element={
+            <ProtectedRoute allowedRoles={['family_member']}>
+              <FamilyMemberProfile />
+            </ProtectedRoute>
+          } />
+
                     {/* NEW: Add the appointment booking routes */}
           <Route path="/family-member/book-appointment/:elderId/:doctorId/physical" element={
             <ProtectedRoute allowedRoles={['family_member']}>
@@ -101,6 +119,13 @@ function App() {
               <OnlineAppointment />
             </ProtectedRoute>
           } />
+
+          <Route path="/family-member/appointments" element={
+  <ProtectedRoute allowedRoles={['family_member']}>
+    <Appointments />
+  </ProtectedRoute>
+} />
+
 
           {/* Add the elders route */}
           <Route path="/family-member/elders" element={
@@ -127,6 +152,12 @@ function App() {
               <DoctorDashboard />
             </ProtectedRoute>
           } />
+
+              <Route path="/doctor/profile" element={
+            <ProtectedRoute allowedRoles={['doctor']}>
+              <DoctorProfile />
+            </ProtectedRoute>
+          } />
           
           {/* Fix the health professional route - change from healthproffesional to healthprofessional */}
           <Route path="/healthprofessional/dashboard" element={
@@ -134,10 +165,22 @@ function App() {
               <HealthProfessionalDashboard />
             </ProtectedRoute>
           } />
+
+                    <Route path="/healthprofessional/profile" element={
+            <ProtectedRoute allowedRoles={['healthprofessional']}>
+              <HealthProfessionalProfile />
+            </ProtectedRoute>
+          } />
           
           <Route path="/caregiver/dashboard" element={
             <ProtectedRoute allowedRoles={['caregiver']}>
               <CaregiverDashboard />
+            </ProtectedRoute>
+          } />
+
+              <Route path="/caregiver/profile" element={
+            <ProtectedRoute allowedRoles={['caregiver']}>
+              <CaregiverProfile />
             </ProtectedRoute>
           } />
           
@@ -147,9 +190,20 @@ function App() {
             </ProtectedRoute>
           } />
 
+          <Route path="/admin/users" element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <AdminUsers />
+              </ProtectedRoute>
+            } />
+
           <Route path="/elder/dashboard" element={
             <ProtectedRoute allowedRoles={['elder']}>
               <ElderDashboard />
+            </ProtectedRoute>
+          } />
+                    <Route path="/elder/profile" element={
+            <ProtectedRoute allowedRoles={['elder']}>
+              <ElderProfile />
             </ProtectedRoute>
           } />
 

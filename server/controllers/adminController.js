@@ -396,8 +396,36 @@ const rejectProfessional = async (req, res) => {
   }
 };
 
+const getAllUsers = async (req, res) => {
+  try {
+    console.log('Fetching all users');
+    
+    const result = await pool.query(`
+      SELECT user_id, name, email, role, created_at
+      FROM "User"
+      ORDER BY created_at DESC
+    `);
+    
+    console.log('Users found:', result.rows.length);
+    
+    res.json({ 
+      success: true, 
+      data: result.rows 
+    });
+    
+  } catch (error) {
+    console.error('Error fetching all users:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch all users',
+      details: error.message
+    });
+  }
+};
+
 module.exports = {
   getAdminDashboard,
   approveProfessional,
-  rejectProfessional
+  rejectProfessional,
+  getAllUsers
 };
