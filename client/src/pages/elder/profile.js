@@ -1,124 +1,343 @@
-import React from 'react';
-import Navbar from '../../components/navbar';
-import styles from "../../components/css/navbar.module.css";
+import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
+import Navbar from '../../components/navbar';
+import { getElderDetailsByEmail } from '../../services/elderApi2';
+import styles from '../../components/css/elder/profile.module.css';
 
 const ElderProfile = () => {
-    const { currentUser, logout } = useAuth();
+  const { currentUser, logout } = useAuth();
+  const navigate = useNavigate();
+  const [elderDetails, setElderDetails] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+
+  useEffect(() => {
+    const fetchElderDetails = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const response = await getElderDetailsByEmail(currentUser.email);
+        setElderDetails(response.data);
+      } catch (error) {
+        console.error("Error fetching elder details:", error);
+        setError(
+          error.response?.data?.error || "Failed to fetch elder details"
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (currentUser?.email) {
+      fetchElderDetails();
+    }
+  }, [currentUser.email]);
+
+  const formatDate = (dateString) => {
+    if (!dateString) return "N/A";
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
+
+  const getAge = (dob) => {
+    if (!dob) return "N/A";
+    const today = new Date();
+    const birthDate = new Date(dob);
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birthDate.getDate())
+    ) {
+      age--;
+    }
+    return age;
+  };
+
+  const handleBackToDashboard = () => {
+    navigate('/elder/dashboard');
+  };
+
+  if (loading) {
+    return (
+      <div className={styles.profileContainer}>
+        <Navbar />
+        <div className={styles.loadingContainer}>
+          <div className={styles.loadingSpinner}></div>
+          <p>Loading your profile...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className={styles.profileContainer}>
+        <Navbar />
+        <div className={styles.errorContainer}>
+          <div className={styles.errorIcon}>⚠️</div>
+          <h2>Oops! Something went wrong</h2>
+          <p>{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className={styles.retryBtn}
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div>
+    <div className={styles.profileContainer}>
       <Navbar />
-          <div>
-      <h1>Welcome, {currentUser.name}!</h1>
-      <p>Email: {currentUser.email}</p>
-      <p>Role: {currentUser.role}</p>
-      {/* Caregiver-specific content */}
-      <button onClick={logout}>Logout</button>
-    </div>
-      <div style={{
-        padding: '40px',
-        fontFamily: 'Arial, sans-serif',
-        backgroundColor: '#f8f9fa',
-        minHeight: '100vh',
-        paddingTop: '120px' // Added extra padding to account for fixed navbar
-      }}>
-        <div style={{
-          maxWidth: '1200px',
-          margin: '0 auto',
-          backgroundColor: 'white',
-          borderRadius: '12px',
-          padding: '40px',
-          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
-        }}>
-          <h1 style={{
-            color: '#2c3e50',
-            fontSize: '2.5rem',
-            marginBottom: '16px',
-            textAlign: 'center'
-          }}>
-            Welcome to Your Caregiver Dashboard
-          </h1>
+      
+      <div className={styles.profileContent}>
+        {/* Header Section */}
+        <div className={styles.profileHeader}>
+          <button 
+            className={styles.backBtn}
+            onClick={handleBackToDashboard}
+          >
+            ← Back to Dashboard
+          </button>
           
-          <p style={{
-            color: '#7f8c8d',
-            fontSize: '1.2rem',
-            textAlign: 'center',
-            marginBottom: '40px'
-          }}>
-            Manage your caregiving services and connect with families in need
-          </p>
-
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-            gap: '24px',
-            marginTop: '40px'
-          }}>
-            <div style={{
-              backgroundColor: '#e8f5e8',
-              padding: '24px',
-              borderRadius: '8px',
-              border: '1px solid #c3e6c3'
-            }}>
-              <h3 style={{ color: '#27ae60', marginBottom: '12px' }}>My Profile</h3>
-              <p style={{ color: '#2c3e50', fontSize: '14px' }}>
-                Manage your professional profile and credentials
-              </p>
-            </div>
-
-            <div style={{
-              backgroundColor: '#e8f4fd',
-              padding: '24px',
-              borderRadius: '8px',
-              border: '1px solid #b3d9f7'
-            }}>
-              <h3 style={{ color: '#3498db', marginBottom: '12px' }}>Available Jobs</h3>
-              <p style={{ color: '#2c3e50', fontSize: '14px' }}>
-                Browse and apply for caregiving opportunities
-              </p>
-            </div>
-
-            <div style={{
-              backgroundColor: '#fff3cd',
-              padding: '24px',
-              borderRadius: '8px',
-              border: '1px solid #ffeaa7'
-            }}>
-              <h3 style={{ color: '#f39c12', marginBottom: '12px' }}>My Clients</h3>
-              <p style={{ color: '#2c3e50', fontSize: '14px' }}>
-                View and manage your current client relationships
-              </p>
-            </div>
-
-            <div style={{
-              backgroundColor: '#fde8e8',
-              padding: '24px',
-              borderRadius: '8px',
-              border: '1px solid #fab1a0'
-            }}>
-              <h3 style={{ color: '#e74c3c', marginBottom: '12px' }}>Schedule</h3>
-              <p style={{ color: '#2c3e50', fontSize: '14px' }}>
-                Manage your appointments and availability
-              </p>
-            </div>
+          <div className={styles.headerContent}>
+            <h1>My Profile</h1>
+            <p>Manage your personal information and settings</p>
           </div>
 
-          <div style={{
-            marginTop: '40px',
-            padding: '24px',
-            backgroundColor: '#f8f9fa',
-            borderRadius: '8px',
-            textAlign: 'center'
-          }}>
-            <h3 style={{ color: '#2c3e50', marginBottom: '12px' }}>
-              🎉 Registration Successful!
-            </h3>
-            <p style={{ color: '#7f8c8d' }}>
-              Your caregiver account has been created successfully. 
-              Start exploring the platform and connect with families who need your care.
-            </p>
+          <div className={styles.headerActions}>
+            <button 
+              className={styles.editBtn}
+              onClick={() => setIsEditing(!isEditing)}
+            >
+              {isEditing ? 'Cancel' : 'Edit Profile'}
+            </button>
+            <button 
+              className={styles.logoutBtn}
+              onClick={logout}
+            >
+              Logout
+            </button>
           </div>
         </div>
+
+        {/* Profile Card */}
+        <div className={styles.profileCard}>
+          {/* Profile Image Section */}
+          <div className={styles.profileImageSection}>
+            <div className={styles.imageContainer}>
+              {elderDetails?.profile_photo ? (
+                <img
+                  src={`http://localhost:5000/uploads/profiles/${elderDetails.profile_photo}`}
+                  alt="Profile"
+                  className={styles.profileImage}
+                />
+              ) : (
+                <div className={styles.profilePlaceholder}>
+                  <span>{elderDetails?.name?.charAt(0) || "E"}</span>
+                </div>
+                              )}
+              <div className={styles.statusIndicator}></div>
+            </div>
+            
+            {isEditing && (
+              <button className={styles.changePhotoBtn}>
+                📷 Change Photo
+              </button>
+            )}
+          </div>
+
+          {/* Profile Information */}
+          <div className={styles.profileInfo}>
+            <div className={styles.profileName}>
+              <h2>{elderDetails?.name}</h2>
+              <span className={styles.roleTag}>Elder</span>
+            </div>
+            
+            <div className={styles.profileMeta}>
+              <div className={styles.metaItem}>
+                <span className={styles.metaLabel}>Age</span>
+                <span className={styles.metaValue}>{getAge(elderDetails?.dob)} years</span>
+              </div>
+              <div className={styles.metaItem}>
+                <span className={styles.metaLabel}>Gender</span>
+                <span className={styles.metaValue}>{elderDetails?.gender}</span>
+              </div>
+              <div className={styles.metaItem}>
+                <span className={styles.metaLabel}>Member Since</span>
+                <span className={styles.metaValue}>{formatDate(elderDetails?.created_at)}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Detailed Information Sections */}
+        <div className={styles.infoSections}>
+          {/* Personal Information */}
+          <div className={styles.infoSection}>
+            <div className={styles.sectionHeader}>
+              <h3>📋 Personal Information</h3>
+              {isEditing && (
+                <button className={styles.sectionEditBtn}>Edit</button>
+              )}
+            </div>
+            
+            <div className={styles.infoGrid}>
+              <div className={styles.infoItem}>
+                <label>Full Name</label>
+                <span>{elderDetails?.name}</span>
+              </div>
+              
+              <div className={styles.infoItem}>
+                <label>Date of Birth</label>
+                <span>{formatDate(elderDetails?.dob)}</span>
+              </div>
+              
+              <div className={styles.infoItem}>
+                <label>Gender</label>
+                <span>{elderDetails?.gender}</span>
+              </div>
+              
+              <div className={styles.infoItem}>
+                <label>National ID</label>
+                <span>{elderDetails?.nic}</span>
+              </div>
+              
+              <div className={styles.infoItem}>
+                <label>Address</label>
+                <span>{elderDetails?.address}</span>
+              </div>
+              
+              <div className={styles.infoItem}>
+                <label>District</label>
+                <span>{elderDetails?.district}</span>
+              </div>
+
+              {elderDetails?.medical_conditions && (
+                <div className={styles.infoItem}>
+                  <label>Medical Conditions</label>
+                  <span>{elderDetails.medical_conditions}</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Contact Information */}
+          <div className={styles.infoSection}>
+            <div className={styles.sectionHeader}>
+              <h3>📞 Contact Information</h3>
+              {isEditing && (
+                <button className={styles.sectionEditBtn}>Edit</button>
+              )}
+            </div>
+            
+            <div className={styles.infoGrid}>
+              <div className={styles.infoItem}>
+                <label>Email Address</label>
+                <span>{elderDetails?.email}</span>
+              </div>
+              
+              <div className={styles.infoItem}>
+                <label>Phone Number</label>
+                <span>{elderDetails?.contact}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Family Information */}
+          {elderDetails?.family_member && (
+            <div className={styles.infoSection}>
+              <div className={styles.sectionHeader}>
+                <h3>👨‍👩‍👧‍👦 Family Information</h3>
+              </div>
+              
+              <div className={styles.familyCard}>
+                <div className={styles.familyInfo}>
+                  <div className={styles.familyDetail}>
+                    <label>Family Contact Person</label>
+                    <span>{elderDetails.family_member.name}</span>
+                  </div>
+                  
+                  <div className={styles.familyDetail}>
+                    <label>Email</label>
+                    <span>{elderDetails.family_member.email}</span>
+                  </div>
+                  
+                  <div className={styles.familyDetail}>
+                    <label>Phone</label>
+                    <span>{elderDetails.family_member.phone}</span>
+                  </div>
+                </div>
+                
+                <div className={styles.familyActions}>
+                  <button className={styles.contactBtn}>
+                    📞 Call
+                  </button>
+                  <button className={styles.messageBtn}>
+                    💬 Message
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Account Settings */}
+          <div className={styles.infoSection}>
+            <div className={styles.sectionHeader}>
+              <h3>⚙️ Account Settings</h3>
+            </div>
+            
+            <div className={styles.settingsGrid}>
+              <div className={styles.settingItem}>
+                <div className={styles.settingInfo}>
+                  <span className={styles.settingLabel}>Notifications</span>
+                  <span className={styles.settingDesc}>Receive email and SMS notifications</span>
+                </div>
+                <button className={styles.toggleBtn}>Enabled</button>
+              </div>
+              
+              <div className={styles.settingItem}>
+                <div className={styles.settingInfo}>
+                  <span className={styles.settingLabel}>Privacy</span>
+                  <span className={styles.settingDesc}>Control who can see your information</span>
+                </div>
+                <button className={styles.toggleBtn}>Private</button>
+              </div>
+              
+              <div className={styles.settingItem}>
+                <div className={styles.settingInfo}>
+                  <span className={styles.settingLabel}>Emergency Alerts</span>
+                  <span className={styles.settingDesc}>Automatic emergency notifications</span>
+                </div>
+                <button className={styles.toggleBtn}>Enabled</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        {isEditing && (
+          <div className={styles.actionButtons}>
+            <button className={styles.saveBtn}>
+              💾 Save Changes
+            </button>
+            <button 
+              className={styles.cancelBtn}
+              onClick={() => setIsEditing(false)}
+            >
+              Cancel
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

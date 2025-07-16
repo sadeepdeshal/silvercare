@@ -19,6 +19,7 @@ const {
 
 const { 
   getElderDetails,
+  getElderDashboardStats,
   getUpcomingAppointments,
   getPastAppointments,
   getAllAppointments,
@@ -55,6 +56,9 @@ router.get('/:elderId/doctors', getDoctorsByElderDistrict);
 // Get all doctors for online meetings - MUST BE BEFORE /:elderId route
 router.get('/:elderId/doctors/online', getAllDoctorsForOnlineMeeting);
 
+// Get dashboard stats for an elder - MUST BE BEFORE /:elderId route
+router.get('/:elderId/dashboard-stats', getElderDashboardStats);
+
 // Create new appointment - MUST BE BEFORE /:elderId route
 router.post('/:elderId/appointments', createAppointment);
 
@@ -79,4 +83,3 @@ router.put('/:elderId', updateElder);
 router.post('/', createElder);
 
 module.exports = router;
-
