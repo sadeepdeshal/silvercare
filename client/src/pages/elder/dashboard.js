@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 import Navbar from "../../components/navbar";
 import {
   getElderDetailsByEmail,
@@ -12,14 +13,22 @@ import styles from "../../components/css/elder/dashboard.module.css";
 
 const ElderDashboard = () => {
   const { currentUser } = useAuth();
+  const navigate = useNavigate();
   const [elderDetails, setElderDetails] = useState(null);
   const [upcomingAppointments, setUpcomingAppointments] = useState([]);
   const [pastAppointments, setPastAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [showFullProfile, setShowFullProfile] = useState(false);
   const [activeTab, setActiveTab] = useState("upcoming");
   const [appointmentsLoading, setAppointmentsLoading] = useState(false);
+
+  // Dummy data for the stats cards
+  const [statsData] = useState({
+    upcomingAppointments: 3,
+    upcomingSessions: 2,
+    upcomingCampaigns: 1,
+    assignedCaregivers: 2,
+  });
 
   useEffect(() => {
     const fetchElderDetails = async () => {
@@ -98,6 +107,10 @@ const ElderDashboard = () => {
     }
   };
 
+  const handleViewProfile = () => {
+    navigate('/elder/profile');
+  };
+
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -142,6 +155,8 @@ const ElderDashboard = () => {
       (monthDiff === 0 && today.getDate() < birthDate.getDate())
     ) {
       age--;
+
+
     }
     return age;
   };
@@ -285,22 +300,43 @@ const ElderDashboard = () => {
       <Navbar />
 
       <div className={styles.dashboardContent}>
-        {/* Welcome Header */}
-        <div className={styles.welcomeHeader}>
-          <div className={styles.welcomeText}>
-            <h1>
-              Welcome back, {elderDetails?.name?.split(" ")[0] || "Elder"}! 👋
-            </h1>
-            <p>Hope you're having a wonderful day</p>
+        {/* Stats Cards */}
+        <div className={styles.statsGrid}>
+          <div className={styles.statsCard}>
+            <div className={styles.statsIcon}>📅</div>
+            <div className={styles.statsContent}>
+              <h3>Upcoming Appointments</h3>
+              <p className={styles.statsNumber}>
+                {statsData.upcomingAppointments}
+              </p>
+            </div>
           </div>
-          <div className={styles.dateTime}>
-            <div className={styles.currentDate}>
-              {new Date().toLocaleDateString("en-US", {
-                weekday: "long",
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-              })}
+
+          <div className={styles.statsCard}>
+            <div className={styles.statsIcon}>🧠</div>
+            <div className={styles.statsContent}>
+              <h3>Upcoming Sessions</h3>
+              <p className={styles.statsNumber}>{statsData.upcomingSessions}</p>
+            </div>
+          </div>
+
+          <div className={styles.statsCard}>
+            <div className={styles.statsIcon}>📢</div>
+            <div className={styles.statsContent}>
+              <h3>Upcoming Campaigns</h3>
+              <p className={styles.statsNumber}>
+                {statsData.upcomingCampaigns}
+              </p>
+            </div>
+          </div>
+
+          <div className={styles.statsCard}>
+            <div className={styles.statsIcon}>👥</div>
+            <div className={styles.statsContent}>
+              <h3>Caregivers Assigned</h3>
+              <p className={styles.statsNumber}>
+                {statsData.assignedCaregivers}
+              </p>
             </div>
           </div>
         </div>
@@ -324,7 +360,7 @@ const ElderDashboard = () => {
             </div>
 
             <div className={styles.profileInfo}>
-              <h2>{elderDetails?.name}</h2>
+              <h2>Welcome {elderDetails?.name}</h2>
               <div className={styles.profileMeta}>
                 <span className={styles.age}>
                   Age: {getAge(elderDetails?.dob)}
@@ -340,7 +376,7 @@ const ElderDashboard = () => {
             <div className={styles.profileActions}>
               <button
                 className={styles.viewProfileBtn}
-                onClick={() => setShowFullProfile(true)}
+                onClick={handleViewProfile}
               >
                 View Full Profile
               </button>
@@ -423,7 +459,6 @@ const ElderDashboard = () => {
                   <div className={styles.noAppointments}>
                     <div className={styles.noAppointmentsIcon}>📋</div>
                     <h3>No Past Appointments</h3>
-
                     <p>
                       You haven't had any appointments yet. Your appointment
                       history will appear here.
@@ -483,82 +518,6 @@ const ElderDashboard = () => {
           </div>
         </div>
       </div>
-
-      {/* Full Profile Modal */}
-      {showFullProfile && (
-        <div
-          className={styles.modalOverlay}
-          onClick={() => setShowFullProfile(false)}
-        >
-          <div
-            className={styles.modalContent}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className={styles.modalHeader}>
-              <h2>Complete Profile</h2>
-              <button
-                className={styles.closeBtn}
-                onClick={() => setShowFullProfile(false)}
-              >
-                ✕
-              </button>
-            </div>
-            <div className={styles.modalBody}>
-              <div className={styles.fullProfileGrid}>
-                <div className={styles.profileDetailItem}>
-                  <label>Full Name:</label>
-                  <span>{elderDetails?.name}</span>
-                </div>
-                <div className={styles.profileDetailItem}>
-                  <label>Date of Birth:</label>
-                  <span>{formatDate(elderDetails?.dob)}</span>
-                </div>
-                <div className={styles.profileDetailItem}>
-                  <label>Age:</label>
-                  <span>{getAge(elderDetails?.dob)} years</span>
-                </div>
-                <div className={styles.profileDetailItem}>
-                  <label>Gender:</label>
-                  <span>{elderDetails?.gender}</span>
-                </div>
-                <div className={styles.profileDetailItem}>
-                  <label>Email:</label>
-                  <span>{elderDetails?.email}</span>
-                </div>
-                <div className={styles.profileDetailItem}>
-                  <label>Contact:</label>
-                  <span>{elderDetails?.contact}</span>
-                </div>
-                <div className={styles.profileDetailItem}>
-                  <label>National ID:</label>
-                  <span>{elderDetails?.nic}</span>
-                </div>
-                <div className={styles.profileDetailItem}>
-                  <label>Address:</label>
-                  <span>{elderDetails?.address}</span>
-                </div>
-                <div className={styles.profileDetailItem}>
-                  <label>Family ID:</label>
-                  <span>{elderDetails?.family_id}</span>
-                </div>
-                <div className={styles.profileDetailItem}>
-                  <label>Member Since:</label>
-                  <span>{formatDate(elderDetails?.created_at)}</span>
-                </div>
-              </div>
-
-              {elderDetails?.medical_conditions && (
-                <div className={styles.medicalConditionsSection}>
-                  <h3>Medical Conditions</h3>
-                  <div className={styles.medicalConditionsContent}>
-                    <p>{elderDetails.medical_conditions}</p>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
