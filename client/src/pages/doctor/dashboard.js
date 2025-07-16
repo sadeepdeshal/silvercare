@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import Navbar from '../../components/navbar';
+import DoctorSidebar from '../../components/doctor_sidebar';
+import WelcomeModal from '../../components/WelcomeModal';
+import OnboardingTour from '../../components/OnboardingTour';
 import styles from '../../components/css/doctor/dashboard.module.css';
 
 const API_BASE = "http://localhost:5000"; // Change if your backend runs elsewhere
@@ -19,6 +22,95 @@ const DoctorDashboard = () => {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  
+  // Onboarding tour state
+  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
+  const [showTour, setShowTour] = useState(false);
+  
+  // Sidebar state
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  // Tour steps configuration
+  const tourSteps = [
+    {
+      target: '[data-tour="header"]',
+      title: 'Welcome to Your Dashboard',
+      content: 'This is your personalized medical dashboard where you can manage your practice efficiently.',
+      placement: 'bottom'
+    },
+    {
+      target: '[data-tour="stats"]',
+      title: 'Quick Statistics',
+      content: 'Get an instant overview of your daily activities and patient load.',
+      placement: 'bottom'
+    },
+    {
+      target: '[data-tour="next-patient"]',
+      title: 'Next Patient Details',
+      content: 'View comprehensive information about your next scheduled patient.',
+      placement: 'right'
+    },
+    {
+      target: '[data-tour="tasks"]',
+      title: 'Today\'s Tasks',
+      content: 'Stay organized with your daily medical tasks and reminders.',
+      placement: 'left'
+    },
+    {
+      target: '[data-tour="consultations"]',
+      title: 'Upcoming Consultations',
+      content: 'Manage your consultation schedule and patient appointments.',
+      placement: 'right'
+    },
+    {
+      target: '[data-tour="schedule"]',
+      title: 'Today\'s Schedule',
+      content: 'View your complete daily schedule at a glance.',
+      placement: 'left'
+    },
+    {
+      target: '[data-tour="quick-actions"]',
+      title: 'Quick Actions',
+      content: 'Access frequently used medical tools and features instantly.',
+      placement: 'top'
+    }
+  ];
+
+  // Check if user is new and should see onboarding
+  useEffect(() => {
+    if (currentUser && !loading && !error) {
+      const tourKey = `doctor_tour_${currentUser.user_id}`;
+      const hasSeenTour = localStorage.getItem(tourKey);
+      
+      // Only show tour if user hasn't seen it before
+      if (!hasSeenTour || hasSeenTour !== 'completed') {
+        setShowWelcomeModal(true);
+      }
+    }
+  }, [currentUser, loading, error]);
+
+  // Tour control functions
+  const startTour = () => {
+    setShowWelcomeModal(false);
+    setShowTour(true);
+  };
+
+  const skipTour = () => {
+    setShowWelcomeModal(false);
+    setShowTour(false);
+    localStorage.setItem(`doctor_tour_${currentUser?.user_id}`, 'completed');
+  };
+
+  const completeTour = () => {
+    setShowTour(false);
+    localStorage.setItem(`doctor_tour_${currentUser?.user_id}`, 'completed');
+  };
+
+  // Function to restart tour (can be triggered by a help button)
+  const restartTour = () => {
+    localStorage.removeItem(`doctor_tour_${currentUser?.user_id}`);
+    setShowWelcomeModal(true);
+  };
 
   // Helper functions
   const formatDate = (dateString) => {
@@ -177,10 +269,12 @@ const DoctorDashboard = () => {
 
   return (
     <div className={styles.dashboardContainer}>
-      <Navbar />
-      
-      {/* Header Section */}
-      <div className={styles.headerSection}>
+      <DoctorSidebar onToggleCollapse={setSidebarCollapsed} />
+      <div className={`${styles.mainContent} ${sidebarCollapsed ? styles.mainContentCollapsed : ''}`}>
+        <Navbar />
+        
+        {/* Header Section */}
+      <div className={styles.headerSection} data-tour="header">
         <div className={styles.welcomeCard}>
           <div className={styles.welcomeContent}>
             <h1 className={styles.welcomeTitle}>Welcome back, Dr. {currentUser.name}!</h1>
@@ -199,7 +293,7 @@ const DoctorDashboard = () => {
       </div>
 
       {/* Quick Stats Section */}
-      <div className={styles.statsSection}>
+      <div className={styles.statsSection} data-tour="stats">
         <div className={styles.statsGrid}>
           <div className={styles.statCard}>
             <div className={styles.statIcon}>📅</div>
@@ -236,7 +330,7 @@ const DoctorDashboard = () => {
       <div className={styles.mainContentSection}>
         {/* Next Patient & Tasks Section - Left Half */}
         <div className={styles.leftContentContainer}>
-          <div className={styles.contentCard}>
+          <div className={styles.contentCard} data-tour="next-patient">
             <h2 className={styles.sectionTitle}>🏥 Next Patient</h2>
             {nextPatient ? (
               <div className={styles.nextPatientCard}>
@@ -276,7 +370,7 @@ const DoctorDashboard = () => {
           </div>
 
           {/* Today's Tasks */}
-          <div className={styles.contentCard}>
+          <div className={styles.contentCard} data-tour="tasks">
             <h2 className={styles.sectionTitle}>✅ Today's Tasks</h2>
             <div className={styles.tasksList}>
               {tasks.map(task => (
@@ -295,7 +389,7 @@ const DoctorDashboard = () => {
 
         {/* Upcoming Consultations & Calendar Section - Right Half */}
         <div className={styles.rightContentContainer}>
-          <div className={styles.contentCard}>
+          <div className={styles.contentCard} data-tour="consultations">
             <h2 className={styles.sectionTitle}>📊 Upcoming Consultations</h2>
             {consultations.length === 0 ? (
               <div className={styles.emptyState}>
@@ -324,7 +418,7 @@ const DoctorDashboard = () => {
           </div>
 
           {/* Today's Appointments */}
-          <div className={styles.contentCard}>
+          <div className={styles.contentCard} data-tour="schedule">
             <h2 className={styles.sectionTitle}>📅 Today's Schedule</h2>
             <div className={styles.appointmentsList}>
               {(dashboardData.todaysAppointments || []).length === 0 ? (
@@ -353,7 +447,7 @@ const DoctorDashboard = () => {
       </div>
 
       {/* Quick Actions Section */}
-      <div className={styles.quickActionsSection}>
+      <div className={styles.quickActionsSection} data-tour="quick-actions">
         <div className={styles.quickActionsContainer}>
           <h2 className={styles.sectionTitle}>⚡ Quick Actions</h2>
           <div className={styles.quickActionsGrid}>
@@ -390,6 +484,31 @@ const DoctorDashboard = () => {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Help Button to restart tour */}
+      <button 
+        className={styles.helpButton}
+        onClick={restartTour}
+        title="Take a tour of the dashboard"
+      >
+        ❓
+      </button>
+
+      {/* Onboarding Components */}
+      <WelcomeModal 
+        isVisible={showWelcomeModal}
+        onStartTour={startTour}
+        onSkip={skipTour}
+        userName={currentUser?.name}
+      />
+      
+      <OnboardingTour 
+        steps={tourSteps}
+        isActive={showTour}
+        onComplete={completeTour}
+        onSkip={skipTour}
+      />
       </div>
     </div>
   );

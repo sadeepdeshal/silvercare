@@ -146,6 +146,8 @@ const updateAppointmentStatus = async (appointmentId, status, notes = null) => {
 // Get doctor information by user ID
 const getDoctorByUserId = async (userId) => {
   try {
+    console.log('Fetching doctor for user ID:', userId);
+    
     const result = await pool.query(`
       SELECT 
         d.doctor_id,
@@ -156,18 +158,76 @@ const getDoctorByUserId = async (userId) => {
         d.current_institution,
         d.years_experience,
         d.status,
+        d.district,
         u.name,
         u.email,
         u.phone,
-        u.role
+        u.role,
+        u.created_at
       FROM doctor d
       JOIN "User" u ON d.user_id = u.user_id
       WHERE d.user_id = $1
     `, [userId]);
+    
+    console.log('Doctor query result:', result.rows);
     return result.rows[0] || null;
   } catch (error) {
     console.error('Error fetching doctor by user ID:', error);
+    console.error('Query parameters:', { userId });
     throw error;
+  }
+};
+
+// Update doctor profile
+const updateDoctorProfile = async (userId, profileData) => {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    
+    // Update User table
+    const userUpdateQuery = `
+      UPDATE "User" 
+      SET name = $1, email = $2, phone = $3
+      WHERE user_id = $4
+      RETURNING *
+    `;
+    const userResult = await client.query(userUpdateQuery, [
+      profileData.name,
+      profileData.email,
+      profileData.phone,
+      userId
+    ]);
+
+    // Update Doctor table
+    const doctorUpdateQuery = `
+      UPDATE doctor 
+      SET specialization = $1, alternative_number = $2, current_institution = $3, 
+          years_experience = $4, district = $5
+      WHERE user_id = $6
+      RETURNING *
+    `;
+    const doctorResult = await client.query(doctorUpdateQuery, [
+      profileData.specialization,
+      profileData.alternative_number,
+      profileData.current_institution,
+      profileData.years_experience,
+      profileData.district,
+      userId
+    ]);
+
+    await client.query('COMMIT');
+    
+    // Return updated doctor profile
+    return {
+      ...doctorResult.rows[0],
+      ...userResult.rows[0]
+    };
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error('Error updating doctor profile:', error);
+    throw error;
+  } finally {
+    client.release();
   }
 };
 
@@ -177,5 +237,6 @@ module.exports = {
   getTodaysAppointmentsByDoctorId,
   getNextAppointmentByDoctorId,
   updateAppointmentStatus,
-  getDoctorByUserId
+  getDoctorByUserId,
+  updateDoctorProfile
 };
