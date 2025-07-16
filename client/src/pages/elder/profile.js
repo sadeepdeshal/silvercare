@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../../components/navbar';
-import { getElderDetailsByEmail } from '../../services/elderApi';
+import { getElderDetailsByEmail } from '../../services/elderApi2';
 import styles from '../../components/css/elder/profile.module.css';
 
 const ElderProfile = () => {

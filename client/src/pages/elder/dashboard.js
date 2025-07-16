@@ -8,7 +8,7 @@ import {
   getPastAppointments,
   cancelAppointment,
   rescheduleAppointment,
-} from "../../services/elderApi";
+} from "../../services/elderApi2";
 import styles from "../../components/css/elder/dashboard.module.css";
 
 const ElderDashboard = () => {
