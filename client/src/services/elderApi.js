@@ -66,7 +66,7 @@ export const elderApi = {
       const response = await fetch(`${API_BASE}/${elderId}/doctors`);
       const data = await response.json();
       
-            console.log('API: Doctors response:', data);
+      console.log('API: Doctors response:', data);
       
       if (!response.ok) {
         throw new Error(data.error || 'Failed to fetch doctors');
@@ -139,8 +139,31 @@ export const elderApi = {
     }
   },
 
-  // NEW: Create appointment
-    createAppointment: async (elderId, appointmentData) => {
+  // NEW: Get blocked time slots for a doctor on a specific date
+   getBlockedTimeSlots: async (doctorId, date, appointmentType) => {
+    try {
+      console.log('API: Fetching blocked time slots for doctor:', doctorId, 'date:', date, 'type:', appointmentType);
+      
+      const url = `${API_BASE}/doctor/${doctorId}/blocked-slots/${date}?appointmentType=${appointmentType}`;
+      const response = await fetch(url);
+      const data = await response.json();
+      
+      console.log('API: Blocked time slots response:', data);
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to fetch blocked time slots');
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('API: Error fetching blocked time slots:', error);
+      throw error;
+    }
+  },
+
+
+  // Create appointment (simplified)
+  createAppointment: async (elderId, appointmentData) => {
     try {
       console.log('API: Creating appointment for elder:', elderId, 'with data:', appointmentData);
       const response = await fetch(`${API_BASE}/${elderId}/appointments`, {
@@ -165,7 +188,7 @@ export const elderApi = {
     }
   },
 
-  // NEW: Get elder appointments
+  // Get elder appointments
   getElderAppointments: async (elderId, filters = {}) => {
     try {
       console.log('API: Fetching appointments for elder:', elderId, 'with filters:', filters);
@@ -296,6 +319,46 @@ export const elderApi = {
     }
   },
 
+  // Get upcoming appointments for family member
+  getUpcomingAppointmentsByFamily: async (familyMemberId) => {
+    try {
+      console.log('API: Fetching upcoming appointments for family member:', familyMemberId);
+      const response = await fetch(`${API_BASE}/family-member/${familyMemberId}/appointments/upcoming`);
+      const data = await response.json();
+      
+      console.log('API: Upcoming appointments response:', data);
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to fetch upcoming appointments');
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('API: Error fetching upcoming appointments:', error);
+      throw error;
+    }
+  },
+
+  // Get appointment count for family member
+  getAppointmentCountByFamily: async (familyMemberId) => {
+    try {
+      console.log('API: Fetching appointment count for family member:', familyMemberId);
+      const response = await fetch(`${API_BASE}/family-member/${familyMemberId}/appointments/count`);
+      const data = await response.json();
+      
+      console.log('API: Appointment count response:', data);
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to fetch appointment count');
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('API: Error fetching appointment count:', error);
+      throw error;
+    }
+  },
+
   // Get elders with medical conditions
   getEldersWithMedicalConditions: async (familyMemberId) => {
     try {
@@ -336,42 +399,5 @@ export const elderApi = {
       throw error;
     }
   }
-};
-
-export const getElderDetailsByEmail = (email) => {
-  return axios.get(`${API_BASE}/elderDetails`, {
-    params: { email }
-  });
-};
-
-export const updateElderDetails = (elderId, elderData) => {
-  return axios.put(`${API_BASE}/${elderId}`, elderData);
-};
-
-// New appointment-related functions
-export const getUpcomingAppointments = (elderId) => {
-  return axios.get(`${API_BASE}/${elderId}/appointments/upcoming`);
-};
-
-export const getPastAppointments = (elderId) => {
-  return axios.get(`${API_BASE}/${elderId}/appointments/past`);
-};
-
-export const getAllAppointments = (elderId) => {
-  return axios.get(`${API_BASE}/${elderId}/appointments`);
-};
-
-export const getAppointmentById = (elderId, appointmentId) => {
-  return axios.get(`${API_BASE}/${elderId}/appointments/${appointmentId}`);
-};
-
-export const cancelAppointment = (elderId, appointmentId) => {
-  return axios.put(`${API_BASE}/${elderId}/appointments/${appointmentId}/cancel`);
-};
-
-export const rescheduleAppointment = (elderId, appointmentId, newDateTime) => {
-  return axios.put(`${API_BASE}/${elderId}/appointments/${appointmentId}/reschedule`, {
-    newDateTime
-  });
 };
 

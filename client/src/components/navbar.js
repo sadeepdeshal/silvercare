@@ -42,9 +42,42 @@ const Navbar = () => {
     setIsProfileDropdownOpen(!isProfileDropdownOpen);
   };
 
-  // ✅ Profile dropdown navigation handlers
+  // ✅ Role-based profile navigation handler - Updated to match App.js routes
   const handleProfileNavigation = () => {
-    navigate('/profile');
+    if (!currentUser || !currentUser.role) {
+      console.error('User role not found');
+      return;
+    }
+
+    const role = currentUser.role.toLowerCase();
+    let profilePath = '/profile'; // default fallback
+
+    switch (role) {
+      case 'elder':
+        profilePath = '/elder/profile';
+        break;
+      case 'doctor':
+        profilePath = '/doctor/profile';
+        break;
+      case 'caregiver':
+        profilePath = '/caregiver/profile';
+        break;
+      case 'family_member':
+        profilePath = '/family-member/profile'; // ✅ Fixed to match App.js route
+        break;
+      case 'healthprofessional':
+        profilePath = '/healthprofessional/profile';
+        break;
+      case 'admin':
+        // Admin doesn't have a profile page, so we don't navigate
+        console.log('Admin users do not have a profile page');
+        return;
+      default:
+        console.warn('Unknown role:', role);
+        profilePath = '/profile';
+    }
+
+    navigate(profilePath);
     setIsProfileDropdownOpen(false);
   };
 
@@ -57,6 +90,9 @@ const Navbar = () => {
   const handleNotificationClick = () => {
     navigate('/notifications'); // Navigate to notifications page
   };
+
+  // ✅ Check if current user is admin
+  const isAdmin = currentUser && currentUser.role && currentUser.role.toLowerCase() === 'admin';
 
   // ✅ Close dropdown when clicking outside
   useEffect(() => {
@@ -123,15 +159,18 @@ const Navbar = () => {
                   />
                 </div>
                 
-                {/* ✅ Profile Dropdown */}
+                {/* ✅ Profile Dropdown - Hide Profile option for admin */}
                 {isProfileDropdownOpen && (
                   <div className={styles.profileDropdown}>
-                    <div 
-                      className={styles.dropdownItem}
-                      onClick={handleProfileNavigation}
-                    >
-                      Profile
-                    </div>
+                    {/* Only show Profile menu item if user is not admin */}
+                    {!isAdmin && (
+                      <div 
+                        className={styles.dropdownItem}
+                        onClick={handleProfileNavigation}
+                      >
+                        Profile
+                      </div>
+                    )}
                     <div 
                       className={styles.dropdownItem}
                       onClick={handleSettingsNavigation}
@@ -164,17 +203,16 @@ const Navbar = () => {
         </div>
 
         <div className={styles.navAuth}>
-  {!isAuthenticated && (
-    // ✅ Show login button when not authenticated
-    <button
-      className={styles.loginBtn}
-      onClick={() => handleNavigation('/login')}
-    >
-      Login
-    </button>
-  )}
-</div>
-
+          {!isAuthenticated && (
+            // ✅ Show login button when not authenticated
+            <button
+              className={styles.loginBtn}
+              onClick={() => handleNavigation('/login')}
+            >
+              Login
+            </button>
+          )}
+        </div>
 
         {/* Mobile Menu Toggle */}
         <div className={styles.mobileMenuToggle} onClick={toggleMobileMenu}>
@@ -204,10 +242,16 @@ const Navbar = () => {
         {/* ✅ Mobile Icons Section - Only show when authenticated */}
         {isAuthenticated && (
           <div className={styles.mobileIconsSection}>
-            <div className={styles.mobileNavItem} onClick={() => handleNavigation('/profile')}>
-              <img src={userIcon} alt="Profile" className={styles.mobileIconImage} />
-              Profile
-            </div>
+            {/* Only show Profile menu item if user is not admin */}
+            {!isAdmin && (
+              <div className={styles.mobileNavItem} onClick={() => {
+                handleProfileNavigation();
+                setIsMobileMenuOpen(false);
+              }}>
+                <img src={userIcon} alt="Profile" className={styles.mobileIconImage} />
+                Profile
+              </div>
+            )}
             <div className={styles.mobileNavItem} onClick={() => handleNavigation('/settings')}>
               Settings
             </div>
