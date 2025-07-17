@@ -477,6 +477,26 @@ const updateCareRequestStatus = async (req, res) => {
   }
 };
 
+//get assigner elders
+const getAssignedElders = async (req, res) => {
+  const caregiverId = req.params.id;
+
+  try {
+    const query = `
+      SELECT e.elder_id, e.name, e.age, c.duration, c.end_sate
+      FROM carelog c
+      JOIN elder e ON c.elder_id = e.elder_id
+      WHERE c.caregiver_id = $1
+    `;
+    const result = await pool.query(query, [caregiverId]);
+
+    res.status(200).json(result.rows);
+  } catch (error) {
+    console.error('Error fetching assigned elders:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
 module.exports = {
   getAllCaregivers,
   getActiveCaregiverCount,
@@ -485,6 +505,7 @@ module.exports = {
   createCareRequest,
   getCareRequestsByFamily,
   searchCaregivers,
-  updateCareRequestStatus
+  updateCareRequestStatus,
+  getAssignedElders
 };
 

@@ -8,7 +8,8 @@ const {
   createCareRequest,
   getCareRequestsByFamily,
   searchCaregivers,
-  updateCareRequestStatus
+  updateCareRequestStatus,
+  getAssignedElders 
 } = require('../controllers/caregiverController');
 
 // Get all caregivers
@@ -34,5 +35,8 @@ router.post('/:caregiverId/request', createCareRequest);
 
 // Update care request status
 router.put('/requests/:requestId/status', updateCareRequestStatus);
+
+//get assigned elders
+router.get('/:id/assigned-elders', getAssignedElders);
 
 module.exports = router;
