@@ -1,0 +1,344 @@
+/* General Layout */
+.doctor-dashboard {
+  background: #f7fafd;
+  min-height: 100vh;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  color: #222e3a;
+  padding-bottom: 32px;
+}
+
+.dashboard-header {
+  padding: 32px 0 16px 0;
+  text-align: left;
+  margin-left: 40px;
+}
+
+.doctor-name {
+  color: #2476d2;
+  font-weight: bold;
+}
+
+.dashboard-main {
+  display: flex;
+  gap: 32px;
+  justify-content: center;
+  align-items: flex-start;
+  margin: 0 40px;
+}
+
+/* Columns */
+.dashboard-left,
+.dashboard-center,
+.dashboard-right {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.dashboard-left,
+.dashboard-right {
+  flex: 1 1 260px;
+  min-width: 260px;
+  max-width: 320px;
+}
+
+.dashboard-center {
+  flex: 2 1 400px;
+  min-width: 340px;
+  max-width: 480px;
+}
+
+/* Card Styles */
+.card {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 2px 12px rgba(36, 118, 210, 0.07);
+  padding: 24px 20px;
+  margin-bottom: 0;
+}
+
+h4 {
+  margin: 0 0 10px 0;
+  font-size: 1.15rem;
+  color: #2476d2;
+  font-weight: 600;
+}
+
+/* Daily Read */
+.daily-read-img {
+  width: 100%;
+  border-radius: 12px;
+  margin-bottom: 12px;
+  max-height: 120px;
+  object-fit: cover;
+}
+
+.read-more-btn {
+  background: #2476d2;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 7px 18px;
+  font-size: 0.95rem;
+  margin-top: 10px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.read-more-btn:hover {
+  background: #195a9b;
+}
+
+/* Calendar */
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.add-reminder-btn {
+  background: #e3f0fc;
+  color: #2476d2;
+  border: none;
+  border-radius: 8px;
+  padding: 5px 12px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.add-reminder-btn:hover {
+  background: #d0e6fa;
+}
+
+.calendar-dates {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.calendar-day {
+  background: #f0f4fa;
+  color: #2476d2;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-weight: 500;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.calendar-day.active,
+.calendar-day:hover {
+  background: #2476d2;
+  color: #fff;
+}
+
+.calendar-events {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.calendar-events li {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.98rem;
+  margin-bottom: 6px;
+}
+
+/* Tasks */
+.tasks-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.tasks-count {
+  background: #2476d2;
+  color: #fff;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.tasks-list {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0 0 0;
+}
+.task-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 7px 0;
+  border-bottom: 1px solid #f0f4fa;
+  font-size: 1rem;
+}
+.task-item:last-child {
+  border-bottom: none;
+}
+.task-time {
+  color: #2476d2;
+  font-weight: 500;
+  font-size: 0.97rem;
+}
+.view-all-tasks {
+  display: block;
+  margin-top: 10px;
+  color: #2476d2;
+  text-decoration: underline;
+  font-size: 0.97rem;
+  cursor: pointer;
+}
+
+/* Next Patient */
+.next-patient-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.next-patient-icon {
+  font-size: 1.6rem;
+  margin-left: 8px;
+}
+
+.patient-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 14px 0 10px 0;
+}
+.patient-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #e3f0fc;
+}
+.patient-info h5 {
+  margin: 0 0 3px 0;
+  font-size: 1.1rem;
+  color: #2476d2;
+}
+.patient-info p {
+  margin: 0;
+  font-size: 0.97rem;
+  color: #555;
+}
+
+.patient-tabs {
+  display: flex;
+  gap: 10px;
+  margin: 10px 0 8px 0;
+}
+.tab {
+  background: #f0f4fa;
+  border: none;
+  border-radius: 8px;
+  padding: 5px 14px;
+  font-size: 0.97rem;
+  color: #2476d2;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.tab.active,
+.tab:hover {
+  background: #2476d2;
+  color: #fff;
+}
+.patient-summary {
+  font-size: 0.98rem;
+  color: #444;
+  margin-top: 5px;
+}
+
+/* Upcoming Consultations */
+.upcoming-consult h4 {
+  margin-bottom: 14px;
+}
+.consult-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.consult-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid #f0f4fa;
+}
+.consult-item:last-child {
+  border-bottom: none;
+}
+.consult-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #e3f0fc;
+}
+.consult-info {
+  flex: 1;
+}
+.consult-name {
+  font-weight: 600;
+  color: #2476d2;
+  font-size: 1rem;
+  display: block;
+}
+.consult-date {
+  color: #888;
+  font-size: 0.95rem;
+}
+.clinical-record-btn {
+  background: #e3f0fc;
+  color: #2476d2;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-size: 0.97rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.clinical-record-btn:hover {
+  background: #2476d2;
+  color: #fff;
+}
+
+/* Logout Button */
+.logout-btn {
+  margin: 32px auto 0 auto;
+  display: block;
+  background: #fff;
+  color: #2476d2;
+  border: 2px solid #2476d2;
+  border-radius: 8px;
+  padding: 8px 28px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.logout-btn:hover {
+  background: #2476d2;
+  color: #fff;
+}
+
+/* Responsive */
+@media (max-width: 1100px) {
+  .dashboard-main {
+    flex-direction: column;
+    gap: 24px;
+    margin: 0 10px;
+  }
+  .dashboard-left,
+  .dashboard-center,
+  .dashboard-right {
+    max-width: 100%;
+    min-width: 0;
+  }
+}

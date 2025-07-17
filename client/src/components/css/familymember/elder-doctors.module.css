@@ -1,0 +1,806 @@
+.container {
+  min-height: 100vh;
+  background-color: #f8fafc;
+}
+
+.content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+/* Meeting Selection Styles */
+.meetingSelection {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.selectionHeader {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.selectionHeader .title {
+  font-size: 2.5rem;
+  color: #1a202c;
+  margin-bottom: 10px;
+  font-weight: 700;
+}
+
+.selectionHeader .subtitle {
+  font-size: 1.2rem;
+  color: #64748b;
+  margin-bottom: 0;
+}
+
+.meetingOptions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 30px;
+  margin-bottom: 40px;
+}
+
+.meetingOption {
+  background: white;
+  border-radius: 15px;
+  padding: 30px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.meetingOption:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+  border-color: #3b82f6;
+}
+
+.optionIcon {
+  font-size: 4rem;
+  margin-bottom: 20px;
+}
+
+.optionTitle {
+  font-size: 1.8rem;
+  color: #1a202c;
+  margin-bottom: 15px;
+  font-weight: 600;
+}
+
+.optionDescription {
+  font-size: 1rem;
+  color: #64748b;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.optionFeatures {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 25px;
+}
+
+.feature {
+  font-size: 0.9rem;
+  color: #10b981;
+  font-weight: 500;
+}
+
+.selectButton {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
+  border: none;
+  padding: 12px 25px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 100%;
+}
+
+.selectButton:hover {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  transform: translateY(-2px);
+}
+
+/* Meeting Type Badge */
+.meetingTypeBadge {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+/* Header Buttons */
+.headerButtons {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.changeTypeButton {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.changeTypeButton:hover {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  transform: translateY(-2px);
+}
+
+/* Header Styles */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.headerContent {
+  flex: 1;
+}
+
+.title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #1a202c;
+  margin-bottom: 0.5rem;
+}
+
+.subtitle {
+  font-size: 1.1rem;
+  color: #64748b;
+  margin: 0;
+}
+
+.elderInfo {
+  margin-top: 0.5rem;
+  padding: 1rem;
+  background-color: #e0f2fe;
+  border-radius: 8px;
+  border-left: 4px solid #0284c7;
+}
+
+.backButton {
+  background-color: #64748b;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.backButton:hover {
+  background-color: #475569;
+  transform: translateY(-1px);
+}
+
+/* Search Styles */
+.searchSection {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  gap: 1rem;
+}
+
+.searchContainer {
+  position: relative;
+  flex: 1;
+  max-width: 500px;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 0.75rem 1rem 0.75rem 3rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.2s ease;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.searchIcon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.2rem;
+  color: #64748b;
+}
+
+.doctorCount {
+  font-size: 1rem;
+  color: #64748b;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* Loading Styles */
+.loadingContainer,
+.loadingContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+}
+
+.loadingSpinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #e2e8f0;
+  border-top: 4px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Error Styles */
+.errorMessage {
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.errorMessage p {
+  color: #dc2626;
+  margin: 0;
+  font-weight: 500;
+}
+
+.retryButton {
+  background-color: #dc2626;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.retryButton:hover {
+  background-color: #b91c1c;
+}
+
+/* Empty State Styles */
+.emptyState {
+  text-align: center;
+  padding: 4rem 2rem;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.emptyIcon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+.emptyState h2 {
+  font-size: 1.5rem;
+  color: #374151;
+  margin-bottom: 0.5rem;
+}
+
+.emptyState p {
+  color: #6b7280;
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+}
+
+.clearSearchButton {
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.clearSearchButton:hover {
+  background-color: #2563eb;
+  transform: translateY(-1px);
+}
+
+/* Doctors Grid */
+.doctorsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+/* Doctor Card Styles */
+.doctorCard {
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+  position: relative;
+  border: 1px solid #e2e8f0;
+}
+
+.doctorCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* Doctor Header */
+.doctorHeader {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.doctorAvatar {
+  margin-right: 1rem;
+}
+
+.doctorInitial {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.doctorBasicInfo {
+  flex: 1;
+}
+
+.doctorName {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1a202c;
+  margin: 0 0 0.25rem 0;
+}
+
+.doctorSpecialization {
+  font-size: 1rem;
+  color: #3b82f6;
+  font-weight: 500;
+  margin: 0;
+}
+
+/* Doctor Details */
+.doctorDetails {
+  margin-bottom: 1.5rem;
+}
+
+.detailRow {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 0.75rem;
+  padding: 0.5rem 0;
+}
+
+.detailIcon {
+  font-size: 1.1rem;
+  margin-right: 0.75rem;
+  margin-top: 0.1rem;
+  min-width: 20px;
+}
+
+.detailContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.detailLabel {
+  font-size: 0.85rem;
+  color: #64748b;
+  font-weight: 500;
+  margin-bottom: 0.1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.detailValue {
+  font-size: 0.95rem;
+  color: #374151;
+  font-weight: 400;
+  word-break: break-word;
+}
+
+/* Doctor Actions */
+.doctorActions {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.primaryButton {
+  flex: 1;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  border: none;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.primaryButton:hover {
+  background: linear-gradient(135deg, #059669, #047857);
+  transform: translateY(-1px);
+}
+
+.secondaryButton {
+  flex: 1;
+  background-color: #f8fafc;
+  color: #475569;
+  border: 2px solid #e2e8f0;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.secondaryButton:hover {
+  background-color: #f1f5f9;
+  border-color: #cbd5e1;
+  transform: translateY(-1px);
+}
+
+.buttonIcon {
+  font-size: 1rem;
+}
+
+/* Status Indicator */
+.statusIndicator {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: #f0fdf4;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  border: 1px solid #bbf7d0;
+}
+
+.statusDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #22c55e;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.statusText {
+  font-size: 0.8rem;
+  color: #16a34a;
+  font-weight: 500;
+}
+
+/* Navigation Section */
+.navigationSection {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid #e2e8f0;
+  flex-wrap: wrap;
+}
+
+.backToEldersButton,
+.backToDashboardButton {
+  background-color: #6366f1;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.backToEldersButton:hover,
+.backToDashboardButton:hover {
+  background-color: #4f46e5;
+  transform: translateY(-1px);
+}
+
+.backToDashboardButton {
+  background-color: #8b5cf6;
+}
+
+.backToDashboardButton:hover {
+  background-color: #7c3aed;
+}
+
+/* Back Section for Meeting Selection */
+.backSection {
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+/* Access Denied Styles */
+.accessDenied {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+  text-align: center;
+  padding: 2rem;
+}
+
+.accessDenied h2 {
+  color: #dc2626;
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+.accessDenied p {
+  color: #64748b;
+  font-size: 1.1rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .content {
+    padding: 1rem;
+  }
+  
+  .title {
+    font-size: 2rem;
+  }
+  
+  .selectionHeader .title {
+    font-size: 2rem;
+  }
+  
+  .meetingOptions {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .meetingOption {
+    padding: 20px;
+  }
+  
+  .optionTitle {
+    font-size: 1.5rem;
+  }
+  
+  .header {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .headerButtons {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .searchSection {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .searchContainer {
+    max-width: none;
+  }
+  
+  .doctorsGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .doctorActions {
+    flex-direction: column;
+  }
+  
+  .navigationSection {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .backToEldersButton,
+  .backToDashboardButton,
+  .changeTypeButton {
+    width: 100%;
+    max-width: 300px;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .meetingOption {
+    padding: 15px;
+  }
+  
+  .optionIcon {
+    font-size: 3rem;
+  }
+  
+  .optionTitle {
+    font-size: 1.3rem;
+  }
+  
+  .doctorCard {
+    padding: 1rem;
+  }
+  
+  .doctorHeader {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
+  
+  .doctorAvatar {
+    margin-right: 0;
+    align-self: center;
+  }
+  
+  .meetingTypeBadge {
+    position: static;
+    display: inline-block;
+    margin-bottom: 1rem;
+  }
+  
+  .statusIndicator {
+    position: static;
+    justify-content: center;
+    margin-top: 1rem;
+  }
+}
+
+/* Additional utility classes */
+.textCenter {
+  text-align: center;
+}
+
+.marginBottom {
+  margin-bottom: 1rem;
+}
+
+.marginTop {
+  margin-top: 1rem;
+}
+
+.flexCenter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flexBetween {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.fullWidth {
+  width: 100%;
+}
+
+/* Hover effects for better UX */
+.doctorCard:hover .doctorName {
+  color: #3b82f6;
+}
+
+.doctorCard:hover .meetingTypeBadge {
+  transform: scale(1.05);
+}
+
+/* Focus states for accessibility */
+.selectButton:focus,
+.primaryButton:focus,
+.secondaryButton:focus,
+.backButton:focus,
+.changeTypeButton:focus,
+.clearSearchButton:focus,
+.retryButton:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Print styles */
+@media print {
+  .navigationSection,
+  .searchSection,
+  .doctorActions,
+  .backButton,
+  .changeTypeButton {
+    display: none;
+  }
+  
+  .doctorCard {
+    break-inside: avoid;
+    box-shadow: none;
+    border: 1px solid #ccc;
+  }
+}
