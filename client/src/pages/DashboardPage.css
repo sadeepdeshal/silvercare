@@ -1,0 +1,252 @@
+.dashboard-container {
+  background: #f7f8fa;
+  min-height: 100vh;
+  font-family: 'Inter', Arial, sans-serif;
+}
+.dashboard-navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #fff;
+  padding: 18px 40px;
+  border-bottom: 1px solid #e5e7eb;
+}
+.logo {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #4f8cff;
+}
+.nav-links button {
+  background: none;
+  border: none;
+  margin: 0 10px;
+  font-size: 1rem;
+  color: #444;
+  cursor: pointer;
+  padding: 8px 18px;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+.nav-links .active,
+.nav-links button:hover {
+  background: #4f8cff;
+  color: #fff;
+}
+.profile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.profile-pic {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+}
+main {
+  max-width: 1200px;
+  margin: 32px auto;
+  padding: 0 24px;
+}
+.subtitle {
+  color: #888;
+  margin-bottom: 28px;
+}
+.dashboard-cards {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+.card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px #e5e7eb55;
+  padding: 24px 32px;
+  flex: 1;
+  text-align: center;
+}
+.card-title {
+  color: #888;
+  font-size: 1rem;
+  margin-bottom: 8px;
+}
+.card-value {
+  font-size: 2.2rem;
+  font-weight: bold;
+  color: #4f8cff;
+}
+.dashboard-main {
+  display: flex;
+  gap: 32px;
+}
+.dashboard-left, .dashboard-right {
+  flex: 1;
+}
+.section {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px #e5e7eb33;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+.session-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.session-card {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  background: #f7f8fa;
+  border-radius: 8px;
+  padding: 14px 18px;
+}
+.session-card img {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+}
+.session-name {
+  font-weight: 600;
+}
+.session-info {
+  color: #888;
+  font-size: 0.95rem;
+}
+.session-card button {
+  margin-left: auto;
+  margin-right: 8px;
+  padding: 7px 16px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.session-card .join {
+  background: #4f8cff;
+  color: #fff;
+}
+.session-card .notes {
+  background: #5bc0be;
+  color: #fff;
+}
+.session-card .reschedule {
+  background: #e5e7eb;
+  color: #444;
+}
+.activity-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.activity-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  font-size: 1rem;
+}
+.icon {
+  width: 18px;
+  height: 18px;
+  display: inline-block;
+  border-radius: 50%;
+}
+.icon.mood { background: #ff5e5e; }
+.icon.med { background: #4f8cff; }
+.icon.walk { background: #3ec300; }
+.time {
+  margin-left: auto;
+  color: #aaa;
+  font-size: 0.9rem;
+}
+.approval-card {
+  background: #f7f8fa;
+  border-radius: 8px;
+  padding: 14px 18px;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+}
+.approval-name {
+  font-weight: 600;
+}
+.approval-info {
+  color: #888;
+  font-size: 0.95rem;
+}
+.approval-card .approve {
+  background: #3ec300;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 7px 14px;
+  margin-right: 6px;
+  cursor: pointer;
+}
+.approval-card .decline {
+  background: #ff5e5e;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 7px 14px;
+  cursor: pointer;
+}
+.tag {
+  position: absolute;
+  top: 12px;
+  right: 18px;
+  font-size: 0.8rem;
+  padding: 2px 10px;
+  border-radius: 8px;
+  color: #fff;
+}
+.tag.urgent { background: #ff5e5e; }
+.tag.routine { background: #4f8cff; }
+.quick-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.quick {
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 12px 0;
+  cursor: pointer;
+}
+.quick.blue { background: #4f8cff; }
+.quick.green { background: #3ec300; }
+.quick.orange { background: #ffb300; }
+.quick.purple { background: #a259ff; }
+.messages-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.messages-list li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.messages-list img {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+}
+.msg-name {
+  font-weight: 600;
+}
+.msg-text {
+  color: #444;
+  font-size: 0.97rem;
+}
+.msg-time {
+  color: #aaa;
+  font-size: 0.9rem;
+}

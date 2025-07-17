@@ -38,3 +38,7 @@ logs
 # Database
 *.sqlite
 *.db
+
+
+#jsonfiles ignorations
+*.json 
