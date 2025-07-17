@@ -1,0 +1,396 @@
+.container {
+  min-height: 100vh;
+  background-color: #f8fafc;
+}
+
+.content {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.header {
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 30px;
+  border: 2px solid #dc2626;
+}
+
+.headerContent h1 {
+  color: #1e293b;
+  margin: 0 0 5px 0;
+  font-size: 28px;
+  font-weight: 600;
+}
+
+.subtitle {
+  color: #64748b;
+  margin: 0 0 20px 0;
+  font-size: 16px;
+}
+
+.countdown {
+  background: #fef2f2;
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid #fecaca;
+}
+
+.countdownTimer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 5px;
+}
+
+.timerIcon {
+  font-size: 20px;
+}
+
+.timerText {
+  color: #374151;
+  font-weight: 500;
+}
+
+.timerValue {
+  color: #dc2626;
+  font-weight: 700;
+  font-size: 18px;
+  font-family: 'Courier New', monospace;
+}
+
+.timerValue.urgent {
+  color: #dc2626;
+  animation: pulse 1s infinite;
+}
+
+.countdownNote {
+  color: #6b7280;
+  font-size: 14px;
+  margin: 0;
+}
+
+.errorMessage {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.errorIcon {
+  font-size: 18px;
+}
+
+.paymentContainer {
+  display: grid;
+  gap: 20px;
+}
+
+.bookingSummary {
+  background: white;
+  border-radius: 12px;
+  padding: 25px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 2px solid #3b82f6;
+}
+
+.summaryHeader {
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #f1f5f9;
+}
+
+.summaryHeader h2 {
+  color: #1e293b;
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.summaryDetails {
+  display: grid;
+  gap: 12px;
+}
+
+.summaryRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.summaryRow:last-child {
+  border-bottom: none;
+}
+
+.summaryRow.totalRow {
+  border-top: 2px solid #3b82f6;
+  padding-top: 15px;
+  margin-top: 10px;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.label {
+  color: #64748b;
+  font-weight: 500;
+}
+
+.value {
+  color: #1e293b;
+  font-weight: 600;
+}
+
+.totalRow .label,
+.totalRow .value {
+  color: #3b82f6;
+  font-weight: 700;
+}
+
+.paymentMethods {
+  background: white;
+  border-radius: 12px;
+  padding: 25px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.methodsHeader {
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #f1f5f9;
+}
+
+.methodsHeader h2 {
+  color: #1e293b;
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.methodOptions {
+  display: grid;
+  gap: 15px;
+}
+
+.methodOption {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 15px;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.methodOption:hover {
+  border-color: #3b82f6;
+  background: #f8fafc;
+}
+
+.methodOption.selected {
+  border-color: #3b82f6;
+  background: #eff6ff;
+}
+
+.methodIcon {
+  font-size: 24px;
+  width: 40px;
+  text-align: center;
+}
+
+.methodInfo {
+  flex: 1;
+}
+
+.methodInfo h3 {
+  color: #1e293b;
+  margin: 0 0 5px 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.methodInfo p {
+  color: #64748b;
+  margin: 0;
+  font-size: 14px;
+}
+
+.methodRadio input {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.securityNotice {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  padding: 20px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.securityIcon {
+  font-size: 24px;
+  color: #16a34a;
+}
+
+.securityText h3 {
+  color: #15803d;
+  margin: 0 0 5px 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.securityText p {
+  color: #166534;
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.actionButtons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  margin-top: 30px;
+}
+
+.cancelButton {
+  background: #e2e8f0;
+  color: #475569;
+  border: none;
+  padding: 15px 30px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 16px;
+  transition: all 0.2s;
+  min-width: 150px;
+}
+
+.cancelButton:hover:not(:disabled) {
+  background: #cbd5e1;
+  transform: translateY(-1px);
+}
+
+.cancelButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.payButton {
+  background: #10b981;
+  color: white;
+  border: none;
+  padding: 15px 30px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 16px;
+  transition: all 0.2s;
+  min-width: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.payButton:hover:not(:disabled) {
+  background: #059669;
+  transform: translateY(-1px);
+}
+
+.payButton:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.buttonSpinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid transparent;
+  border-top: 2px solid currentColor;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.loadingSpinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e2e8f0;
+  border-top: 4px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+
+.accessDenied {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  text-align: center;
+  color: #dc2626;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .header {
+    text-align: center;
+  }
+
+  .countdownTimer {
+    justify-content: center;
+  }
+
+  .actionButtons {
+    flex-direction: column;
+  }
+
+  .cancelButton,
+  .payButton {
+    width: 100%;
+  }
+
+  .methodOption {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .methodRadio {
+    order: -1;
+  }
+}
+

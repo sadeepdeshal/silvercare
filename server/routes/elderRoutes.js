@@ -14,7 +14,11 @@ const {
   getElderAppointments,
   getUpcomingAppointmentsByFamily,
   getAppointmentCountByFamily,
-  getBlockedTimeSlots // Add this import
+  getBlockedTimeSlots ,// Add this import
+   createTemporaryBooking,
+  confirmPaymentAndCreateAppointment,
+  cancelTemporaryBooking,
+  cleanupExpiredBookings
 } = require('../controllers/elderController');
 
 const { 
@@ -81,5 +85,13 @@ router.put('/:elderId', updateElder);
 
 // Create new elder
 router.post('/', createElder);
+
+// Temporary booking routes - MUST BE BEFORE /:elderId route
+router.post('/:elderId/temporary-booking', createTemporaryBooking);
+router.post('/:elderId/confirm-payment', confirmPaymentAndCreateAppointment);
+router.delete('/temporary-booking/:tempBookingId', cancelTemporaryBooking);
+
+// Cleanup route (for maintenance)
+router.delete('/cleanup-expired-bookings', cleanupExpiredBookings);
 
 module.exports = router;

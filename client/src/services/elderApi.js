@@ -376,6 +376,83 @@ export const elderApi = {
     }
   },
 
+  // Add these new functions to the elderApi object:
+
+// Create temporary booking (blocks slot for 10 minutes)
+createTemporaryBooking: async (elderId, bookingData) => {
+  try {
+    console.log('API: Creating temporary booking for elder:', elderId, 'with data:', bookingData);
+    const response = await fetch(`${API_BASE}/${elderId}/temporary-booking`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(bookingData),
+    });
+    
+    const data = await response.json();
+    console.log('API: Create temporary booking response:', data);
+    
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to create temporary booking');
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('API: Error creating temporary booking:', error);
+    throw error;
+  }
+},
+
+// Confirm payment and create actual appointment
+confirmPaymentAndCreateAppointment: async (elderId, confirmationData) => {
+  try {
+    console.log('API: Confirming payment and creating appointment for elder:', elderId, 'with data:', confirmationData);
+    const response = await fetch(`${API_BASE}/${elderId}/confirm-payment`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(confirmationData),
+    });
+    
+    const data = await response.json();
+    console.log('API: Confirm payment response:', data);
+    
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to confirm payment');
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('API: Error confirming payment:', error);
+    throw error;
+  }
+},
+
+// Cancel temporary booking
+cancelTemporaryBooking: async (tempBookingId) => {
+  try {
+    console.log('API: Canceling temporary booking:', tempBookingId);
+    const response = await fetch(`${API_BASE}/temporary-booking/${tempBookingId}`, {
+      method: 'DELETE',
+    });
+    
+    const data = await response.json();
+    console.log('API: Cancel temporary booking response:', data);
+    
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to cancel temporary booking');
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('API: Error canceling temporary booking:', error);
+    throw error;
+  }
+},
+
+
   // Update elder photo
   updateElderPhoto: async (elderId, photoData) => {
     try {

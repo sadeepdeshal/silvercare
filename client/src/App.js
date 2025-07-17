@@ -23,6 +23,9 @@ import { DoctorRegStep2 } from './pages/doctor/signup-step2';
 import PhysicalAppointment from './pages/familemember/physical-appointment';
 import OnlineAppointment from './pages/familemember/online-appointment';
 import Appointments from './pages/familemember/appointments';
+import BookingSummary from './pages/familemember/booking-summary';
+import Payment from './pages/familemember/payment';
+import PaymentSuccess from './pages/familemember/payment-success';
 
 
 import DoctorDashboard from './pages/doctor/dashboard';
@@ -146,6 +149,26 @@ function App() {
               <ElderDoctors />
             </ProtectedRoute>
           } />
+
+          {/* NEW: Booking flow routes */}
+<Route path="/family-member/elder/:elderId/booking-summary/:doctorId" element={
+  <ProtectedRoute allowedRoles={['family_member']}>
+    <BookingSummary />
+  </ProtectedRoute>
+} />
+
+<Route path="/family-member/payment" element={
+  <ProtectedRoute allowedRoles={['family_member']}>
+    <Payment />
+  </ProtectedRoute>
+} />
+
+<Route path="/family-member/payment-success" element={
+  <ProtectedRoute allowedRoles={['family_member']}>
+    <PaymentSuccess />
+  </ProtectedRoute>
+} />
+
           
           <Route path="/doctor/dashboard" element={
             <ProtectedRoute allowedRoles={['doctor']}>

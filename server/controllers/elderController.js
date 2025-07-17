@@ -1908,6 +1908,402 @@ const getBlockedTimeSlots = async (req, res) => {
 };
 
 
+// Add these new functions to the elderController:
+
+// Create temporary booking (blocks slot for 10 minutes)
+const createTemporaryBooking = async (req, res) => {
+  const { elderId } = req.params;
+  
+  try {
+    const {
+      doctorId,
+      appointmentDate,
+      appointmentTime,
+      appointmentType,
+      patientName,
+      contactNumber,
+      symptoms,
+      notes,
+      emergencyContact,
+      preferredPlatform
+    } = req.body;
+
+    console.log('Creating temporary booking with data:', {
+      elderId,
+      doctorId,
+      appointmentDate,
+      appointmentTime,
+      appointmentType
+    });
+
+    // Validate required fields
+    if (!doctorId || !appointmentDate || !appointmentTime || !appointmentType) {
+      return res.status(400).json({
+        success: false,
+        error: 'Doctor, date, time, and appointment type are required'
+      });
+    }
+
+    // Get elder information to get family_id
+    const elderResult = await pool.query(
+      'SELECT family_id, name FROM elder WHERE elder_id = $1',
+      [elderId]
+    );
+
+    if (elderResult.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: 'Elder not found'
+      });
+    }
+
+    const familyId = elderResult.rows[0].family_id;
+
+    // Verify doctor exists and is approved
+    const doctorResult = await pool.query(
+      `SELECT d.doctor_id, u.name as doctor_name 
+       FROM doctor d 
+       INNER JOIN "User" u ON d.user_id = u.user_id 
+       WHERE d.doctor_id = $1 AND d.status = 'confirmed'`,
+      [doctorId]
+    );
+
+    if (doctorResult.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: 'Doctor not found or not approved'
+      });
+    }
+
+    // Combine date and time into a timestamp
+    const dateTimeString = `${appointmentDate} ${appointmentTime}:00`;
+    const appointmentDateTime = new Date(dateTimeString);
+
+    // Check if the appointment time is in the future
+    const now = new Date();
+    if (appointmentDateTime <= now) {
+      return res.status(400).json({
+        success: false,
+        error: 'Appointment date and time must be in the future'
+      });
+          }
+
+    // Check for conflicting appointments (same doctor, same time)
+    const conflictCheck = await pool.query(
+      `SELECT appointment_id FROM appointment 
+       WHERE doctor_id = $1 
+       AND date_time = $2 
+       AND status IN ('pending', 'confirmed')`,
+      [doctorId, appointmentDateTime]
+    );
+
+    if (conflictCheck.rows.length > 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'This time slot is already booked. Please select a different time.'
+      });
+    }
+
+    // Check for existing temporary bookings that haven't expired
+    const tempBookingCheck = await pool.query(
+      `SELECT temp_booking_id FROM temporary_booking 
+       WHERE doctor_id = $1 
+       AND date_time = $2 
+       AND expires_at > CURRENT_TIMESTAMP`,
+      [doctorId, appointmentDateTime]
+    );
+
+    if (tempBookingCheck.rows.length > 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'This time slot is temporarily reserved. Please select a different time.'
+      });
+    }
+
+    // Create temporary booking (expires in 10 minutes)
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes from now
+    
+    const tempBookingResult = await pool.query(
+      `INSERT INTO temporary_booking (
+        elder_id, 
+        family_id, 
+        doctor_id, 
+        date_time, 
+        appointment_type,
+        patient_name,
+        contact_number,
+        symptoms,
+        notes,
+        emergency_contact,
+        preferred_platform,
+        expires_at,
+        created_at
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, CURRENT_TIMESTAMP)
+      RETURNING 
+        temp_booking_id,
+        elder_id,
+        family_id,
+        doctor_id,
+        date_time,
+        appointment_type,
+        expires_at,
+        created_at`,
+      [
+        parseInt(elderId),
+        parseInt(familyId),
+        parseInt(doctorId),
+        appointmentDateTime,
+        appointmentType,
+        patientName || elderResult.rows[0].name,
+        contactNumber,
+        symptoms || 'Consultation requested',
+        notes,
+        emergencyContact,
+        preferredPlatform,
+        expiresAt
+      ]
+    );
+
+    const tempBooking = tempBookingResult.rows[0];
+    console.log('Temporary booking created:', tempBooking);
+
+    res.status(201).json({
+      success: true,
+      message: 'Temporary booking created successfully',
+      tempBooking: {
+        temp_booking_id: tempBooking.temp_booking_id,
+        elder_id: tempBooking.elder_id,
+        family_id: tempBooking.family_id,
+        doctor_id: tempBooking.doctor_id,
+        date_time: tempBooking.date_time,
+        appointment_type: tempBooking.appointment_type,
+        expires_at: tempBooking.expires_at,
+        created_at: tempBooking.created_at,
+        elder_name: elderResult.rows[0].name,
+        doctor_name: doctorResult.rows[0].doctor_name
+      }
+    });
+
+  } catch (err) {
+    console.error('Error creating temporary booking:', err);
+    res.status(500).json({
+      success: false,
+      error: 'Error creating temporary booking',
+      details: process.env.NODE_ENV === 'development' ? err.message : undefined
+    });
+  }
+};
+
+// Confirm payment and create actual appointment
+const confirmPaymentAndCreateAppointment = async (req, res) => {
+  const { elderId } = req.params;
+  
+  try {
+    const {
+      tempBookingId,
+      paymentMethod,
+      paymentAmount,
+      transactionId,
+      paymentStatus
+    } = req.body;
+
+    console.log('Confirming payment and creating appointment:', {
+      elderId,
+      tempBookingId,
+      paymentMethod,
+      paymentAmount,
+      transactionId,
+      paymentStatus
+    });
+
+    // Validate required fields
+    if (!tempBookingId || !paymentMethod || !paymentAmount || !transactionId) {
+      return res.status(400).json({
+        success: false,
+        error: 'All payment details are required'
+      });
+    }
+
+    // Get temporary booking details
+    const tempBookingResult = await pool.query(
+      `SELECT * FROM temporary_booking 
+       WHERE temp_booking_id = $1 
+       AND elder_id = $2 
+       AND expires_at > CURRENT_TIMESTAMP`,
+      [tempBookingId, elderId]
+    );
+
+    if (tempBookingResult.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: 'Temporary booking not found or expired'
+      });
+    }
+
+    const tempBooking = tempBookingResult.rows[0];
+
+    // Start transaction
+    const client = await pool.connect();
+    
+    try {
+      await client.query('BEGIN');
+
+      // Create the actual appointment
+      const appointmentResult = await client.query(
+        `INSERT INTO appointment (
+          elder_id, 
+          family_id, 
+          doctor_id, 
+          date_time, 
+          status, 
+          notes, 
+          appointment_type,
+          created_at,
+          updated_at
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        RETURNING 
+          appointment_id,
+          elder_id,
+          family_id,
+          doctor_id,
+          date_time,
+          status,
+          notes,
+          appointment_type,
+          created_at`,
+        [
+          tempBooking.elder_id,
+          tempBooking.family_id,
+          tempBooking.doctor_id,
+          tempBooking.date_time,
+          'confirmed', // Doctor needs to confirm
+          tempBooking.notes,
+          tempBooking.appointment_type
+        ]
+      );
+
+      const newAppointment = appointmentResult.rows[0];
+
+      // Create payment record
+      const paymentResult = await client.query(
+        `INSERT INTO payment (
+          appointment_id,
+          elder_id,
+          amount,
+          payment_method,
+          transaction_id,
+          payment_status,
+          payment_date,
+          created_at
+        ) VALUES ($1, $2, $3, $4, $5, $6, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        RETURNING payment_id, amount, payment_method, transaction_id, payment_status, payment_date`,
+        [
+          newAppointment.appointment_id,
+          elderId,
+          parseFloat(paymentAmount),
+          paymentMethod,
+          transactionId,
+          paymentStatus || 'completed'
+        ]
+      );
+
+      const payment = paymentResult.rows[0];
+
+      // Delete the temporary booking
+      await client.query(
+        'DELETE FROM temporary_booking WHERE temp_booking_id = $1',
+        [tempBookingId]
+      );
+
+      await client.query('COMMIT');
+
+      console.log('Appointment and payment created successfully:', {
+        appointment: newAppointment,
+        payment: payment
+      });
+
+      res.status(201).json({
+        success: true,
+        message: 'Payment confirmed and appointment created successfully',
+        appointment: newAppointment,
+        payment: payment
+      });
+
+    } catch (transactionErr) {
+      await client.query('ROLLBACK');
+      throw transactionErr;
+    } finally {
+      client.release();
+    }
+
+  } catch (err) {
+    console.error('Error confirming payment and creating appointment:', err);
+    res.status(500).json({
+      success: false,
+      error: 'Error processing payment confirmation',
+      details: process.env.NODE_ENV === 'development' ? err.message : undefined
+    });
+  }
+};
+
+// Cancel temporary booking
+const cancelTemporaryBooking = async (req, res) => {
+  const { tempBookingId } = req.params;
+  
+  try {
+    console.log('Canceling temporary booking:', tempBookingId);
+
+    const result = await pool.query(
+      'DELETE FROM temporary_booking WHERE temp_booking_id = $1 RETURNING temp_booking_id',
+      [tempBookingId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: 'Temporary booking not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'Temporary booking canceled successfully'
+    });
+
+  } catch (err) {
+    console.error('Error canceling temporary booking:', err);
+    res.status(500).json({
+      success: false,
+      error: 'Error canceling temporary booking'
+    });
+  }
+};
+
+// Clean up expired temporary bookings (can be run as a cron job)
+const cleanupExpiredBookings = async (req, res) => {
+  try {
+    const result = await pool.query(
+      'DELETE FROM temporary_booking WHERE expires_at < CURRENT_TIMESTAMP RETURNING temp_booking_id'
+    );
+
+    console.log(`Cleaned up ${result.rows.length} expired temporary bookings`);
+
+    res.json({
+      success: true,
+      message: `Cleaned up ${result.rows.length} expired temporary bookings`,
+      cleanedCount: result.rows.length
+    });
+
+  } catch (err) {
+    console.error('Error cleaning up expired bookings:', err);
+    res.status(500).json({
+      success: false,
+      error: 'Error cleaning up expired bookings'
+    });
+  }
+};
+
+
 
 
 
@@ -2007,7 +2403,11 @@ module.exports = {
   getElderAppointments ,
   getUpcomingAppointmentsByFamily,  // Add this
   getAppointmentCountByFamily,
-  getBlockedTimeSlots    
+  getBlockedTimeSlots,
+   createTemporaryBooking,
+  confirmPaymentAndCreateAppointment,
+  cancelTemporaryBooking,
+  cleanupExpiredBookings    
 };
 
 
