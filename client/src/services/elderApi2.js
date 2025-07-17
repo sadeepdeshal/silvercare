@@ -11,7 +11,7 @@ export const updateElderDetails = (elderId, elderData) => {
   return axios.put(`${API_BASE}/${elderId}`, elderData);
 };
 
-// New function to update elder profile with form data (for file uploads)
+// Function to update elder profile with form data (for file uploads)
 export const updateElderProfile = (elderId, formData) => {
   return axios.put(`${API_BASE}/${elderId}/profile`, formData, {
     headers: {

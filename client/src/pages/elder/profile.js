@@ -24,9 +24,7 @@ const ElderProfile = () => {
     address: '',
     nic: '',
     medical_conditions: '',
-    district: '',
-    email: '',
-    user_phone: ''
+    district: ''
   });
   
   const [profilePhoto, setProfilePhoto] = useState(null);
@@ -60,9 +58,7 @@ const ElderProfile = () => {
           address: data.address || '',
           nic: data.nic || '',
           medical_conditions: data.medical_conditions || '',
-          district: data.district || '',
-          email: data.email || '',
-          user_phone: data.user_details?.user_phone || ''
+          district: data.district || ''
         });
       } catch (error) {
         console.error("Error fetching elder details:", error);
@@ -166,9 +162,7 @@ const ElderProfile = () => {
       address: data.address || '',
       nic: data.nic || '',
       medical_conditions: data.medical_conditions || '',
-      district: data.district || '',
-      email: data.email || '',
-      user_phone: data.user_details?.user_phone || ''
+      district: data.district || ''
     });
   };
 
@@ -398,9 +392,9 @@ const ElderProfile = () => {
                     required
                   >
                     <option value="">Select Gender</option>
-                    <option value="male">Male</option>
-                    <option value="female">Female</option>
-                    <option value="other">Other</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
                   </select>
                 ) : (
                   <span>{elderDetails?.gender}</span>
@@ -487,18 +481,13 @@ const ElderProfile = () => {
             <div className={styles.infoGrid}>
               <div className={styles.infoItem}>
                 <label>Email Address</label>
-                {isEditing ? (
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    className={styles.editInput}
-                    required
-                  />
-                ) : (
-                  <span>{elderDetails?.email}</span>
-                )}
+                <input
+                  type="email"
+                  value={elderDetails?.email || ''}
+                  className={`${styles.editInput} ${styles.disabledInput}`}
+                  disabled
+                  readOnly
+                />
               </div>
               
               <div className={styles.infoItem}>
@@ -515,22 +504,6 @@ const ElderProfile = () => {
                   />
                 ) : (
                   <span>{elderDetails?.contact}</span>
-                )}
-              </div>
-
-              <div className={styles.infoItem}>
-                <label>Alternative Phone</label>
-                {isEditing ? (
-                  <input
-                    type="tel"
-                    name="user_phone"
-                    value={formData.user_phone}
-                    onChange={handleInputChange}
-                    className={styles.editInput}
-                    placeholder="e.g., 0771234567"
-                  />
-                ) : (
-                  <span>{elderDetails?.user_details?.user_phone || 'Not provided'}</span>
                 )}
               </div>
             </div>
@@ -648,5 +621,3 @@ const ElderProfile = () => {
 };
 
 export default ElderProfile;
-
-

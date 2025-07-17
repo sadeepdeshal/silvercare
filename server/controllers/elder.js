@@ -1,41 +1,40 @@
 const pool = require("../db");
-const multer = require("multer");
-const path = require("path");
-const fs = require("fs");
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
 
-// Configure multer for profile photo uploads
+// Configure multer for file uploads
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    const uploadPath = "uploads/profiles/";
+    const uploadPath = 'uploads/profiles/';
+    // Create directory if it doesn't exist
     if (!fs.existsSync(uploadPath)) {
       fs.mkdirSync(uploadPath, { recursive: true });
     }
     cb(null, uploadPath);
   },
   filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, "elder-" + uniqueSuffix + path.extname(file.originalname));
-  },
+    // Generate unique filename
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, 'profile-' + uniqueSuffix + path.extname(file.originalname));
+  }
 });
+
+const fileFilter = (req, file, cb) => {
+  // Check if file is an image
+  if (file.mimetype.startsWith('image/')) {
+    cb(null, true);
+  } else {
+    cb(new Error('Only image files are allowed!'), false);
+  }
+};
 
 const upload = multer({
   storage: storage,
+  fileFilter: fileFilter,
   limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB limit
-  },
-  fileFilter: function (req, file, cb) {
-    const allowedTypes = /jpeg|jpg|png|gif/;
-    const extname = allowedTypes.test(
-      path.extname(file.originalname).toLowerCase()
-    );
-    const mimetype = allowedTypes.test(file.mimetype);
-
-    if (mimetype && extname) {
-      return cb(null, true);
-    } else {
-      cb(new Error("Only image files are allowed"));
-    }
-  },
+    fileSize: 5 * 1024 * 1024 // 5MB limit
+  }
 });
 
 // Fetch elder details based on user email
@@ -138,7 +137,7 @@ const getElderDetails = async (req, res) => {
   }
 };
 
-// Update elder profile
+// Update elder profile with file upload support
 const updateElderProfile = async (req, res) => {
   const { elderId } = req.params;
   const {
@@ -149,48 +148,71 @@ const updateElderProfile = async (req, res) => {
     address,
     nic,
     medical_conditions,
-    district,
-    email,
-    user_phone,
+    district
   } = req.body;
 
   console.log("Updating elder profile for ID:", elderId);
   console.log("Request body:", req.body);
+  console.log("Uploaded file:", req.file);
 
   try {
     // Start transaction
-    await pool.query("BEGIN");
+    await pool.query('BEGIN');
 
-    // Check if elder exists
-    const elderCheck = await pool.query(
-      "SELECT * FROM elder WHERE elder_id = $1",
+    // Get current elder details to find user_id and current photo
+    const currentElderResult = await pool.query(
+      'SELECT * FROM elder WHERE elder_id = $1',
       [elderId]
     );
 
-    if (elderCheck.rows.length === 0) {
-      await pool.query("ROLLBACK");
+    if (currentElderResult.rows.length === 0) {
+      await pool.query('ROLLBACK');
       return res.status(404).json({
         success: false,
-        error: "Elder not found",
+        error: 'Elder not found'
       });
     }
 
-    const currentElder = elderCheck.rows[0];
+    const currentElder = currentElderResult.rows[0];
+    
+    // Get user_id from User table using elder's email
+    const userResult = await pool.query(
+      'SELECT user_id FROM "User" WHERE LOWER(email) = LOWER($1)',
+      [currentElder.email]
+    );
 
-    // Handle profile photo upload
-    let profilePhotoPath = currentElder.profile_photo;
+    if (userResult.rows.length === 0) {
+      await pool.query('ROLLBACK');
+      return res.status(404).json({
+        success: false,
+        error: 'Associated user not found'
+      });
+    }
+
+    const userId = userResult.rows[0].user_id;
+
+    // Handle profile photo
+    let profilePhotoName = currentElder.profile_photo;
     if (req.file) {
-      profilePhotoPath = req.file.filename;
-
-      // Delete old profile photo if it exists
+      // Delete old photo if it exists
       if (currentElder.profile_photo) {
-        const oldPhotoPath = path.join(
-          "uploads/profiles/",
-          currentElder.profile_photo
-        );
+        const oldPhotoPath = path.join('uploads/profiles/', currentElder.profile_photo);
         if (fs.existsSync(oldPhotoPath)) {
           fs.unlinkSync(oldPhotoPath);
         }
+      }
+      profilePhotoName = req.file.filename;
+    }
+
+    // Calculate age from date of birth
+    let calculatedAge = null;
+    if (dob) {
+      const birthDate = new Date(dob);
+      const today = new Date();
+      calculatedAge = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+        calculatedAge--;
       }
     }
 
@@ -206,64 +228,73 @@ const updateElderProfile = async (req, res) => {
         nic = COALESCE($6, nic),
         medical_conditions = COALESCE($7, medical_conditions),
         district = COALESCE($8, district),
-        email = COALESCE($9, email),
-        profile_photo = COALESCE($10, profile_photo),
-        age = CASE 
-          WHEN $2 IS NOT NULL THEN EXTRACT(YEAR FROM AGE($2::date))
-          ELSE age
-        END
+        profile_photo = COALESCE($9, profile_photo),
+        age = COALESCE($10, age)
       WHERE elder_id = $11
       RETURNING *
     `;
 
-    const elderResult = await pool.query(updateElderQuery, [
-      name,
-      dob,
-      gender,
-      contact,
-      address,
-      nic,
-      medical_conditions,
-      district,
-      email,
-      profilePhotoPath,
-      elderId,
+    const elderUpdateResult = await pool.query(updateElderQuery, [
+      name || null,
+      dob || null,
+      gender || null,
+      contact || null,
+      address || null,
+      nic || null,
+      medical_conditions || null,
+      district || null,
+      profilePhotoName,
+      calculatedAge,
+      elderId
     ]);
 
-    // Update User table if email or phone changed
-    if (email || user_phone) {
-      const updateUserQuery = `
-        UPDATE "User" 
-        SET 
-          email = COALESCE($1, email),
-          phone = COALESCE($2, phone)
-        WHERE email = $3
-        RETURNING *
-      `;
+    // Update User table with same name and phone (contact)
+    const updateUserQuery = `
+      UPDATE "User" 
+      SET 
+        name = COALESCE($1, name),
+        phone = COALESCE($2, phone)
+      WHERE user_id = $3
+      RETURNING *
+    `;
 
-      await pool.query(updateUserQuery, [
-        email,
-        user_phone,
-        currentElder.email,
-      ]);
-    }
+    const userUpdateResult = await pool.query(updateUserQuery, [
+      name || null,
+      contact || null,
+      userId
+    ]);
 
     // Commit transaction
-    await pool.query("COMMIT");
+    await pool.query('COMMIT');
+
+    console.log("Elder profile updated successfully");
+    console.log("Updated elder:", elderUpdateResult.rows[0]);
+    console.log("Updated user:", userUpdateResult.rows[0]);
 
     res.json({
       success: true,
-      message: "Profile updated successfully",
-      elder: elderResult.rows[0],
+      message: 'Profile updated successfully',
+      elder: elderUpdateResult.rows[0],
+      user: userUpdateResult.rows[0]
     });
+
   } catch (err) {
     // Rollback transaction on error
-    await pool.query("ROLLBACK");
-
+    await pool.query('ROLLBACK');
+    
     console.error("Error updating elder profile:", err);
+    
+    // Delete uploaded file if there was an error
+    if (req.file) {
+      const filePath = req.file.path;
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
+    }
+    
     res.status(500).json({
       success: false,
-      error: "Server error while updating profile",
+      error: "Server error while updating profile"
     });
   }
 };
@@ -433,9 +464,9 @@ const getUpcomingAppointments = async (req, res) => {
       FROM appointment a
       JOIN doctor d ON a.doctor_id = d.doctor_id
       JOIN "User" u ON d.user_id = u.user_id
-      WHERE a.elder_id = $1 
-      AND a.date_time > NOW()
-      AND a.status IN ('approved')
+      WHERE a.elder_id = $1
+            AND a.date_time > NOW()
+      AND a.status IN ('approved', 'confirmed')
       ORDER BY a.date_time ASC`,
       [elderId]
     );
@@ -534,7 +565,7 @@ const getAllAppointments = async (req, res) => {
         a.status,
         a.notes,
         a.created_at,
-        d.name as doctor_name,
+        u.name as doctor_name,
         d.specialization,
         d.license_number,
         d.current_institution,
@@ -578,7 +609,7 @@ const getAppointmentById = async (req, res) => {
         a.status,
         a.notes,
         a.created_at,
-        d.name as doctor_name,
+        u.name as doctor_name,
         d.specialization,
         d.license_number,
         d.current_institution,

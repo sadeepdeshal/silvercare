@@ -14,7 +14,7 @@ const {
   getElderAppointments,
   getUpcomingAppointmentsByFamily,
   getAppointmentCountByFamily,
-  getBlockedTimeSlots // Add this import
+  getBlockedTimeSlots
 } = require('../controllers/elderController');
 
 const { 
@@ -74,7 +74,6 @@ router.get('/:elderId/appointments', getElderAppointments);
 router.get('/:elderId/appointments/upcoming', getUpcomingAppointments);
 router.get('/:elderId/appointments/past', getPastAppointments);
 router.get('/:elderId/appointments/:appointmentId', getAppointmentById);
-router.get('/:elderId/appointments', getAllAppointments);
 router.put('/:elderId/appointments/:appointmentId/cancel', cancelAppointment);
 router.put('/:elderId/appointments/:appointmentId/reschedule', rescheduleAppointment);
 
