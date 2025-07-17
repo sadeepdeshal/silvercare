@@ -401,7 +401,8 @@ const getElderAppointments = async (req, res) => {
         a.doctor_id,
         a.date_time,
         a.status,
-        a.notes,
+        a.appointment_type,
+        a.created_at,
         d.specialization,
         d.license_number,
         d.alternative_number,
@@ -429,9 +430,10 @@ const getElderAppointments = async (req, res) => {
   }
 };
 
-// Get upcoming appointments for an elder
+// Get upcoming appointments for an elder (limited to 2 for dashboard)
 const getUpcomingAppointments = async (req, res) => {
   const { elderId } = req.params;
+  const { limit } = req.query; // Add limit parameter for dashboard
   console.log("Fetching upcoming appointments for elder ID:", elderId);
 
   try {
@@ -447,13 +449,12 @@ const getUpcomingAppointments = async (req, res) => {
       });
     }
 
-    // Get upcoming appointments
-    const result = await pool.query(
-      `SELECT 
+    // Get upcoming appointments with optional limit
+    let query = `SELECT 
         a.appointment_id,
         a.date_time,
         a.status,
-        a.notes,
+        a.appointment_type,
         a.created_at,
         u.name as doctor_name,
         d.specialization,
@@ -467,9 +468,16 @@ const getUpcomingAppointments = async (req, res) => {
       WHERE a.elder_id = $1
             AND a.date_time > NOW()
       AND a.status IN ('approved', 'confirmed')
-      ORDER BY a.date_time ASC`,
-      [elderId]
-    );
+      ORDER BY a.date_time ASC`;
+    
+    const queryParams = [elderId];
+    
+    if (limit) {
+      query += ` LIMIT $2`;
+      queryParams.push(parseInt(limit));
+    }
+
+    const result = await pool.query(query, queryParams);
 
     res.json({
       success: true,
@@ -485,9 +493,10 @@ const getUpcomingAppointments = async (req, res) => {
   }
 };
 
-// Get past appointments for an elder
+// Get past appointments for an elder (limited to 2 for dashboard)
 const getPastAppointments = async (req, res) => {
   const { elderId } = req.params;
+  const { limit } = req.query; // Add limit parameter for dashboard
   console.log("Fetching past appointments for elder ID:", elderId);
 
   try {
@@ -503,13 +512,12 @@ const getPastAppointments = async (req, res) => {
       });
     }
 
-    // Get past appointments
-    const result = await pool.query(
-      `SELECT 
+    // Get past appointments with optional limit
+    let query = `SELECT 
         a.appointment_id,
         a.date_time,
         a.status,
-        a.notes,
+        a.appointment_type,
         a.created_at,
         u.name as doctor_name,
         d.specialization,
@@ -521,10 +529,17 @@ const getPastAppointments = async (req, res) => {
       JOIN doctor d ON a.doctor_id = d.doctor_id
       JOIN "User" u ON d.user_id = u.user_id
       WHERE a.elder_id = $1 
-      AND (a.date_time < NOW() OR a.status IN ('completed', 'cancelled'))
-      ORDER BY a.date_time DESC`,
-      [elderId]
-    );
+      AND (a.date_time < NOW() )
+      ORDER BY a.date_time DESC`;
+    
+    const queryParams = [elderId];
+    
+    if (limit) {
+      query += ` LIMIT $2`;
+      queryParams.push(parseInt(limit));
+    }
+
+    const result = await pool.query(query, queryParams);
 
     res.json({
       success: true,
@@ -563,7 +578,7 @@ const getAllAppointments = async (req, res) => {
         a.appointment_id,
         a.date_time,
         a.status,
-        a.notes,
+        a.appointment_type,
         a.created_at,
         u.name as doctor_name,
         d.specialization,
@@ -607,7 +622,7 @@ const getAppointmentById = async (req, res) => {
         a.doctor_id,
         a.date_time,
         a.status,
-        a.notes,
+        a.appointment_type,
         a.created_at,
         u.name as doctor_name,
         d.specialization,
@@ -668,11 +683,10 @@ const cancelAppointment = async (req, res) => {
     const result = await pool.query(
       `UPDATE appointment 
        SET status = 'cancelled', 
-           notes = COALESCE(notes || ' | Cancelled: ' || $3, 'Cancelled: ' || $3),
            updated_at = CURRENT_TIMESTAMP
        WHERE appointment_id = $1 AND elder_id = $2
        RETURNING *`,
-      [appointmentId, elderId, reason || "Cancelled by elder"]
+      [appointmentId, elderId]
     );
 
     res.json({
@@ -689,57 +703,64 @@ const cancelAppointment = async (req, res) => {
   }
 };
 
-// Reschedule appointment
-const rescheduleAppointment = async (req, res) => {
+// Join appointment (for online appointments)
+const joinAppointment = async (req, res) => {
   const { elderId, appointmentId } = req.params;
-  const { newDateTime, reason } = req.body;
 
   try {
-    // Validate new date time
-    if (!newDateTime) {
-      return res.status(400).json({
-        success: false,
-        error: "New date and time is required",
-      });
-    }
-
-    // Check if appointment exists and belongs to elder
+    // Check if appointment exists, belongs to elder, and is online
     const appointmentCheck = await pool.query(
-      "SELECT * FROM appointment WHERE appointment_id = $1 AND elder_id = $2",
+      "SELECT * FROM appointment WHERE appointment_id = $1 AND elder_id = $2 AND appointment_type = 'online'",
       [appointmentId, elderId]
     );
 
     if (appointmentCheck.rows.length === 0) {
       return res.status(404).json({
         success: false,
-        error: "Appointment not found",
+        error: "Online appointment not found",
       });
     }
 
-    // Update appointment with new date time
-    const result = await pool.query(
-      `UPDATE appointment 
-       SET date_time = $3,
-           notes = COALESCE(notes || ' | Rescheduled: ' || $4, 'Rescheduled: ' || $4),
-           updated_at = CURRENT_TIMESTAMP
-       WHERE appointment_id = $1 AND elder_id = $2
-       RETURNING *`,
-      [appointmentId, elderId, newDateTime, reason || "Rescheduled by elder"]
-    );
+    const appointment = appointmentCheck.rows[0];
+
+    // Check if appointment is today and within 15 minutes of start time
+    const appointmentTime = new Date(appointment.date_time);
+    const now = new Date();
+    const timeDiff = appointmentTime.getTime() - now.getTime();
+    const minutesDiff = timeDiff / (1000 * 60);
+
+    if (minutesDiff > 15) {
+      return res.status(400).json({
+        success: false,
+        error: "You can only join the appointment 15 minutes before the scheduled time",
+      });
+    }
+
+    if (minutesDiff < -30) {
+      return res.status(400).json({
+        success: false,
+        error: "This appointment has ended",
+      });
+    }
+
+    // Generate meeting link or return existing one
+    const meetingLink = `https://meet.silvercare.com/appointment/${appointmentId}`;
 
     res.json({
       success: true,
-      message: "Appointment rescheduled successfully",
-      appointment: result.rows[0],
+      message: "Joining appointment",
+      meetingLink: meetingLink,
+      appointment: appointment,
     });
   } catch (err) {
-    console.error("Error rescheduling appointment:", err);
+    console.error("Error joining appointment:", err);
     res.status(500).json({
       success: false,
-      error: "Error rescheduling appointment",
+      error: "Error joining appointment",
     });
   }
 };
+
 
 module.exports = {
   getElderDetails,
@@ -752,5 +773,6 @@ module.exports = {
   getAllAppointments,
   getAppointmentById,
   cancelAppointment,
-  rescheduleAppointment,
+  joinAppointment, // Replace rescheduleAppointment with joinAppointment
 };
+

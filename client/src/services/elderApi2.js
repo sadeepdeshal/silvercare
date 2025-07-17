@@ -26,12 +26,12 @@ export const getElderDashboardStats = (elderId) => {
 };
 
 // Appointment-related functions
-export const getUpcomingAppointments = (elderId) => {
-  return axios.get(`${API_BASE}/${elderId}/appointments/upcoming`);
+export const getUpcomingAppointments = (elderId, config = {}) => {
+  return axios.get(`${API_BASE}/${elderId}/appointments/upcoming`, config);
 };
 
-export const getPastAppointments = (elderId) => {
-  return axios.get(`${API_BASE}/${elderId}/appointments/past`);
+export const getPastAppointments = (elderId, config = {}) => {
+  return axios.get(`${API_BASE}/${elderId}/appointments/past`, config);
 };
 
 export const getAllAppointments = (elderId) => {
@@ -46,8 +46,6 @@ export const cancelAppointment = (elderId, appointmentId) => {
   return axios.put(`${API_BASE}/${elderId}/appointments/${appointmentId}/cancel`);
 };
 
-export const rescheduleAppointment = (elderId, appointmentId, newDateTime) => {
-  return axios.put(`${API_BASE}/${elderId}/appointments/${appointmentId}/reschedule`, {
-    newDateTime
-  });
+export const joinAppointment = (elderId, appointmentId) => {
+  return axios.post(`${API_BASE}/${elderId}/appointments/${appointmentId}/join`);
 };

@@ -27,7 +27,7 @@ const {
   getAllAppointments,
   getAppointmentById,
   cancelAppointment,
-  rescheduleAppointment
+  joinAppointment // Replace rescheduleAppointment with joinAppointment
 } = require('../controllers/elder');
 
 // Get all elders for a specific family member
@@ -75,7 +75,7 @@ router.get('/:elderId/appointments/upcoming', getUpcomingAppointments);
 router.get('/:elderId/appointments/past', getPastAppointments);
 router.get('/:elderId/appointments/:appointmentId', getAppointmentById);
 router.put('/:elderId/appointments/:appointmentId/cancel', cancelAppointment);
-router.put('/:elderId/appointments/:appointmentId/reschedule', rescheduleAppointment);
+router.post('/:elderId/appointments/:appointmentId/join', joinAppointment); // Replace reschedule with join
 
 // Get specific elder by ID
 router.get('/:elderId', getElderById);
@@ -87,3 +87,4 @@ router.put('/:elderId', updateElder);
 router.post('/', createElder);
 
 module.exports = router;
+
