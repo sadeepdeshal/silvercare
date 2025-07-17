@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const { 
   getAllCaregivers,
+  getActiveCaregiverCount,
+  getCaregiverStats,
   getCaregiverById,
   createCareRequest,
   getCareRequestsByFamily,
@@ -11,6 +13,12 @@ const {
 
 // Get all caregivers
 router.get('/', getAllCaregivers);
+
+// Get active caregiver count
+router.get('/count/active', getActiveCaregiverCount);
+
+// Get caregiver statistics
+router.get('/stats', getCaregiverStats);
 
 // Search caregivers
 router.get('/search', searchCaregivers);

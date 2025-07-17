@@ -1,7 +1,7 @@
 .sidebar {
   width: 250px;
   height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #4C4DDC;
   color: white;
   position: fixed;
   left: 0;
@@ -50,7 +50,7 @@
   background: rgba(255, 255, 255, 0.1);
   border: none;
   color: white;
-  padding: 8px;
+  padding: 4px 8px 8px 8px;
   border-radius: 4px;
   cursor: pointer;
   font-size: 12px;
@@ -62,7 +62,7 @@
 }
 
 .userInfo {
-  padding: 20px 15px;
+  padding: 0px 15px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   display: flex;
   align-items: center;
@@ -87,7 +87,7 @@
 
 .userName {
   font-weight: 600;
-  font-size: 14px;
+  font-size: 20px;
 }
 
 .userRole {
@@ -97,7 +97,7 @@
 
 .navigation {
   flex: 1;
-  padding: 20px 0;
+  padding: 20px 15px; /* Added horizontal padding */
 }
 
 .menuList {
@@ -107,35 +107,37 @@
 }
 
 .menuItem {
-  margin-bottom: 2px;
+  margin-bottom: 15px; /* Increased spacing between menu items */
 }
 
 .menuLink {
   display: flex;
   align-items: center;
-  padding: 12px 20px;
-  color: rgba(255, 255, 255, 0.9);
+  padding: 6px 10px;
+  background: white; /* White background */
+  color: #333; /* Black text color */
   text-decoration: none;
   cursor: pointer;
   transition: all 0.3s ease;
   position: relative;
+  border-radius: 8px; /* Rounded corners */
+  border: 1px solid rgba(0, 0, 0, 0.05); /* Light border */
 }
 
 .menuLink:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
+  background: #f8f9fa; /* Light gray on hover */
+  color: #333;
+  transform: translateY(-1px); /* Slight lift effect */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); /* Enhanced shadow on hover */
 }
 
-.menuLink.active {
-  background: rgba(255, 255, 255, 0.2);
-  color: white;
-  border-right: 3px solid #4CAF50;
-}
+
 
 .menuIcon {
   font-size: 18px;
   min-width: 24px;
   margin-right: 12px;
+  color: inherit; /* Inherit color from parent */
 }
 
 .menuLabel {
@@ -143,6 +145,7 @@
   font-size: 14px;
   font-weight: 500;
   white-space: nowrap;
+  color: inherit; /* Inherit color from parent */
 }
 
 .badge {
@@ -160,6 +163,7 @@
   font-size: 10px;
   margin-left: 8px;
   transition: transform 0.3s ease;
+  color: inherit; /* Inherit color from parent */
 }
 
 .submenuArrow.expanded {
@@ -169,8 +173,8 @@
 .submenu {
   list-style: none;
   padding: 0;
-  margin: 0;
-  background: rgba(0, 0, 0, 0.1);
+  margin: 8px 0 0 0; /* Top margin for spacing */
+  background: transparent;
   animation: slideDown 0.3s ease;
 }
 
@@ -186,33 +190,38 @@
 }
 
 .submenuItem {
-  border-left: 2px solid rgba(255, 255, 255, 0.1);
-  margin-left: 20px;
+  margin-bottom: 1px; /* Spacing between submenu items */
 }
 
 .submenuLink {
   display: flex;
   align-items: center;
-  padding: 10px 20px 10px 30px;
-  color: rgba(255, 255, 255, 0.8);
+  padding: 10px 16px 10px 24px;
+  background: rgba(255, 255, 255, 0.9); /* Semi-transparent white */
+  color: #555; /* Darker gray for submenu text */
   cursor: pointer;
   transition: all 0.3s ease;
   font-size: 13px;
+  border-radius: 6px; /* Rounded corners */
+  margin-left: 16px; /* Indent submenu items */
+  border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .submenuLink:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
+  background: #f0f0f0; /* Light gray on hover */
+  color: #333;
+  transform: translateX(4px); /* Slight slide effect */
 }
 
 .submenuLink.active {
-  background: rgba(255, 255, 255, 0.15);
+  background: #4CAF50; /* Green background for active submenu */
   color: white;
-  border-left: 2px solid #4CAF50;
+  border-left: 3px solid #2E7D32;
 }
 
 .submenuLabel {
   white-space: nowrap;
+  color: inherit;
 }
 
 .sidebarFooter {
@@ -334,6 +343,7 @@
 .sidebar.collapsed .menuLink {
   position: relative;
   justify-content: center;
+  background: rgba(255, 255, 255, 0.9); /* Maintain white background when collapsed */
 }
 
 .sidebar.collapsed .menuLink::after {
@@ -367,8 +377,9 @@
   top: 0;
   bottom: 0;
   width: 4px;
-  background: #4CAF50;
+  
   animation: slideIn 0.3s ease;
+  border-radius: 0 4px 4px 0;
 }
 
 @keyframes slideIn {
@@ -414,11 +425,11 @@
 }
 
 /* Focus states for accessibility */
-.menuLink:focus,
+
 .submenuLink:focus,
 .toggleButton:focus,
 .logoutButton:focus {
-  outline: 2px solid rgba(255, 255, 255, 0.5);
+  outline: 2px solid #4CAF50;
   outline-offset: 2px;
 }
 

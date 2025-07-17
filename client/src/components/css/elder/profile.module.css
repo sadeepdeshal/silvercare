@@ -1,0 +1,1290 @@
+.profileContainer {
+  min-height: 100vh;
+  background: #f8fafc;
+}
+
+.profileContent {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+/* Header Section */
+.profileHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+  padding: 24px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
+}
+
+.backBtn {
+  background: #f1f5f9;
+  color: #475569;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.backBtn:hover {
+  background: #e2e8f0;
+  color: #334155;
+}
+
+.headerContent {
+  text-align: center;
+  flex: 1;
+}
+
+.headerContent h1 {
+  color: #1e293b;
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+}
+
+.headerContent p {
+  color: #64748b;
+  font-size: 1rem;
+  margin: 0;
+}
+
+.headerActions {
+  display: flex;
+  gap: 12px;
+}
+
+.editBtn {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.editBtn:hover {
+  background: #2563eb;
+}
+
+.logoutBtn {
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.logoutBtn:hover {
+  background: #dc2626;
+}
+
+/* Profile Card */
+.profileCard {
+  background: white;
+  border-radius: 12px;
+  padding: 32px;
+  margin-bottom: 32px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+
+.profileImageSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.imageContainer {
+  position: relative;
+}
+
+.profileImage {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid #e2e8f0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.profilePlaceholder {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 2.5rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+
+  .profileContainer {
+  min-height: 100vh;
+  background: #f8fafc;
+}
+
+.profileContent {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+/* Header Section */
+.profileHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+  padding: 24px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
+}
+
+.backBtn {
+  background: #f1f5f9;
+  color: #475569;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.backBtn:hover {
+  background: #e2e8f0;
+  color: #334155;
+}
+
+.headerContent {
+  text-align: center;
+  flex: 1;
+}
+
+.headerContent h1 {
+  color: #1e293b;
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+}
+
+.headerContent p {
+  color: #64748b;
+  font-size: 1rem;
+  margin: 0;
+}
+
+.headerActions {
+  display: flex;
+  gap: 12px;
+}
+
+.editBtn {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.editBtn:hover {
+  background: #2563eb;
+}
+
+.logoutBtn {
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.logoutBtn:hover {
+  background: #dc2626;
+}
+
+/* Profile Card */
+.profileCard {
+  background: white;
+  border-radius: 12px;
+  padding: 32px;
+  margin-bottom: 32px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+
+.profileImageSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.imageContainer {
+  position: relative;
+}
+
+.profileImage {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid #e2e8f0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.profilePlaceholder {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 2.5rem;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.statusIndicator {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  width: 24px;
+  height: 24px;
+  background: #10b981;
+  border-radius: 50%;
+  border: 4px solid white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.changePhotoBtn {
+  background: #f1f5f9;
+  color: #475569;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.changePhotoBtn:hover {
+  background: #e2e8f0;
+}
+
+.profileInfo {
+  flex: 1;
+}
+
+.profileName {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.profileName h2 {
+  color: #1e293b;
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.roleTag {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.profileMeta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 20px;
+}
+
+.metaItem {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.metaLabel {
+  color: #64748b;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.metaValue {
+  color: #1e293b;
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+/* Information Sections */
+.infoSections {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.infoSection {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.sectionHeader h3 {
+  color: #1e293b;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sectionEditBtn {
+  background: #f1f5f9;
+  color: #475569;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.sectionEditBtn:hover {
+  background: #e2e8f0;
+}
+
+.infoGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.infoItem {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.infoItem label {
+  color: #64748b;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.infoItem span {
+  color: #1e293b;
+  font-size: 1rem;
+  font-weight: 500;
+  padding: 12px;
+  background: #f8fafc;
+  border-radius: 6px;
+  border-left: 3px solid #3b82f6;
+  min-height: 20px;
+}
+
+/* Family Card */
+.familyCard {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.familyInfo {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  flex: 1;
+}
+
+.familyDetail {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.familyDetail label {
+  color: #64748b;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.familyDetail span {
+  color: #1e293b;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.familyActions {
+  display: flex;
+  gap: 12px;
+  margin-left: 20px;
+}
+
+.contactBtn {
+  background: #10b981;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.contactBtn:hover {
+  background: #059669;
+}
+
+.messageBtn {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.messageBtn:hover {
+  background: #2563eb;
+}
+
+/* Settings */
+.settingsGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.settingItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.settingInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.settingLabel {
+  color: #1e293b;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.settingDesc {
+  color: #64748b;
+  font-size: 0.875rem;
+}
+
+.toggleBtn {
+  background: #10b981;
+  color: white;
+  border: none;
+  padding: 6px 16px;
+  border-radius: 16px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.toggleBtn:hover {
+  background: #059669;
+}
+
+/* Action Buttons */
+.actionButtons {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 32px;
+  padding: 24px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
+}
+
+.saveBtn {
+  background: #10b981;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.saveBtn:hover {
+  background: #059669;
+}
+
+.cancelBtn {
+  background: #64748b;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.cancelBtn:hover {
+  background: #475569;
+}
+
+/* Loading States */
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  color: #64748b;
+}
+
+.loadingSpinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #e2e8f0;
+  border-top: 4px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+
+.loadingContainer p {
+  font-size: 1.125rem;
+  font-weight: 500;
+}
+
+/* Error States */
+.errorContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  color: #64748b;
+  text-align: center;
+}
+
+.errorIcon {
+  font-size: 4rem;
+  margin-bottom: 20px;
+  color: #ef4444;
+}
+
+.errorContainer h2 {
+  font-size: 1.75rem;
+  margin-bottom: 16px;
+  color: #1e293b;
+}
+
+.errorContainer p {
+  font-size: 1.125rem;
+  margin-bottom: 32px;
+}
+
+.retryBtn {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.retryBtn:hover {
+  background: #2563eb;
+}
+
+/* Animations */
+@keyframes spin {
+  0% { 
+    transform: rotate(0deg); 
+  }
+  100% { 
+    transform: rotate(360deg); 
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .profileCard {
+    flex-direction: column;
+    text-align: center;
+    gap: 24px;
+  }
+
+  .profileMeta {
+    justify-content: center;
+  }
+  
+  .familyCard {
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .familyActions {
+    margin-left: 0;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .profileContent {
+    padding: 16px;
+  }
+  
+  .profileHeader {
+    flex-direction: column;
+    gap: 20px;
+    text-align: center;
+  }
+  
+  .headerActions {
+    justify-content: center;
+  }
+  
+  .profileCard {
+    padding: 24px;
+  }
+  
+  .profileImage, .profilePlaceholder {
+    width: 100px;
+    height: 100px;
+  }
+  
+  .profilePlaceholder {
+    font-size: 2rem;
+  }
+  
+  .profileName {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .profileName h2 {
+    font-size: 1.75rem;
+  }
+  
+  .infoGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .familyInfo {
+    grid-template-columns: 1fr;
+  }
+  
+  .actionButtons {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 480px) {
+  .profileHeader {
+    padding: 20px;
+  }
+  
+  .headerContent h1 {
+    font-size: 1.5rem;
+  }
+  
+  .profileCard {
+    padding: 20px;
+  }
+  
+  .profileImage, .profilePlaceholder {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .profilePlaceholder {
+    font-size: 1.5rem;
+  }
+  
+  .profileName h2 {
+    font-size: 1.5rem;
+  }
+  
+  .infoSection {
+    padding: 20px;
+  }
+  
+  .sectionHeader h3 {
+    font-size: 1.125rem;
+  }
+  
+  .familyActions {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .contactBtn, .messageBtn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Focus states for accessibility */
+.backBtn:focus,
+.editBtn:focus,
+.logoutBtn:focus,
+.changePhotoBtn:focus,
+.sectionEditBtn:focus,
+.contactBtn:focus,
+.messageBtn:focus,
+.toggleBtn:focus,
+.saveBtn:focus,
+.cancelBtn:focus,
+.retryBtn:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Print styles */
+@media print {
+  .profileContainer {
+    background: white;
+  }
+  
+  .headerActions,
+  .changePhotoBtn,
+  .sectionEditBtn,
+  .familyActions,
+  .actionButtons {
+    display: none;
+  }
+  
+  .profileCard,
+  .infoSection {
+    box-shadow: none;
+    border: 1px solid #000;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .profileContainer {
+    background: #0f172a;
+  }
+  
+  .profileHeader,
+  .profileCard,
+  .infoSection,
+  .actionButtons {
+    background: #1e293b;
+    border-color: #334155;
+  }
+  
+  .headerContent h1,
+  .profileName h2,
+  .sectionHeader h3,
+  .metaValue,
+  .infoItem span,
+  .familyDetail span,
+  .settingLabel {
+    color: #f1f5f9;
+  }
+  
+  .headerContent p,
+  .metaLabel,
+  .infoItem label,
+  .familyDetail label,
+  .settingDesc {
+    color: #cbd5e1;
+  }
+  
+  .backBtn,
+  .changePhotoBtn,
+  .sectionEditBtn {
+    background: #334155;
+    color: #cbd5e1;
+  }
+  
+  .backBtn:hover,
+  .changePhotoBtn:hover,
+  .sectionEditBtn:hover {
+    background: #475569;
+  }
+  
+  .infoItem span,
+  .familyCard,
+  .settingItem {
+    background: #0f172a;
+    border-color: #334155;
+  }
+}
+
+/* Utility classes */
+.textCenter {
+  text-align: center;
+}
+
+.flexCenter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mt20 {
+  margin-top: 20px;
+}
+
+.mb20 {
+  margin-bottom: 20px;
+}
+
+.p20 {
+  padding: 20px;
+}
+
+/* Custom scrollbar */
+.profileContent::-webkit-scrollbar {
+  width: 8px;
+}
+
+.profileContent::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+.profileContent::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.profileContent::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Hover effects */
+.infoSection:hover {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+  transition: all 0.2s ease;
+}
+
+.profileCard:hover {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+/* Loading state for sections */
+.infoSection.loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.infoSection.loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  border: 2px solid #e2e8f0;
+  border-top: 2px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* Success/Error states */
+.successMessage {
+  background: #d1fae5;
+  color: #065f46;
+  padding: 12px 16px;
+  border-radius: 6px;
+  border: 1px solid #a7f3d0;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.errorMessage {
+  background: #fef2f2;
+  color: #991b1b;
+  padding: 12px 16px;
+  border-radius: 6px;
+  border: 1px solid #fecaca;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Enhanced accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .profileCard,
+  .infoSection,
+  .actionButtons {
+    border: 2px solid #000;
+  }
+  
+  .editBtn,
+  .logoutBtn,
+  .saveBtn,
+  .cancelBtn,
+  .contactBtn,
+  .messageBtn,
+  .toggleBtn {
+    border: 2px solid #000;
+  }
+}
+
+/* Large text support */
+@media (min-resolution: 2dppx) {
+  .profileImage,
+  .profilePlaceholder {
+    border-width: 2px;
+  }
+  
+  .statusIndicator {
+    border-width: 2px;
+  }
+}
+
+/* Additional responsive breakpoints */
+@media (max-width: 360px) {
+  .profileContent {
+    padding: 12px;
+  }
+  
+  .profileHeader {
+    padding: 16px;
+  }
+  
+  .profileCard {
+    padding: 16px;
+  }
+  
+  .infoSection {
+    padding: 16px;
+  }
+  
+  .headerContent h1 {
+    font-size: 1.25rem;
+  }
+  
+  .profileName h2 {
+    font-size: 1.25rem;
+  }
+  
+  .sectionHeader h3 {
+    font-size: 1rem;
+  }
+}
+
+/* Tablet landscape */
+@media (min-width: 768px) and (max-width: 1024px) and (orientation: landscape) {
+  .profileCard {
+    flex-direction: row;
+    text-align: left;
+  }
+  
+  .profileMeta {
+    justify-content: flex-start;
+  }
+  
+  .familyCard {
+    flex-direction: row;
+  }
+  
+  .familyActions {
+    margin-left: 20px;
+    justify-content: flex-end;
+  }
+}
+
+/* Animation delays for staggered loading */
+.infoSection:nth-child(1) {
+  animation-delay: 0.1s;
+}
+
+.infoSection:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.infoSection:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+.infoSection:nth-child(4) {
+  animation-delay: 0.4s;
+}
+
+/* Fade in animation */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.infoSection {
+  animation: fadeInUp 0.6s ease-out both;
+}
+
+/* Pulse animation for status indicator */
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+}
+
+.statusIndicator {
+  animation: pulse 2s infinite;
+}
+
+/* Gradient backgrounds for different sections */
+.infoSection:nth-child(1) {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+}
+
+.infoSection:nth-child(2) {
+  background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
+}
+
+.infoSection:nth-child(3) {
+  background: linear-gradient(135deg, #ffffff 0%, #ecfdf5 100%);
+}
+
+.infoSection:nth-child(4) {
+  background: linear-gradient(135deg, #ffffff 0%, #fffbeb 100%);
+}
+
+/* Improved button states */
+.editBtn:active,
+.logoutBtn:active,
+.saveBtn:active,
+.cancelBtn:active,
+.contactBtn:active,
+.messageBtn:active,
+.toggleBtn:active {
+  transform: translateY(1px);
+}
+
+/* Enhanced focus indicators */
+.editBtn:focus-visible,
+.logoutBtn:focus-visible,
+.saveBtn:focus-visible,
+.cancelBtn:focus-visible,
+.contactBtn:focus-visible,
+.messageBtn:focus-visible,
+.toggleBtn:focus-visible {
+  outline: 3px solid #3b82f6;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 6px rgba(59, 130, 246, 0.2);
+}
+
+/* Tooltip styles (for future implementation) */
+.tooltip {
+  position: relative;
+}
+
+.tooltip::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1e293b;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+  z-index: 1000;
+}
+
+.tooltip:hover::after {
+  opacity: 1;
+}
+
+/* Badge styles for status indicators */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.badge.success {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.badge.warning {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.badge.error {
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+.badge.info {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+/* Card hover effects */
+.familyCard:hover,
+.settingItem:hover {
+  background: #f1f5f9;
+  transition: background-color 0.2s;
+}
+
+/* Improved spacing for mobile */
+@media (max-width: 480px) {
+  .infoGrid {
+    gap: 16px;
+  }
+  
+  .familyInfo {
+    gap: 12px;
+  }
+  
+  .settingsGrid {
+    gap: 12px;
+  }
+  
+  .actionButtons {
+    gap: 12px;
+    padding: 20px;
+  }
+}
+
+

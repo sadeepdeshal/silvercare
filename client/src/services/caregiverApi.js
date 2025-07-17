@@ -18,7 +18,7 @@ export const caregiverApi = {
       return data;
     } catch (error) {
       console.error('API: Error fetching caregivers:', error);
-            throw error;
+      throw error;
     }
   },
 
@@ -38,6 +38,46 @@ export const caregiverApi = {
       return data;
     } catch (error) {
       console.error('API: Error fetching caregiver details:', error);
+      throw error;
+    }
+  },
+
+  // Get active caregiver count
+  getActiveCaregiverCount: async () => {
+    try {
+      console.log('API: Fetching active caregiver count');
+      const response = await fetch(`${API_BASE}/count/active`);
+      const data = await response.json();
+      
+      console.log('API: Active caregiver count response:', data);
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to fetch active caregiver count');
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('API: Error fetching active caregiver count:', error);
+      throw error;
+    }
+  },
+
+  // Get caregiver statistics
+  getCaregiverStats: async () => {
+    try {
+      console.log('API: Fetching caregiver statistics');
+      const response = await fetch(`${API_BASE}/stats`);
+      const data = await response.json();
+      
+      console.log('API: Caregiver stats response:', data);
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to fetch caregiver statistics');
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('API: Error fetching caregiver statistics:', error);
       throw error;
     }
   },
@@ -143,4 +183,3 @@ export const caregiverApi = {
 };
 
 export default caregiverApi;
-

@@ -2,12 +2,13 @@ const pool = require("../db");
 
 // Fetch elder details based on user email
 const getElderDetails = async (req, res) => {
-  const { email } = req.query; 
-  console.log('Received email:', email);
-  
+  const { email } = req.query;
+  console.log("Received email:", email);
+
   try {
     // Query to join User, elder, familymember tables based on email
-    const elderResult = await pool.query(`
+    const elderResult = await pool.query(
+      `
       SELECT 
         e.elder_id,
         e.family_id,
@@ -40,15 +41,19 @@ const getElderDetails = async (req, res) => {
       LEFT JOIN familymember fm ON e.family_id = fm.family_id
       LEFT JOIN "User" fu ON fm.user_id = fu.user_id
       WHERE LOWER(u.email) = LOWER($1)
-    `, [email]);
+    `,
+      [email]
+    );
 
     if (elderResult.rows.length === 0) {
-      return res.status(404).json({ error: "Elder details not found for this user" });
+      return res
+        .status(404)
+        .json({ error: "Elder details not found for this user" });
     }
 
     // Send the elder details in the response
     const elderData = elderResult.rows[0];
-    
+
     // Format the response
     const response = {
       elder_id: elderData.elder_id,
@@ -67,33 +72,125 @@ const getElderDetails = async (req, res) => {
         user_name: elderData.user_name,
         user_phone: elderData.user_phone,
         role: elderData.role,
-        user_created_at: elderData.user_created_at
+        user_created_at: elderData.user_created_at,
       },
-      family_member: elderData.family_member_name ? {
-        name: elderData.family_member_name,
-        email: elderData.family_member_email,
-        phone: elderData.family_member_phone,
-        phone_fixed: elderData.fm_phone_fixed,
-        address: elderData.fm_address,
-        created_at: elderData.family_member_created_at
-      } : null,
-      created_at: elderData.elder_created_at
+      family_member: elderData.family_member_name
+        ? {
+            name: elderData.family_member_name,
+            email: elderData.family_member_email,
+            phone: elderData.family_member_phone,
+            phone_fixed: elderData.fm_phone_fixed,
+            address: elderData.fm_address,
+            created_at: elderData.family_member_created_at,
+          }
+        : null,
+      created_at: elderData.elder_created_at,
     };
 
     res.json(response);
   } catch (err) {
     console.error("Error in getElderDetails:", err);
-    res.status(500).json({ error: "Server error while fetching elder details" });
+    res
+      .status(500)
+      .json({ error: "Server error while fetching elder details" });
+  }
+};
+
+// Get dashboard stats for an elder
+const getElderDashboardStats = async (req, res) => {
+  const { elderId } = req.params;
+  console.log("Fetching dashboard stats for elder ID:", elderId);
+
+  try {
+    // Check if elder exists
+    const elderCheck = await pool.query(
+      "SELECT * FROM elder WHERE elder_id = $1",
+      [elderId]
+    );
+    if (elderCheck.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: "Elder not found",
+      });
+    }
+
+    // Get upcoming appointments count
+    const upcomingAppointmentsResult = await pool.query(
+      `
+      SELECT COUNT(*) as count
+      FROM appointment 
+      WHERE elder_id = $1 
+      AND date_time > NOW()
+      AND status IN ('approved', 'confirmed')
+    `,
+      [elderId]
+    );
+
+    // Get upcoming sessions count
+    const upcomingSessionsResult = await pool.query(
+      `
+      SELECT COUNT(*) as count
+      FROM session 
+      WHERE elder_id = $1 
+      AND date_time > NOW()
+      AND status IN ('pending', 'completed')
+    `,
+      [elderId]
+    );
+
+    // Get upcoming campaigns count (booked campaigns)
+    const upcomingCampaignsResult = await pool.query(
+      `
+      SELECT COUNT(*) as count
+      FROM campaignbooking cb
+      INNER JOIN campaignevent c ON cb.campaign_id = c.campaign_id
+      WHERE cb.elder_id = $1 
+      AND c.start_date > NOW()
+    `,
+      [elderId]
+    );
+
+    // Get active caregivers count (caregivers who have recent logs)
+    const activeCaregiversResult = await pool.query(
+      `
+      SELECT COUNT(DISTINCT caregiver_id) as count
+      FROM carelog 
+      WHERE elder_id = $1
+    `,
+      [elderId]
+    );
+
+    const stats = {
+      upcomingAppointments:
+        parseInt(upcomingAppointmentsResult.rows[0].count) || 0,
+      upcomingSessions: parseInt(upcomingSessionsResult.rows[0].count) || 0,
+      upcomingCampaigns: parseInt(upcomingCampaignsResult.rows[0].count) || 0,
+      assignedCaregivers: parseInt(activeCaregiversResult.rows[0].count) || 0,
+    };
+
+    console.log("Dashboard stats:", stats);
+
+    res.json({
+      success: true,
+      stats: stats,
+    });
+  } catch (err) {
+    console.error("Error fetching dashboard stats:", err);
+    res.status(500).json({
+      success: false,
+      error: "Error fetching dashboard statistics",
+    });
   }
 };
 
 // Get all appointments for an elder
 const getElderAppointments = async (req, res) => {
   const { elderId } = req.params;
-  console.log('Fetching appointments for elder ID:', elderId);
-  
+  console.log("Fetching appointments for elder ID:", elderId);
+
   try {
-    const appointmentsResult = await pool.query(`
+    const appointmentsResult = await pool.query(
+      `
       SELECT 
         a.appointment_id,
         a.elder_id,
@@ -115,11 +212,13 @@ const getElderAppointments = async (req, res) => {
       INNER JOIN "User" u ON d.user_id = u.user_id
       WHERE a.elder_id = $1 AND a.status != 'pending'
       ORDER BY a.date_time DESC
-    `, [elderId]);
+    `,
+      [elderId]
+    );
 
     res.json({
       success: true,
-      appointments: appointmentsResult.rows
+      appointments: appointmentsResult.rows,
     });
   } catch (err) {
     console.error("Error fetching elder appointments:", err);
@@ -130,15 +229,18 @@ const getElderAppointments = async (req, res) => {
 // Get upcoming appointments for an elder
 const getUpcomingAppointments = async (req, res) => {
   const { elderId } = req.params;
-  console.log('Fetching upcoming appointments for elder ID:', elderId);
-  
+  console.log("Fetching upcoming appointments for elder ID:", elderId);
+
   try {
     // Check if elder exists
-    const elderCheck = await pool.query('SELECT * FROM elder WHERE elder_id = $1', [elderId]);
+    const elderCheck = await pool.query(
+      "SELECT * FROM elder WHERE elder_id = $1",
+      [elderId]
+    );
     if (elderCheck.rows.length === 0) {
       return res.status(404).json({
         success: false,
-        error: 'Elder not found'
+        error: "Elder not found",
       });
     }
 
@@ -165,18 +267,17 @@ const getUpcomingAppointments = async (req, res) => {
       ORDER BY a.date_time ASC`,
       [elderId]
     );
-    
+
     res.json({
       success: true,
       appointments: result.rows,
-      count: result.rows.length
+      count: result.rows.length,
     });
-    
   } catch (err) {
-    console.error('Error fetching upcoming appointments:', err);
-    res.status(500).json({ 
+    console.error("Error fetching upcoming appointments:", err);
+    res.status(500).json({
       success: false,
-      error: 'Error fetching upcoming appointments' 
+      error: "Error fetching upcoming appointments",
     });
   }
 };
@@ -184,15 +285,18 @@ const getUpcomingAppointments = async (req, res) => {
 // Get past appointments for an elder
 const getPastAppointments = async (req, res) => {
   const { elderId } = req.params;
-  console.log('Fetching past appointments for elder ID:', elderId);
-  
+  console.log("Fetching past appointments for elder ID:", elderId);
+
   try {
     // Check if elder exists
-    const elderCheck = await pool.query('SELECT * FROM elder WHERE elder_id = $1', [elderId]);
+    const elderCheck = await pool.query(
+      "SELECT * FROM elder WHERE elder_id = $1",
+      [elderId]
+    );
     if (elderCheck.rows.length === 0) {
       return res.status(404).json({
         success: false,
-        error: 'Elder not found'
+        error: "Elder not found",
       });
     }
 
@@ -218,18 +322,17 @@ const getPastAppointments = async (req, res) => {
       ORDER BY a.date_time DESC`,
       [elderId]
     );
-    
+
     res.json({
       success: true,
       appointments: result.rows,
-      count: result.rows.length
+      count: result.rows.length,
     });
-    
   } catch (err) {
-    console.error('Error fetching past appointments:', err);
-    res.status(500).json({ 
+    console.error("Error fetching past appointments:", err);
+    res.status(500).json({
       success: false,
-      error: 'Error fetching past appointments' 
+      error: "Error fetching past appointments",
     });
   }
 };
@@ -237,14 +340,17 @@ const getPastAppointments = async (req, res) => {
 // Get all appointments for an elder
 const getAllAppointments = async (req, res) => {
   const { elderId } = req.params;
-  
+
   try {
     // Check if elder exists
-    const elderCheck = await pool.query('SELECT * FROM elder WHERE elder_id = $1', [elderId]);
+    const elderCheck = await pool.query(
+      "SELECT * FROM elder WHERE elder_id = $1",
+      [elderId]
+    );
     if (elderCheck.rows.length === 0) {
       return res.status(404).json({
         success: false,
-        error: 'Elder not found'
+        error: "Elder not found",
       });
     }
 
@@ -269,18 +375,17 @@ const getAllAppointments = async (req, res) => {
       ORDER BY a.date_time DESC`,
       [elderId]
     );
-    
+
     res.json({
       success: true,
       appointments: result.rows,
-      count: result.rows.length
+      count: result.rows.length,
     });
-    
   } catch (err) {
-    console.error('Error fetching appointments:', err);
-    res.status(500).json({ 
+    console.error("Error fetching appointments:", err);
+    res.status(500).json({
       success: false,
-      error: 'Error fetching appointments' 
+      error: "Error fetching appointments",
     });
   }
 };
@@ -288,7 +393,7 @@ const getAllAppointments = async (req, res) => {
 // Get specific appointment by ID
 const getAppointmentById = async (req, res) => {
   const { elderId, appointmentId } = req.params;
-  
+
   try {
     // Get specific appointment
     const result = await pool.query(
@@ -316,24 +421,23 @@ const getAppointmentById = async (req, res) => {
       WHERE a.appointment_id = $1 AND a.elder_id = $2`,
       [appointmentId, elderId]
     );
-    
+
     if (result.rows.length === 0) {
       return res.status(404).json({
         success: false,
-        error: 'Appointment not found'
+        error: "Appointment not found",
       });
     }
-    
+
     res.json({
       success: true,
-      appointment: result.rows[0]
+      appointment: result.rows[0],
     });
-    
   } catch (err) {
-    console.error('Error fetching appointment:', err);
-    res.status(500).json({ 
+    console.error("Error fetching appointment:", err);
+    res.status(500).json({
       success: false,
-      error: 'Error fetching appointment' 
+      error: "Error fetching appointment",
     });
   }
 };
@@ -342,21 +446,21 @@ const getAppointmentById = async (req, res) => {
 const cancelAppointment = async (req, res) => {
   const { elderId, appointmentId } = req.params;
   const { reason } = req.body;
-  
+
   try {
     // Check if appointment exists and belongs to elder
     const appointmentCheck = await pool.query(
-      'SELECT * FROM appointment WHERE appointment_id = $1 AND elder_id = $2',
+      "SELECT * FROM appointment WHERE appointment_id = $1 AND elder_id = $2",
       [appointmentId, elderId]
     );
-    
+
     if (appointmentCheck.rows.length === 0) {
       return res.status(404).json({
         success: false,
-        error: 'Appointment not found'
+        error: "Appointment not found",
       });
     }
-    
+
     // Update appointment status to cancelled
     const result = await pool.query(
       `UPDATE appointment 
@@ -365,20 +469,19 @@ const cancelAppointment = async (req, res) => {
            updated_at = CURRENT_TIMESTAMP
        WHERE appointment_id = $1 AND elder_id = $2
        RETURNING *`,
-      [appointmentId, elderId, reason || 'Cancelled by elder']
+      [appointmentId, elderId, reason || "Cancelled by elder"]
     );
-    
+
     res.json({
       success: true,
-      message: 'Appointment cancelled successfully',
-      appointment: result.rows[0]
+      message: "Appointment cancelled successfully",
+      appointment: result.rows[0],
     });
-    
   } catch (err) {
-    console.error('Error cancelling appointment:', err);
-    res.status(500).json({ 
+    console.error("Error cancelling appointment:", err);
+    res.status(500).json({
       success: false,
-      error: 'Error cancelling appointment' 
+      error: "Error cancelling appointment",
     });
   }
 };
@@ -387,29 +490,29 @@ const cancelAppointment = async (req, res) => {
 const rescheduleAppointment = async (req, res) => {
   const { elderId, appointmentId } = req.params;
   const { newDateTime, reason } = req.body;
-  
+
   try {
     // Validate new date time
     if (!newDateTime) {
       return res.status(400).json({
         success: false,
-        error: 'New date and time is required'
+        error: "New date and time is required",
       });
     }
-    
+
     // Check if appointment exists and belongs to elder
     const appointmentCheck = await pool.query(
-      'SELECT * FROM appointment WHERE appointment_id = $1 AND elder_id = $2',
+      "SELECT * FROM appointment WHERE appointment_id = $1 AND elder_id = $2",
       [appointmentId, elderId]
     );
-    
+
     if (appointmentCheck.rows.length === 0) {
       return res.status(404).json({
         success: false,
-        error: 'Appointment not found'
+        error: "Appointment not found",
       });
     }
-    
+
     // Update appointment with new date time
     const result = await pool.query(
       `UPDATE appointment 
@@ -418,31 +521,31 @@ const rescheduleAppointment = async (req, res) => {
            updated_at = CURRENT_TIMESTAMP
        WHERE appointment_id = $1 AND elder_id = $2
        RETURNING *`,
-      [appointmentId, elderId, newDateTime, reason || 'Rescheduled by elder']
+      [appointmentId, elderId, newDateTime, reason || "Rescheduled by elder"]
     );
-    
+
     res.json({
       success: true,
-      message: 'Appointment rescheduled successfully',
-      appointment: result.rows[0]
+      message: "Appointment rescheduled successfully",
+      appointment: result.rows[0],
     });
-    
   } catch (err) {
-    console.error('Error rescheduling appointment:', err);
-    res.status(500).json({ 
+    console.error("Error rescheduling appointment:", err);
+    res.status(500).json({
       success: false,
-      error: 'Error rescheduling appointment' 
+      error: "Error rescheduling appointment",
     });
   }
 };
 
-module.exports = { 
+module.exports = {
   getElderDetails,
+  getElderDashboardStats,
   getElderAppointments,
   getUpcomingAppointments,
   getPastAppointments,
   getAllAppointments,
   getAppointmentById,
   cancelAppointment,
-  rescheduleAppointment
+  rescheduleAppointment,
 };

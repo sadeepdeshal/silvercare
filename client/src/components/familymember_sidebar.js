@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import styles from './../components/css/familymember_sidebar.module.css';
 
 const FamilyMemberSidebar = ({ onItemClick }) => {
   const [expandedMenus, setExpandedMenus] = useState({});
   const [activeMenuItem, setActiveMenuItem] = useState('dashboard'); // Internal state
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false); // Internal state
+  const { currentUser } = useAuth(); // Get current user from AuthContext
   const navigate = useNavigate();
 
   const toggleSubmenu = (menuKey) => {
@@ -40,10 +42,19 @@ const FamilyMemberSidebar = ({ onItemClick }) => {
         navigate('/family-member/medical-history');
         break;
       case 'book-appointment':
-        navigate('/family-member/appointments');
+        navigate('/family-member/elders');
         break;
       case 'upcoming-appointments':
-        navigate('/family-member/upcoming-appointments');
+        navigate('/family-member/appointments');
+        break;
+              case 'upcoming-appointments':
+        navigate('/family-member/appointments');
+        break;
+      case 'approved-appointment':
+        navigate('/family-member/Approved-appointment');
+        break;
+      case 'cancel-appointment':
+        navigate('/family-member/cancel-appointment');
         break;
       case 'appointment-history':
         navigate('/family-member/appointment-history');
@@ -125,7 +136,10 @@ const FamilyMemberSidebar = ({ onItemClick }) => {
       hasSubmenu: true,
       submenu: [
         { key: 'book-appointment', label: 'Book Appointment', path: '/family-member/appointments' },
-        { key: 'upcoming-appointments', label: 'Upcoming', path: '/family-member/upcoming-appointments' },
+        { key: 'upcoming-appointments', label: 'Upcoming', path: '/family-member/appointments' },
+        { key: 'approved-appointment', label: 'Approved', path: '/family-member/Approved-appointment' },
+        { key: 'pending-appointments', label: 'Pending', path: '/family-member/pending-appointments' },
+        { key: 'cancel-appointment', label: 'Cancel', path: '/family-member/cancel-appointment' },
         { key: 'appointment-history', label: 'History', path: '/family-member/appointment-history' }
       ]
     },
@@ -219,8 +233,9 @@ const FamilyMemberSidebar = ({ onItemClick }) => {
         <div className={styles.userInfo}>
           <div className={styles.userAvatar}>👨‍👩‍👧‍👦</div>
           <div className={styles.userDetails}>
-            <span className={styles.userName}>Family Member</span>
-            <span className={styles.userRole}>Guardian</span>
+            <span className={styles.userName}>
+              Hi {currentUser?.name || 'User'}!
+            </span>
           </div>
         </div>
       )}

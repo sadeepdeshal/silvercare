@@ -4,6 +4,7 @@ import { elderApi } from '../../services/elderApi';
 import { useAuth } from '../../context/AuthContext';
 import Navbar from '../../components/navbar';
 import styles from '../../components/css/familymember/elder-details.module.css';
+import FamilyMemberLayout from '../../components/FamilyMemberLayout';
 
 const ElderDetails = () => {
   const { elderId } = useParams();
@@ -252,7 +253,8 @@ const ElderDetails = () => {
   if (loading) {
     return (
       <div>
-        <Navbar />
+        
+      
         <div className={styles.container}>
           <div className={styles.loadingContainer}>
             <div className={styles.loadingSpinner}></div>
@@ -266,7 +268,7 @@ const ElderDetails = () => {
   if (error && !elder) {
     return (
       <div>
-        <Navbar />
+       
         <div className={styles.container}>
           <div className={styles.errorContainer}>
             <h2>Error</h2>
@@ -283,6 +285,7 @@ const ElderDetails = () => {
   return (
     <div>
       <Navbar />
+      <FamilyMemberLayout>
       <div className={styles.container}>
         <div className={styles.header}>
           <button 
@@ -581,6 +584,7 @@ const ElderDetails = () => {
           )}
         </div>
       </div>
+      </FamilyMemberLayout>
     </div>
   );
 };
