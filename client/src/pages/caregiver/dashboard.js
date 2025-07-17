@@ -11,12 +11,12 @@ const CaregiverDashboard = () => {
   const [messages, setMessages] = useState([]);
   const [schedule, setSchedule] = useState([]);
   const [alerts, setAlerts] = useState([]);
-  const [medReminders, setMedReminders] = useState([]);
+  const [families, setFamilies] = useState([]);
 
   useEffect(() => {
     const caregiverId = 1; // TODO: Replace with dynamic ID from session/auth
 
-    // Fetch real assigned elders
+    // Fetch assigned elders
     caregiverApi.fetchAssignedElders(caregiverId).then((data) => {
       const transformed = data.map((elder) => ({
         name: elder.name,
@@ -27,7 +27,17 @@ const CaregiverDashboard = () => {
       }));
       setElders(transformed);
     });
-
+    
+    // Fetch assigned families count
+    caregiverApi.getAssignedFamiliesCount(caregiverId).then((data) => {
+      if (data && typeof data.count === 'number') {
+        const dummyFamilies = Array.from({ length: data.count }, (_, i) => ({ elder: `Family ${i + 1}` }));
+        setFamilies(dummyFamilies);
+      } else {
+        setFamilies([]);
+      }
+    });
+    
     // Dummy data for other sections
     setActivities([
       { description: "Prepared Robert's Daily Medical Report", timeAgo: "2 hours ago" },
@@ -47,10 +57,6 @@ const CaregiverDashboard = () => {
       { id: 1, elder: "Robert Chen", type: "Emergency", status: "Pending" },
       { id: 2, elder: "Mery Silva", type: "Medication Missed", status: "Pending" }
     ]);
-    setMedReminders([
-      { elder: "Robert Chen", due: "In 2 hours" },
-      { elder: "Mary Silva", due: "Completed" }
-    ]);
   }, []);
 
   const dashboardContent = (
@@ -61,6 +67,14 @@ const CaregiverDashboard = () => {
           <div className={styles.cardContent}>
             <p className={styles.cardLabel}>Assigned Elders</p>
             <span className={styles.cardNumber}>{elders.length}</span>
+          </div>
+        </div>
+
+        <div className={styles.card}>
+          <div className={styles.cardIcon}>👨‍👩‍👧‍👦</div>
+          <div className={styles.cardContent}>
+            <p className={styles.cardLabel}>Number of Families</p>
+            <span className={styles.cardNumber}>{families.length}</span>
           </div>
         </div>
 
@@ -80,13 +94,6 @@ const CaregiverDashboard = () => {
           </div>
         </div>
 
-        <div className={styles.card}>
-          <div className={styles.cardIcon}>⏰</div>
-          <div className={styles.cardContent}>
-            <p className={styles.cardLabel}>Med Reminders</p>
-            <span className={styles.cardNumber}>{medReminders.length}</span>
-          </div>
-        </div>
       </div>
 
       <div className={styles.dashboardgrid}>
