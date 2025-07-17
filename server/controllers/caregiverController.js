@@ -483,9 +483,9 @@ const getAssignedElders = async (req, res) => {
 
   try {
     const query = `
-      SELECT e.elder_id, e.name, e.age, c.duration, c.end_sate
-      FROM carelog c
-      JOIN elder e ON c.elder_id = e.elder_id
+      SELECT e.name, e.age, c.duration, c.end_date
+      FROM elder e
+      JOIN carelog c ON e.elder_id = c.elder_id
       WHERE c.caregiver_id = $1
     `;
     const result = await pool.query(query, [caregiverId]);

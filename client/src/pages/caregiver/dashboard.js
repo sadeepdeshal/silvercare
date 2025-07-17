@@ -14,7 +14,7 @@ const CaregiverDashboard = () => {
   const [families, setFamilies] = useState([]);
 
   useEffect(() => {
-    const caregiverId = 1; // TODO: Replace with dynamic ID from session/auth
+    //const caregiverId = 5; // TODO: Replace with dynamic ID from session/auth
 
     // Fetch assigned elders
     caregiverApi.fetchAssignedElders(caregiverId).then((data) => {
