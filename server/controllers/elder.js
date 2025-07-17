@@ -1,4 +1,42 @@
 const pool = require("../db");
+const multer = require("multer");
+const path = require("path");
+const fs = require("fs");
+
+// Configure multer for profile photo uploads
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const uploadPath = "uploads/profiles/";
+    if (!fs.existsSync(uploadPath)) {
+      fs.mkdirSync(uploadPath, { recursive: true });
+    }
+    cb(null, uploadPath);
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, "elder-" + uniqueSuffix + path.extname(file.originalname));
+  },
+});
+
+const upload = multer({
+  storage: storage,
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB limit
+  },
+  fileFilter: function (req, file, cb) {
+    const allowedTypes = /jpeg|jpg|png|gif/;
+    const extname = allowedTypes.test(
+      path.extname(file.originalname).toLowerCase()
+    );
+    const mimetype = allowedTypes.test(file.mimetype);
+
+    if (mimetype && extname) {
+      return cb(null, true);
+    } else {
+      cb(new Error("Only image files are allowed"));
+    }
+  },
+});
 
 // Fetch elder details based on user email
 const getElderDetails = async (req, res) => {
@@ -22,6 +60,8 @@ const getElderDetails = async (req, res) => {
         e.profile_photo,
         e.email as elder_email,
         e.created_at as elder_created_at,
+        e.district,
+        e.age,
         u.user_id,
         u.name as user_name,
         u.phone as user_phone,
@@ -67,6 +107,8 @@ const getElderDetails = async (req, res) => {
       medical_conditions: elderData.medical_conditions,
       profile_photo: elderData.profile_photo,
       email: elderData.elder_email,
+      district: elderData.district,
+      age: elderData.age,
       user_details: {
         user_id: elderData.user_id,
         user_name: elderData.user_name,
@@ -93,6 +135,136 @@ const getElderDetails = async (req, res) => {
     res
       .status(500)
       .json({ error: "Server error while fetching elder details" });
+  }
+};
+
+// Update elder profile
+const updateElderProfile = async (req, res) => {
+  const { elderId } = req.params;
+  const {
+    name,
+    dob,
+    gender,
+    contact,
+    address,
+    nic,
+    medical_conditions,
+    district,
+    email,
+    user_phone,
+  } = req.body;
+
+  console.log("Updating elder profile for ID:", elderId);
+  console.log("Request body:", req.body);
+
+  try {
+    // Start transaction
+    await pool.query("BEGIN");
+
+    // Check if elder exists
+    const elderCheck = await pool.query(
+      "SELECT * FROM elder WHERE elder_id = $1",
+      [elderId]
+    );
+
+    if (elderCheck.rows.length === 0) {
+      await pool.query("ROLLBACK");
+      return res.status(404).json({
+        success: false,
+        error: "Elder not found",
+      });
+    }
+
+    const currentElder = elderCheck.rows[0];
+
+    // Handle profile photo upload
+    let profilePhotoPath = currentElder.profile_photo;
+    if (req.file) {
+      profilePhotoPath = req.file.filename;
+
+      // Delete old profile photo if it exists
+      if (currentElder.profile_photo) {
+        const oldPhotoPath = path.join(
+          "uploads/profiles/",
+          currentElder.profile_photo
+        );
+        if (fs.existsSync(oldPhotoPath)) {
+          fs.unlinkSync(oldPhotoPath);
+        }
+      }
+    }
+
+    // Update elder table
+    const updateElderQuery = `
+      UPDATE elder 
+      SET 
+        name = COALESCE($1, name),
+        dob = COALESCE($2, dob),
+        gender = COALESCE($3, gender),
+        contact = COALESCE($4, contact),
+        address = COALESCE($5, address),
+        nic = COALESCE($6, nic),
+        medical_conditions = COALESCE($7, medical_conditions),
+        district = COALESCE($8, district),
+        email = COALESCE($9, email),
+        profile_photo = COALESCE($10, profile_photo),
+        age = CASE 
+          WHEN $2 IS NOT NULL THEN EXTRACT(YEAR FROM AGE($2::date))
+          ELSE age
+        END
+      WHERE elder_id = $11
+      RETURNING *
+    `;
+
+    const elderResult = await pool.query(updateElderQuery, [
+      name,
+      dob,
+      gender,
+      contact,
+      address,
+      nic,
+      medical_conditions,
+      district,
+      email,
+      profilePhotoPath,
+      elderId,
+    ]);
+
+    // Update User table if email or phone changed
+    if (email || user_phone) {
+      const updateUserQuery = `
+        UPDATE "User" 
+        SET 
+          email = COALESCE($1, email),
+          phone = COALESCE($2, phone)
+        WHERE email = $3
+        RETURNING *
+      `;
+
+      await pool.query(updateUserQuery, [
+        email,
+        user_phone,
+        currentElder.email,
+      ]);
+    }
+
+    // Commit transaction
+    await pool.query("COMMIT");
+
+    res.json({
+      success: true,
+      message: "Profile updated successfully",
+      elder: elderResult.rows[0],
+    });
+  } catch (err) {
+    // Rollback transaction on error
+    await pool.query("ROLLBACK");
+
+    console.error("Error updating elder profile:", err);
+    res.status(500).json({
+      success: false,
+      error: "Server error while updating profile",
+    });
   }
 };
 
@@ -540,6 +712,8 @@ const rescheduleAppointment = async (req, res) => {
 
 module.exports = {
   getElderDetails,
+  updateElderProfile,
+  upload,
   getElderDashboardStats,
   getElderAppointments,
   getUpcomingAppointments,

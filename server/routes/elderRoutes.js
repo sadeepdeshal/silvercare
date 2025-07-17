@@ -19,6 +19,8 @@ const {
 
 const { 
   getElderDetails,
+  updateElderProfile,
+  upload,
   getElderDashboardStats,
   getUpcomingAppointments,
   getPastAppointments,
@@ -58,6 +60,9 @@ router.get('/:elderId/doctors/online', getAllDoctorsForOnlineMeeting);
 
 // Get dashboard stats for an elder - MUST BE BEFORE /:elderId route
 router.get('/:elderId/dashboard-stats', getElderDashboardStats);
+
+// Update elder profile with file upload - MUST BE BEFORE /:elderId route
+router.put('/:elderId/profile', upload.single('profile_photo'), updateElderProfile);
 
 // Create new appointment - MUST BE BEFORE /:elderId route
 router.post('/:elderId/appointments', createAppointment);
