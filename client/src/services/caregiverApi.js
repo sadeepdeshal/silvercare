@@ -179,7 +179,18 @@ export const caregiverApi = {
       console.error('API: Error updating care request status:', error);
       throw error;
     }
-  }
+  },
+
+  // Get assigned elders for caregiver
+  fetchAssignedElders: async (caregiverId) => {
+    try {
+      const response = await axios.get(`${API_BASE}/${caregiverId}/assigned-elders`);
+      return response.data;
+    } catch (error) {
+      console.error('API: Error fetching assigned elders:', error);
+      return [];
+    }
+  },
 };
 
 export default caregiverApi;
