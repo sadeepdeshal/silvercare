@@ -191,6 +191,18 @@ export const caregiverApi = {
       return [];
     }
   },
+
+  // Get number of assigned families for caregiver
+  getAssignedFamiliesCount: async (caregiverId) => {
+    try {
+      const response = await axios.get(`${API_BASE}/assigned-families/${caregiverId}`);
+      return response.data;
+    } catch (error) {
+      console.error('API: Error fetching assigned families count:', error);
+      return { count: 0 };
+    }
+  },
+
 };
 
 export default caregiverApi;
