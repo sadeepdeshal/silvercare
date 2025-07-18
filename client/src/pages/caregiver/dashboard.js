@@ -18,7 +18,6 @@ const CaregiverDashboard = () => {
 
 
   useEffect(() => {
-    //const caregiverId = 5; // TODO: Replace with dynamic ID from session/auth
     if (!user || !user.caregiver_id) return;
 
     const caregiverId = user.caregiver_id;
@@ -37,8 +36,12 @@ const CaregiverDashboard = () => {
     
     // Fetch assigned families count
     caregiverApi.getAssignedFamiliesCount(caregiverId).then((data) => {
-      if (data && typeof data.count === 'number') {
-        const dummyFamilies = Array.from({ length: data.count }, (_, i) => ({ elder: `Family ${i + 1}` }));
+       console.log('Families API response:', data);
+       const count = Number(data.count);
+      if (!isNaN(count)) {
+        const dummyFamilies = Array.from({ length: count }, (_, i) => ({
+          elder: `Family ${i + 1}`
+        }));
         setFamilies(dummyFamilies);
       } else {
         setFamilies([]);

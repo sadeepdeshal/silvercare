@@ -483,29 +483,46 @@ const getAssignedElders = async (req, res) => {
   const caregiverId = req.params.id;
 
   try {
-    const query = `
-      SELECT 
-          e.name,
-          e.age,
-          c.duration,
-          c.end_sate,
-          cg.caregiver_id,
-          u.user_id
-      FROM 
-          carelog c
-      JOIN 
-          elder e ON c.elder_id = e.elder_id
-      JOIN 
-          caregiver cg ON c.caregiver_id = cg.caregiver_id
-      JOIN 
-          "User" u ON cg.user_id = u.user_id;
 
-    `;
+     const query = `SELECT 
+        e.name,
+        e.age,
+        c.duration,
+        c.end_date,
+        cg.caregiver_id,
+        u.user_id
+      FROM carelog c
+      JOIN elder e ON c.elder_id = e.elder_id
+      JOIN caregiver cg ON c.caregiver_id = cg.caregiver_id
+      JOIN "User" u ON cg.user_id = u.user_id
+      WHERE cg.caregiver_id = $1`;
+
     const result = await pool.query(query, [caregiverId]);
 
     res.status(200).json(result.rows);
   } catch (error) {
     console.error('Error fetching assigned elders:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+//get assigner families count (role caregiver)
+const getAssignedFamiliesCount = async (req, res) => {
+    const caregiverId = req.params.id;
+
+  try {
+    const query = `
+      SELECT COUNT(DISTINCT cr.family_id) AS count
+      FROM carerequest cr
+      JOIN caregiver cg ON cr.caregiver_id = cg.caregiver_id
+      JOIN "User" u ON cg.user_id = u.user_id
+      WHERE cr.caregiver_id = $1;
+    `;
+    const result = await pool.query(query, [caregiverId]);
+
+    res.status(200).json(result.rows[0]);
+  } catch (error) {
+    console.error('Error fetching assigned families count:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -519,6 +536,7 @@ module.exports = {
   getCareRequestsByFamily,
   searchCaregivers,
   updateCareRequestStatus,
-  getAssignedElders
+  getAssignedElders,
+  getAssignedFamiliesCount
 };
 
