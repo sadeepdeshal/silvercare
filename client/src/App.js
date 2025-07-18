@@ -36,7 +36,6 @@ import ProtectedRoute from './components/ProtectedRoute';
 // Import ElderDoctors component
 import ElderDoctors from "./pages/familemember/elder-doctors";
 import CaregiverProfile from "./pages/familemember/profile";
-import DoctorProfile from "./pages/doctor/profile";
 import FamilyMemberProfile from "./pages/familemember/profile";
 import HealthProfessionalProfile from "./pages/healthproffesional/profile";
 import ElderProfile from "./pages/elder/profile";
