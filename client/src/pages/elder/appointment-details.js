@@ -22,6 +22,11 @@ const AppointmentDetails = () => {
   const [error, setError] = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
 
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -235,10 +240,6 @@ const AppointmentDetails = () => {
               </div>
               <div className={styles.infoGrid}>
                 <div className={styles.infoItem}>
-                  <span className={styles.infoLabel}>License Number:</span>
-                  <span className={styles.infoValue}>{appointment.license_number || 'N/A'}</span>
-                </div>
-                <div className={styles.infoItem}>
                   <span className={styles.infoLabel}>Years of Experience:</span>
                   <span className={styles.infoValue}>{appointment.experience_years || 'N/A'} years</span>
                 </div>
@@ -284,17 +285,14 @@ const AppointmentDetails = () => {
               
               {/* Time Remaining for Upcoming Appointments */}
               {isUpcomingAppointment(appointment) && (
-                <div className={styles.timeRemainingCard}>
-                  <div className={`${styles.timeRemaining} ${
-                    getTimeRemaining(appointment.date_time).urgent ? styles.timeRemainingUrgent : styles.timeRemainingNormal
+                <div className={styles.timeRemainingSection}>
+                  <div className={`${styles.timeRemainingBanner} ${
+                    getTimeRemaining(appointment.date_time).urgent ? styles.urgent : styles.normal
                   }`}>
-                    <div className={styles.timeRemainingIcon}>⏰</div>
                     <div className={styles.timeRemainingContent}>
-                      <div className={styles.timeRemainingText}>
+                      <div className={styles.timeRemainingLabel}>Appointment starts in</div>
+                      <div className={styles.timeRemainingValue}>
                         {getTimeRemaining(appointment.date_time).text}
-                      </div>
-                      <div className={styles.timeRemainingDetail}>
-                        {getTimeRemaining(appointment.date_time).detail}
                       </div>
                     </div>
                   </div>

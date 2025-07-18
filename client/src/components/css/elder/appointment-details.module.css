@@ -21,25 +21,31 @@
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
+/* Modern Professional Back Button */
 .backBtn {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 8px;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  color: #3b82f6;
+  border: 2px solid #3b82f6;
+  padding: 12px 24px;
+  border-radius: 12px;
   font-size: 0.875rem;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .backBtn:hover {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.35);
 }
 
 .headerContent {
@@ -251,64 +257,100 @@
   font-size: 0.75rem !important;
 }
 
-/* Time Remaining Card */
-.timeRemainingCard {
-  margin-top: 16px;
-  padding: 20px;
-  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+/* Professional Time Remaining Section */
+.timeRemainingSection {
+  margin-top: 20px;
+}
+
+.timeRemainingBanner {
   border-radius: 12px;
-  border: 2px solid #0ea5e9;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.timeRemaining {
-  display: flex;
-  align-items: center;
-  gap: 16px;
+.timeRemainingBanner.normal {
+  background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+  border-left: 4px solid #0ea5e9;
 }
 
-.timeRemainingIcon {
-  font-size: 2rem;
-  animation: pulse 2s infinite;
+.timeRemainingBanner.urgent {
+  background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%);
+  border-left: 4px solid #f59e0b;
+  animation: subtleGlow 3s ease-in-out infinite alternate;
 }
 
 .timeRemainingContent {
-  flex: 1;
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.timeRemainingLabel {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.timeRemainingValue {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.timeRemainingBanner.urgent .timeRemainingLabel {
+  color: #92400e;
+}
+
+.timeRemainingBanner.urgent .timeRemainingValue {
+  color: #d97706;
+}
+
+.timeRemainingBanner.normal .timeRemainingLabel {
+  color: #0369a1;
+}
+
+.timeRemainingBanner.normal .timeRemainingValue {
+  color: #0284c7;
+}
+
+@keyframes subtleGlow {
+  0% { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); }
+  100% { box-shadow: 0 8px 16px rgba(245, 158, 11, 0.2); }
+}
+
+/* Remove old time remaining styles */
+.timeRemainingCard {
+  display: none;
+}
+
+.timeRemaining {
+  display: none;
+}
+
+.timeRemainingIcon {
+  display: none;
 }
 
 .timeRemainingText {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #0369a1;
-  margin-bottom: 4px;
+  display: none;
 }
 
 .timeRemainingDetail {
-  font-size: 1rem;
-  color: #0284c7;
-  font-weight: 500;
+  display: none;
 }
 
 .timeRemainingUrgent {
-  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%) !important;
-  border-color: #f59e0b !important;
-  animation: glow 2s ease-in-out infinite alternate;
+  display: none;
 }
 
-.timeRemainingUrgent .timeRemainingIcon {
-  color: #f59e0b;
-  animation: bounce 1s infinite;
-}
-
-.timeRemainingUrgent .timeRemainingText {
-  color: #d97706 !important;
-}
-
-.timeRemainingUrgent .timeRemainingDetail {
-  color: #f59e0b !important;
-}
-
-.timeRemainingNormal .timeRemainingIcon {
-  color: #0ea5e9;
+.timeRemainingNormal {
+  display: none;
 }
 
 /* Actions */
@@ -318,10 +360,11 @@
   gap: 12px;
 }
 
+/* Modern Professional Action Buttons */
 .actionBtn {
-  padding: 14px 20px;
+  padding: 16px 28px;
   border: none;
-  border-radius: 10px;
+  border-radius: 12px;
   font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
@@ -329,9 +372,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 10px;
   position: relative;
   overflow: hidden;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
 }
 
 .actionBtn:hover {
@@ -341,36 +387,37 @@
 .actionBtn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+  transform: none;
 }
 
 .joinBtn {
-  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   color: white;
-  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
 }
 
 .joinBtn:hover {
-  box-shadow: 0 6px 20px rgba(5, 150, 105, 0.4);
+  box-shadow: 0 6px 24px rgba(16, 185, 129, 0.4);
 }
 
 .cancelBtn {
   background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
   color: white;
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.3);
 }
 
 .cancelBtn:hover {
-  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+  box-shadow: 0 6px 24px rgba(239, 68, 68, 0.4);
 }
 
 .backToListBtn {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
   color: white;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
 }
 
 .backToListBtn:hover {
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 6px 24px rgba(59, 130, 246, 0.4);
 }
 
 /* Button Spinner */
@@ -520,8 +567,16 @@
     text-align: left;
   }
   
-  .timeRemainingText {
-    font-size: 1.25rem;
+  .timeRemainingContent {
+    padding: 16px 20px;
+  }
+  
+  .timeRemainingValue {
+    font-size: 1.5rem;
+  }
+  
+  .timeRemainingLabel {
+    font-size: 0.8rem;
   }
   
   .actionsGrid {
@@ -548,12 +603,16 @@
     padding: 16px;
   }
   
-  .timeRemainingIcon {
-    font-size: 1.5rem;
+  .timeRemainingContent {
+    padding: 12px 16px;
   }
   
-  .timeRemainingText {
-    font-size: 1.125rem;
+  .timeRemainingValue {
+    font-size: 1.25rem;
+  }
+  
+  .timeRemainingLabel {
+    font-size: 0.75rem;
   }
 }
 

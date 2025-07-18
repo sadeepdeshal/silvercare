@@ -31,6 +31,11 @@ const AllAppointments = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const appointmentsPerPage = 6;
 
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -391,45 +396,38 @@ const AllAppointments = () => {
                 </div>
 
                 <div className={styles.appointmentDetails}>
-                  <div className={styles.detailRow}>
-                    <span className={styles.detailLabel}>📅 Date:</span>
-                    <span className={styles.detailValue}>{formatDate(appointment.date_time)}</span>
-                  </div>
-                  <div className={styles.detailRow}>
-                    <span className={styles.detailLabel}>🕐 Time:</span>
-                    <span className={styles.detailValue}>{formatTime(appointment.date_time)}</span>
-                  </div>
-                  {isUpcomingAppointment(appointment) && (
-                    <div className={styles.timeRemainingContainer}>
-                      <div className={`${styles.timeRemaining} ${
-                        getTimeRemaining(appointment.date_time).urgent ? styles.timeRemainingUrgent : styles.timeRemainingNormal
+                  <div className={styles.appointmentMeta}>
+                    <div className={styles.dateTimeGroup}>
+                      <div className={styles.dateInfo}>
+                        <span className={styles.dateText}>{formatDate(appointment.date_time)}</span>
+                      </div>
+                      <div className={styles.timeInfo}>
+                        <span className={styles.timeText}>{formatTime(appointment.date_time)}</span>
+                      </div>
+                    </div>
+                    <div className={styles.typeIndicator}>
+                      <span className={`${styles.typeChip} ${
+                        appointment.appointment_type === 'online' 
+                          ? styles.onlineChip 
+                          : styles.physicalChip
                       }`}>
-                        <div className={styles.timeRemainingIcon}>⏰</div>
-                        <div className={styles.timeRemainingContent}>
-                          <div className={styles.timeRemainingText}>
-                            {getTimeRemaining(appointment.date_time).text}
-                          </div>
-                          <div className={styles.timeRemainingDetail}>
-                            {getTimeRemaining(appointment.date_time).detail}
-                          </div>
+                        {appointment.appointment_type === 'online' ? 'Online' : 'Physical'}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  {isUpcomingAppointment(appointment) && (
+                    <div className={styles.timeRemainingBanner}>
+                      <div className={`${styles.timeRemainingContent} ${
+                        getTimeRemaining(appointment.date_time).urgent ? styles.urgent : styles.normal
+                      }`}>
+                        <div className={styles.timeRemainingLabel}>Starts in</div>
+                        <div className={styles.timeRemainingValue}>
+                          {getTimeRemaining(appointment.date_time).text}
                         </div>
                       </div>
                     </div>
                   )}
-                  <div className={styles.detailRow}>
-                    <span className={styles.detailLabel}>📍 Type:</span>
-                    <span className={`${styles.detailValue} ${
-                      appointment.appointment_type === 'online' 
-                        ? styles.onlineType 
-                        : styles.physicalType
-                    }`}>
-                      {appointment.appointment_type === 'online' ? '💻 Online' : '🏥 Physical'}
-                    </span>
-                  </div>
-                  <div className={styles.detailRow}>
-                    <span className={styles.detailLabel}>🆔 License:</span>
-                    <span className={styles.detailValue}>{appointment.license_number || 'N/A'}</span>
-                  </div>
                 </div>
 
                 {/* Actions */}
