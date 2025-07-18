@@ -186,6 +186,30 @@ const AllAppointments = () => {
     return new Date(appointment.date_time) > new Date();
   };
 
+  const getTimeRemaining = (dateString) => {
+    if (!dateString) return { text: "N/A", urgent: false, detail: "" };
+    const now = new Date();
+    const appointmentDate = new Date(dateString);
+    const diffTime = appointmentDate - now;
+
+    if (diffTime < 0) return { text: "Past due", urgent: false, detail: "" };
+
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
+    const diffMinutes = Math.floor(diffTime / (1000 * 60));
+
+    if (diffDays > 7) return { text: `${diffDays} days`, urgent: false, detail: "More than a week away" };
+    if (diffDays > 1) return { text: `${diffDays} days`, urgent: false, detail: `${diffHours} hours remaining` };
+    if (diffHours > 2) return { text: `${diffHours} hours`, urgent: true, detail: "Today" };
+    if (diffHours > 0) return { text: `${diffHours}h ${diffMinutes % 60}m`, urgent: true, detail: "Very soon!" };
+    if (diffMinutes > 0) return { text: `${diffMinutes} minutes`, urgent: true, detail: "Starting soon!" };
+    return { text: "Now", urgent: true, detail: "Time to join!" };
+  };
+
+  const isUpcomingAppointment = (appointment) => {
+    return new Date(appointment.date_time) > new Date() && appointment.status !== "cancelled";
+  };
+
   if (loading) {
     return (
       <div className={styles.pageContainer}>
@@ -219,92 +243,120 @@ const AllAppointments = () => {
       <Navbar />
       
       <div className={styles.contentContainer}>
-        {/* Header */}
-        <div className={styles.header}>
-          <div className={styles.headerContent}>
-            <button 
-              onClick={() => navigate("/elder/dashboard")}
-              className={styles.backBtn}
-            >
-              ← Back to Dashboard
-            </button>
-            <div className={styles.headerInfo}>
-              <h1>All Appointments</h1>
-              <p>Manage and view all your medical appointments</p>
+        {/* Summary Stats - moved to top */}
+        <div className={styles.summaryStats}>
+          <div className={styles.statCard}>
+            <div className={styles.statIcon}>📊</div>
+            <div className={styles.statContent}>
+              <h4>Total Appointments</h4>
+              <p>{appointments.length}</p>
+            </div>
+          </div>
+          <div className={styles.statCard}>
+            <div className={styles.statIcon}>⏰</div>
+            <div className={styles.statContent}>
+              <h4>Upcoming</h4>
+              <p>{appointments.filter(apt => new Date(apt.date_time) > new Date() && apt.status !== "cancelled").length}</p>
+            </div>
+          </div>
+          <div className={styles.statCard}>
+            <div className={styles.statIcon}>✅</div>
+            <div className={styles.statContent}>
+              <h4>Completed</h4>
+              <p>{appointments.filter(apt => apt.status === "completed").length}</p>
+            </div>
+          </div>
+          <div className={styles.statCard}>
+            <div className={styles.statIcon}>❌</div>
+            <div className={styles.statContent}>
+              <h4>Cancelled</h4>
+              <p>{appointments.filter(apt => apt.status === "cancelled").length}</p>
             </div>
           </div>
         </div>
 
         {/* Filters and Search */}
         <div className={styles.filtersContainer}>
-          <div className={styles.filtersRow}>
-            {/* Status Filter */}
-            <div className={styles.filterGroup}>
-              <label>Status:</label>
-              <div className={styles.statusFilters}>
-                {[
-                  { key: "all", label: "All", count: appointments.length },
-                  { key: "upcoming", label: "Upcoming", count: appointments.filter(apt => new Date(apt.date_time) > new Date() && apt.status !== "cancelled").length },
-                  { key: "past", label: "Past", count: appointments.filter(apt => new Date(apt.date_time) < new Date() || apt.status === "completed").length },
-                  { key: "cancelled", label: "Cancelled", count: appointments.filter(apt => apt.status === "cancelled").length }
-                ].map((filter) => (
-                  <button
-                    key={filter.key}
-                    className={`${styles.filterBtn} ${
-                      activeFilter === filter.key ? styles.activeFilter : ""
-                    }`}
-                    onClick={() => setActiveFilter(filter.key)}
-                  >
-                    {filter.label} ({filter.count})
-                  </button>
-                ))}
+          <div className={styles.filtersHeader}>
+            <h2>All Appointments</h2>
+            <button 
+              onClick={() => navigate("/elder/dashboard")}
+              className={styles.backBtn}
+            >
+              ← Back to Dashboard
+            </button>
+          </div>
+          
+          <div className={styles.filtersContent}>
+            <div className={styles.filtersRow}>
+              {/* Status Filter */}
+              <div className={styles.filterGroup}>
+                <label>Filter by Status:</label>
+                <div className={styles.statusFilters}>
+                  {[
+                    { key: "all", label: "All", count: appointments.length },
+                    { key: "upcoming", label: "Upcoming", count: appointments.filter(apt => new Date(apt.date_time) > new Date() && apt.status !== "cancelled").length },
+                    { key: "past", label: "Past", count: appointments.filter(apt => new Date(apt.date_time) < new Date() || apt.status === "completed").length },
+                    { key: "cancelled", label: "Cancelled", count: appointments.filter(apt => apt.status === "cancelled").length }
+                  ].map((filter) => (
+                    <button
+                      key={filter.key}
+                      className={`${styles.filterBtn} ${
+                        activeFilter === filter.key ? styles.activeFilter : ""
+                      }`}
+                      onClick={() => setActiveFilter(filter.key)}
+                    >
+                      {filter.label} ({filter.count})
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 
-            {/* Search */}
-            <div className={styles.filterGroup}>
-              <label>Search:</label>
-              <input
-                type="text"
-                placeholder="Search by doctor name or specialization..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className={styles.searchInput}
-              />
-            </div>
-          </div>
+            <div className={styles.filtersRow}>
+              {/* Search */}
+              <div className={styles.filterGroup}>
+                <label>Search:</label>
+                <input
+                  type="text"
+                  placeholder="Search by doctor name or specialization..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className={styles.searchInput}
+                />
+              </div>
 
-          <div className={styles.filtersRow}>
-            {/* Date Filter */}
-            <div className={styles.filterGroup}>
-              <label>Date:</label>
-              <input
-                type="date"
-                value={dateFilter}
-                onChange={(e) => setDateFilter(e.target.value)}
-                className={styles.dateInput}
-              />
-            </div>
+              {/* Date Filter */}
+              <div className={styles.filterGroup}>
+                <label>Filter by Date:</label>
+                <input
+                  type="date"
+                  value={dateFilter}
+                  onChange={(e) => setDateFilter(e.target.value)}
+                  className={styles.dateInput}
+                />
+              </div>
 
-            {/* Type Filter */}
-            <div className={styles.filterGroup}>
-              <label>Type:</label>
-              <select
-                value={typeFilter}
-                onChange={(e) => setTypeFilter(e.target.value)}
-                className={styles.selectInput}
-              >
-                <option value="all">All Types</option>
-                <option value="online">Online</option>
-                <option value="physical">Physical</option>
-              </select>
-            </div>
+              {/* Type Filter */}
+              <div className={styles.filterGroup}>
+                <label>Filter by Type:</label>
+                <select
+                  value={typeFilter}
+                  onChange={(e) => setTypeFilter(e.target.value)}
+                  className={styles.selectInput}
+                >
+                  <option value="all">All Types</option>
+                  <option value="online">Online</option>
+                  <option value="physical">Physical</option>
+                </select>
+              </div>
 
-            {/* Clear Filters */}
-            <div className={styles.filterGroup}>
-              <button onClick={clearFilters} className={styles.clearBtn}>
-                Clear Filters
-              </button>
+              {/* Clear Filters */}
+              <div className={styles.filterGroup}>
+                <button onClick={clearFilters} className={styles.clearBtn}>
+                  Clear All Filters
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -347,6 +399,23 @@ const AllAppointments = () => {
                     <span className={styles.detailLabel}>🕐 Time:</span>
                     <span className={styles.detailValue}>{formatTime(appointment.date_time)}</span>
                   </div>
+                  {isUpcomingAppointment(appointment) && (
+                    <div className={styles.timeRemainingContainer}>
+                      <div className={`${styles.timeRemaining} ${
+                        getTimeRemaining(appointment.date_time).urgent ? styles.timeRemainingUrgent : styles.timeRemainingNormal
+                      }`}>
+                        <div className={styles.timeRemainingIcon}>⏰</div>
+                        <div className={styles.timeRemainingContent}>
+                          <div className={styles.timeRemainingText}>
+                            {getTimeRemaining(appointment.date_time).text}
+                          </div>
+                          <div className={styles.timeRemainingDetail}>
+                            {getTimeRemaining(appointment.date_time).detail}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                   <div className={styles.detailRow}>
                     <span className={styles.detailLabel}>📍 Type:</span>
                     <span className={`${styles.detailValue} ${
@@ -359,13 +428,13 @@ const AllAppointments = () => {
                   </div>
                   <div className={styles.detailRow}>
                     <span className={styles.detailLabel}>🆔 License:</span>
-                    <span className={styles.detailValue}>{appointment.license_number}</span>
+                    <span className={styles.detailValue}>{appointment.license_number || 'N/A'}</span>
                   </div>
                 </div>
 
                 {/* Actions */}
                 <div className={styles.cardActions}>
-                  {appointment.appointment_type === 'online' && (
+                  {appointment.appointment_type === 'online' && isUpcomingAppointment(appointment) && (
                     <button
                       onClick={() => handleJoinAppointment(appointment.appointment_id)}
                       className={styles.joinBtn}
@@ -381,7 +450,10 @@ const AllAppointments = () => {
                       ❌ Cancel
                     </button>
                   )}
-                  <button className={styles.detailsBtn}>
+                  <button 
+                    onClick={() => navigate(`/elder/appointment/${appointment.appointment_id}`)}
+                    className={styles.detailsBtn}
+                  >
                     📋 View Details
                   </button>
                 </div>
@@ -454,38 +526,6 @@ const AllAppointments = () => {
             </button>
           </div>
         )}
-
-        {/* Summary Stats */}
-        <div className={styles.summaryStats}>
-          <div className={styles.statCard}>
-            <div className={styles.statIcon}>📊</div>
-            <div className={styles.statContent}>
-              <h4>Total Appointments</h4>
-              <p>{appointments.length}</p>
-            </div>
-          </div>
-          <div className={styles.statCard}>
-            <div className={styles.statIcon}>⏰</div>
-            <div className={styles.statContent}>
-              <h4>Upcoming</h4>
-              <p>{appointments.filter(apt => new Date(apt.date_time) > new Date() && apt.status !== "cancelled").length}</p>
-            </div>
-          </div>
-          <div className={styles.statCard}>
-            <div className={styles.statIcon}>✅</div>
-            <div className={styles.statContent}>
-              <h4>Completed</h4>
-              <p>{appointments.filter(apt => apt.status === "completed").length}</p>
-            </div>
-          </div>
-          <div className={styles.statCard}>
-            <div className={styles.statIcon}>❌</div>
-            <div className={styles.statContent}>
-              <h4>Cancelled</h4>
-              <p>{appointments.filter(apt => apt.status === "cancelled").length}</p>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );
