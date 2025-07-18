@@ -26,6 +26,7 @@ import Appointments from './pages/familemember/appointments';
 
 
 import DoctorDashboard from './pages/doctor/dashboard';
+import DoctorProfile from './pages/doctor/profile';
 import ElderDashboard from './pages/elder/dashboard';
 import { Login } from './pages/login';
 import { Roles } from './pages/roles';
@@ -154,6 +155,12 @@ function App() {
           } />
 
               <Route path="/doctor/profile" element={
+            <ProtectedRoute allowedRoles={['doctor']}>
+              <DoctorProfile />
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/doctor/profile" element={
             <ProtectedRoute allowedRoles={['doctor']}>
               <DoctorProfile />
             </ProtectedRoute>

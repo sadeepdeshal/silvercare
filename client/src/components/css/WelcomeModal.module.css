@@ -1,0 +1,151 @@
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modalContent {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  max-width: 500px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from { 
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to { 
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.modalHeader {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.modalHeader h2 {
+  color: #2c3e50;
+  margin: 0 0 1rem 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.welcomeIcon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.modalBody {
+  margin-bottom: 2rem;
+}
+
+.modalBody p {
+  color: #555;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.features {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.feature {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border-left: 4px solid #3498db;
+}
+
+.featureIcon {
+  font-size: 1.2rem;
+  width: 24px;
+  text-align: center;
+}
+
+.modalFooter {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.skipButton, .startButton {
+  flex: 1;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.skipButton {
+  background: #e9ecef;
+  color: #6c757d;
+}
+
+.skipButton:hover {
+  background: #dee2e6;
+  color: #495057;
+}
+
+.startButton {
+  background: #3498db;
+  color: white;
+}
+
+.startButton:hover {
+  background: #2980b9;
+  transform: translateY(-1px);
+}
+
+.startButton:active {
+  transform: translateY(0);
+}
+
+@media (max-width: 480px) {
+  .modalContent {
+    padding: 1.5rem;
+    margin: 1rem;
+  }
+  
+  .modalHeader h2 {
+    font-size: 1.3rem;
+  }
+  
+  .modalFooter {
+    flex-direction: column;
+  }
+  
+  .skipButton, .startButton {
+    width: 100%;
+  }
+}
