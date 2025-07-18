@@ -25,12 +25,13 @@ import OnlineAppointment from "./pages/familemember/online-appointment";
 import Appointments from "./pages/familemember/appointments";
 import AllAppointments from "./pages/elder/appointments";
 
-import DoctorDashboard from "./pages/doctor/dashboard";
-import ElderDashboard from "./pages/elder/dashboard";
-import { Login } from "./pages/login";
-import { Roles } from "./pages/roles";
-import { AuthProvider } from "./context/AuthContext";
-import ProtectedRoute from "./components/ProtectedRoute";
+import DoctorDashboard from './pages/doctor/dashboard';
+import DoctorProfile from './pages/doctor/profile';
+import ElderDashboard from './pages/elder/dashboard';
+import { Login } from './pages/login';
+import { Roles } from './pages/roles';
+import { AuthProvider } from './context/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
 
 // Import ElderDoctors component
 import ElderDoctors from "./pages/familemember/elder-doctors";
@@ -177,6 +178,7 @@ function App() {
           />
 
           {/* Add the elder doctors route - THIS IS THE IMPORTANT ONE */}
+
           <Route
             path="/family-member/elder/:elderId/doctors"
             element={
@@ -203,6 +205,7 @@ function App() {
               </ProtectedRoute>
             }
           />
+
 
           {/* Fix the health professional route - change from healthproffesional to healthprofessional */}
           <Route

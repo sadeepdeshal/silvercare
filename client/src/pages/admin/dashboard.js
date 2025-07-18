@@ -29,8 +29,9 @@ const AdminDashboard = () => {
   const [dataLoading, setDataLoading] = useState(true);
   const [error, setError] = useState(null);
   
-  // Add state for modal
+  // Add state for modals
   const [showPendingDoctorsModal, setShowPendingDoctorsModal] = useState(false);
+  const [showMonthlySignupsModal, setShowMonthlySignupsModal] = useState(false);
 
   // Protect the dashboard route
   useEffect(() => {
@@ -60,11 +61,7 @@ const AdminDashboard = () => {
         const response = await adminApi.getDashboardData();
         console.log('Dashboard API response:', response);
         
-
-
         if (response.success) {
-
-
           // Ensure all required properties exist with default values
           const safeData = {
             newBookings: response.data.newBookings || 0,
@@ -82,7 +79,6 @@ const AdminDashboard = () => {
             }
           };
           
-
           console.log('Safe data:', safeData);
           console.log('Pending doctors count:', safeData.pendingDoctors.length);
           setDashboardData(safeData);
@@ -208,13 +204,13 @@ const AdminDashboard = () => {
     }
   };
 
-  // Modify the handlePendingDoctorsClick function
+  // Handle pending doctors click
   const handlePendingDoctorsClick = async () => {
     console.log('Pending doctors clicked!');
     setShowPendingDoctorsModal(true);
     
     // If we don't have pending doctors data, fetch it separately
-    if (pendingDoctors.length === 0 && stats.pending_doctors > 0) {
+    if (dashboardData.pendingDoctors.length === 0 && dashboardData.stats.pending_doctors > 0) {
       console.log('Fetching pending doctors separately...');
       setDataLoading(true);
       
@@ -235,8 +231,18 @@ const AdminDashboard = () => {
     }
   };
 
+  // Handle monthly signups click
+  const handleMonthlySignupsClick = () => {
+    console.log('Monthly signups clicked!');
+    setShowMonthlySignupsModal(true);
+  };
+
   const closePendingDoctorsModal = () => {
     setShowPendingDoctorsModal(false);
+  };
+
+  const closeMonthlySignupsModal = () => {
+    setShowMonthlySignupsModal(false);
   };
 
   // Show loading while checking authentication
@@ -299,14 +305,16 @@ const AdminDashboard = () => {
               <p className={styles.statLabel}>New Bookings (7 days)</p>
             </div>
           </div>
-          <div className={styles.statCard}>
+          <div 
+            className={`${styles.statCard} ${styles.clickableCard}`} 
+            onClick={handleMonthlySignupsClick}
+          >
             <div className={styles.statIcon}>👥</div>
             <div className={styles.statContent}>
               <h3 className={styles.statNumber}>{dataLoading ? '...' : dashboardData.monthlySignups}</h3>
-              <p className={styles.statLabel}>Monthly Signups</p>
+              <p className={styles.statLabel}>Monthly Signups (Click to view)</p>
             </div>
           </div>
-          {/* Make this stat card clickable */}
           <div 
             className={`${styles.statCard} ${styles.clickableCard}`} 
             onClick={handlePendingDoctorsClick}
@@ -355,7 +363,6 @@ const AdminDashboard = () => {
           <p>⚠️ {error}</p>
         </div>
       )}
-
 
       {/* Main Content Section - Quick Actions and Recent Activity Side by Side */}
       <div className={styles.mainContentSection}>
@@ -421,7 +428,7 @@ const AdminDashboard = () => {
                     <div key={registration.user_id || index} className={styles.activityItem}>
                       <div className={styles.activityIcon}>
                         {registration.role === 'doctor' ? '👨‍⚕️' : 
-                         registration.role === 'family_member' ? '👨‍👩‍👧‍👦' :
+                         registration.roleDog === 'family_member' ? '👨‍👩‍👧‍👦' :
                          registration.role === 'caregiver' ? '🤝' :
                          registration.role === 'elder' ? '👴' : '👤'}
                       </div>
@@ -589,6 +596,60 @@ const AdminDashboard = () => {
                   <p>All doctor applications have been processed.</p>
                   <p><small>Debug: pendingDoctors.length = {pendingDoctors.length}</small></p>
                   <p><small>Debug: stats.pending_doctors = {stats.pending_doctors}</small></p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Monthly Signups Modal */}
+      {showMonthlySignupsModal && (
+        <div className={styles.modalOverlay} onClick={closeMonthlySignupsModal}>
+          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <h2>📈 Monthly Signups</h2>
+              <button className={styles.closeButton} onClick={closeMonthlySignupsModal}>
+                ✕
+              </button>
+            </div>
+            
+            <div className={styles.modalBody}>
+              {dataLoading ? (
+                <div className={styles.modalLoading}>
+                  <div className={styles.loadingSpinner}></div>
+                  <p>Loading monthly signups...</p>
+                </div>
+              ) : recentRegistrations.length > 0 ? (
+                <div className={styles.modalDoctorsList}>
+                  {recentRegistrations.map((registration, index) => (
+                    <div key={registration.user_id || index} className={styles.modalDoctorCard}>
+                      <div className={styles.modalDoctorInfo}>
+                        <div className={styles.modalDoctorHeader}>
+                          <h3>{registration.name || 'Unknown Name'}</h3>
+                          <span className={styles.modalDoctorBadge}>
+                            {registration.role === 'doctor' ? '👨‍⚕️ Doctor' : 
+                             registration.role === 'family_member' ? '👨‍👩‍👧‍👦 Family Member' :
+                             registration.role === 'caregiver' ? '🤝 Caregiver' :
+                             registration.role === 'elder' ? '👴 Elder' : '👤 User'}
+                          </span>
+                        </div>
+                        <div className={styles.modalDoctorDetails}>
+                          <p><strong>📧 Email:</strong> {registration.email || 'N/A'}</p>
+                          <p><strong>📅 Registered:</strong> {registration.created_at ? new Date(registration.created_at).toLocaleDateString() : 'N/A'}</p>
+                          <p><strong>📋 Role:</strong> {registration.role?.replace('_', ' ') || 'N/A'}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className={styles.modalEmptyState}>
+                  <div className={styles.emptyStateIcon}>📝</div>
+                  <h3>No Recent Signups</h3>
+                  <p>No users have registered in the past month.</p>
+                  <p><small>Debug: recentRegistrations.length = {recentRegistrations.length}</small></p>
+                  <p><small>Debug: monthlySignups = {dashboardData.monthlySignups}</small></p>
                 </div>
               )}
             </div>
