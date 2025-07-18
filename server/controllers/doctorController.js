@@ -130,6 +130,33 @@ const getDoctorByUserId = async (req, res) => {
   }
 };
 
+// Update doctor profile
+const updateDoctorProfile = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const profileData = req.body;
+    
+    if (!userId) {
+      return res.status(400).json({ error: 'User ID is required' });
+    }
+    
+    // Validate required fields
+    if (!profileData.name || !profileData.email) {
+      return res.status(400).json({ error: 'Name and email are required' });
+    }
+    
+    const updatedProfile = await doctorModel.updateDoctorProfile(userId, profileData);
+    res.json({ 
+      success: true, 
+      message: 'Profile updated successfully',
+      doctor: updatedProfile 
+    });
+  } catch (error) {
+    console.error('Error updating doctor profile:', error);
+    res.status(500).json({ error: 'Error updating doctor profile' });
+  }
+};
+
 module.exports = {
   getDoctorAppointments,
   getUpcomingAppointments,
@@ -137,5 +164,6 @@ module.exports = {
   getNextAppointment,
   updateAppointmentStatus,
   getDoctorDashboard,
-  getDoctorByUserId
+  getDoctorByUserId,
+  updateDoctorProfile
 };

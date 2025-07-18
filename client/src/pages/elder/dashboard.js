@@ -8,7 +8,7 @@ import {
   getUpcomingAppointments,
   getPastAppointments,
   cancelAppointment,
-  rescheduleAppointment,
+  joinAppointment,
 } from "../../services/elderApi2";
 import styles from "../../components/css/elder/dashboard.module.css";
 
@@ -86,9 +86,10 @@ const ElderDashboard = () => {
     try {
       setAppointmentsLoading(true);
 
+      // Fetch only 2 appointments for dashboard display
       const [upcomingResponse, pastResponse] = await Promise.all([
-        getUpcomingAppointments(elderId),
-        getPastAppointments(elderId),
+        getUpcomingAppointments(elderId, { params: { limit: 2 } }),
+        getPastAppointments(elderId, { params: { limit: 2 } }),
       ]);
 
       setUpcomingAppointments(upcomingResponse.data.appointments || []);
@@ -100,9 +101,9 @@ const ElderDashboard = () => {
     }
   };
 
-  const handleCancelAppointment = async (appointmentId, reason) => {
+  const handleCancelAppointment = async (appointmentId) => {
     try {
-      await cancelAppointment(elderDetails.elder_id, appointmentId, { reason });
+      await cancelAppointment(elderDetails.elder_id, appointmentId);
       // Refresh appointments and stats
       await Promise.all([
         fetchAppointments(elderDetails.elder_id),
@@ -115,30 +116,26 @@ const ElderDashboard = () => {
     }
   };
 
-  const handleRescheduleAppointment = async (
-    appointmentId,
-    newDateTime,
-    reason
-  ) => {
+  const handleJoinAppointment = async (appointmentId) => {
     try {
-      await rescheduleAppointment(elderDetails.elder_id, appointmentId, {
-        newDateTime,
-        reason,
-      });
-      // Refresh appointments and stats
-      await Promise.all([
-        fetchAppointments(elderDetails.elder_id),
-        fetchDashboardStats(elderDetails.elder_id),
-      ]);
-      alert("Appointment rescheduled successfully");
+      const response = await joinAppointment(elderDetails.elder_id, appointmentId);
+      if (response.data.success) {
+        // Open meeting link in new tab
+        window.open(response.data.meetingLink, '_blank');
+      }
     } catch (error) {
-      console.error("Error rescheduling appointment:", error);
-      alert("Failed to reschedule appointment");
+      console.error("Error joining appointment:", error);
+      alert(error.response?.data?.error || "Failed to join appointment");
     }
   };
 
   const handleViewProfile = () => {
     navigate("/elder/profile");
+  };
+
+  const handleShowAllAppointments = () => {
+    // For now, navigate to an empty page as requested
+    navigate("/elder/appointments");
   };
 
   const formatDate = (dateString) => {
@@ -241,6 +238,16 @@ const ElderDashboard = () => {
               {formatTime(appointment.date_time)}
             </span>
           </div>
+          <div className={styles.typeInfo}>
+            <span className={styles.typeLabel}>Type</span>
+            <span className={`${styles.typeValue} ${
+              appointment.appointment_type === 'online' 
+                ? styles.onlineType 
+                : styles.physicalType
+            }`}>
+              {appointment.appointment_type === 'online' ? '💻 Online' : '🏥 Physical'}
+            </span>
+          </div>
         </div>
 
         {activeTab === "upcoming" && (
@@ -253,48 +260,32 @@ const ElderDashboard = () => {
         )}
       </div>
 
-      {appointment.notes && (
-        <div className={styles.appointmentNotes}>
-          <span className={styles.notesLabel}>📝 Notes:</span>
-          <p>{appointment.notes}</p>
-        </div>
-      )}
-
       {activeTab === "upcoming" && appointment.status !== "cancelled" && (
         <div className={styles.appointmentActions}>
-          <button
-            className={styles.rescheduleBtn}
-            onClick={() => {
-              const newDateTime = prompt(
-                "Enter new date and time (YYYY-MM-DD HH:MM):"
-              );
-              const reason = prompt("Reason for rescheduling:");
-              if (newDateTime) {
-                handleRescheduleAppointment(
-                  appointment.appointment_id,
-                  newDateTime,
-                  reason
-                );
-              }
-            }}
-          >
-            📅 Reschedule
-          </button>
-          <button
-            className={styles.cancelBtn}
-            onClick={() => {
-              const reason = prompt("Reason for cancellation:");
-              if (
-                window.confirm(
-                  "Are you sure you want to cancel this appointment?"
-                )
-              ) {
-                handleCancelAppointment(appointment.appointment_id, reason);
-              }
-            }}
-          >
-            ❌ Cancel
-          </button>
+          {appointment.appointment_type === 'online' && (
+            <button
+              className={styles.joinBtn}
+              onClick={() => handleJoinAppointment(appointment.appointment_id)}
+            >
+              🎥 Join Meeting
+            </button>
+          )}
+          {appointment.appointment_type === 'online' && (
+            <button
+              className={styles.cancelBtn}
+              onClick={() => {
+                if (
+                  window.confirm(
+                    "Are you sure you want to cancel this appointment?"
+                  )
+                ) {
+                  handleCancelAppointment(appointment.appointment_id);
+                }
+              }}
+            >
+              ❌ Cancel
+            </button>
+          )}
         </div>
       )}
     </div>
@@ -423,7 +414,7 @@ const ElderDashboard = () => {
             </div>
           </div>
 
-          {/* Family Member Card */}
+                    {/* Family Member Card */}
           {elderDetails?.family_member && (
             <div className={styles.familyMemberCard}>
               <div className={styles.familyMemberHeader}>
@@ -505,6 +496,16 @@ const ElderDashboard = () => {
                 )}
               </div>
             )}
+            
+            {/* Show All Button */}
+            <div className={styles.showAllContainer}>
+              <button 
+                className={styles.showAllBtn}
+                onClick={handleShowAllAppointments}
+              >
+                Show All Appointments
+              </button>
+            </div>
           </div>
         </div>
 
@@ -561,3 +562,4 @@ const ElderDashboard = () => {
 };
 
 export default ElderDashboard;
+
