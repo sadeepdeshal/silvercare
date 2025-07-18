@@ -36,7 +36,7 @@ router.post('/:caregiverId/request', createCareRequest);
 // Update care request status
 router.put('/requests/:requestId/status', updateCareRequestStatus);
 
-//get assigned elders
+//get assigned elders(role caregiver)
 router.get('/:id/assigned-elders', getAssignedElders);
 
 //Number of families assigned to specific caregiver

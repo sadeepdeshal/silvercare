@@ -181,7 +181,7 @@ export const caregiverApi = {
     }
   },
 
-  // Get assigned elders for caregiver
+  // Get assigned elders for caregiver(role caregiver)
   fetchAssignedElders: async (caregiverId) => {
     try {
       const response = await axios.get(`${API_BASE}/${caregiverId}/assigned-elders`);
@@ -192,7 +192,7 @@ export const caregiverApi = {
     }
   },
 
-  // Get number of assigned families for caregiver
+  // Get number of assigned families for caregiver(role caregiver)
   getAssignedFamiliesCount: async (caregiverId) => {
     try {
       const response = await axios.get(`${API_BASE}/assigned-families/${caregiverId}`);

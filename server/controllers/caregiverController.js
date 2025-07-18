@@ -477,16 +477,29 @@ const updateCareRequestStatus = async (req, res) => {
   }
 };
 
-//get assigner elders
+
+//get assigner elders(role caregiver)
 const getAssignedElders = async (req, res) => {
   const caregiverId = req.params.id;
 
   try {
     const query = `
-      SELECT e.name, e.age, c.duration, c.end_date
-      FROM elder e
-      JOIN carelog c ON e.elder_id = c.elder_id
-      WHERE c.caregiver_id = $1
+      SELECT 
+          e.name,
+          e.age,
+          c.duration,
+          c.end_sate,
+          cg.caregiver_id,
+          u.user_id
+      FROM 
+          carelog c
+      JOIN 
+          elder e ON c.elder_id = e.elder_id
+      JOIN 
+          caregiver cg ON c.caregiver_id = cg.caregiver_id
+      JOIN 
+          "User" u ON cg.user_id = u.user_id;
+
     `;
     const result = await pool.query(query, [caregiverId]);
 

@@ -4,8 +4,11 @@ import Navbar from '../../components/navbar';
 import styles from "../../components/css/caregiver/dashboard.module.css";
 import CaregiverLayout from '../../components/CaregiverLayout';
 import caregiverApi from '../../services/caregiverApi';
+import { useAuth } from '../../context/AuthContext';
+
 
 const CaregiverDashboard = () => {
+  const { user } = useAuth(); // <-- pulls from logged-in context
   const [elders, setElders] = useState([]);
   const [activities, setActivities] = useState([]);
   const [messages, setMessages] = useState([]);
@@ -13,8 +16,12 @@ const CaregiverDashboard = () => {
   const [alerts, setAlerts] = useState([]);
   const [families, setFamilies] = useState([]);
 
+
   useEffect(() => {
     //const caregiverId = 5; // TODO: Replace with dynamic ID from session/auth
+    if (!user || !user.caregiver_id) return;
+
+    const caregiverId = user.caregiver_id;
 
     // Fetch assigned elders
     caregiverApi.fetchAssignedElders(caregiverId).then((data) => {
