@@ -248,38 +248,6 @@ const AllAppointments = () => {
       <Navbar />
       
       <div className={styles.contentContainer}>
-        {/* Summary Stats - moved to top */}
-        <div className={styles.summaryStats}>
-          <div className={styles.statCard}>
-            <div className={styles.statIcon}>📊</div>
-            <div className={styles.statContent}>
-              <h4>Total Appointments</h4>
-              <p>{appointments.length}</p>
-            </div>
-          </div>
-          <div className={styles.statCard}>
-            <div className={styles.statIcon}>⏰</div>
-            <div className={styles.statContent}>
-              <h4>Upcoming</h4>
-              <p>{appointments.filter(apt => new Date(apt.date_time) > new Date() && apt.status !== "cancelled").length}</p>
-            </div>
-          </div>
-          <div className={styles.statCard}>
-            <div className={styles.statIcon}>✅</div>
-            <div className={styles.statContent}>
-              <h4>Completed</h4>
-              <p>{appointments.filter(apt => apt.status === "completed").length}</p>
-            </div>
-          </div>
-          <div className={styles.statCard}>
-            <div className={styles.statIcon}>❌</div>
-            <div className={styles.statContent}>
-              <h4>Cancelled</h4>
-              <p>{appointments.filter(apt => apt.status === "cancelled").length}</p>
-            </div>
-          </div>
-        </div>
-
         {/* Filters and Search */}
         <div className={styles.filtersContainer}>
           <div className={styles.filtersHeader}>
@@ -296,7 +264,6 @@ const AllAppointments = () => {
             <div className={styles.filtersRow}>
               {/* Status Filter */}
               <div className={styles.filterGroup}>
-                <label>Filter by Status:</label>
                 <div className={styles.statusFilters}>
                   {[
                     { key: "all", label: "All", count: appointments.length },
