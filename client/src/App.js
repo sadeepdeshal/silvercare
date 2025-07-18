@@ -29,9 +29,7 @@ import Payment from './pages/familemember/payment';
 import PaymentSuccess from './pages/familemember/payment-success';
 
 
-import PhysicalAppointment from "./pages/familemember/physical-appointment";
-import OnlineAppointment from "./pages/familemember/online-appointment";
-import Appointments from "./pages/familemember/appointments";
+
 import AllAppointments from "./pages/elder/appointments";
 
 

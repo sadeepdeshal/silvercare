@@ -21,7 +21,7 @@ const {
   cancelTemporaryBooking,
   cleanupExpiredBookings
 
-  getBlockedTimeSlots
+ 
 
 } = require('../controllers/elderController');
 
