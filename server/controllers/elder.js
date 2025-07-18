@@ -1,4 +1,41 @@
 const pool = require("../db");
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+
+// Configure multer for file uploads
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const uploadPath = 'uploads/profiles/';
+    // Create directory if it doesn't exist
+    if (!fs.existsSync(uploadPath)) {
+      fs.mkdirSync(uploadPath, { recursive: true });
+    }
+    cb(null, uploadPath);
+  },
+  filename: function (req, file, cb) {
+    // Generate unique filename
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, 'profile-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const fileFilter = (req, file, cb) => {
+  // Check if file is an image
+  if (file.mimetype.startsWith('image/')) {
+    cb(null, true);
+  } else {
+    cb(new Error('Only image files are allowed!'), false);
+  }
+};
+
+const upload = multer({
+  storage: storage,
+  fileFilter: fileFilter,
+  limits: {
+    fileSize: 5 * 1024 * 1024 // 5MB limit
+  }
+});
 
 // Fetch elder details based on user email
 const getElderDetails = async (req, res) => {
@@ -22,6 +59,8 @@ const getElderDetails = async (req, res) => {
         e.profile_photo,
         e.email as elder_email,
         e.created_at as elder_created_at,
+        e.district,
+        e.age,
         u.user_id,
         u.name as user_name,
         u.phone as user_phone,
@@ -67,6 +106,8 @@ const getElderDetails = async (req, res) => {
       medical_conditions: elderData.medical_conditions,
       profile_photo: elderData.profile_photo,
       email: elderData.elder_email,
+      district: elderData.district,
+      age: elderData.age,
       user_details: {
         user_id: elderData.user_id,
         user_name: elderData.user_name,
@@ -93,6 +134,168 @@ const getElderDetails = async (req, res) => {
     res
       .status(500)
       .json({ error: "Server error while fetching elder details" });
+  }
+};
+
+// Update elder profile with file upload support
+const updateElderProfile = async (req, res) => {
+  const { elderId } = req.params;
+  const {
+    name,
+    dob,
+    gender,
+    contact,
+    address,
+    nic,
+    medical_conditions,
+    district
+  } = req.body;
+
+  console.log("Updating elder profile for ID:", elderId);
+  console.log("Request body:", req.body);
+  console.log("Uploaded file:", req.file);
+
+  try {
+    // Start transaction
+    await pool.query('BEGIN');
+
+    // Get current elder details to find user_id and current photo
+    const currentElderResult = await pool.query(
+      'SELECT * FROM elder WHERE elder_id = $1',
+      [elderId]
+    );
+
+    if (currentElderResult.rows.length === 0) {
+      await pool.query('ROLLBACK');
+      return res.status(404).json({
+        success: false,
+        error: 'Elder not found'
+      });
+    }
+
+    const currentElder = currentElderResult.rows[0];
+    
+    // Get user_id from User table using elder's email
+    const userResult = await pool.query(
+      'SELECT user_id FROM "User" WHERE LOWER(email) = LOWER($1)',
+      [currentElder.email]
+    );
+
+    if (userResult.rows.length === 0) {
+      await pool.query('ROLLBACK');
+      return res.status(404).json({
+        success: false,
+        error: 'Associated user not found'
+      });
+    }
+
+    const userId = userResult.rows[0].user_id;
+
+    // Handle profile photo
+    let profilePhotoName = currentElder.profile_photo;
+    if (req.file) {
+      // Delete old photo if it exists
+      if (currentElder.profile_photo) {
+        const oldPhotoPath = path.join('uploads/profiles/', currentElder.profile_photo);
+        if (fs.existsSync(oldPhotoPath)) {
+          fs.unlinkSync(oldPhotoPath);
+        }
+      }
+      profilePhotoName = req.file.filename;
+    }
+
+    // Calculate age from date of birth
+    let calculatedAge = null;
+    if (dob) {
+      const birthDate = new Date(dob);
+      const today = new Date();
+      calculatedAge = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+        calculatedAge--;
+      }
+    }
+
+    // Update elder table
+    const updateElderQuery = `
+      UPDATE elder 
+      SET 
+        name = COALESCE($1, name),
+        dob = COALESCE($2, dob),
+        gender = COALESCE($3, gender),
+        contact = COALESCE($4, contact),
+        address = COALESCE($5, address),
+        nic = COALESCE($6, nic),
+        medical_conditions = COALESCE($7, medical_conditions),
+        district = COALESCE($8, district),
+        profile_photo = COALESCE($9, profile_photo),
+        age = COALESCE($10, age)
+      WHERE elder_id = $11
+      RETURNING *
+    `;
+
+    const elderUpdateResult = await pool.query(updateElderQuery, [
+      name || null,
+      dob || null,
+      gender || null,
+      contact || null,
+      address || null,
+      nic || null,
+      medical_conditions || null,
+      district || null,
+      profilePhotoName,
+      calculatedAge,
+      elderId
+    ]);
+
+    // Update User table with same name and phone (contact)
+    const updateUserQuery = `
+      UPDATE "User" 
+      SET 
+        name = COALESCE($1, name),
+        phone = COALESCE($2, phone)
+      WHERE user_id = $3
+      RETURNING *
+    `;
+
+    const userUpdateResult = await pool.query(updateUserQuery, [
+      name || null,
+      contact || null,
+      userId
+    ]);
+
+    // Commit transaction
+    await pool.query('COMMIT');
+
+    console.log("Elder profile updated successfully");
+    console.log("Updated elder:", elderUpdateResult.rows[0]);
+    console.log("Updated user:", userUpdateResult.rows[0]);
+
+    res.json({
+      success: true,
+      message: 'Profile updated successfully',
+      elder: elderUpdateResult.rows[0],
+      user: userUpdateResult.rows[0]
+    });
+
+  } catch (err) {
+    // Rollback transaction on error
+    await pool.query('ROLLBACK');
+    
+    console.error("Error updating elder profile:", err);
+    
+    // Delete uploaded file if there was an error
+    if (req.file) {
+      const filePath = req.file.path;
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
+    }
+    
+    res.status(500).json({
+      success: false,
+      error: "Server error while updating profile"
+    });
   }
 };
 
@@ -198,7 +401,8 @@ const getElderAppointments = async (req, res) => {
         a.doctor_id,
         a.date_time,
         a.status,
-        a.notes,
+        a.appointment_type,
+        a.created_at,
         d.specialization,
         d.license_number,
         d.alternative_number,
@@ -226,9 +430,10 @@ const getElderAppointments = async (req, res) => {
   }
 };
 
-// Get upcoming appointments for an elder
+// Get upcoming appointments for an elder (limited to 2 for dashboard)
 const getUpcomingAppointments = async (req, res) => {
   const { elderId } = req.params;
+  const { limit } = req.query; // Add limit parameter for dashboard
   console.log("Fetching upcoming appointments for elder ID:", elderId);
 
   try {
@@ -244,13 +449,12 @@ const getUpcomingAppointments = async (req, res) => {
       });
     }
 
-    // Get upcoming appointments
-    const result = await pool.query(
-      `SELECT 
+    // Get upcoming appointments with optional limit
+    let query = `SELECT 
         a.appointment_id,
         a.date_time,
         a.status,
-        a.notes,
+        a.appointment_type,
         a.created_at,
         u.name as doctor_name,
         d.specialization,
@@ -261,12 +465,19 @@ const getUpcomingAppointments = async (req, res) => {
       FROM appointment a
       JOIN doctor d ON a.doctor_id = d.doctor_id
       JOIN "User" u ON d.user_id = u.user_id
-      WHERE a.elder_id = $1 
-      AND a.date_time > NOW()
-      AND a.status IN ('approved')
-      ORDER BY a.date_time ASC`,
-      [elderId]
-    );
+      WHERE a.elder_id = $1
+            AND a.date_time > NOW()
+      AND a.status IN ('approved', 'confirmed')
+      ORDER BY a.date_time ASC`;
+    
+    const queryParams = [elderId];
+    
+    if (limit) {
+      query += ` LIMIT $2`;
+      queryParams.push(parseInt(limit));
+    }
+
+    const result = await pool.query(query, queryParams);
 
     res.json({
       success: true,
@@ -282,9 +493,10 @@ const getUpcomingAppointments = async (req, res) => {
   }
 };
 
-// Get past appointments for an elder
+// Get past appointments for an elder (limited to 2 for dashboard)
 const getPastAppointments = async (req, res) => {
   const { elderId } = req.params;
+  const { limit } = req.query; // Add limit parameter for dashboard
   console.log("Fetching past appointments for elder ID:", elderId);
 
   try {
@@ -300,13 +512,12 @@ const getPastAppointments = async (req, res) => {
       });
     }
 
-    // Get past appointments
-    const result = await pool.query(
-      `SELECT 
+    // Get past appointments with optional limit
+    let query = `SELECT 
         a.appointment_id,
         a.date_time,
         a.status,
-        a.notes,
+        a.appointment_type,
         a.created_at,
         u.name as doctor_name,
         d.specialization,
@@ -318,10 +529,17 @@ const getPastAppointments = async (req, res) => {
       JOIN doctor d ON a.doctor_id = d.doctor_id
       JOIN "User" u ON d.user_id = u.user_id
       WHERE a.elder_id = $1 
-      AND (a.date_time < NOW() OR a.status IN ('completed', 'cancelled'))
-      ORDER BY a.date_time DESC`,
-      [elderId]
-    );
+      AND (a.date_time < NOW() )
+      ORDER BY a.date_time DESC`;
+    
+    const queryParams = [elderId];
+    
+    if (limit) {
+      query += ` LIMIT $2`;
+      queryParams.push(parseInt(limit));
+    }
+
+    const result = await pool.query(query, queryParams);
 
     res.json({
       success: true,
@@ -360,9 +578,9 @@ const getAllAppointments = async (req, res) => {
         a.appointment_id,
         a.date_time,
         a.status,
-        a.notes,
+        a.appointment_type,
         a.created_at,
-        d.name as doctor_name,
+        u.name as doctor_name,
         d.specialization,
         d.license_number,
         d.current_institution,
@@ -404,9 +622,9 @@ const getAppointmentById = async (req, res) => {
         a.doctor_id,
         a.date_time,
         a.status,
-        a.notes,
+        a.appointment_type,
         a.created_at,
-        d.name as doctor_name,
+        u.name as doctor_name,
         d.specialization,
         d.license_number,
         d.current_institution,
@@ -465,11 +683,10 @@ const cancelAppointment = async (req, res) => {
     const result = await pool.query(
       `UPDATE appointment 
        SET status = 'cancelled', 
-           notes = COALESCE(notes || ' | Cancelled: ' || $3, 'Cancelled: ' || $3),
            updated_at = CURRENT_TIMESTAMP
        WHERE appointment_id = $1 AND elder_id = $2
        RETURNING *`,
-      [appointmentId, elderId, reason || "Cancelled by elder"]
+      [appointmentId, elderId]
     );
 
     res.json({
@@ -486,60 +703,69 @@ const cancelAppointment = async (req, res) => {
   }
 };
 
-// Reschedule appointment
-const rescheduleAppointment = async (req, res) => {
+// Join appointment (for online appointments)
+const joinAppointment = async (req, res) => {
   const { elderId, appointmentId } = req.params;
-  const { newDateTime, reason } = req.body;
 
   try {
-    // Validate new date time
-    if (!newDateTime) {
-      return res.status(400).json({
-        success: false,
-        error: "New date and time is required",
-      });
-    }
-
-    // Check if appointment exists and belongs to elder
+    // Check if appointment exists, belongs to elder, and is online
     const appointmentCheck = await pool.query(
-      "SELECT * FROM appointment WHERE appointment_id = $1 AND elder_id = $2",
+      "SELECT * FROM appointment WHERE appointment_id = $1 AND elder_id = $2 AND appointment_type = 'online'",
       [appointmentId, elderId]
     );
 
     if (appointmentCheck.rows.length === 0) {
       return res.status(404).json({
         success: false,
-        error: "Appointment not found",
+        error: "Online appointment not found",
       });
     }
 
-    // Update appointment with new date time
-    const result = await pool.query(
-      `UPDATE appointment 
-       SET date_time = $3,
-           notes = COALESCE(notes || ' | Rescheduled: ' || $4, 'Rescheduled: ' || $4),
-           updated_at = CURRENT_TIMESTAMP
-       WHERE appointment_id = $1 AND elder_id = $2
-       RETURNING *`,
-      [appointmentId, elderId, newDateTime, reason || "Rescheduled by elder"]
-    );
+    const appointment = appointmentCheck.rows[0];
+
+    // Check if appointment is today and within 15 minutes of start time
+    const appointmentTime = new Date(appointment.date_time);
+    const now = new Date();
+    const timeDiff = appointmentTime.getTime() - now.getTime();
+    const minutesDiff = timeDiff / (1000 * 60);
+
+    if (minutesDiff > 15) {
+      return res.status(400).json({
+        success: false,
+        error: "You can only join the appointment 15 minutes before the scheduled time",
+      });
+    }
+
+    if (minutesDiff < -30) {
+      return res.status(400).json({
+        success: false,
+        error: "This appointment has ended",
+      });
+    }
+
+    // Generate meeting link or return existing one
+    const meetingLink = `https://meet.silvercare.com/appointment/${appointmentId}`;
 
     res.json({
       success: true,
-      message: "Appointment rescheduled successfully",
-      appointment: result.rows[0],
+      message: "Joining appointment",
+      meetingLink: meetingLink,
+      appointment: appointment,
     });
   } catch (err) {
-    console.error("Error rescheduling appointment:", err);
+    console.error("Error joining appointment:", err);
     res.status(500).json({
       success: false,
-      error: "Error rescheduling appointment",
+      error: "Error joining appointment",
     });
   }
 };
 
+
 module.exports = {
   getElderDetails,
+  updateElderProfile,
+  upload,
   getElderDashboardStats,
   getElderAppointments,
   getUpcomingAppointments,
@@ -547,5 +773,6 @@ module.exports = {
   getAllAppointments,
   getAppointmentById,
   cancelAppointment,
-  rescheduleAppointment,
+  joinAppointment, // Replace rescheduleAppointment with joinAppointment
 };
+
