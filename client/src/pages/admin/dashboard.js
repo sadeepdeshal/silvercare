@@ -298,13 +298,6 @@ const AdminDashboard = () => {
       {/* Quick Stats Section */}
       <div className={styles.statsSection}>
         <div className={styles.statsGrid}>
-          <div className={styles.statCard}>
-            <div className={styles.statIcon}>📅</div>
-            <div className={styles.statContent}>
-              <h3 className={styles.statNumber}>{dataLoading ? '...' : dashboardData.newBookings}</h3>
-              <p className={styles.statLabel}>New Bookings (7 days)</p>
-            </div>
-          </div>
           <div 
             className={`${styles.statCard} ${styles.clickableCard}`} 
             onClick={handleMonthlySignupsClick}
@@ -376,7 +369,7 @@ const AdminDashboard = () => {
                 <div className={styles.quickActionContent}>
                   <h3 className={styles.quickActionTitle}>Manage Users</h3>
                   <p className={styles.quickActionDescription}>
-                    View and manage all {(stats.family_members || 0) + (stats.elders || 0) + (stats.caregivers || 0)} registered users
+                    View and manage all {dataLoading ? '...' : dashboardData.newBookings} registered users
                   </p>
                 </div>
               </div>
