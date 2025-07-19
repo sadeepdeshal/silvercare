@@ -1,126 +1,243 @@
-import React from 'react';
+// dashboard.js
+import React, { useEffect, useState } from 'react';
 import Navbar from '../../components/navbar';
-import styles from "../../components/css/navbar.module.css";
+import styles from "../../components/css/caregiver/dashboard.module.css";
+import CaregiverLayout from '../../components/CaregiverLayout';
+import caregiverApi from '../../services/caregiverApi';
 import { useAuth } from '../../context/AuthContext';
 
+
 const CaregiverDashboard = () => {
-    const { currentUser, logout } = useAuth();
-  return (
-    <div>
-      <Navbar />
-          <div>
-      <h1>Welcome, {currentUser.name}!</h1>
-      <p>Email: {currentUser.email}</p>
-      <p>Role: {currentUser.role}</p>
-      {/* Caregiver-specific content */}
-      <button onClick={logout}>Logout</button>
-    </div>
-      <div style={{
-        padding: '40px',
-        fontFamily: 'Arial, sans-serif',
-        backgroundColor: '#f8f9fa',
-        minHeight: '100vh',
-        paddingTop: '120px' // Added extra padding to account for fixed navbar
-      }}>
-        <div style={{
-          maxWidth: '1200px',
-          margin: '0 auto',
-          backgroundColor: 'white',
-          borderRadius: '12px',
-          padding: '40px',
-          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
-        }}>
-          <h1 style={{
-            color: '#2c3e50',
-            fontSize: '2.5rem',
-            marginBottom: '16px',
-            textAlign: 'center'
-          }}>
-            Welcome to Your Caregiver Dashboard
-          </h1>
-          
-          <p style={{
-            color: '#7f8c8d',
-            fontSize: '1.2rem',
-            textAlign: 'center',
-            marginBottom: '40px'
-          }}>
-            Manage your caregiving services and connect with families in need
-          </p>
+  const { user } = useAuth(); // <-- pulls from logged-in context
+  const [elders, setElders] = useState([]);
+  const [activities, setActivities] = useState([]);
+  const [messages, setMessages] = useState([]);
+  const [schedule, setSchedule] = useState([]);
+  const [carelog, setCarelogCount] = useState([]);
+  const [families, setFamilies] = useState([]);
 
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-            gap: '24px',
-            marginTop: '40px'
-          }}>
-            <div style={{
-              backgroundColor: '#e8f5e8',
-              padding: '24px',
-              borderRadius: '8px',
-              border: '1px solid #c3e6c3'
-            }}>
-              <h3 style={{ color: '#27ae60', marginBottom: '12px' }}>My Profile</h3>
-              <p style={{ color: '#2c3e50', fontSize: '14px' }}>
-                Manage your professional profile and credentials
-              </p>
-            </div>
 
-            <div style={{
-              backgroundColor: '#e8f4fd',
-              padding: '24px',
-              borderRadius: '8px',
-              border: '1px solid #b3d9f7'
-            }}>
-              <h3 style={{ color: '#3498db', marginBottom: '12px' }}>Available Jobs</h3>
-              <p style={{ color: '#2c3e50', fontSize: '14px' }}>
-                Browse and apply for caregiving opportunities
-              </p>
-            </div>
+  useEffect(() => {
+    if (!user || !user.caregiver_id) return;
 
-            <div style={{
-              backgroundColor: '#fff3cd',
-              padding: '24px',
-              borderRadius: '8px',
-              border: '1px solid #ffeaa7'
-            }}>
-              <h3 style={{ color: '#f39c12', marginBottom: '12px' }}>My Clients</h3>
-              <p style={{ color: '#2c3e50', fontSize: '14px' }}>
-                View and manage your current client relationships
-              </p>
-            </div>
+    const caregiverId = user.caregiver_id;
 
-            <div style={{
-              backgroundColor: '#fde8e8',
-              padding: '24px',
-              borderRadius: '8px',
-              border: '1px solid #fab1a0'
-            }}>
-              <h3 style={{ color: '#e74c3c', marginBottom: '12px' }}>Schedule</h3>
-              <p style={{ color: '#2c3e50', fontSize: '14px' }}>
-                Manage your appointments and availability
-              </p>
-            </div>
-          </div>
+    // Fetch assigned elders
+    caregiverApi.fetchAssignedElders(caregiverId).then((data) => {
+      const transformed = data.map((elder) => ({
+        name: elder.name,
+        age: elder.age,
+        duration: elder.duration || "N/A",
+        status: elder.status,
+        //nextMedication: elder.end_sate === 'Completed' ? 'Completed' : 'In 2 hours',
+      }));
+      setElders(transformed);
+    });
+    
+    // Fetch assigned families count
+    caregiverApi.getAssignedFamiliesCount(caregiverId).then((data) => {
+       console.log('Families API response:', data);
+       const count = Number(data.count);
+      if (!isNaN(count)) {
+        const dummyFamilies = Array.from({ length: count }, (_, i) => ({
+          elder: `Family ${i + 1}`
+        }));
+        setFamilies(dummyFamilies);
+      } else {
+        setFamilies([]);
+      }
+    });
+    
+    //Fetch carelog counts
+    caregiverApi.getcarelogsCount(caregiverId).then((data) => {
+        console.log('Carelog count API response:', data);
+        const count = Number(data.count);
+        if (!isNaN(count)) {
+            setCarelogCount(count);
+        } else {
+            setCarelogCount(0);
+        }
+    }).catch(error => {
+        console.error('Failed to load carelog count:', error);
+        setCarelogCount(0); // Set to 0 on error
+    });
 
-          <div style={{
-            marginTop: '40px',
-            padding: '24px',
-            backgroundColor: '#f8f9fa',
-            borderRadius: '8px',
-            textAlign: 'center'
-          }}>
-            <h3 style={{ color: '#2c3e50', marginBottom: '12px' }}>
-              🎉 Registration Successful!
-            </h3>
-            <p style={{ color: '#7f8c8d' }}>
-              Your caregiver account has been created successfully. 
-              Start exploring the platform and connect with families who need your care.
-            </p>
+    // Fetch caregiver schedule with active statuses
+    caregiverApi.fetchSchedules(caregiverId).then((data) => {
+      const transformed = data.map((elder) => ({
+        name: elder.name,
+        address: elder.address,
+        startdate: elder.start_date,
+        enddate: elder.end_date,
+      }));
+      setSchedule(transformed);
+        console.log("Schedule Data:", transformed);
+
+    });
+
+    // Dummy data for other sections
+    setActivities([
+      { description: "Prepared Robert's Daily Medical Report", timeAgo: "2 hours ago" },
+      { description: "Assigned Doctors", timeAgo: "6 hours ago" },
+      { description: "Chatted with Family Member", timeAgo: "8 hours ago" }
+    ]);
+    setMessages([
+      { sender: "Dr. Michael Chen", content: "Please update Margaret's blood pressure readings.", timeAgo: "2 hours ago" },
+      { sender: "Lisa Thompson (Family)", content: "Did Margaret take her evening medication?", timeAgo: "6 hours ago" }
+    ]);
+  }, []);
+
+  const dashboardContent = (
+    <div className={styles.dashboard}>
+      <div className={styles.summarycards}>
+        <div className={styles.card}>
+          <div className={styles.cardIcon}>👥</div>
+          <div className={styles.cardContent}>
+            <p className={styles.cardLabel}>Assigned Elders</p>
+            <span className={styles.cardNumber}>{elders.length}</span>
           </div>
         </div>
+
+        <div className={styles.card}>
+          <div className={styles.cardIcon}>👨‍👩‍👧‍👦</div>
+          <div className={styles.cardContent}>
+            <p className={styles.cardLabel}>Number of Families</p>
+            <span className={styles.cardNumber}>{families.length}</span>
+          </div>
+        </div>
+
+        <div className={styles.card}>
+          <div className={styles.cardIcon}>📝</div> 
+          <div className={styles.cardContent}>
+            <p className={styles.cardLabel}>No. of Carelogs</p> 
+            <span className={styles.cardNumber}>{carelog}</span> 
+          </div>
+        </div>
+
+        <div className={styles.card}>
+          <div className={styles.cardIcon}>💬</div>
+          <div className={styles.cardContent}>
+            <p className={styles.cardLabel}>Messages</p>
+            <span className={styles.cardNumber}>{messages.length}</span>
+          </div>
+        </div>
+
+      </div>
+
+      <div className={styles.dashboardgrid}>
+        <section className={styles.recentactivities}>
+          <h2>Recent Activities</h2>
+          <ul>
+            {activities.map((act, i) => (
+              <li key={i}>
+                <div className={`${styles.activityIcon} ${styles[act.type]}`}>
+                  {act.type === 'report' && '📋'}
+                  {act.type === 'doctor' && '👨‍⚕️'}
+                  {act.type === 'chat' && '💬'}
+                </div>
+                <div className={styles.activityContent}>
+                  <div className={styles.activityDescription}>{act.description}</div>
+                  <div className={styles.activityTime}>{act.timeAgo}</div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <section className={styles.schedule}>
+          <h2>My Schedule</h2>
+          <ul>
+            {schedule.length === 0 ? (
+              <li>No scheduled care requests yet.</li>
+            ) : (
+              schedule.map((elder, i) => (
+                <li key={i}>
+                  <span className={styles.time}>
+                    {new Date(elder.startdate).toLocaleDateString()} - {new Date(elder.enddate).toLocaleDateString()}
+                  </span>
+                  <div className={styles.scheduleTitle}>{elder.name}</div>
+                  <div className={styles.scheduleSubtitle}>{elder.address}</div>
+                </li>
+              ))
+            )}
+            
+          </ul>
+        </section>
+
+
+
+        
+      </div>
+
+      <div className={styles.recentelders}>
+        <h2>Recent Elders</h2>
+        <div className={styles.elderlist}>
+          {elders.length === 0 ? (
+            <p className={styles.noElders}>No elders assigned yet.</p>
+          ) : (
+            elders.map((elder, i) => (
+              <div className={styles.eldercard} key={i}>
+                <div className={styles.elderHeader}>
+                  <div className={styles.elderAvatar}>
+                    {elder.name.split(' ').map(n => n[0]).join('')}
+                  </div>
+                  <div className={styles.elderInfo}>
+                    <h4>{elder.name}</h4>
+                    <div className={styles.elderAge}>{elder.age} years old</div>
+                  </div>
+                </div>
+                <div className={styles.elderDetails}>
+                  <div className={styles.elderDetail}>
+                    <span className={styles.label}>Duration :</span>
+                    <span className={styles.value}>{elder.duration}</span>
+                  </div>
+                  <div className={styles.elderDetail}>
+                    <span className={styles.label}>Status :</span>
+                      <span className={`${styles.value} ${
+                        elder.status === 'completed' ? styles.completedStatus :
+                        elder.status === 'ongoing' ? styles.ongoingStatus :
+                        elder.status === 'upcoming' ? styles.upcomingStatus : ''
+                      }`}>
+                        {elder.status}
+                      </span>
+                    {/*<span className={`${styles.value} ${elder.nextMedication === 'Completed' ? styles.completed : elder.nextMedication.includes('hours') ? styles.urgent : ''}`}>
+                      {elder.nextMedication}
+                    </span>*/}
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+
+      <div className={styles.recentmessages}>
+        <h2>Recent Messages</h2>
+        <ul>
+          {messages.map((msg, i) => (
+            <li key={i}>
+              <div className={styles.messageAvatar}>
+                {msg.sender.split(' ').map(n => n[0]).join('').substring(0, 2)}
+              </div>
+              <div className={styles.messageContent}>
+                <div className={styles.messageSender}>{msg.sender}</div>
+                <p className={styles.messageText}>{msg.content}</p>
+              </div>
+              <span className={styles.messageTime}>{msg.timeAgo}</span>
+            </li>
+          ))}
+        </ul>
       </div>
     </div>
+  );
+
+  return (
+    <>
+      <Navbar />
+      <CaregiverLayout>
+        {dashboardContent}
+      </CaregiverLayout>
+    </>
   );
 };
 

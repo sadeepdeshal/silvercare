@@ -1,0 +1,480 @@
+.dashboard {
+  padding: 30px;
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #f5f7fa;
+  min-height: 100vh;
+  padding-bottom: 40px;
+  /* REMOVED: margin-left: 120px; - This was causing the conflict */
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.dashboardheader {
+  margin-bottom: 25px;
+  color: #2c3e50;
+  font-size: 28px;
+  font-weight: 600;
+}
+
+.summarycards {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+}
+
+.card {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 16px;
+  padding: 30px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  flex: 1;
+  min-width: 200px;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+.cardIcon {
+  font-size: 2.5rem;
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
+}
+
+.cardContent {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  align-items: center; 
+}
+
+.cardNumber {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #2d3748;
+  margin: 0;
+  text-align: center;
+}
+
+.cardLabel {
+  color: #718096;
+  margin: 5px 0 0 0;
+  font-size: 0.9rem;
+}
+
+.dashboardgrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  margin-bottom: 30px;
+}
+
+/* Make grid responsive */
+@media (max-width: 768px) {
+  .dashboardgrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .summarycards {
+    flex-direction: column;
+  }
+  
+  .card {
+    min-width: auto;
+  }
+}
+
+section {
+  background: white;
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.recentactivities ul,
+.recentmessages ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.recentactivities li,
+.recentmessages li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 14px;
+  color: #333;
+}
+
+.recentactivities li:last-child,
+.recentmessages li:last-child {
+  border-bottom: none;
+}
+
+/*recent activity*/
+
+.activityIcon {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.activityIcon.report {
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+}
+
+.activityIcon.doctor {
+  background: linear-gradient(135deg, #fff3e0 0%, #ffcc02 100%);
+}
+
+.activityIcon.chat {
+  background: linear-gradient(135deg, #e0f2f1 0%, #80cbc4 100%);
+}
+
+.activityContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.activityDescription {
+  font-weight: 500;
+  color: #2c3e50;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.activityTime {
+  color: #718096;
+  font-size: 12px;
+}
+
+
+/* Updated Schedule Styles */
+.schedule {
+  background: white;
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  
+}
+
+.schedule ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.schedule li {
+  display: flex;
+  align-items: center;
+  padding: 16px 20px;
+  border-radius: 12px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border: none;
+  font-size: 14px;
+  position: relative;
+  overflow: hidden;
+}
+
+.schedule li:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Different background colors for schedule items */
+.schedule li:nth-child(1) {
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+  color: #1565c0;
+}
+
+.schedule li:nth-child(2) {
+  background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%);
+  color: #2e7d32;
+}
+
+.schedule li:nth-child(3) {
+  background: linear-gradient(135deg, #fce4ec 0%, #f8bbd9 100%);
+  color: #c2185b;
+}
+
+.schedule li:nth-child(4) {
+  background: linear-gradient(135deg, #fff3e0 0%, #ffcc02 100%);
+  color: #f57c00;
+}
+
+.schedule li:nth-child(5) {
+  background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
+  color: #7b1fa2;
+}
+
+.schedule .time {
+  font-weight: 600;
+  font-size: 13px;
+  min-width: 80px;
+  margin-right: 16px;
+  opacity: 0.8;
+}
+
+.schedule .scheduleTitle {
+  font-weight: 500;
+  flex: 1;
+  line-height: 1.4;
+}
+
+
+.time {
+  font-size: 12px;
+  color: #999;
+  white-space: nowrap;
+  margin-left: 10px;
+}
+
+.recentelders,
+.recentmessages {
+  background: white;
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  margin-bottom: 30px;
+}
+
+.elderlist {
+  display: flex;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  justify-content: flex-start; /* Align cards to the start */
+}
+
+.eldercard {
+  background: #eef2fa;
+  padding: 15px;
+  border-radius: 10px;
+   border: 1px solid #e2e8f0;
+   position: relative;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  flex: 0 0 calc(25% - 15px); /* For 3 cards per row, accounting for gap */
+  max-width: calc(25% - 15px); /* Max width for 3 cards per row */
+  min-width: 280px; /* Ensure cards don't get too small */
+}
+
+.eldercard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.elderHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 15px;
+}
+
+.elderAvatar,
+.messageAvatar
+{
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 18px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.elderInfo h4 {
+  margin: 0;
+  font-size: 20px;
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+.elderAge {
+  color: #718096;
+  font-size: 14px;
+  margin: 2px 0 0 0;
+}
+
+.elderDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.elderDetail {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 15px;
+}
+
+.elderDetail .label {
+  color: #4a5568;
+  font-weight: 500;
+}
+
+.elderDetail .value {
+  color: #2d3748;
+  font-weight: 600;
+}
+
+.elderDetail .value.urgent {
+  color: #e53e3e;
+}
+
+.elderDetail .value.completed {
+  color: #38a169;
+}
+
+/* New Status Colors */
+.elderDetail .value.completedStatus {
+  color: #e53e3e; /* Green */
+}
+
+.elderDetail .value.ongoingStatus {
+  color: #38a169; /* Orange (you had yellow, but orange often preferred for 'ongoing') */
+}
+
+.elderDetail .value.upcomingStatus {
+  color: #fd8c00; /* Red */
+}
+.recentmessages h2,
+.recentelders h2,
+.schedule h2,
+.recentactivities h2 {
+  font-size: 20px;
+  color: #2b4c7e;
+  margin-bottom: 15px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #e0e6ed;
+}
+
+.recentmessages li {
+  display: flex;
+  align-items: center;
+  padding: 15px 0;
+  border-bottom: 1px solid #f0f0f0;
+  gap: 12px;
+}
+
+.recentmessages li:last-child {
+  border-bottom: none;
+}
+
+.messageAvatar.doctor {
+  background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+}
+
+.messageAvatar.family {
+  background: linear-gradient(135deg, #ed64a6 0%, #d53f8c 100%);
+}
+
+.messageContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.messageSender {
+  color: #2c3e50;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.messageText {
+  color: #4a5568;
+  font-size: 13px;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.messageTime {
+  color: #718096;
+  font-size: 12px;
+  font-weight: 500;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .dashboard {
+    padding: 20px;
+  }
+  
+  .summarycards {
+    gap: 15px;
+  }
+  
+  .card {
+    padding: 20px;
+  }
+  
+  .dashboardgrid {
+    gap: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard {
+    padding: 15px;
+  }
+  
+  .elderlist {
+    grid-template-columns: 1fr;
+  }
+  
+  .cardIcon {
+    width: 50px;
+    height: 50px;
+    font-size: 2rem;
+  }
+  
+  .cardNumber {
+    font-size: 1.5rem;
+  }
+}
+
+/* Ensure content doesn't overflow */
+.dashboard * {
+  box-sizing: border-box;
+}
+
+/* Loading state */
+.dashboard.loading {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+
