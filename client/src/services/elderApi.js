@@ -1,5 +1,38 @@
 import axios from 'axios';
-const API_BASE = 'http://localhost:5000/api/elders';
+
+// Use consistent API base URL
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000';
+const API_BASE = `${API_BASE_URL}/api/elders`;
+
+// Helper function to get auth token
+const getAuthToken = () => {
+  // Check for the correct token key used in AuthContext
+  const token = localStorage.getItem('silvercare_token') || 
+                localStorage.getItem('token') || 
+                localStorage.getItem('authToken') || 
+                localStorage.getItem('accessToken');
+  
+  console.log('Retrieved token from silvercare_token:', token ? `${token.substring(0, 20)}...` : 'No token found');
+  return token;
+};
+
+// Helper function to get auth headers
+const getAuthHeaders = () => {
+  const token = getAuthToken();
+  const headers = {
+    'Content-Type': 'application/json',
+  };
+  
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  
+  console.log('Auth headers:', { 
+    ...headers, 
+    Authorization: headers.Authorization ? `Bearer ${headers.Authorization.substring(7, 27)}...` : 'No auth header' 
+  });
+  return headers;
+};
 
 export const elderApi = {
   // Get all elders for a family member
@@ -139,8 +172,8 @@ export const elderApi = {
     }
   },
 
-  // NEW: Get blocked time slots for a doctor on a specific date
-   getBlockedTimeSlots: async (doctorId, date, appointmentType) => {
+  // Get blocked time slots for a doctor on a specific date
+  getBlockedTimeSlots: async (doctorId, date, appointmentType) => {
     try {
       console.log('API: Fetching blocked time slots for doctor:', doctorId, 'date:', date, 'type:', appointmentType);
       
@@ -161,8 +194,163 @@ export const elderApi = {
     }
   },
 
+  // Create temporary booking (blocks slot for 10 minutes)
+  createTemporaryBooking: async (elderId, bookingData) => {
+    try {
+      console.log('API: Creating temporary booking for elder:', elderId, 'with data:', bookingData);
+      const response = await fetch(`${API_BASE}/${elderId}/temporary-booking`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(bookingData),
+      });
+      
+      const data = await response.json();
+      console.log('API: Create temporary booking response:', data);
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to create temporary booking');
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('API: Error creating temporary booking:', error);
+      throw error;
+    }
+  },
 
-  // Create appointment (simplified)
+  // Cancel temporary booking
+  cancelTemporaryBooking: async (tempBookingId) => {
+    try {
+      console.log('API: Canceling temporary booking:', tempBookingId);
+      const response = await fetch(`${API_BASE}/temporary-booking/${tempBookingId}`, {
+        method: 'DELETE',
+      });
+      
+      const data = await response.json();
+      console.log('API: Cancel temporary booking response:', data);
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to cancel temporary booking');
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('API: Error canceling temporary booking:', error);
+      throw error;
+    }
+  },
+
+  // PAYMENT METHODS - UPDATED WITH CORRECT TOKEN HANDLING
+
+  // Create payment intent
+  createPaymentIntent: async (paymentData) => {
+    try {
+      console.log('API: Creating payment intent with data:', paymentData);
+      
+      const headers = getAuthHeaders();
+      console.log('API: Using headers for payment intent:', headers);
+      
+      const response = await fetch(`${API_BASE_URL}/api/payment/create-payment-intent`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(paymentData)
+      });
+
+      console.log('API: Payment intent response status:', response.status);
+      
+      const data = await response.json();
+      console.log('API: Payment intent response data:', data);
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          console.error('Authentication failed. Token may be invalid or expired.');
+          // Clear potentially invalid tokens
+          localStorage.removeItem('silvercare_token');
+          localStorage.removeItem('silvercare_user');
+          localStorage.removeItem('silvercare_role');
+          throw new Error('Authentication failed. Please log in again.');
+        }
+        throw new Error(data.error || `HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      return data;
+    } catch (error) {
+      console.error('API: Error creating payment intent:', error);
+      throw error;
+    }
+  },
+
+  // Get payment intent status
+  getPaymentIntentStatus: async (paymentIntentId) => {
+    try {
+      console.log('API: Getting payment intent status for:', paymentIntentId);
+      
+      const headers = getAuthHeaders();
+      
+      const response = await fetch(`${API_BASE_URL}/api/payment/payment-intent/${paymentIntentId}`, {
+        method: 'GET',
+        headers
+      });
+
+      console.log('API: Payment intent status response status:', response.status);
+      const data = await response.json();
+      console.log('API: Payment intent status response:', data);
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem('silvercare_token');
+          localStorage.removeItem('silvercare_user');
+          localStorage.removeItem('silvercare_role');
+          throw new Error('Authentication failed. Please log in again.');
+        }
+        throw new Error(data.error || 'Failed to get payment status');
+      }
+
+      return data;
+    } catch (error) {
+      console.error('API: Error getting payment status:', error);
+      throw error;
+    }
+  },
+
+  // Confirm payment and create appointment
+  confirmPaymentAndCreateAppointment: async (elderId, confirmationData) => {
+    try {
+      console.log('API: Confirming payment and creating appointment for elder:', elderId);
+      console.log('API: Confirmation data:', confirmationData);
+      
+      const headers = getAuthHeaders();
+      
+      const response = await fetch(`${API_BASE}/${elderId}/confirm-payment`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(confirmationData)
+      });
+
+      console.log('API: Confirm payment response status:', response.status);
+      const data = await response.json();
+      console.log('API: Confirm payment response:', data);
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem('silvercare_token');
+          localStorage.removeItem('silvercare_user');
+          localStorage.removeItem('silvercare_role');
+          throw new Error('Authentication failed. Please log in again.');
+        }
+        throw new Error(data.error || 'Failed to confirm payment');
+      }
+
+      return data;
+    } catch (error) {
+      console.error('API: Error confirming payment:', error);
+      throw error;
+    }
+  },
+
+  // Create appointment (simplified - keeping existing method)
   createAppointment: async (elderId, appointmentData) => {
     try {
       console.log('API: Creating appointment for elder:', elderId, 'with data:', appointmentData);
@@ -261,7 +449,7 @@ export const elderApi = {
       return data;
     } catch (error) {
       console.error('Error creating elder:', error);
-      throw error;
+            throw error;
     }
   },
 
@@ -400,4 +588,3 @@ export const elderApi = {
     }
   }
 };
-

@@ -20,11 +20,19 @@ import { HealthProfessionalRegStep3 } from "./pages/healthproffesional/signup-st
 import HealthProfessionalDashboard from "./pages/healthproffesional/dashboard";
 import { DoctorRegStep2 } from "./pages/doctor/signup-step2";
 // Import new appointment components
-import PhysicalAppointment from "./pages/familemember/physical-appointment";
-import OnlineAppointment from "./pages/familemember/online-appointment";
-import Appointments from "./pages/familemember/appointments";
+
+import PhysicalAppointment from './pages/familemember/physical-appointment';
+import OnlineAppointment from './pages/familemember/online-appointment';
+import Appointments from './pages/familemember/appointments';
+import BookingSummary from './pages/familemember/booking-summary';
+import Payment from './pages/familemember/payment';
+import PaymentSuccess from './pages/familemember/payment-success';
+
+
+
 import AllAppointments from "./pages/elder/appointments";
 import AppointmentDetails from "./pages/elder/appointment-details";
+
 
 import DoctorDashboard from './pages/doctor/dashboard';
 import DoctorProfile from './pages/doctor/profile';
@@ -179,6 +187,46 @@ function App() {
 
           {/* Add the elder doctors route - THIS IS THE IMPORTANT ONE */}
 
+          <Route path="/family-member/elder/:elderId/doctors" element={
+            <ProtectedRoute allowedRoles={['family_member']}>
+              <ElderDoctors />
+            </ProtectedRoute>
+          } />
+
+          {/* NEW: Booking flow routes */}
+<Route path="/family-member/elder/:elderId/booking-summary/:doctorId" element={
+  <ProtectedRoute allowedRoles={['family_member']}>
+    <BookingSummary />
+  </ProtectedRoute>
+} />
+
+<Route path="/family-member/payment" element={
+  <ProtectedRoute allowedRoles={['family_member']}>
+    <Payment />
+  </ProtectedRoute>
+} />
+
+<Route path="/family-member/payment-success" element={
+  <ProtectedRoute allowedRoles={['family_member']}>
+    <PaymentSuccess />
+  </ProtectedRoute>
+} />
+
+          
+          <Route path="/doctor/dashboard" element={
+            <ProtectedRoute allowedRoles={['doctor']}>
+              <DoctorDashboard />
+            </ProtectedRoute>
+          } />
+
+              <Route path="/doctor/profile" element={
+            <ProtectedRoute allowedRoles={['doctor']}>
+              <DoctorProfile />
+            </ProtectedRoute>
+          } />
+          
+
+
           <Route
             path="/family-member/elder/:elderId/doctors"
             element={
@@ -205,6 +253,7 @@ function App() {
               </ProtectedRoute>
             }
           />
+
 
 
           {/* Fix the health professional route - change from healthproffesional to healthprofessional */}

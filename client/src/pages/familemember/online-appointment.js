@@ -210,56 +210,29 @@ useEffect(() => {
     }
   };
 
-  const handleBookAppointment = async () => {
-    if (!selectedDate || !selectedTime) {
-      setError('Please select both date and time for the appointment');
-      return;
-    }
+  // Add this to the existing handleBookAppointment function, replace the existing one:
 
-    if (isTimeSlotBlocked(selectedTime)) {
-      setError('Selected time slot is not available. Please choose a different time.');
-      return;
-    }
+const handleBookAppointment = async () => {
+  if (!selectedDate || !selectedTime) {
+    setError('Please select both date and time for the appointment');
+    return;
+  }
 
-    try {
-      setSubmitting(true);
-      setError(null);
-      
-      const appointmentData = {
-        doctorId: parseInt(doctorId),
-        appointmentDate: selectedDate,
-        appointmentTime: selectedTime,
-        appointmentType: 'online',
-        patientName: elderInfo.name,
-        contactNumber: elderInfo.contact,
-        symptoms: 'Online consultation requested',
-        notes: 'Booked through online appointment system',
-        emergencyContact: elderInfo.contact,
-        preferredPlatform: 'zoom'
-      };
+  if (isTimeSlotBlocked(selectedTime)) {
+    setError('Selected time slot is not available. Please choose a different time.');
+    return;
+  }
 
-      console.log('Submitting appointment data:', appointmentData);
+  // Redirect to booking summary page instead of directly creating appointment
+  const summaryParams = new URLSearchParams({
+    date: selectedDate,
+    time: selectedTime,
+    type: 'online'
+  });
 
-      const response = await elderApi.createAppointment(elderId, appointmentData);
-      
-      if (response.success) {
-        setSuccessMessage('Online appointment booked successfully!');
-        console.log('Appointment created:', response.appointment);
-        
-        setTimeout(() => {
-          navigate(`/family-member/elder/${elderId}/appointments`);
-        }, 2000);
-      } else {
-        throw new Error(response.error || 'Failed to book appointment');
-      }
-      
-    } catch (err) {
-      console.error('Error creating appointment:', err);
-      setError(err.message || 'Failed to book appointment. Please try again.');
-    } finally {
-      setSubmitting(false);
-    }
-  };
+  navigate(`/family-member/elder/${elderId}/booking-summary/${doctorId}?${summaryParams.toString()}`);
+};
+
 
   const calendarDays = generateCalendarDays();
   const timeSlots = generateTimeSlots();
