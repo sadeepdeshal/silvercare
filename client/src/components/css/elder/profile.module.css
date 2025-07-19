@@ -1,9 +1,10 @@
-.profileContainer {
+/* Modern Professional Profile Page - Matching Appointments Page Design */
+.pageContainer {
   min-height: 100vh;
   background: #f8fafc;
 }
 
-.profileContent {
+.contentContainer {
   max-width: 1200px;
   margin: 0 auto;
   padding: 24px;
@@ -11,80 +12,104 @@
 
 /* Success and Error Messages */
 .successMessage {
-  background: #d1fae5;
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
   color: #065f46;
-  padding: 12px 16px;
-  border-radius: 6px;
-  border: 1px solid #a7f3d0;
-  margin-bottom: 20px;
+  padding: 16px 20px;
+  border-radius: 12px;
+  border-left: 4px solid #10b981;
+  margin-bottom: 24px;
   display: flex;
   align-items: center;
   gap: 8px;
-  font-weight: 500;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.15);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 0.875rem;
 }
 
 .errorMessage {
-  background: #fef2f2;
+  background: linear-gradient(135deg, #fef2f2 0%, #fecaca 100%);
   color: #991b1b;
-  padding: 12px 16px;
-  border-radius: 6px;
-  border: 1px solid #fecaca;
-  margin-bottom: 20px;
+  padding: 16px 20px;
+  border-radius: 12px;
+  border-left: 4px solid #ef4444;
+  margin-bottom: 24px;
   display: flex;
   align-items: center;
   gap: 8px;
-  font-weight: 500;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.15);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 0.875rem;
 }
 
-/* Header Section */
-.profileHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+/* Modern Professional Header - Matching Appointments Page */
+.header {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border-radius: 16px;
+  padding: 32px;
   margin-bottom: 32px;
-  padding: 24px;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
   border: 1px solid #e2e8f0;
 }
 
-.backBtn {
-  background: #f1f5f9;
-  color: #475569;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 6px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
+.headerContent {
   display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+/* Modern Professional Back Button - Matching Appointments Page */
+.backBtn {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  color: #3b82f6;
+  border: 2px solid #3b82f6;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-flex;
   align-items: center;
   gap: 8px;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .backBtn:hover {
-  background: #e2e8f0;
-  color: #334155;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.35);
 }
 
-.headerContent {
+.headerInfo {
   text-align: center;
   flex: 1;
 }
 
-.headerContent h1 {
+.headerInfo h1 {
   color: #1e293b;
   font-size: 2rem;
   font-weight: 700;
   margin: 0 0 8px 0;
+  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
-.headerContent p {
+.headerInfo p {
   color: #64748b;
   font-size: 1rem;
   margin: 0;
+  font-weight: 500;
 }
 
 .headerActions {
@@ -92,54 +117,72 @@
   gap: 12px;
 }
 
+/* Modern Professional Action Buttons */
 .editBtn {
-  background: #3b82f6;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   color: white;
   border: none;
-  padding: 8px 16px;
-  border-radius: 6px;
+  padding: 12px 24px;
+  border-radius: 12px;
   font-size: 0.875rem;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .editBtn:hover:not(:disabled) {
-  background: #2563eb;
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
 }
 
 .editBtn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+  transform: none;
 }
 
 .logoutBtn {
-  background: #ef4444;
+  background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
   color: white;
   border: none;
-  padding: 8px 16px;
-  border-radius: 6px;
+  padding: 12px 24px;
+  border-radius: 12px;
   font-size: 0.875rem;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.25);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .logoutBtn:hover {
-  background: #dc2626;
+  background: linear-gradient(135deg, #b91c1c 0%, #dc2626 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.35);
 }
 
-/* Profile Card */
+/* Modern Professional Profile Card */
 .profileCard {
-  background: white;
-  border-radius: 12px;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border-radius: 16px;
   padding: 32px;
   margin-bottom: 32px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
   border: 1px solid #e2e8f0;
   display: flex;
   align-items: center;
   gap: 32px;
+  transition: all 0.3s ease;
+}
+
+.profileCard:hover {
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
 }
 
 .profileImageSection {
@@ -160,13 +203,19 @@
   object-fit: cover;
   border: 4px solid #e2e8f0;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.profileImage:hover {
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  transform: scale(1.02);
 }
 
 .profilePlaceholder {
   width: 120px;
   height: 120px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -174,6 +223,12 @@
   font-size: 2.5rem;
   font-weight: 700;
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  transition: all 0.3s ease;
+}
+
+.profilePlaceholder:hover {
+  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+  transform: scale(1.02);
 }
 
 .statusIndicator {
@@ -182,10 +237,10 @@
   right: 8px;
   width: 24px;
   height: 24px;
-  background: #10b981;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   border-radius: 50%;
   border: 4px solid white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
 }
 
 .photoUploadSection {
@@ -195,22 +250,30 @@
   gap: 8px;
 }
 
+/* Modern Professional Change Photo Button */
 .changePhotoBtn {
-  background: #f1f5f9;
+  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
   color: #475569;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 6px;
+  border: 2px solid #cbd5e1;
+  padding: 10px 20px;
+  border-radius: 12px;
   font-size: 0.875rem;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s ease;
   text-decoration: none;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .changePhotoBtn:hover {
-  background: #e2e8f0;
+  background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .profileInfo {
@@ -221,7 +284,7 @@
   display: flex;
   align-items: center;
   gap: 16px;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .profileName h2 {
@@ -231,13 +294,17 @@
   margin: 0;
 }
 
+/* Modern Professional Role Tag */
 .roleTag {
-  background: linear-gradient(135deg, #10b981, #059669);
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   color: white;
-  padding: 6px 16px;
+  padding: 8px 20px;
   border-radius: 20px;
   font-size: 0.875rem;
   font-weight: 600;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .profileMeta {
@@ -249,13 +316,16 @@
 .metaItem {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 8px;
+  padding: 16px;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-radius: 12px;
 }
 
 .metaLabel {
   color: #64748b;
   font-size: 0.875rem;
-  font-weight: 500;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -266,84 +336,101 @@
   font-weight: 600;
 }
 
-/* Information Sections */
+/* Modern Professional Information Sections */
 .infoSections {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 32px;
 }
 
 .infoSection {
-  background: white;
-  border-radius: 12px;
-  padding: 24px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
   border: 1px solid #e2e8f0;
+  transition: all 0.3s ease;
+}
+
+.infoSection:hover {
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
 }
 
 .sectionHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
   padding-bottom: 16px;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 2px solid #e2e8f0;
 }
 
 .sectionHeader h3 {
   color: #1e293b;
-  font-size: 1.25rem;
-  font-weight: 600;
+  font-size: 1.5rem;
+  font-weight: 700;
   margin: 0;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
+  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .infoGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
 }
 
 .infoItem {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
 }
 
 .infoItem label {
   color: #64748b;
   font-size: 0.875rem;
-  font-weight: 500;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  margin-bottom: 4px;
 }
 
 .infoItem span {
   color: #1e293b;
   font-size: 1rem;
   font-weight: 500;
-  padding: 12px;
-  background: #f8fafc;
-  border-radius: 6px;
-  border-left: 3px solid #3b82f6;
+  padding: 16px;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-radius: 12px;
   min-height: 20px;
+  transition: all 0.3s ease;
 }
 
-/* Edit Form Styles */
+.infoItem span:hover {
+  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+  transform: translateX(2px);
+}
+
+/* Modern Professional Form Inputs - Matching Appointments Page */
 .editInput,
 .editSelect,
 .editTextarea {
   width: 100%;
-  padding: 12px;
+  padding: 16px;
   border: 2px solid #e2e8f0;
-  border-radius: 6px;
+  border-radius: 12px;
   font-size: 1rem;
   font-weight: 500;
   color: #1e293b;
-  background: white;
-  transition: border-color 0.2s;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .editInput:focus,
@@ -351,7 +438,9 @@
 .editTextarea:focus {
   outline: none;
   border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+  background: white;
+  transform: translateY(-1px);
 }
 
 .editTextarea {
@@ -366,15 +455,16 @@
 
 /* Disabled Input Styles */
 .disabledInput {
-  background: #f1f5f9 !important;
+  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%) !important;
   color: #64748b !important;
   cursor: not-allowed !important;
-  border-color: #cbd5e1 !important
+  border-color: #cbd5e1 !important;
 }
 
 .disabledInput:focus {
   border-color: #cbd5e1 !important;
   box-shadow: none !important;
+  transform: none !important;
 }
 
 /* Family Card */

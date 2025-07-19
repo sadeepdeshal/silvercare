@@ -161,19 +161,27 @@ const ElderDashboard = () => {
   };
 
   const getTimeRemaining = (dateString) => {
-    if (!dateString) return "N/A";
+    if (!dateString) return { text: "N/A", urgent: false, detail: "" };
     const now = new Date();
     const appointmentDate = new Date(dateString);
     const diffTime = appointmentDate - now;
 
-    if (diffTime < 0) return "Past due";
+    if (diffTime < 0) return { text: "Past due", urgent: false, detail: "" };
 
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    const diffHours = Math.ceil(diffTime / (1000 * 60 * 60));
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
+    const diffMinutes = Math.floor(diffTime / (1000 * 60));
 
-    if (diffDays > 1) return `${diffDays} days`;
-    if (diffHours > 1) return `${diffHours} hours`;
-    return "Soon";
+    if (diffDays > 7) return { text: `${diffDays} days`, urgent: false, detail: "More than a week away" };
+    if (diffDays > 1) return { text: `${diffDays} days`, urgent: false, detail: `${diffHours} hours remaining` };
+    if (diffHours > 2) return { text: `${diffHours} hours`, urgent: true, detail: "Today" };
+    if (diffHours > 0) return { text: `${diffHours}h ${diffMinutes % 60}m`, urgent: true, detail: "Very soon!" };
+    if (diffMinutes > 0) return { text: `${diffMinutes} minutes`, urgent: true, detail: "Starting soon!" };
+    return { text: "Now", urgent: true, detail: "Time to join!" };
+  };
+
+  const isUpcomingAppointment = (appointment) => {
+    return new Date(appointment.date_time) > new Date() && appointment.status !== "cancelled";
   };
 
   const getAge = (dob) => {
@@ -201,98 +209,93 @@ const ElderDashboard = () => {
 
   const renderAppointmentCard = (appointment) => (
     <div key={appointment.appointment_id} className={styles.appointmentCard}>
-      <div className={styles.appointmentHeader}>
+      <div className={styles.cardHeader}>
         <div className={styles.doctorInfo}>
           <div className={styles.doctorAvatar}>👨‍⚕️</div>
           <div className={styles.doctorDetails}>
-            <h4>Dr. {appointment.doctor_name}</h4>
-            <p className={styles.specialization}>
-              {appointment.specialization}
-            </p>
-            <p className={styles.licenseNumber}>
-              License: {appointment.license_number}
-            </p>
+            <h3>Dr. {appointment.doctor_name}</h3>
+            <p className={styles.specialization}>{appointment.specialization}</p>
+            <p className={styles.institution}>{appointment.current_institution}</p>
           </div>
         </div>
-        <div className={styles.appointmentStatus}>
-          <span
-            className={
-              appointment.status === "completed" ||
-              appointment.status === "cancelled"
-                ? styles.statusBadgeCompleted
-                : styles.statusBadge
-            }
-          >
-            {appointment.status.charAt(0).toUpperCase() +
-              appointment.status.slice(1)}
+        <div className={styles.statusContainer}>
+          <span className={
+            appointment.status === "completed" || appointment.status === "cancelled"
+              ? styles.statusCompleted
+              : styles.statusUpcoming
+          }>
+            {appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}
           </span>
         </div>
       </div>
 
       <div className={styles.appointmentDetails}>
-        <div className={styles.appointmentDateTime}>
-          <div className={styles.dateInfo}>
-            <span className={styles.dateLabel}>Date</span>
-            <span className={styles.dateValue}>
-              {formatDate(appointment.date_time)}
-            </span>
+        <div className={styles.appointmentMeta}>
+          <div className={styles.dateTimeGroup}>
+            <div className={styles.dateInfo}>
+              <span className={styles.dateText}>{formatDate(appointment.date_time)}</span>
+            </div>
+            <div className={styles.timeInfo}>
+              <span className={styles.timeText}>{formatTime(appointment.date_time)}</span>
+            </div>
           </div>
-          <div className={styles.timeInfo}>
-            <span className={styles.timeLabel}>Time</span>
-            <span className={styles.timeValue}>
-              {formatTime(appointment.date_time)}
-            </span>
-          </div>
-          <div className={styles.typeInfo}>
-            <span className={styles.typeLabel}>Type</span>
-            <span className={`${styles.typeValue} ${
+          <div className={styles.typeIndicator}>
+            <span className={`${styles.typeChip} ${
               appointment.appointment_type === 'online' 
-                ? styles.onlineType 
-                : styles.physicalType
+                ? styles.onlineChip 
+                : styles.physicalChip
             }`}>
-              {appointment.appointment_type === 'online' ? '💻 Online' : '🏥 Physical'}
+              {appointment.appointment_type === 'online' ? 'Online' : 'Physical'}
             </span>
           </div>
         </div>
-
-        {activeTab === "upcoming" && (
-          <div className={styles.timeRemaining}>
-            <span className={styles.remainingLabel}>Time Remaining</span>
-            <span className={styles.remainingValue}>
-              {getTimeRemaining(appointment.date_time)}
-            </span>
+        
+        {isUpcomingAppointment(appointment) && (
+          <div className={styles.timeRemainingBanner}>
+            <div className={`${styles.timeRemainingContent} ${
+              getTimeRemaining(appointment.date_time).urgent ? styles.urgent : styles.normal
+            }`}>
+              <div className={styles.timeRemainingLabel}>Starts in</div>
+              <div className={styles.timeRemainingValue}>
+                {getTimeRemaining(appointment.date_time).text}
+              </div>
+            </div>
           </div>
         )}
       </div>
 
-      {activeTab === "upcoming" && appointment.status !== "cancelled" && (
-        <div className={styles.appointmentActions}>
-          {appointment.appointment_type === 'online' && (
-            <button
-              className={styles.joinBtn}
-              onClick={() => handleJoinAppointment(appointment.appointment_id)}
-            >
-              🎥 Join Meeting
-            </button>
-          )}
-          {appointment.appointment_type === 'online' && (
-            <button
-              className={styles.cancelBtn}
-              onClick={() => {
-                if (
-                  window.confirm(
-                    "Are you sure you want to cancel this appointment?"
-                  )
-                ) {
-                  handleCancelAppointment(appointment.appointment_id);
-                }
-              }}
-            >
-              ❌ Cancel
-            </button>
-          )}
-        </div>
-      )}
+      <div className={styles.cardActions}>
+        {appointment.appointment_type === 'online' && isUpcomingAppointment(appointment) && (
+          <button
+            className={styles.joinBtn}
+            onClick={() => handleJoinAppointment(appointment.appointment_id)}
+          >
+            🎥 Join Meeting
+          </button>
+        )}
+        {isUpcomingAppointment(appointment) && (
+          <button
+            className={styles.cancelBtn}
+            onClick={() => {
+              if (
+                window.confirm(
+                  "Are you sure you want to cancel this appointment?"
+                )
+              ) {
+                handleCancelAppointment(appointment.appointment_id);
+              }
+            }}
+          >
+            ❌ Cancel
+          </button>
+        )}
+        <button 
+          onClick={() => navigate(`/elder/appointment/${appointment.appointment_id}`)}
+          className={styles.detailsBtn}
+        >
+          📋 View Details
+        </button>
+      </div>
     </div>
   );
 
@@ -407,15 +410,6 @@ const ElderDashboard = () => {
                   Member since {formatMemberSince(elderDetails?.created_at)}
                 </div>
               </div>
-
-              <div className={styles.profileActions}>
-                <button
-                  className={styles.viewProfileBtn}
-                  onClick={handleViewProfile}
-                >
-                  View Profile
-                </button>
-              </div>
             </div>
           </div>
 
@@ -445,7 +439,7 @@ const ElderDashboard = () => {
         {/* Appointments Section */}
         <div className={styles.appointmentsSection}>
           <div className={styles.appointmentsHeader}>
-            <h2>📅 Your Appointments</h2>
+            <h2>Your Appointments</h2>
             <div className={styles.appointmentTabs}>
               <button
                 className={`${styles.tabBtn} ${
@@ -453,7 +447,7 @@ const ElderDashboard = () => {
                 }`}
                 onClick={() => setActiveTab("upcoming")}
               >
-                Upcoming ({upcomingAppointments.length})
+                Upcoming
               </button>
               <button
                 className={`${styles.tabBtn} ${
@@ -461,7 +455,7 @@ const ElderDashboard = () => {
                 }`}
                 onClick={() => setActiveTab("past")}
               >
-                Past ({pastAppointments.length})
+                Past
               </button>
             </div>
           </div>
@@ -473,7 +467,7 @@ const ElderDashboard = () => {
                 <p>Loading appointments...</p>
               </div>
             ) : (
-              <div className={styles.appointmentsList}>
+              <div className={styles.appointmentsGrid}>
                 {activeTab === "upcoming" ? (
                   upcomingAppointments.length > 0 ? (
                     upcomingAppointments.map(renderAppointmentCard)
@@ -514,53 +508,6 @@ const ElderDashboard = () => {
           </div>
         </div>
 
-        {/* Quick Actions Section */}
-        <div className={styles.quickActionsSection}>
-          <h2>Quick Actions</h2>
-          <div className={styles.actionGrid}>
-            <div className={styles.actionCard}>
-              <div className={styles.actionIcon}>📅</div>
-              <h3>Book Appointment</h3>
-              <p>Schedule a new appointment with your doctor</p>
-              <button className={styles.actionButton}>Book Now</button>
-            </div>
-
-            <div className={styles.actionCard}>
-              <div className={styles.actionIcon}>💊</div>
-              <h3>Medications</h3>
-              <p>Track your daily medications & reminders</p>
-              <button className={styles.actionButton}>My Medications</button>
-            </div>
-
-            <div className={styles.actionCard}>
-              <div className={styles.actionIcon}>📋</div>
-              <h3>Health Records</h3>
-              <p>Access your medical history & reports</p>
-              <button className={styles.actionButton}>View Records</button>
-            </div>
-
-            <div className={styles.actionCard}>
-              <div className={styles.actionIcon}>🩺</div>
-              <h3>Consultations</h3>
-              <p>Join video calls with your doctors</p>
-              <button className={styles.actionButton}>Join Consultation</button>
-            </div>
-
-            <div className={styles.actionCard}>
-              <div className={styles.actionIcon}>🧠</div>
-              <h3>Mental Health</h3>
-              <p>Connect with counselors & therapists</p>
-              <button className={styles.actionButton}>Get Support</button>
-            </div>
-
-            <div className={styles.actionCard}>
-              <div className={styles.actionIcon}>🚨</div>
-              <h3>Emergency</h3>
-              <p>Quick access to emergency contacts</p>
-              <button className={styles.emergencyButton}>Emergency Help</button>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );

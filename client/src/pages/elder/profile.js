@@ -196,7 +196,7 @@ const ElderProfile = () => {
 
   if (loading) {
     return (
-      <div className={styles.profileContainer}>
+      <div className={styles.pageContainer}>
         <Navbar />
         <div className={styles.loadingContainer}>
           <div className={styles.loadingSpinner}></div>
@@ -208,7 +208,7 @@ const ElderProfile = () => {
 
   if (error) {
     return (
-      <div className={styles.profileContainer}>
+      <div className={styles.pageContainer}>
         <Navbar />
         <div className={styles.errorContainer}>
           <div className={styles.errorIcon}>⚠️</div>
@@ -226,10 +226,10 @@ const ElderProfile = () => {
   }
 
   return (
-    <div className={styles.profileContainer}>
+    <div className={styles.pageContainer}>
       <Navbar />
       
-      <div className={styles.profileContent}>
+      <div className={styles.contentContainer}>
         {/* Success Message */}
         {successMessage && (
           <div className={styles.successMessage}>
@@ -244,38 +244,40 @@ const ElderProfile = () => {
           </div>
         )}
 
-        {/* Header Section */}
-        <div className={styles.profileHeader}>
-          <button 
-            className={styles.backBtn}
-            onClick={handleBackToDashboard}
-          >
-            ← Back to Dashboard
-          </button>
-          
+        {/* Modern Professional Header */}
+        <div className={styles.header}>
           <div className={styles.headerContent}>
-            <h1>My Profile</h1>
-            <p>Manage your personal information and settings</p>
-          </div>
+            <button 
+              className={styles.backBtn}
+            onClick={handleBackToDashboard}
+            >
+              ← Back to Dashboard
+            </button>
+            
+            <div className={styles.headerInfo}>
+              <h1>My Profile</h1>
+              <p>Manage your personal information and settings</p>
+            </div>
 
-          <div className={styles.headerActions}>
-            <button 
-              className={styles.editBtn}
-              onClick={() => setIsEditing(!isEditing)}
-              disabled={saving}
-            >
-              {isEditing ? 'Cancel' : 'Edit Profile'}
-            </button>
-            <button 
-              className={styles.logoutBtn}
-              onClick={logout}
-            >
-              Logout
-            </button>
+            <div className={styles.headerActions}>
+              <button 
+                className={styles.editBtn}
+                onClick={() => setIsEditing(!isEditing)}
+                disabled={saving}
+              >
+                {isEditing ? 'Cancel' : 'Edit Profile'}
+              </button>
+              <button 
+                className={styles.logoutBtn}
+                onClick={logout}
+              >
+                Logout
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* Profile Card */}
+        {/* Modern Professional Profile Card */}
         <div className={styles.profileCard}>
           {/* Profile Image Section */}
           <div className={styles.profileImageSection}>
@@ -532,13 +534,7 @@ const ElderProfile = () => {
                     <label>Phone</label>
                     <span>{elderDetails.family_member.phone}</span>
                   </div>
-
-                  {elderDetails.family_member.phone_fixed && (
-                    <div className={styles.familyDetail}>
-                      <label>Fixed Line</label>
-                      <span>{elderDetails.family_member.phone_fixed}</span>
-                    </div>
-                  )}
+                {/* Fixed Line removed as requested */}
                 </div>
                 
                 <div className={styles.familyActions}>
@@ -560,29 +556,22 @@ const ElderProfile = () => {
             </div>
             
             <div className={styles.settingsGrid}>
-              <div className={styles.settingItem}>
-                <div className={styles.settingInfo}>
-                  <span className={styles.settingLabel}>Notifications</span>
-                  <span className={styles.settingDesc}>Receive email and SMS notifications</span>
-                </div>
-                <button className={styles.toggleBtn}>Enabled</button>
+            <div className={styles.settingItem}>
+              <div className={styles.settingInfo}>
+                <span className={styles.settingLabel}>Notifications</span>
+                <span className={styles.settingDesc}>Receive email and SMS notifications</span>
               </div>
-              
-              <div className={styles.settingItem}>
-                <div className={styles.settingInfo}>
-                  <span className={styles.settingLabel}>Privacy</span>
-                  <span className={styles.settingDesc}>Control who can see your information</span>
-                </div>
-                <button className={styles.toggleBtn}>Private</button>
+              <button className={styles.toggleBtn}>Enabled</button>
+            </div>
+            
+            <div className={styles.settingItem}>
+              <div className={styles.settingInfo}>
+                <span className={styles.settingLabel}>Privacy</span>
+                <span className={styles.settingDesc}>Control who can see your information</span>
               </div>
-              
-              <div className={styles.settingItem}>
-                <div className={styles.settingInfo}>
-                  <span className={styles.settingLabel}>Emergency Alerts</span>
-                  <span className={styles.settingDesc}>Automatic emergency notifications</span>
-                </div>
-                <button className={styles.toggleBtn}>Enabled</button>
-              </div>
+              <button className={styles.toggleBtn}>Private</button>
+            </div>
+            {/* Emergency Alerts section removed as requested */}
             </div>
           </div>
         </div>
