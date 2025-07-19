@@ -24,6 +24,7 @@ import PhysicalAppointment from "./pages/familemember/physical-appointment";
 import OnlineAppointment from "./pages/familemember/online-appointment";
 import Appointments from "./pages/familemember/appointments";
 import AllAppointments from "./pages/elder/appointments";
+import AppointmentDetails from "./pages/elder/appointment-details";
 
 import DoctorDashboard from './pages/doctor/dashboard';
 import DoctorProfile from './pages/doctor/profile';
@@ -283,6 +284,15 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={["elder"]}>
                 <AllAppointments />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/elder/appointment/:appointmentId"
+            element={
+              <ProtectedRoute allowedRoles={["elder"]}>
+                <AppointmentDetails />
               </ProtectedRoute>
             }
           />

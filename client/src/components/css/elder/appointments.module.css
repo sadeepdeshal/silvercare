@@ -25,22 +25,31 @@
   gap: 20px;
 }
 
+/* Modern Professional Back Button */
 .backBtn {
-  background: #f1f5f9;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
   color: #3b82f6;
-  border: 1px solid #3b82f6;
-  padding: 8px 16px;
-  border-radius: 6px;
+  border: 2px solid #3b82f6;
+  padding: 12px 24px;
+  border-radius: 12px;
   font-size: 0.875rem;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s ease;
   text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .backBtn:hover {
-  background: #3b82f6;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
   color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.35);
 }
 
 .headerInfo h1 {
@@ -56,21 +65,83 @@
   margin: 0;
 }
 
-/* Filters */
+/* Modern Professional Filters Container */
 .filtersContainer {
-  background: white;
-  border-radius: 8px;
-  padding: 24px;
-  margin-bottom: 24px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border-radius: 16px;
+  padding: 32px;
+  margin-bottom: 32px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
   border: 1px solid #e2e8f0;
+  position: relative;
+  overflow: hidden;
+}
+
+.filtersHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.filtersHeader h2 {
+  color: #1e293b;
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin: 0;
+  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Modern Professional Back Button (duplicate for filters header) */
+.backBtn {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  color: #3b82f6;
+  border: 2px solid #3b82f6;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.backBtn:hover {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.35);
+}
+
+.filtersContent {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .filtersRow {
   display: flex;
-  gap: 24px;
+  gap: 32px;
   align-items: end;
-  margin-bottom: 16px;
+  flex-wrap: wrap;
+  padding: 16px 0;
+}
+
+.filtersRow:first-child {
+  margin-bottom: 20px;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 20px;
 }
 
 .filtersRow:last-child {
@@ -82,12 +153,16 @@
   flex-direction: column;
   gap: 8px;
   min-width: 0;
+  flex: 1;
 }
 
 .filterGroup label {
-  color: #374151;
+  color: #64748b;
   font-size: 0.875rem;
-  font-weight: 500;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
 }
 
 .statusFilters {
@@ -96,113 +171,147 @@
   flex-wrap: wrap;
 }
 
+/* Modern Professional Filter Buttons */
 .filterBtn {
-  background: #f8fafc;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
   color: #64748b;
-  border: 1px solid #e2e8f0;
-  padding: 8px 16px;
-  border-radius: 6px;
+  border: 2px solid #e2e8f0;
+  padding: 12px 24px;
+  border-radius: 12px;
   font-size: 0.875rem;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s ease;
   white-space: nowrap;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .filterBtn:hover {
-  background: #f1f5f9;
-  border-color: #cbd5e1;
+  background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+  border-color: #94a3b8;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .activeFilter {
-  background: #3b82f6 !important;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
   color: white !important;
   border-color: #3b82f6 !important;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.35) !important;
+  transform: translateY(-1px);
 }
 
+/* Modern Professional Search Input */
 .searchInput {
-  padding: 8px 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
+  padding: 12px 16px;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
   font-size: 0.875rem;
-  min-width: 250px;
-  transition: border-color 0.2s;
+  min-width: 280px;
+  transition: all 0.3s ease;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  font-weight: 500;
 }
 
 .searchInput:focus {
   outline: none;
   border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+  background: white;
 }
 
+/* Modern Professional Date and Select Inputs */
 .dateInput, .selectInput {
-  padding: 8px 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
+  padding: 12px 16px;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
   font-size: 0.875rem;
-  min-width: 150px;
-  transition: border-color 0.2s;
+  min-width: 180px;
+  transition: all 0.3s ease;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  font-weight: 500;
 }
 
 .dateInput:focus, .selectInput:focus {
   outline: none;
   border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+  background: white;
 }
 
+/* Modern Professional Clear Button */
 .clearBtn {
-  background: #ef4444;
+  background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
   color: white;
   border: none;
-  padding: 8px 16px;
-  border-radius: 6px;
+  padding: 12px 24px;
+  border-radius: 12px;
   font-size: 0.875rem;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.25);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .clearBtn:hover {
-  background: #dc2626;
+  background: linear-gradient(135deg, #b91c1c 0%, #dc2626 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.35);
 }
 
-/* Results Info */
+/* Modern Professional Results Info */
 .resultsInfo {
-  margin-bottom: 24px;
+  margin-bottom: 32px;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border-radius: 12px;
+  border-left: 4px solid #3b82f6;
 }
 
 .resultsInfo p {
-  color: #64748b;
+  color: #0369a1;
   font-size: 0.875rem;
+  font-weight: 600;
   margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-/* Appointments Grid */
+/* Modern Professional Appointments Grid */
 .appointmentsGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
-  gap: 24px;
-  margin-bottom: 32px;
+  grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+  gap: 32px;
+  margin-bottom: 40px;
 }
 
 .appointmentCard {
-  background: white;
-  border-radius: 8px;
-  padding: 24px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border-radius: 16px;
+  padding: 28px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
   border: 1px solid #e2e8f0;
-  transition: box-shadow 0.2s;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
 }
 
 .appointmentCard:hover {
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+  transform: translateY(-4px);
 }
 
 .cardHeader {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .doctorInfo {
@@ -212,16 +321,19 @@
   flex: 1;
 }
 
+/* Modern Professional Doctor Avatar */
 .doctorAvatar {
-  width: 48px;
-  height: 48px;
-  background: #10b981;
+  width: 56px;
+  height: 56px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.25rem;
+  font-size: 1.5rem;
   flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  border: 3px solid rgba(255, 255, 255, 0.9);
 }
 
 .doctorDetails h3 {
@@ -288,100 +400,261 @@
   margin-bottom: 20px;
 }
 
-.detailRow {
+/* Modern Appointment Meta Information */
+.appointmentMeta {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: 16px;
 }
 
-.detailRow:last-child {
-  margin-bottom: 0;
+.dateTimeGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dateInfo {
+  display: flex;
+  align-items: center;
+}
+
+.dateText {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.timeInfo {
+  display: flex;
+  align-items: center;
+}
+
+.timeText {
+  font-size: 0.875rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.typeIndicator {
+  display: flex;
+  align-items: center;
+}
+
+.typeChip {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.onlineChip {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
+}
+
+.physicalChip {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+}
+
+/* Professional Time Remaining Banner */
+.timeRemainingBanner {
+  margin-top: 16px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.timeRemainingContent {
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.timeRemainingContent.normal {
+  background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+  border-left: 4px solid #0ea5e9;
+}
+
+.timeRemainingContent.urgent {
+  background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%);
+  border-left: 4px solid #f59e0b;
+  animation: subtleGlow 3s ease-in-out infinite alternate;
+}
+
+.timeRemainingLabel {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.timeRemainingValue {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.timeRemainingContent.urgent .timeRemainingLabel {
+  color: #92400e;
+}
+
+.timeRemainingContent.urgent .timeRemainingValue {
+  color: #d97706;
+}
+
+.timeRemainingContent.normal .timeRemainingLabel {
+  color: #0369a1;
+}
+
+.timeRemainingContent.normal .timeRemainingValue {
+  color: #0284c7;
+}
+
+@keyframes subtleGlow {
+  0% { box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); }
+  100% { box-shadow: 0 4px 8px rgba(245, 158, 11, 0.2); }
+}
+
+/* Remove old time remaining styles */
+.timeRemainingContainer {
+  display: none;
+}
+
+.timeRemaining {
+  display: none;
+}
+
+.timeRemainingIcon {
+  display: none;
+}
+
+.timeRemainingText {
+  display: none;
+}
+
+.timeRemainingDetail {
+  display: none;
+}
+
+.timeRemainingUrgent {
+  display: none;
+}
+
+.timeRemainingNormal {
+  display: none;
+}
+
+/* Remove old detail row styles */
+.detailRow {
+  display: none;
 }
 
 .detailLabel {
-  color: #64748b;
-  font-size: 0.875rem;
-  font-weight: 500;
+  display: none;
 }
 
 .detailValue {
-  color: #1e293b;
-  font-size: 0.875rem;
-  font-weight: 600;
+  display: none;
 }
 
 .onlineType {
-  color: #059669 !important;
-  background: #d1fae5;
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 0.75rem !important;
+  display: none;
 }
 
 .physicalType {
-  color: #dc2626 !important;
-  background: #fee2e2;
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 0.75rem !important;
+  display: none;
 }
 
+/* Modern Professional Card Actions */
 .cardActions {
   display: flex;
-  gap: 8px;
+  gap: 12px;
   flex-wrap: wrap;
-  padding-top: 16px;
-  border-top: 1px solid #e2e8f0;
+  padding-top: 20px;
+  border-top: 2px solid #e2e8f0;
+  justify-content: center;
 }
 
+/* Modern Professional Action Buttons */
 .joinBtn {
-  background: #059669;
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
   color: white;
   border: none;
-  padding: 8px 12px;
-  border-radius: 4px;
-  font-size: 0.75rem;
-  font-weight: 500;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(5, 150, 105, 0.25);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .joinBtn:hover {
-  background: #047857;
+  background: linear-gradient(135deg, #047857 0%, #059669 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.35);
 }
 
 .cancelBtn {
-  background: #ef4444;
+  background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
   color: white;
   border: none;
-  padding: 8px 12px;
-  border-radius: 4px;
-  font-size: 0.75rem;
-  font-weight: 500;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.25);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .cancelBtn:hover {
-  background: #dc2626;
+  background: linear-gradient(135deg, #b91c1c 0%, #dc2626 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.35);
 }
 
 .detailsBtn {
-  background: #f1f5f9;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
   color: #3b82f6;
-  border: 1px solid #3b82f6;
-  padding: 8px 12px;
-  border-radius: 4px;
-  font-size: 0.75rem;
-  font-weight: 500;
+  border: 2px solid #3b82f6;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .detailsBtn:hover {
-  background: #3b82f6;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
   color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.35);
 }
 
 /* No Appointments */
@@ -504,58 +777,6 @@
   font-weight: 500;
 }
 
-/* Summary Stats */
-.summaryStats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 20px;
-  margin-bottom: 24px;
-}
-
-.statCard {
-  background: white;
-  border-radius: 8px;
-  padding: 20px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e2e8f0;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  transition: box-shadow 0.2s;
-}
-
-.statCard:hover {
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.statIcon {
-  font-size: 2rem;
-  background: #f1f5f9;
-  border-radius: 50%;
-  width: 50px;
-  height: 50px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.statContent h4 {
-  color: #1e293b;
-  font-size: 0.875rem;
-  font-weight: 500;
-  margin: 0 0 4px 0;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.statContent p {
-  color: #3b82f6;
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin: 0;
-}
-
 /* Loading States */
 .loadingContainer {
   display: flex;
@@ -652,10 +873,15 @@
     padding: 16px;
   }
   
-  .headerContent {
+  .filtersHeader {
     flex-direction: column;
-    align-items: flex-start;
     gap: 16px;
+    align-items: stretch;
+    text-align: center;
+  }
+  
+  .filtersHeader h2 {
+    font-size: 1.25rem;
   }
   
   .filtersRow {
@@ -701,6 +927,28 @@
     justify-content: center;
     margin-bottom: 8px;
   }
+  
+  .timeRemainingBanner {
+    margin: 12px 0;
+  }
+  
+  .timeRemainingContent {
+    padding: 10px 12px;
+  }
+  
+  .timeRemainingValue {
+    font-size: 0.875rem;
+  }
+  
+  .appointmentMeta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .typeIndicator {
+    align-self: flex-end;
+  }
 }
 
 @media (max-width: 480px) {
@@ -729,6 +977,41 @@
   .cardActions button {
     width: 100%;
     justify-content: center;
+  }
+  
+  .timeRemainingBanner {
+    margin: 8px 0;
+  }
+  
+  .timeRemainingContent {
+    padding: 8px 10px;
+  }
+  
+  .timeRemainingValue {
+    font-size: 0.75rem;
+  }
+  
+  .timeRemainingLabel {
+    font-size: 0.625rem;
+  }
+  
+  .appointmentMeta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  
+  .dateText {
+    font-size: 0.875rem;
+  }
+  
+  .timeText {
+    font-size: 0.75rem;
+  }
+  
+  .typeChip {
+    font-size: 0.625rem;
+    padding: 4px 8px;
   }
   
   .summaryStats {
