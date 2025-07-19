@@ -575,6 +575,47 @@ const fetchSchedules = async (req, res) => {
   }
 };
 
+//fetch care requests for caregiver (role caregiver)
+const fetchCareRequests = async (req, res) => {
+  const caregiverId = req.params.id;
+
+  try {
+    const query = `
+      SELECT 
+        cr.request_id,
+        cr.family_id,
+        cr.elder_id,
+        cr.start_date,
+        cr.end_date,
+        cr.status,
+        cr.duration,
+        cr.request_date,
+        e.name as elder_name,
+        e.age as elder_age,
+        e.address as elder_address,
+        e.medical_conditions,
+        e.contact as elder_contact,
+        fm.user_id as family_member_user_id,
+        u.name as family_member_name,
+        u.phone as family_member_phone,
+        u.email as family_member_email
+      FROM carerequest cr
+      JOIN elder e ON cr.elder_id = e.elder_id
+      JOIN familymember fm ON cr.family_id = fm.family_id
+      JOIN "User" u ON fm.user_id = u.user_id
+      WHERE cr.caregiver_id = $1
+      ORDER BY cr.request_date DESC, cr.start_date ASC;
+    `;
+
+    const result = await pool.query(query, [caregiverId]);
+
+    res.status(200).json(result.rows);
+  } catch (error) {
+    console.error('Error fetching care requests:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
 module.exports = {
   getAllCaregivers,
   getActiveCaregiverCount,
@@ -587,6 +628,7 @@ module.exports = {
   getAssignedElders,
   getAssignedFamiliesCount,
   getcarelogsCount,
-  fetchSchedules
+  fetchSchedules,
+  fetchCareRequests
 };
 

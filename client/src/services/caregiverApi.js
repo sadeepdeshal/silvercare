@@ -225,6 +225,17 @@ export const caregiverApi = {
     }
   },
 
+  // Get care requests for caregiver(role caregiver)
+  fetchCareRequests: async (caregiverId) => {
+    try {
+      const response = await axios.get(`${API_BASE}/${caregiverId}/care-requests`);
+      return response.data;
+    } catch (error) {
+      console.error('API: Error fetching care requests:', error);
+      return [];
+    }
+  },
+
 };
 
 export default caregiverApi;
