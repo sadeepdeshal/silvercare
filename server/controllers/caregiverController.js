@@ -487,13 +487,13 @@ const getAssignedElders = async (req, res) => {
      const query = `SELECT 
         e.name,
         e.age,
-        c.duration,
-        c.end_date,
-        cg.caregiver_id,
+        cr.duration,
+        cr.status,
+        cr.caregiver_id,
         u.user_id
-      FROM carelog c
-      JOIN elder e ON c.elder_id = e.elder_id
-      JOIN caregiver cg ON c.caregiver_id = cg.caregiver_id
+      FROM carerequest cr
+      JOIN elder e ON cr.elder_id = e.elder_id
+      JOIN caregiver cg ON cr.caregiver_id = cg.caregiver_id
       JOIN "User" u ON cg.user_id = u.user_id
       WHERE cg.caregiver_id = $1`;
 
@@ -527,6 +527,54 @@ const getAssignedFamiliesCount = async (req, res) => {
   }
 };
 
+//Get carelog count(role caregiver)
+const getcarelogsCount = async (req, res) => {
+    const caregiverId = req.params.id;
+
+  try {
+    const query = `
+      SELECT COUNT (cl.log_id) AS count
+      FROM carelog cl
+      JOIN caregiver cg ON cl.caregiver_id = cg.caregiver_id
+      JOIN "User" u ON cg.user_id = u.user_id
+      WHERE cl.caregiver_id = $1;
+    `;
+    const result = await pool.query(query, [caregiverId]);
+
+    res.status(200).json(result.rows[0]);
+  } catch (error) {
+    console.error('Error fetching carelogs count:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+//fetch caregiver schedules (role caregiver)
+const fetchSchedules = async (req, res) => {
+  const caregiverId = req.params.id;
+
+  try {
+
+     const query = `
+      SELECT 
+          e.name AS eldername,
+          e.address AS elderaddress,
+          cr.start_date,
+          cr.end_date
+      FROM carerequest cr
+      JOIN elder e ON cr.elder_id = e.elder_id
+      JOIN "User" u ON cg.user_id = u.user_id
+      WHERE cr.caregiver_id = $1;
+    `;
+
+    const result = await pool.query(query, [caregiverId]);
+
+    res.status(200).json(result.rows);
+  } catch (error) {
+    console.error('Error fetching assigned elders:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
 module.exports = {
   getAllCaregivers,
   getActiveCaregiverCount,
@@ -537,6 +585,8 @@ module.exports = {
   searchCaregivers,
   updateCareRequestStatus,
   getAssignedElders,
-  getAssignedFamiliesCount
+  getAssignedFamiliesCount,
+  getcarelogsCount,
+  fetchSchedules
 };
 

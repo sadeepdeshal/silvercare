@@ -13,7 +13,7 @@ const CaregiverDashboard = () => {
   const [activities, setActivities] = useState([]);
   const [messages, setMessages] = useState([]);
   const [schedule, setSchedule] = useState([]);
-  const [alerts, setAlerts] = useState([]);
+  const [carelog, setCarelogCount] = useState([]);
   const [families, setFamilies] = useState([]);
 
 
@@ -27,9 +27,9 @@ const CaregiverDashboard = () => {
       const transformed = data.map((elder) => ({
         name: elder.name,
         age: elder.age,
-        lastVisit: "Unknown", // Placeholder, update if you have it
         duration: elder.duration || "N/A",
-        nextMedication: elder.end_sate === 'Completed' ? 'Completed' : 'In 2 hours',
+        status: elder.status,
+        //nextMedication: elder.end_sate === 'Completed' ? 'Completed' : 'In 2 hours',
       }));
       setElders(transformed);
     });
@@ -48,6 +48,31 @@ const CaregiverDashboard = () => {
       }
     });
     
+    //Fetch carelog counts
+    caregiverApi.getcarelogsCount(caregiverId).then((data) => {
+        console.log('Carelog count API response:', data);
+        const count = Number(data.count);
+        if (!isNaN(count)) {
+            setCarelogCount(count);
+        } else {
+            setCarelogCount(0);
+        }
+    }).catch(error => {
+        console.error('Failed to load carelog count:', error);
+        setCarelogCount(0); // Set to 0 on error
+    });
+
+    // Fetch caregiver schedule with active statuses
+    caregiverApi.fetchSchedules(caregiverId).then((data) => {
+      const transformed = data.map((elder) => ({
+        eldername: elder.eldername || elder.name,
+        elderaddress: elder.elderaddress || elder.address,
+        startdate: elder.start_date,
+        enddate: elder.end_date,
+      }));
+      setSchedule(transformed);
+    });
+
     // Dummy data for other sections
     setActivities([
       { description: "Prepared Robert's Daily Medical Report", timeAgo: "2 hours ago" },
@@ -57,15 +82,6 @@ const CaregiverDashboard = () => {
     setMessages([
       { sender: "Dr. Michael Chen", content: "Please update Margaret's blood pressure readings.", timeAgo: "2 hours ago" },
       { sender: "Lisa Thompson (Family)", content: "Did Margaret take her evening medication?", timeAgo: "6 hours ago" }
-    ]);
-    setSchedule([
-      { time: "9:00 AM", title: "Morning Medication" },
-      { time: "11:00 AM", title: "Visit Mary Williams - Physical therapy" },
-      { time: "2:00 PM", title: "Virtual consultation - Support John Davis" }
-    ]);
-    setAlerts([
-      { id: 1, elder: "Robert Chen", type: "Emergency", status: "Pending" },
-      { id: 2, elder: "Mery Silva", type: "Medication Missed", status: "Pending" }
     ]);
   }, []);
 
@@ -89,10 +105,10 @@ const CaregiverDashboard = () => {
         </div>
 
         <div className={styles.card}>
-          <div className={styles.cardIcon}>🚨</div>
+          <div className={styles.cardIcon}>📝</div> 
           <div className={styles.cardContent}>
-            <p className={styles.cardLabel}>Pending Alerts</p>
-            <span className={styles.cardNumber}>{alerts.length}</span>
+            <p className={styles.cardLabel}>No. of Carelogs</p> 
+            <span className={styles.cardNumber}>{carelog}</span> 
           </div>
         </div>
 
@@ -127,16 +143,27 @@ const CaregiverDashboard = () => {
         </section>
 
         <section className={styles.schedule}>
-          <h2>Today's Schedule</h2>
+          <h2>My Schedule</h2>
           <ul>
-            {schedule.map((item, i) => (
-              <li key={i}>
-                <span className={styles.time}>{item.time}</span>
-                <span className={styles.scheduleTitle}>{item.title}</span>
-              </li>
-            ))}
+            {schedule.length === 0 ? (
+              <li>No scheduled care requests yet.</li>
+            ) : (
+              schedule.map((elder, i) => (
+                <li key={i}>
+                  <span className={styles.time}>
+                    {new Date(elder.startdate).toLocaleDateString()} - {new Date(elder.enddate).toLocaleDateString()}
+                  </span>
+                  <div className={styles.scheduleTitle}>{elder.eldername}</div>
+                  <div className={styles.scheduleSubtitle}>{elder.elderaddress}</div>
+                </li>
+              ))
+            )}
           </ul>
         </section>
+
+
+
+        
       </div>
 
       <div className={styles.recentelders}>
@@ -153,23 +180,26 @@ const CaregiverDashboard = () => {
                   </div>
                   <div className={styles.elderInfo}>
                     <h4>{elder.name}</h4>
-                    <div className={styles.elderAge}>Age {elder.age}</div>
+                    <div className={styles.elderAge}>{elder.age} years old</div>
                   </div>
                 </div>
                 <div className={styles.elderDetails}>
-                  <div className={styles.elderDetail}>
-                    <span className={styles.label}>Last Visit :</span>
-                    <span className={styles.value}>{elder.lastVisit}</span>
-                  </div>
                   <div className={styles.elderDetail}>
                     <span className={styles.label}>Duration :</span>
                     <span className={styles.value}>{elder.duration}</span>
                   </div>
                   <div className={styles.elderDetail}>
-                    <span className={styles.label}>Next Med :</span>
-                    <span className={`${styles.value} ${elder.nextMedication === 'Completed' ? styles.completed : elder.nextMedication.includes('hours') ? styles.urgent : ''}`}>
+                    <span className={styles.label}>Status :</span>
+                      <span className={`${styles.value} ${
+                        elder.status === 'completed' ? styles.completedStatus :
+                        elder.status === 'ongoing' ? styles.ongoingStatus :
+                        elder.status === 'upcoming' ? styles.upcomingStatus : ''
+                      }`}>
+                        {elder.status}
+                      </span>
+                    {/*<span className={`${styles.value} ${elder.nextMedication === 'Completed' ? styles.completed : elder.nextMedication.includes('hours') ? styles.urgent : ''}`}>
                       {elder.nextMedication}
-                    </span>
+                    </span>*/}
                   </div>
                 </div>
               </div>

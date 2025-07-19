@@ -201,8 +201,29 @@ export const caregiverApi = {
       console.error('API: Error fetching assigned families count:', error);
       return { count: 0 };
     }
-  }
+  },
 
+  // Get number of carelogs(role caregiver)
+  getcarelogsCount: async (caregiverId) => {
+    try {
+      const response = await axios.get(`${API_BASE}/${caregiverId}/carelogs-count`);
+      return response.data;
+    } catch (error) {
+      console.error('API: Error fetching carelogs count:', error);
+      return { count: 0 };
+    }
+  },
+
+  // Get caregiver schedules(role caregiver)
+  fetchSchedules: async (caregiverId) => {
+    try {
+      const response = await axios.get(`${API_BASE}/${caregiverId}/caregiver-schedules`);
+      return response.data;
+    } catch (error) {
+      console.error('API: Error fetching schedules:', error);
+      return [];
+    }
+  },
 
 };
 

@@ -269,6 +269,7 @@ section {
   display: flex;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 20px;
+  justify-content: flex-start; /* Align cards to the start */
 }
 
 .eldercard {
@@ -278,6 +279,9 @@ section {
    border: 1px solid #e2e8f0;
    position: relative;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  flex: 0 0 calc(25% - 15px); /* For 3 cards per row, accounting for gap */
+  max-width: calc(25% - 15px); /* Max width for 3 cards per row */
+  min-width: 280px; /* Ensure cards don't get too small */
 }
 
 .eldercard:hover {
@@ -310,14 +314,14 @@ section {
 
 .elderInfo h4 {
   margin: 0;
-  font-size: 16px;
+  font-size: 20px;
   color: #2c3e50;
   font-weight: 600;
 }
 
 .elderAge {
   color: #718096;
-  font-size: 13px;
+  font-size: 14px;
   margin: 2px 0 0 0;
 }
 
@@ -331,7 +335,7 @@ section {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 13px;
+  font-size: 15px;
 }
 
 .elderDetail .label {
@@ -352,6 +356,18 @@ section {
   color: #38a169;
 }
 
+/* New Status Colors */
+.elderDetail .value.completedStatus {
+  color: #e53e3e; /* Green */
+}
+
+.elderDetail .value.ongoingStatus {
+  color: #38a169; /* Orange (you had yellow, but orange often preferred for 'ongoing') */
+}
+
+.elderDetail .value.upcomingStatus {
+  color: #fd8c00; /* Red */
+}
 .recentmessages h2,
 .recentelders h2,
 .schedule h2,
