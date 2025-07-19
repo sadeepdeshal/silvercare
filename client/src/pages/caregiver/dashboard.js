@@ -1,5 +1,6 @@
 // dashboard.js
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Navbar from '../../components/navbar';
 import styles from "../../components/css/caregiver/dashboard.module.css";
 import CaregiverLayout from '../../components/CaregiverLayout';
@@ -9,10 +10,10 @@ import { useAuth } from '../../context/AuthContext';
 
 const CaregiverDashboard = () => {
   const { user } = useAuth(); // <-- pulls from logged-in context
+  const navigate = useNavigate();
   const [elders, setElders] = useState([]);
-  const [activities, setActivities] = useState([]);
   const [messages, setMessages] = useState([]);
-  const [schedule, setSchedule] = useState([]);
+  const [careRequests, setCareRequests] = useState([]);
   const [carelog, setCarelogCount] = useState([]);
   const [families, setFamilies] = useState([]);
 
@@ -62,25 +63,31 @@ const CaregiverDashboard = () => {
         setCarelogCount(0); // Set to 0 on error
     });
 
-    // Fetch caregiver schedule with active statuses
-    caregiverApi.fetchSchedules(caregiverId).then((data) => {
-      const transformed = data.map((elder) => ({
-        name: elder.name,
-        address: elder.address,
-        startdate: elder.start_date,
-        enddate: elder.end_date,
-      }));
-      setSchedule(transformed);
-        console.log("Schedule Data:", transformed);
-
+    // Fetch care requests for caregiver
+    caregiverApi.fetchCareRequests(caregiverId).then((data) => {
+      const transformed = data
+        .filter(request => request.status === 'pending') // Only show pending requests
+        .map((request) => ({
+          requestId: request.request_id,
+          elderName: request.elder_name,
+          elderAge: request.elder_age,
+          elderAddress: request.elder_address,
+          elderContact: request.elder_contact,
+          medicalConditions: request.medical_conditions,
+          familyMemberName: request.family_member_name,
+          familyMemberPhone: request.family_member_phone,
+          familyMemberEmail: request.family_member_email,
+          startDate: request.start_date,
+          endDate: request.end_date,
+          status: request.status,
+          duration: request.duration,
+          requestDate: request.request_date
+        }));
+      setCareRequests(transformed);
+      console.log("Care Requests Data:", transformed);
     });
 
-    // Dummy data for other sections
-    setActivities([
-      { description: "Prepared Robert's Daily Medical Report", timeAgo: "2 hours ago" },
-      { description: "Assigned Doctors", timeAgo: "6 hours ago" },
-      { description: "Chatted with Family Member", timeAgo: "8 hours ago" }
-    ]);
+    // Dummy data for messages
     setMessages([
       { sender: "Dr. Michael Chen", content: "Please update Margaret's blood pressure readings.", timeAgo: "2 hours ago" },
       { sender: "Lisa Thompson (Family)", content: "Did Margaret take her evening medication?", timeAgo: "6 hours ago" }
@@ -125,48 +132,57 @@ const CaregiverDashboard = () => {
       </div>
 
       <div className={styles.dashboardgrid}>
-        <section className={styles.recentactivities}>
-          <h2>Recent Activities</h2>
-          <ul>
-            {activities.map((act, i) => (
-              <li key={i}>
-                <div className={`${styles.activityIcon} ${styles[act.type]}`}>
-                  {act.type === 'report' && '📋'}
-                  {act.type === 'doctor' && '👨‍⚕️'}
-                  {act.type === 'chat' && '💬'}
-                </div>
-                <div className={styles.activityContent}>
-                  <div className={styles.activityDescription}>{act.description}</div>
-                  <div className={styles.activityTime}>{act.timeAgo}</div>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </section>
-
-        <section className={styles.schedule}>
-          <h2>My Schedule</h2>
-          <ul>
-            {schedule.length === 0 ? (
-              <li>No scheduled care requests yet.</li>
+        <section className={styles.carerequest}>
+          <h2>Care Requests</h2>
+          <div className={styles.careRequestsList}>
+            {careRequests.length === 0 ? (
+              <div className={styles.noCareRequests}>No care requests available.</div>
             ) : (
-              schedule.map((elder, i) => (
-                <li key={i}>
-                  <span className={styles.time}>
-                    {new Date(elder.startdate).toLocaleDateString()} - {new Date(elder.enddate).toLocaleDateString()}
-                  </span>
-                  <div className={styles.scheduleTitle}>{elder.name}</div>
-                  <div className={styles.scheduleSubtitle}>{elder.address}</div>
-                </li>
+              careRequests.map((request, i) => (
+                <div className={styles.careRequestCard} key={i}>
+                  <div className={styles.careRequestHeader}>
+                    <div className={styles.requestInfo}>
+                      <h3 className={styles.elderName}>{request.elderName}</h3>
+                    </div>
+                    <div className={`${styles.statusBadge} ${styles[request.status]}`}>
+                      {request.status}
+                    </div>
+                  </div>
+                  
+                  <div className={styles.careRequestDetails}>
+                    <div className={styles.requestDetail}>
+                      <span className={styles.label}>Elder Age:</span>
+                      <span className={styles.value}>{request.elderAge} years</span>
+                    </div>
+                    <div className={styles.requestDetail}>
+                      <span className={styles.label}>Duration:</span>
+                      <span className={styles.value}>
+                        {new Date(request.startDate).toLocaleDateString()} - {new Date(request.endDate).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <div className={styles.requestDetail}>
+                      <span className={styles.label}>Location:</span>
+                      <span className={styles.value}>{request.elderAddress}</span>
+                    </div>
+                    <div className={styles.requestDetail}>
+                      <span className={styles.label}>Family Contact:</span>
+                      <span className={styles.value}>{request.familyMemberName}</span>
+                    </div>
+                  </div>
+
+                  <div className={styles.careRequestActions}>
+                    <button 
+                      className={styles.viewMoreButton}
+                      onClick={() => navigate(`/caregiver/care-request/${request.requestId}`)}
+                    >
+                      View More Details
+                    </button>
+                  </div>
+                </div>
               ))
             )}
-            
-          </ul>
+          </div>
         </section>
-
-
-
-        
       </div>
 
       <div className={styles.recentelders}>

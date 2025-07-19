@@ -225,6 +225,63 @@ export const caregiverApi = {
     }
   },
 
+  // Get care requests for caregiver(role caregiver)
+  fetchCareRequests: async (caregiverId) => {
+    try {
+      const response = await axios.get(`${API_BASE}/${caregiverId}/care-requests`);
+      return response.data;
+    } catch (error) {
+      console.error('API: Error fetching care requests:', error);
+      return [];
+    }
+  },
+
+  // Get care request details by ID(role caregiver)
+  getCareRequestDetails: async (requestId) => {
+    try {
+      console.log('API: Fetching care request details for ID:', requestId);
+      const response = await fetch(`${API_BASE}/requests/${requestId}`);
+      const data = await response.json();
+      
+      console.log('API: Care request details response:', data);
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to fetch care request details');
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('API: Error fetching care request details:', error);
+      throw error;
+    }
+  },
+
+  // Update care request status
+  updateCareRequestStatus: async (requestId, status) => {
+    try {
+      console.log('API: Updating care request status:', requestId, status);
+      const response = await fetch(`${API_BASE}/requests/${requestId}/status`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status }),
+      });
+      
+      const data = await response.json();
+      console.log('API: Update status response:', data);
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to update care request status');
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('API: Error updating care request status:', error);
+      throw error;
+    }
+  },
+
 };
 
 export default caregiverApi;

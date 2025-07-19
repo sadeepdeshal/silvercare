@@ -477,6 +477,71 @@ const updateCareRequestStatus = async (req, res) => {
   }
 };
 
+// Get care request details by ID(role caregiver)
+const getCareRequestById = async (req, res) => {
+  const { requestId } = req.params;
+  
+  try {
+    console.log('Fetching care request details for ID:', requestId);
+    
+    const result = await pool.query(`
+      SELECT 
+        cr.request_id,
+        cr.family_id,
+        cr.caregiver_id,
+        cr.elder_id,
+        cr.start_date,
+        cr.end_date,
+        cr.status,
+        cr.duration,
+        cr.request_date,
+        e.name as elder_name,
+        e.age as elder_age,
+        e.gender as elder_gender,
+        e.contact as elder_contact,
+        e.address as elder_address,
+        e.medical_conditions,
+        e.profile_photo as elder_photo,
+        e.email as elder_email,
+        e.district as elder_district,
+        fm.name as family_member_name,
+        fm.email as family_member_email,
+        fm.phone as family_member_phone,
+        c.certifications as caregiver_certifications,
+        c.availability as caregiver_availability,
+        cu.name as caregiver_name
+      FROM carerequest cr
+      INNER JOIN elder e ON cr.elder_id = e.elder_id
+      INNER JOIN "User" fm ON cr.family_id = fm.user_id
+      INNER JOIN caregiver c ON cr.caregiver_id = c.caregiver_id
+      INNER JOIN "User" cu ON c.user_id = cu.user_id
+      WHERE cr.request_id = $1
+    `, [requestId]);
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: 'Care request not found'
+      });
+    }
+    
+    const careRequest = result.rows[0];
+    console.log('Care request details fetched successfully');
+    
+    res.json({
+      success: true,
+      careRequest: careRequest
+    });
+    
+  } catch (err) {
+    console.error('Error fetching care request details:', err);
+    res.status(500).json({ 
+      success: false,
+      error: 'Error fetching care request details' 
+    });
+  }
+};
+
 
 //get assigner elders(role caregiver)
 const getAssignedElders = async (req, res) => {
@@ -575,6 +640,47 @@ const fetchSchedules = async (req, res) => {
   }
 };
 
+//fetch care requests for caregiver (role caregiver)
+const fetchCareRequests = async (req, res) => {
+  const caregiverId = req.params.id;
+
+  try {
+    const query = `
+      SELECT 
+        cr.request_id,
+        cr.family_id,
+        cr.elder_id,
+        cr.start_date,
+        cr.end_date,
+        cr.status,
+        cr.duration,
+        cr.request_date,
+        e.name as elder_name,
+        e.age as elder_age,
+        e.address as elder_address,
+        e.medical_conditions,
+        e.contact as elder_contact,
+        fm.user_id as family_member_user_id,
+        u.name as family_member_name,
+        u.phone as family_member_phone,
+        u.email as family_member_email
+      FROM carerequest cr
+      JOIN elder e ON cr.elder_id = e.elder_id
+      JOIN familymember fm ON cr.family_id = fm.family_id
+      JOIN "User" u ON fm.user_id = u.user_id
+      WHERE cr.caregiver_id = $1
+      ORDER BY cr.request_date DESC, cr.start_date ASC;
+    `;
+
+    const result = await pool.query(query, [caregiverId]);
+
+    res.status(200).json(result.rows);
+  } catch (error) {
+    console.error('Error fetching care requests:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
 module.exports = {
   getAllCaregivers,
   getActiveCaregiverCount,
@@ -584,9 +690,11 @@ module.exports = {
   getCareRequestsByFamily,
   searchCaregivers,
   updateCareRequestStatus,
+  getCareRequestById,
   getAssignedElders,
   getAssignedFamiliesCount,
   getcarelogsCount,
-  fetchSchedules
+  fetchSchedules,
+  fetchCareRequests
 };
 

@@ -9,10 +9,12 @@ const {
   getCareRequestsByFamily,
   searchCaregivers,
   updateCareRequestStatus,
+  getCareRequestById,
   getAssignedElders,
   getAssignedFamiliesCount,
   getcarelogsCount,
-  fetchSchedules
+  fetchSchedules,
+  fetchCareRequests
 } = require('../controllers/caregiverController');
 
 // Get all caregivers
@@ -39,6 +41,9 @@ router.post('/:caregiverId/request', createCareRequest);
 // Update care request status
 router.put('/requests/:requestId/status', updateCareRequestStatus);
 
+// Get care request details by ID(role caregiver)
+router.get('/requests/:requestId', getCareRequestById);
+
 //get assigned elders(role caregiver)
 router.get('/:id/assigned-elders', getAssignedElders);
 
@@ -50,5 +55,8 @@ router.get('/:id/carelogs-count', getcarelogsCount);
 
 //Number of carelogs(role caregiver)
 router.get('/:id/caregiver-schedules', fetchSchedules);
+
+//Get care requests for caregiver(role caregiver)
+router.get('/:id/care-requests', fetchCareRequests);
 
 module.exports = router;
