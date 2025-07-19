@@ -1,4 +1,5 @@
 const pool = require('../db');
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 // Get all appointments for a family member (only confirmed status)
 const getAllAppointmentsByFamily = async (req, res) => {
@@ -24,7 +25,7 @@ const getAllAppointmentsByFamily = async (req, res) => {
     const familyId = familyMemberResult.rows[0].family_id;
     console.log('Found family_id:', familyId);
     
-    // Build dynamic query - ONLY show confirmed appointments
+    // Build dynamic query - ONLY show confirmed appointments with cancellation eligibility
     let query = `
       SELECT 
         a.appointment_id,
@@ -48,11 +49,26 @@ const getAllAppointmentsByFamily = async (req, res) => {
         d.specialization,
         d.current_institution,
         d.district as doctor_district,
-        d.years_experience
+        d.years_experience,
+        -- Calculate if cancellation is allowed (within 3 days of creation)
+        CASE 
+          WHEN EXTRACT(EPOCH FROM (CURRENT_TIMESTAMP - a.created_at)) / 86400 <= 3 
+          THEN true 
+          ELSE false 
+        END as can_cancel,
+        -- Calculate days since creation
+        ROUND(EXTRACT(EPOCH FROM (CURRENT_TIMESTAMP - a.created_at)) / 86400, 1) as days_since_created,
+        -- Check if payment exists
+        p.payment_id,
+        p.amount as payment_amount,
+        p.transaction_id,
+        p.payment_method,
+        p.payment_status
       FROM appointment a
       INNER JOIN elder e ON a.elder_id = e.elder_id
       INNER JOIN doctor d ON a.doctor_id = d.doctor_id
       INNER JOIN "User" u ON d.user_id = u.user_id
+      LEFT JOIN payment p ON a.appointment_id = p.appointment_id
       WHERE a.family_id = $1 AND a.status = 'confirmed'
     `;
     
@@ -360,19 +376,33 @@ const updateAppointmentStatus = async (req, res) => {
   }
 };
 
-// Cancel appointment (only if currently confirmed)
+// Cancel appointment with refund (only if within 3 days and has payment)
 const cancelAppointment = async (req, res) => {
   const { appointmentId } = req.params;
   const { reason } = req.body;
   
   try {
-    console.log('Cancelling confirmed appointment:', appointmentId);
+    console.log('Attempting to cancel appointment:', appointmentId);
     
-    // First check if appointment exists and is confirmed
-    const appointmentCheck = await pool.query(
-      'SELECT * FROM appointment WHERE appointment_id = $1 AND status = $2',
-      [appointmentId, 'confirmed']
-    );
+    // First check if appointment exists, is confirmed, and within 3-day cancellation window
+    const appointmentCheck = await pool.query(`
+      SELECT 
+        a.*,
+        EXTRACT(EPOCH FROM (CURRENT_TIMESTAMP - a.created_at)) / 86400 as days_since_created,
+        p.payment_id,
+        p.amount,
+        p.transaction_id,
+        p.payment_method,
+        p.payment_status,
+        e.name as elder_name,
+        u.name as doctor_name
+      FROM appointment a
+      LEFT JOIN payment p ON a.appointment_id = p.appointment_id
+      LEFT JOIN elder e ON a.elder_id = e.elder_id
+      LEFT JOIN doctor d ON a.doctor_id = d.doctor_id
+      LEFT JOIN "User" u ON d.user_id = u.user_id
+      WHERE a.appointment_id = $1 AND a.status = 'confirmed'
+    `, [appointmentId]);
     
     if (appointmentCheck.rows.length === 0) {
       return res.status(404).json({
@@ -381,34 +411,150 @@ const cancelAppointment = async (req, res) => {
       });
     }
     
-    const result = await pool.query(
-      `UPDATE appointment 
-       SET status = 'cancelled', 
-           notes = CASE 
-             WHEN notes IS NULL OR notes = '' THEN $1
-             ELSE notes || ' | Cancellation reason: ' || $1
-           END,
-           updated_at = CURRENT_TIMESTAMP
-       WHERE appointment_id = $2
-       RETURNING *`,
-      [reason || 'Cancelled by family member', appointmentId]
-    );
+    const appointment = appointmentCheck.rows[0];
+    const daysSinceCreated = parseFloat(appointment.days_since_created);
     
-    res.json({
-      success: true,
-      message: 'Confirmed appointment cancelled successfully',
-      appointment: result.rows[0]
+    console.log('Appointment details:', {
+      id: appointment.appointment_id,
+      status: appointment.status,
+      daysSinceCreated: daysSinceCreated,
+      hasPayment: !!appointment.payment_id,
+      paymentAmount: appointment.amount,
+      transactionId: appointment.transaction_id
     });
     
+    // Check if within 3-day cancellation window
+    if (daysSinceCreated > 3) {
+      return res.status(400).json({
+        success: false,
+        error: `Cancellation not allowed. Appointments can only be cancelled within 3 days of booking. This appointment was created ${daysSinceCreated.toFixed(1)} days ago.`,
+        canCancel: false,
+        daysSinceCreated: daysSinceCreated
+      });
+    }
+    
+    // Start transaction for atomic operation
+    await pool.query('BEGIN');
+    
+    try {
+      // Update appointment status to cancelled
+      const cancelResult = await pool.query(
+        `UPDATE appointment 
+         SET status = 'cancelled', 
+             notes = CASE 
+               WHEN notes IS NULL OR notes = '' THEN $1
+               ELSE notes || ' | Cancellation reason: ' || $1
+             END,
+             updated_at = CURRENT_TIMESTAMP
+         WHERE appointment_id = $2
+         RETURNING *`,
+        [reason || 'Cancelled by family member within 3-day window', appointmentId]
+      );
+      
+      let refundResult = null;
+      
+      // Process refund if payment exists
+      if (appointment.payment_id && appointment.transaction_id && appointment.payment_status === 'completed') {
+        console.log('Processing refund for payment:', appointment.transaction_id);
+        
+        try {
+          // Create refund in Stripe
+          const refund = await stripe.refunds.create({
+            payment_intent: appointment.transaction_id,
+            amount: Math.round(parseFloat(appointment.amount) * 100), // Convert to cents
+            reason: 'requested_by_customer',
+            metadata: {
+              appointment_id: appointmentId.toString(),
+              elder_name: appointment.elder_name || '',
+              doctor_name: appointment.doctor_name || '',
+              cancellation_reason: reason || 'Cancelled within 3-day window',
+              cancelled_at: new Date().toISOString(),
+              platform: 'SilverCare'
+            }
+          });
+          
+          console.log('Stripe refund created:', refund.id);
+          
+          // Update payment status in database
+          await pool.query(
+            `UPDATE payment 
+             SET payment_status = 'refunded'
+             WHERE payment_id = $1`,
+            [appointment.payment_id]
+          );
+          
+          // Insert refund record (you might want to create a refunds table)
+          // For now, we'll add a note to the appointment
+          await pool.query(
+            `UPDATE appointment 
+             SET notes = COALESCE(notes, '') || ' | REFUND: ' || $1 || ' (Amount: Rs.' || $2 || ')'
+             WHERE appointment_id = $3`,
+            [refund.id, appointment.amount, appointmentId]
+          );
+          
+          refundResult = {
+            refund_id: refund.id,
+            amount: parseFloat(appointment.amount),
+            status: refund.status,
+            estimated_arrival: refund.created + (5 * 24 * 60 * 60) // Estimate 5-10 business days
+          };
+          
+        } catch (stripeError) {
+          console.error('Stripe refund failed:', stripeError);
+          
+          // Don't fail the entire cancellation if refund fails
+          // Just log it and notify the user
+          await pool.query(
+            `UPDATE appointment 
+             SET notes = COALESCE(notes, '') || ' | REFUND FAILED: ' || $1 || ' - Contact support'
+             WHERE appointment_id = $2`,
+            [stripeError.message, appointmentId]
+          );
+          
+          refundResult = {
+            error: 'Refund processing failed. Please contact support.',
+            details: stripeError.message
+          };
+        }
+      }
+      
+      // Commit transaction
+      await pool.query('COMMIT');
+      
+      console.log('Appointment cancelled successfully:', {
+        appointmentId,
+        refundProcessed: !!refundResult,
+        refundAmount: refundResult?.amount
+      });
+      
+      res.json({
+        success: true,
+        message: 'Appointment cancelled successfully',
+        appointment: cancelResult.rows[0],
+        refund: refundResult,
+        cancellationInfo: {
+          daysSinceCreated: daysSinceCreated,
+          refundProcessed: !!refundResult && !refundResult.error,
+          refundAmount: refundResult?.amount || 0,
+          estimatedRefundDays: refundResult?.error ? null : '5-10 business days'
+        }
+      });
+      
+    } catch (transactionError) {
+      // Rollback transaction
+      await pool.query('ROLLBACK');
+      throw transactionError;
+    }
+    
   } catch (err) {
-    console.error('Error cancelling confirmed appointment:', err);
+    console.error('Error cancelling appointment:', err);
     res.status(500).json({ 
       success: false,
-      error: 'Error cancelling appointment' 
+      error: 'Error cancelling appointment',
+      details: err.message
     });
   }
 };
-
 // Get appointment statistics for family member (only confirmed appointments)
 const getAppointmentStats = async (req, res) => {
   const { familyMemberId } = req.params;

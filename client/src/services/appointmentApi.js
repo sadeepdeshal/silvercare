@@ -1,7 +1,7 @@
 const API_BASE = 'http://localhost:5000/api/appointments';
 
 export const appointmentApi = {
-  // Get all appointments for a family member
+  // Get all appointments for a family member (now includes cancellation info)
   getAllAppointmentsByFamily: async (familyMemberId, filters = {}) => {
     try {
       console.log('API: Fetching all appointments for family member:', familyMemberId, 'with filters:', filters);
@@ -12,7 +12,7 @@ export const appointmentApi = {
       if (filters.limit) queryParams.append('limit', filters.limit);
       if (filters.offset) queryParams.append('offset', filters.offset);
       
-      const url = `${API_BASE}/family-member/${familyMemberId}${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
+      const url = `${API_BASE}/family/${familyMemberId}${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
       const response = await fetch(url);
       const data = await response.json();
       
@@ -75,10 +75,10 @@ export const appointmentApi = {
     }
   },
 
-  // Cancel appointment
+  // Cancel appointment with refund (enhanced)
   cancelAppointment: async (appointmentId, reason = null) => {
     try {
-      console.log('API: Cancelling appointment:', appointmentId, reason);
+      console.log('API: Cancelling appointment with refund:', appointmentId, reason);
       const response = await fetch(`${API_BASE}/${appointmentId}/cancel`, {
         method: 'PUT',
         headers: {
@@ -105,7 +105,7 @@ export const appointmentApi = {
   getAppointmentStats: async (familyMemberId) => {
     try {
       console.log('API: Fetching appointment stats for family member:', familyMemberId);
-      const response = await fetch(`${API_BASE}/family-member/${familyMemberId}/stats`);
+      const response = await fetch(`${API_BASE}/family/${familyMemberId}/stats`);
       const data = await response.json();
       
       console.log('API: Appointment stats response:', data);

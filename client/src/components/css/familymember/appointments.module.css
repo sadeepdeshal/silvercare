@@ -65,6 +65,27 @@
   margin: 0;
 }
 
+/* NEW: Cancellation Policy Styles */
+.cancellationPolicy {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 8px 12px;
+  background-color: #e8f4fd;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+.policyIcon {
+  font-size: 1rem;
+}
+
+.policyText {
+  color: #2c5aa0;
+  font-weight: 500;
+}
+
 .backButton {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
@@ -266,6 +287,7 @@
   gap: 20px;
 }
 
+/* Enhanced appointment card styling */
 .appointmentCard {
   background: #f8fafc;
   border: 2px solid #e2e8f0;
@@ -273,6 +295,7 @@
   overflow: hidden;
   transition: all 0.3s ease;
   cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .appointmentCard:hover {
@@ -305,6 +328,14 @@
   font-weight: 600;
 }
 
+/* NEW: Enhanced status container */
+.appointmentStatusContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-end;
+}
+
 .appointmentStatus {
   padding: 8px 16px;
   border-radius: 20px;
@@ -312,6 +343,19 @@
   font-weight: 600;
   color: white;
   text-transform: capitalize;
+}
+
+/* NEW: Cancellation status indicator */
+.cancellationStatus {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.cancellationText {
+  font-size: 0.75rem;
 }
 
 .appointmentBody {
@@ -370,6 +414,23 @@
   word-wrap: break-word;
 }
 
+/* NEW: Cancellation Policy Info */
+.cancellationPolicyInfo {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  margin-top: 8px;
+}
+
+.policyContent {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
 .appointmentNotes {
   display: flex;
   align-items: flex-start;
@@ -418,14 +479,96 @@
   font-weight: 600;
 }
 
-.appointmentActions {
-  display: flex;
-  gap: 10px;
-  align-items: center;
+/* NEW: Days ago indicator */
+.daysAgo {
+  font-size: 0.8rem;
+  color: #666;
+  font-weight: 400;
+  margin-left: 4px;
 }
 
+/* NEW: Enhanced appointment actions */
+.appointmentActions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* NEW: Enhanced cancel button */
 .cancelButton {
-  background: #e53e3e;
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  position: relative;
+}
+
+.cancelButton:hover:not(:disabled) {
+  background: linear-gradient(135deg, #c0392b, #a93226);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+}
+
+.cancelButton:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.cancelButton.cancelling {
+  background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+}
+
+/* NEW: Refund amount indicator */
+.refundAmount {
+  font-size: 0.8rem;
+  opacity: 0.9;
+  font-weight: 400;
+}
+
+/* NEW: Button spinner */
+.buttonSpinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid transparent;
+  border-top: 2px solid currentColor;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* NEW: Cannot cancel info */
+.cannotCancelInfo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background-color: #fdf2f2;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  color: #dc2626;
+}
+
+.cannotCancelIcon {
+  font-size: 0.9rem;
+}
+
+.cannotCancelText {
+  font-weight: 500;
+}
+
+/* NEW: View details button */
+.viewDetailsButton {
+  background: linear-gradient(135deg, #3498db, #2980b9);
   color: white;
   border: none;
   padding: 8px 16px;
@@ -436,11 +579,13 @@
   transition: all 0.3s ease;
 }
 
-.cancelButton:hover {
-  background: #c53030;
+.viewDetailsButton:hover {
+  background: linear-gradient(135deg, #2980b9, #21618c);
   transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
 }
 
+/* Legacy view button (keeping for compatibility) */
 .viewButton {
   background: transparent;
   color: #667eea;
@@ -496,6 +641,39 @@
   margin-top: 20px;
   color: #718096;
   font-size: 0.9rem;
+}
+
+/* NEW: Payment info styling */
+.infoRow:has(.infoIcon:contains("💰")) {
+  background-color: #f0f9ff;
+  padding: 8px;
+  border-radius: 6px;
+  border-left: 3px solid #3498db;
+}
+
+/* NEW: Success/Error message styling for cancellation */
+.cancellationSuccess {
+  background-color: #d4edda;
+  border: 1px solid #c3e6cb;
+  color: #155724;
+  padding: 12px;
+  border-radius: 6px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cancellationError {
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  color: #721c24;
+  padding: 12px;
+  border-radius: 6px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 /* Responsive Design */
@@ -573,9 +751,32 @@
     align-items: flex-start;
   }
 
+  /* NEW: Responsive appointment actions */
+  .appointmentStatusContainer {
+    align-items: flex-start;
+  }
+  
+  .cancellationStatus {
+    font-size: 0.75rem;
+  }
+  
   .appointmentActions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
     align-self: stretch;
     justify-content: space-between;
+  }
+  
+  .cancelButton,
+  .viewDetailsButton {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .cannotCancelInfo {
+    font-size: 0.75rem;
+    padding: 4px 8px;
   }
 }
 
@@ -617,8 +818,109 @@
     gap: 10px;
   }
 
-  .cancelButton, .viewButton {
+  .cancelButton, .viewButton, .viewDetailsButton {
     width: 100%;
     padding: 10px;
+  }
+
+  /* NEW: Mobile-specific cancellation policy */
+  .cancellationPolicy {
+    flex-direction: column;
+    text-align: center;
+    gap: 4px;
+  }
+
+  .cancellationPolicyInfo {
+    flex-direction: column;
+    gap: 4px;
+    text-align: center;
+  }
+}
+
+/* NEW: Animation for status changes */
+@keyframes statusChange {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+.appointmentCard.statusChanged {
+  animation: statusChange 0.5s ease-in-out;
+}
+
+/* NEW: Hover effects for interactive elements */
+.appointmentCard .infoItem:hover .infoIcon {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  transform: scale(1.1);
+  transition: all 0.3s ease;
+}
+
+/* NEW: Focus states for accessibility */
+.cancelButton:focus,
+.viewDetailsButton:focus,
+.loadMoreButton:focus,
+.backButton:focus {
+  outline: 2px solid #667eea;
+  outline-offset: 2px;
+}
+
+/* NEW: Print styles */
+@media print {
+  .container {
+    margin-left: 0;
+    background: white;
+  }
+
+  .header,
+  .statsSection,
+  .filtersSection,
+  .appointmentsSection {
+    background: white;
+    box-shadow: none;
+  }
+
+  .appointmentActions,
+  .loadMoreSection {
+    display: none;
+  }
+
+  .appointmentCard {
+    break-inside: avoid;
+    border: 1px solid #ccc;
+    margin-bottom: 20px;
+  }
+}
+
+/* NEW: Dark mode support (if needed in future) */
+@media (prefers-color-scheme: dark) {
+  .container {
+    background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%);
+  }
+
+  .header,
+  .statsSection .statCard,
+  .filtersContainer,
+  .appointmentsSection {
+    background: rgba(45, 55, 72, 0.95);
+    color: #e2e8f0;
+  }
+
+  .appointmentCard {
+    background: #2d3748;
+    border-color: #4a5568;
+    color: #e2e8f0;
+  }
+
+  .title,
+  .statNumber,
+  .infoValue {
+    color: #e2e8f0;
+  }
+
+  .subtitle,
+  .statLabel,
+  .infoLabel {
+    color: #a0aec0;
   }
 }

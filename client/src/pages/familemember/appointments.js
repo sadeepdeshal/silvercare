@@ -15,6 +15,7 @@ const Appointments = () => {
   const [stats, setStats] = useState(null);
   const [dataLoading, setDataLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [cancellingId, setCancellingId] = useState(null);
   const [filters, setFilters] = useState({
     status: 'all',
     type: 'all',
@@ -123,28 +124,84 @@ const Appointments = () => {
     navigate(`/family-member/appointment/${appointmentId}`);
   };
 
-  const handleCancelAppointment = async (appointmentId, event) => {
+  const handleCancelAppointment = async (appointment, event) => {
     event.stopPropagation(); // Prevent navigation
     
-    const reason = prompt('Please provide a reason for cancellation (optional):');
+    // Check if cancellation is allowed
+    if (!appointment.can_cancel) {
+      window.alert(`Cancellation not allowed. This appointment was created ${appointment.days_since_created} days ago. Appointments can only be cancelled within 3 days of booking.`);
+      return;
+    }
+    
+    // Show detailed cancellation confirmation
+    const confirmMessage = `Are you sure you want to cancel this appointment?
+
+📋 Appointment Details:
+• Doctor: ${appointment.doctor_name}
+• Patient: ${appointment.elder_name}
+• Date: ${new Date(appointment.date_time).toLocaleDateString()}
+• Time: ${new Date(appointment.date_time).toLocaleTimeString()}
+
+💰 Refund Information:
+${appointment.payment_amount ? `• Amount: Rs. ${appointment.payment_amount}
+• Refund will be processed to your original payment method
+• Refund typically takes 5-10 business days` : '• No payment found for this appointment'}
+
+⚠️ This action cannot be undone.`;
+
+    if (!window.confirm(confirmMessage)) return;
+    
+    const reason = window.prompt('Please provide a reason for cancellation (optional):');
     if (reason === null) return; // User cancelled the prompt
     
     try {
-      const response = await appointmentApi.cancelAppointment(appointmentId, reason);
+      setCancellingId(appointment.appointment_id);
+      
+      const response = await appointmentApi.cancelAppointment(appointment.appointment_id, reason);
+      
       if (response.success) {
-        // Refresh appointments
+        // Update appointments list
         setAppointments(prev => 
           prev.map(apt => 
-            apt.appointment_id === appointmentId 
+            apt.appointment_id === appointment.appointment_id 
               ? { ...apt, status: 'cancelled' }
               : apt
           )
         );
-        alert('Appointment cancelled successfully');
+        
+        // Show success message with refund info
+        let successMessage = 'Appointment cancelled successfully!';
+        
+        if (response.refund) {
+          if (response.refund.error) {
+            successMessage += `\n\n⚠️ Refund Issue: ${response.refund.error}`;
+          } else {
+            successMessage += `\n\n💰 Refund Processed:
+• Amount: Rs. ${response.refund.amount}
+• Refund ID: ${response.refund.refund_id}
+• Expected in: ${response.cancellationInfo.estimatedRefundDays}
+• You will receive an email confirmation shortly`;
+          }
+        }
+        
+        window.alert(successMessage);
       }
     } catch (err) {
       console.error('Error cancelling appointment:', err);
-      alert('Failed to cancel appointment. Please try again.');
+      
+      let errorMessage = 'Failed to cancel appointment.';
+      
+      if (err.message.includes('not allowed')) {
+        errorMessage = err.message;
+      } else if (err.message.includes('3 days')) {
+        errorMessage = err.message;
+      } else {
+        errorMessage += ' Please try again or contact support.';
+      }
+      
+      window.alert(errorMessage);
+    } finally {
+      setCancellingId(null);
     }
   };
 
@@ -177,6 +234,23 @@ const Appointments = () => {
 
   const getAppointmentTypeIcon = (type) => {
     return type === 'online' ? '💻' : '🏥';
+  };
+
+  const getCancellationInfo = (appointment) => {
+    if (!appointment.can_cancel) {
+      return {
+        canCancel: false,
+        reason: `Created ${appointment.days_since_created} days ago (3-day limit exceeded)`,
+        color: '#e74c3c'
+      };
+    }
+    
+    const daysLeft = Math.max(0, 3 - appointment.days_since_created);
+    return {
+      canCancel: true,
+      reason: `Can cancel (${daysLeft.toFixed(1)} days left)`,
+      color: daysLeft < 1 ? '#f39c12' : '#27ae60'
+    };
   };
 
   const loadMoreAppointments = () => {
@@ -214,10 +288,16 @@ const Appointments = () => {
           {/* Header */}
           <div className={styles.header}>
             <div className={styles.headerContent}>
-              <h1 className={styles.title}>📅 Approved Appointments</h1>
+              <h1 className={styles.title}>📅 Confirmed Appointments</h1>
               <p className={styles.subtitle}>
-                Manage and view doctor approved appointments for your registered elders
+                Manage and view confirmed appointments for your registered elders
               </p>
+              <div className={styles.cancellationPolicy}>
+                <span className={styles.policyIcon}>ℹ️</span>
+                <span className={styles.policyText}>
+                  Appointments can be cancelled within 3 days of booking with full refund
+                </span>
+              </div>
             </div>
             <button 
               className={styles.backButton}
@@ -242,29 +322,29 @@ const Appointments = () => {
                 <div className={styles.statCard}>
                   <div className={styles.statIcon}>📊</div>
                   <div className={styles.statContent}>
-                    <h3 className={styles.statNumber}>{stats.total_appointments}</h3>
-                    <p className={styles.statLabel}>Total Appointments</p>
+                    <h3 className={styles.statNumber}>{stats.total_confirmed_appointments}</h3>
+                    <p className={styles.statLabel}>Total Confirmed</p>
                   </div>
                 </div>
                 <div className={styles.statCard}>
-                  <div className={styles.statIcon}>⏳</div>
+                  <div className={styles.statIcon}>📅</div>
                   <div className={styles.statContent}>
-                    <h3 className={styles.statNumber}>{stats.pending_appointments}</h3>
-                    <p className={styles.statLabel}>Pending</p>
+                    <h3 className={styles.statNumber}>{stats.upcoming_appointments}</h3>
+                    <p className={styles.statLabel}>Upcoming</p>
                   </div>
                 </div>
                 <div className={styles.statCard}>
-                  <div className={styles.statIcon}>✅</div>
+                  <div className={styles.statIcon}>💻</div>
                   <div className={styles.statContent}>
-                    <h3 className={styles.statNumber}>{stats.confirmed_appointments}</h3>
-                    <p className={styles.statLabel}>Confirmed</p>
+                    <h3 className={styles.statNumber}>{stats.online_appointments}</h3>
+                    <p className={styles.statLabel}>Online</p>
                   </div>
                 </div>
                 <div className={styles.statCard}>
-                  <div className={styles.statIcon}>🏁</div>
+                  <div className={styles.statIcon}>🏥</div>
                   <div className={styles.statContent}>
-                    <h3 className={styles.statNumber}>{stats.completed_appointments}</h3>
-                    <p className={styles.statLabel}>Completed</p>
+                    <h3 className={styles.statNumber}>{stats.physical_appointments}</h3>
+                    <p className={styles.statLabel}>Physical</p>
                   </div>
                 </div>
               </div>
@@ -274,8 +354,6 @@ const Appointments = () => {
           {/* Filters Section */}
           <div className={styles.filtersSection}>
             <div className={styles.filtersContainer}>
-   
-
               <div className={styles.filterGroup}>
                 <label htmlFor="typeFilter">Type:</label>
                 <select
@@ -298,7 +376,7 @@ const Appointments = () => {
                   placeholder="Search by elder, doctor, or specialization..."
                   value={filters.search}
                   onChange={(e) => handleFilterChange('search', e.target.value)}
-                                    className={styles.searchInput}
+                  className={styles.searchInput}
                 />
               </div>
             </div>
@@ -314,11 +392,11 @@ const Appointments = () => {
             ) : filteredAppointments.length === 0 ? (
               <div className={styles.noAppointments}>
                 <div className={styles.noAppointmentsIcon}>📅</div>
-                <h2>No Appointments Found</h2>
+                <h2>No Confirmed Appointments Found</h2>
                 <p>
-                  {filters.search || filters.status !== 'all' || filters.type !== 'all'
+                  {filters.search || filters.type !== 'all'
                     ? 'No appointments match your current filters.'
-                    : 'You haven\'t booked any appointments yet.'
+                    : 'You haven\'t confirmed any appointments yet.'
                   }
                 </p>
                 <button 
@@ -334,7 +412,8 @@ const Appointments = () => {
                   {filteredAppointments.map((appointment) => {
                     const { date, time } = formatDateTime(appointment.date_time);
                     const isUpcoming = new Date(appointment.date_time) > new Date();
-                    const canCancel = isUpcoming && ['pending', 'approved', 'confirmed'].includes(appointment.status);
+                    const cancellationInfo = getCancellationInfo(appointment);
+                    const isBeingCancelled = cancellingId === appointment.appointment_id;
                     
                     return (
                       <div
@@ -342,7 +421,7 @@ const Appointments = () => {
                         className={styles.appointmentCard}
                         onClick={() => handleAppointmentClick(appointment.appointment_id)}
                       >
-                        <div className={styles.appointmentHeader}>
+                                                <div className={styles.appointmentHeader}>
                           <div className={styles.appointmentType}>
                             <span className={styles.typeIcon}>
                               {getAppointmentTypeIcon(appointment.appointment_type)}
@@ -351,11 +430,24 @@ const Appointments = () => {
                               {appointment.appointment_type === 'online' ? 'Online' : 'Physical'} Appointment
                             </span>
                           </div>
-                          <div 
-                            className={styles.appointmentStatus}
-                            style={{ backgroundColor: getStatusColor(appointment.status) }}
-                          >
-                            {appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}
+                          <div className={styles.appointmentStatusContainer}>
+                            <div 
+                              className={styles.appointmentStatus}
+                              style={{ backgroundColor: getStatusColor(appointment.status) }}
+                            >
+                              {appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}
+                            </div>
+                            {/* Cancellation Status Indicator */}
+                            <div 
+                              className={styles.cancellationStatus}
+                              style={{ color: cancellationInfo.color }}
+                              title={cancellationInfo.reason}
+                            >
+                              {cancellationInfo.canCancel ? '✅' : '❌'} 
+                              <span className={styles.cancellationText}>
+                                {cancellationInfo.canCancel ? 'Can Cancel' : 'Cannot Cancel'}
+                              </span>
+                            </div>
                           </div>
                         </div>
 
@@ -412,6 +504,47 @@ const Appointments = () => {
                               </div>
                             </div>
 
+                            {/* Payment Information */}
+                            {appointment.payment_amount && (
+                              <div className={styles.infoRow}>
+                                <div className={styles.infoItem}>
+                                  <span className={styles.infoIcon}>💰</span>
+                                  <div className={styles.infoContent}>
+                                    <span className={styles.infoLabel}>Payment</span>
+                                    <span className={styles.infoValue}>
+                                      Rs. {appointment.payment_amount} ({appointment.payment_method})
+                                    </span>
+                                  </div>
+                                </div>
+                                <div className={styles.infoItem}>
+                                  <span className={styles.infoIcon}>📊</span>
+                                  <div className={styles.infoContent}>
+                                    <span className={styles.infoLabel}>Payment Status</span>
+                                    <span className={styles.infoValue}>
+                                      {appointment.payment_status?.charAt(0).toUpperCase() + appointment.payment_status?.slice(1)}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Cancellation Policy Info */}
+                            <div className={styles.cancellationPolicyInfo}>
+                              <span className={styles.infoIcon}>ℹ️</span>
+                              <div className={styles.policyContent}>
+                                <span className={styles.infoLabel}>Cancellation Policy</span>
+                                <span 
+                                  className={styles.policyText}
+                                  style={{ color: cancellationInfo.color }}
+                                >
+                                  {cancellationInfo.reason}
+                                  {appointment.payment_amount && cancellationInfo.canCancel && 
+                                    ' • Full refund available'
+                                  }
+                                </span>
+                              </div>
+                            </div>
+
                             {appointment.notes && (
                               <div className={styles.appointmentNotes}>
                                 <span className={styles.infoIcon}>📝</span>
@@ -436,19 +569,59 @@ const Appointments = () => {
                             </span>
                             <span className={styles.appointmentCreated}>
                               Booked: {new Date(appointment.created_at).toLocaleDateString()}
+                              {appointment.days_since_created && (
+                                <span className={styles.daysAgo}>
+                                  ({appointment.days_since_created} days ago)
+                                </span>
+                              )}
                             </span>
                           </div>
                           
                           <div className={styles.appointmentActions}>
-                            {canCancel && (
+                            {/* Show cancel button only if within 3-day window */}
+                            {cancellationInfo.canCancel && isUpcoming && appointment.status === 'confirmed' && (
                               <button
-                                className={styles.cancelButton}
-                                onClick={(e) => handleCancelAppointment(appointment.appointment_id, e)}
+                                className={`${styles.cancelButton} ${isBeingCancelled ? styles.cancelling : ''}`}
+                                onClick={(e) => handleCancelAppointment(appointment, e)}
+                                disabled={isBeingCancelled}
                               >
-                                Cancel
+                                {isBeingCancelled ? (
+                                  <>
+                                    <div className={styles.buttonSpinner}></div>
+                                    Cancelling...
+                                  </>
+                                ) : (
+                                  <>
+                                    Cancel & Refund
+                                    {appointment.payment_amount && (
+                                      <span className={styles.refundAmount}>
+                                        (Rs. {appointment.payment_amount})
+                                      </span>
+                                    )}
+                                  </>
+                                )}
                               </button>
                             )}
 
+                            {/* Show why cancellation is not available */}
+                            {!cancellationInfo.canCancel && appointment.status === 'confirmed' && (
+                              <div className={styles.cannotCancelInfo}>
+                                <span className={styles.cannotCancelIcon}>🚫</span>
+                                <span className={styles.cannotCancelText}>
+                                  Cannot cancel (3-day limit exceeded)
+                                </span>
+                              </div>
+                            )}
+
+                            <button
+                              className={styles.viewDetailsButton}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleAppointmentClick(appointment.appointment_id);
+                              }}
+                            >
+                              View Details
+                            </button>
                           </div>
                         </div>
                       </div>
@@ -456,7 +629,7 @@ const Appointments = () => {
                   })}
                 </div>
 
-                {/* Load More Button k */}
+                {/* Load More Button */}
                 {pagination.hasMore && (
                   <div className={styles.loadMoreSection}>
                     <button 
@@ -472,7 +645,7 @@ const Appointments = () => {
                 {/* Pagination Info */}
                 <div className={styles.paginationInfo}>
                   <p>
-                    Showing {filteredAppointments.length} of {pagination.total} appointments
+                    Showing {filteredAppointments.length} of {pagination.total} confirmed appointments
                   </p>
                 </div>
               </>

@@ -51,7 +51,7 @@ router.post('/create-payment-intent', authenticate, async (req, res) => {
 
     // Create payment intent - MINIMAL VERSION TO AVOID ERRORS
     const paymentIntentData = {
-      amount: Math.round(amount * 100), // Convert to cents/paisa
+      amount: Math.round(amount), // Convert to cents/paisa
       currency: 'lkr',
       automatic_payment_methods: {
         enabled: true,
