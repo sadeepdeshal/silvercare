@@ -556,14 +556,14 @@ const fetchSchedules = async (req, res) => {
 
      const query = `
       SELECT 
-          e.name AS eldername,
-          e.address AS elderaddress,
-          cr.start_date,
-          cr.end_date
+        e.name,
+        e.address ,
+        cr.start_date,
+        cr.end_date
       FROM carerequest cr
       JOIN elder e ON cr.elder_id = e.elder_id
-      JOIN "User" u ON cg.user_id = u.user_id
-      WHERE cr.caregiver_id = $1;
+      WHERE cr.caregiver_id = $1
+      AND LOWER(cr.status) IN ('upcoming', 'ongoing');
     `;
 
     const result = await pool.query(query, [caregiverId]);

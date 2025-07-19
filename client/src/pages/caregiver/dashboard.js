@@ -65,12 +65,14 @@ const CaregiverDashboard = () => {
     // Fetch caregiver schedule with active statuses
     caregiverApi.fetchSchedules(caregiverId).then((data) => {
       const transformed = data.map((elder) => ({
-        eldername: elder.eldername || elder.name,
-        elderaddress: elder.elderaddress || elder.address,
+        name: elder.name,
+        address: elder.address,
         startdate: elder.start_date,
         enddate: elder.end_date,
       }));
       setSchedule(transformed);
+        console.log("Schedule Data:", transformed);
+
     });
 
     // Dummy data for other sections
@@ -153,11 +155,12 @@ const CaregiverDashboard = () => {
                   <span className={styles.time}>
                     {new Date(elder.startdate).toLocaleDateString()} - {new Date(elder.enddate).toLocaleDateString()}
                   </span>
-                  <div className={styles.scheduleTitle}>{elder.eldername}</div>
-                  <div className={styles.scheduleSubtitle}>{elder.elderaddress}</div>
+                  <div className={styles.scheduleTitle}>{elder.name}</div>
+                  <div className={styles.scheduleSubtitle}>{elder.address}</div>
                 </li>
               ))
             )}
+            
           </ul>
         </section>
 
