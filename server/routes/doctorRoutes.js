@@ -27,6 +27,7 @@ const authenticate = (req, res, next) => {
 
 // Routes remain unchanged
 router.get('/user/:userId', doctorController.getDoctorByUserId);
+router.put('/user/:userId', doctorController.updateDoctorProfile);
 router.get('/:doctorId/appointments', doctorController.getDoctorAppointments);
 router.get('/:doctorId/upcoming', doctorController.getUpcomingAppointments);
 router.get('/:doctorId/today', doctorController.getTodaysAppointments);

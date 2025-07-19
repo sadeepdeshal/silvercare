@@ -9,151 +9,31 @@
   padding: 24px;
 }
 
-/* Header Section */
-.profileHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 32px;
-  padding: 24px;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e2e8f0;
-}
-
-.backBtn {
-  background: #f1f5f9;
-  color: #475569;
-  border: none;
-  padding: 8px 16px;
+/* Success and Error Messages */
+.successMessage {
+  background: #d1fae5;
+  color: #065f46;
+  padding: 12px 16px;
   border-radius: 6px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
+  border: 1px solid #a7f3d0;
+  margin-bottom: 20px;
   display: flex;
   align-items: center;
   gap: 8px;
-}
-
-.backBtn:hover {
-  background: #e2e8f0;
-  color: #334155;
-}
-
-.headerContent {
-  text-align: center;
-  flex: 1;
-}
-
-.headerContent h1 {
-  color: #1e293b;
-  font-size: 2rem;
-  font-weight: 700;
-  margin: 0 0 8px 0;
-}
-
-.headerContent p {
-  color: #64748b;
-  font-size: 1rem;
-  margin: 0;
-}
-
-.headerActions {
-  display: flex;
-  gap: 12px;
-}
-
-.editBtn {
-  background: #3b82f6;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 6px;
-  font-size: 0.875rem;
   font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s;
 }
 
-.editBtn:hover {
-  background: #2563eb;
-}
-
-.logoutBtn {
-  background: #ef4444;
-  color: white;
-  border: none;
-  padding: 8px 16px;
+.errorMessage {
+  background: #fef2f2;
+  color: #991b1b;
+  padding: 12px 16px;
   border-radius: 6px;
-  font-size: 0.875rem;
+  border: 1px solid #fecaca;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.logoutBtn:hover {
-  background: #dc2626;
-}
-
-/* Profile Card */
-.profileCard {
-  background: white;
-  border-radius: 12px;
-  padding: 32px;
-  margin-bottom: 32px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e2e8f0;
-  display: flex;
-  align-items: center;
-  gap: 32px;
-}
-
-.profileImageSection {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-}
-
-.imageContainer {
-  position: relative;
-}
-
-.profileImage {
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 4px solid #e2e8f0;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.profilePlaceholder {
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-size: 2.5rem;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-
-  .profileContainer {
-  min-height: 100vh;
-  background: #f8fafc;
-}
-
-.profileContent {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 24px;
 }
 
 /* Header Section */
@@ -224,8 +104,13 @@
   transition: background-color 0.2s;
 }
 
-.editBtn:hover {
+.editBtn:hover:not(:disabled) {
   background: #2563eb;
+}
+
+.editBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .logoutBtn {
@@ -303,6 +188,13 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+.photoUploadSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
 .changePhotoBtn {
   background: #f1f5f9;
   color: #475569;
@@ -313,6 +205,8 @@
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
+  text-decoration: none;
+  display: inline-block;
 }
 
 .changePhotoBtn:hover {
@@ -406,22 +300,6 @@
   gap: 8px;
 }
 
-.sectionEditBtn {
-  background: #f1f5f9;
-  color: #475569;
-  border: none;
-  padding: 6px 12px;
-  border-radius: 4px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.sectionEditBtn:hover {
-  background: #e2e8f0;
-}
-
 .infoGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -451,6 +329,52 @@
   border-radius: 6px;
   border-left: 3px solid #3b82f6;
   min-height: 20px;
+}
+
+/* Edit Form Styles */
+.editInput,
+.editSelect,
+.editTextarea {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #1e293b;
+  background: white;
+  transition: border-color 0.2s;
+}
+
+.editInput:focus,
+.editSelect:focus,
+.editTextarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.editTextarea {
+  resize: vertical;
+  min-height: 80px;
+  font-family: inherit;
+}
+
+.editSelect {
+  cursor: pointer;
+}
+
+/* Disabled Input Styles */
+.disabledInput {
+  background: #f1f5f9 !important;
+  color: #64748b !important;
+  cursor: not-allowed !important;
+  border-color: #cbd5e1 !important
+}
+
+.disabledInput:focus {
+  border-color: #cbd5e1 !important;
+  box-shadow: none !important;
 }
 
 /* Family Card */
@@ -609,10 +533,17 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  min-width: 140px;
+  justify-content: center;
 }
 
-.saveBtn:hover {
+.saveBtn:hover:not(:disabled) {
   background: #059669;
+}
+
+.saveBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .cancelBtn {
@@ -627,8 +558,23 @@
   transition: background-color 0.2s;
 }
 
-.cancelBtn:hover {
+.cancelBtn:hover:not(:disabled) {
   background: #475569;
+}
+
+.cancelBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Button Spinner */
+.buttonSpinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
 }
 
 /* Loading States */
@@ -708,6 +654,19 @@
   100% { 
     transform: rotate(360deg); 
   }
+}
+
+/* Form Validation Styles */
+.editInput:invalid,
+.editSelect:invalid,
+.editTextarea:invalid {
+  border-color: #ef4444;
+}
+
+.editInput:valid,
+.editSelect:valid,
+.editTextarea:valid {
+  border-color: #10b981;
 }
 
 /* Responsive Design */
@@ -826,6 +785,12 @@
     width: 100%;
     justify-content: center;
   }
+
+  .editInput,
+  .editSelect,
+  .editTextarea {
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
 }
 
 /* Focus states for accessibility */
@@ -833,36 +798,17 @@
 .editBtn:focus,
 .logoutBtn:focus,
 .changePhotoBtn:focus,
-.sectionEditBtn:focus,
 .contactBtn:focus,
 .messageBtn:focus,
 .toggleBtn:focus,
 .saveBtn:focus,
 .cancelBtn:focus,
-.retryBtn:focus {
+.retryBtn:focus,
+.editInput:focus,
+.editSelect:focus,
+.editTextarea:focus {
   outline: 2px solid #3b82f6;
   outline-offset: 2px;
-}
-
-/* Print styles */
-@media print {
-  .profileContainer {
-    background: white;
-  }
-  
-  .headerActions,
-  .changePhotoBtn,
-  .sectionEditBtn,
-  .familyActions,
-  .actionButtons {
-    display: none;
-  }
-  
-  .profileCard,
-  .infoSection {
-    box-shadow: none;
-    border: 1px solid #000;
-  }
 }
 
 /* Dark mode support */
@@ -898,15 +844,13 @@
   }
   
   .backBtn,
-  .changePhotoBtn,
-  .sectionEditBtn {
+  .changePhotoBtn {
     background: #334155;
     color: #cbd5e1;
   }
   
   .backBtn:hover,
-  .changePhotoBtn:hover,
-  .sectionEditBtn:hover {
+  .changePhotoBtn:hover {
     background: #475569;
   }
   
@@ -916,105 +860,38 @@
     background: #0f172a;
     border-color: #334155;
   }
-}
 
-/* Utility classes */
-.textCenter {
-  text-align: center;
-}
+  .editInput,
+  .editSelect,
+  .editTextarea {
+    background: #0f172a;
+    border-color: #334155;
+    color: #f1f5f9;
+  }
 
-.flexCenter {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+  .editInput:focus,
+  .editSelect:focus,
+  .editTextarea:focus {
+    border-color: #3b82f6;
+  }
 
-.mt20 {
-  margin-top: 20px;
-}
+  .disabledInput {
+    background: #334155 !important;
+    color: #94a3b8 !important;
+    border-color: #475569 !important;
+  }
 
-.mb20 {
-  margin-bottom: 20px;
-}
+  .successMessage {
+    background: #064e3b;
+    color: #a7f3d0;
+    border-color: #065f46;
+  }
 
-.p20 {
-  padding: 20px;
-}
-
-/* Custom scrollbar */
-.profileContent::-webkit-scrollbar {
-  width: 8px;
-}
-
-.profileContent::-webkit-scrollbar-track {
-  background: #f1f5f9;
-  border-radius: 4px;
-}
-
-.profileContent::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 4px;
-}
-
-.profileContent::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
-}
-
-/* Hover effects */
-.infoSection:hover {
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  transform: translateY(-2px);
-  transition: all 0.2s ease;
-}
-
-.profileCard:hover {
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  transition: all 0.2s ease;
-}
-
-/* Loading state for sections */
-.infoSection.loading {
-  opacity: 0.6;
-  pointer-events: none;
-}
-
-.infoSection.loading::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 20px;
-  height: 20px;
-  margin: -10px 0 0 -10px;
-  border: 2px solid #e2e8f0;
-  border-top: 2px solid #3b82f6;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-/* Success/Error states */
-.successMessage {
-  background: #d1fae5;
-  color: #065f46;
-  padding: 12px 16px;
-  border-radius: 6px;
-  border: 1px solid #a7f3d0;
-  margin-bottom: 20px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.errorMessage {
-  background: #fef2f2;
-  color: #991b1b;
-  padding: 12px 16px;
-  border-radius: 6px;
-  border: 1px solid #fecaca;
-  margin-bottom: 20px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  .errorMessage {
+    background: #7f1d1d;
+    color: #fecaca;
+    border-color: #991b1b;
+  }
 }
 
 /* Enhanced accessibility */
@@ -1042,249 +919,10 @@
   .cancelBtn,
   .contactBtn,
   .messageBtn,
-  .toggleBtn {
+  .toggleBtn,
+  .editInput,
+  .editSelect,
+  .editTextarea {
     border: 2px solid #000;
   }
 }
-
-/* Large text support */
-@media (min-resolution: 2dppx) {
-  .profileImage,
-  .profilePlaceholder {
-    border-width: 2px;
-  }
-  
-  .statusIndicator {
-    border-width: 2px;
-  }
-}
-
-/* Additional responsive breakpoints */
-@media (max-width: 360px) {
-  .profileContent {
-    padding: 12px;
-  }
-  
-  .profileHeader {
-    padding: 16px;
-  }
-  
-  .profileCard {
-    padding: 16px;
-  }
-  
-  .infoSection {
-    padding: 16px;
-  }
-  
-  .headerContent h1 {
-    font-size: 1.25rem;
-  }
-  
-  .profileName h2 {
-    font-size: 1.25rem;
-  }
-  
-  .sectionHeader h3 {
-    font-size: 1rem;
-  }
-}
-
-/* Tablet landscape */
-@media (min-width: 768px) and (max-width: 1024px) and (orientation: landscape) {
-  .profileCard {
-    flex-direction: row;
-    text-align: left;
-  }
-  
-  .profileMeta {
-    justify-content: flex-start;
-  }
-  
-  .familyCard {
-    flex-direction: row;
-  }
-  
-  .familyActions {
-    margin-left: 20px;
-    justify-content: flex-end;
-  }
-}
-
-/* Animation delays for staggered loading */
-.infoSection:nth-child(1) {
-  animation-delay: 0.1s;
-}
-
-.infoSection:nth-child(2) {
-  animation-delay: 0.2s;
-}
-
-.infoSection:nth-child(3) {
-  animation-delay: 0.3s;
-}
-
-.infoSection:nth-child(4) {
-  animation-delay: 0.4s;
-}
-
-/* Fade in animation */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.infoSection {
-  animation: fadeInUp 0.6s ease-out both;
-}
-
-/* Pulse animation for status indicator */
-@keyframes pulse {
-  0%, 100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  50% {
-    transform: scale(1.1);
-    opacity: 0.8;
-  }
-}
-
-.statusIndicator {
-  animation: pulse 2s infinite;
-}
-
-/* Gradient backgrounds for different sections */
-.infoSection:nth-child(1) {
-  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-}
-
-.infoSection:nth-child(2) {
-  background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
-}
-
-.infoSection:nth-child(3) {
-  background: linear-gradient(135deg, #ffffff 0%, #ecfdf5 100%);
-}
-
-.infoSection:nth-child(4) {
-  background: linear-gradient(135deg, #ffffff 0%, #fffbeb 100%);
-}
-
-/* Improved button states */
-.editBtn:active,
-.logoutBtn:active,
-.saveBtn:active,
-.cancelBtn:active,
-.contactBtn:active,
-.messageBtn:active,
-.toggleBtn:active {
-  transform: translateY(1px);
-}
-
-/* Enhanced focus indicators */
-.editBtn:focus-visible,
-.logoutBtn:focus-visible,
-.saveBtn:focus-visible,
-.cancelBtn:focus-visible,
-.contactBtn:focus-visible,
-.messageBtn:focus-visible,
-.toggleBtn:focus-visible {
-  outline: 3px solid #3b82f6;
-  outline-offset: 2px;
-  box-shadow: 0 0 0 6px rgba(59, 130, 246, 0.2);
-}
-
-/* Tooltip styles (for future implementation) */
-.tooltip {
-  position: relative;
-}
-
-.tooltip::after {
-  content: attr(data-tooltip);
-  position: absolute;
-  bottom: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #1e293b;
-  color: white;
-  padding: 8px 12px;
-  border-radius: 4px;
-  font-size: 0.875rem;
-  white-space: nowrap;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s;
-  z-index: 1000;
-}
-
-.tooltip:hover::after {
-  opacity: 1;
-}
-
-/* Badge styles for status indicators */
-.badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 4px 8px;
-  border-radius: 12px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.badge.success {
-  background: #d1fae5;
-  color: #065f46;
-}
-
-.badge.warning {
-  background: #fef3c7;
-  color: #92400e;
-}
-
-.badge.error {
-  background: #fef2f2;
-  color: #991b1b;
-}
-
-.badge.info {
-  background: #dbeafe;
-  color: #1e40af;
-}
-
-/* Card hover effects */
-.familyCard:hover,
-.settingItem:hover {
-  background: #f1f5f9;
-  transition: background-color 0.2s;
-}
-
-/* Improved spacing for mobile */
-@media (max-width: 480px) {
-  .infoGrid {
-    gap: 16px;
-  }
-  
-  .familyInfo {
-    gap: 12px;
-  }
-  
-  .settingsGrid {
-    gap: 12px;
-  }
-  
-  .actionButtons {
-    gap: 12px;
-    padding: 20px;
-  }
-}
-
-

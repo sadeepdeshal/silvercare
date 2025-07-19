@@ -14,18 +14,20 @@ const {
   getElderAppointments,
   getUpcomingAppointmentsByFamily,
   getAppointmentCountByFamily,
-  getBlockedTimeSlots // Add this import
+  getBlockedTimeSlots
 } = require('../controllers/elderController');
 
 const { 
   getElderDetails,
+  updateElderProfile,
+  upload,
   getElderDashboardStats,
   getUpcomingAppointments,
   getPastAppointments,
   getAllAppointments,
   getAppointmentById,
   cancelAppointment,
-  rescheduleAppointment
+  joinAppointment // Replace rescheduleAppointment with joinAppointment
 } = require('../controllers/elder');
 
 // Get all elders for a specific family member
@@ -59,6 +61,9 @@ router.get('/:elderId/doctors/online', getAllDoctorsForOnlineMeeting);
 // Get dashboard stats for an elder - MUST BE BEFORE /:elderId route
 router.get('/:elderId/dashboard-stats', getElderDashboardStats);
 
+// Update elder profile with file upload - MUST BE BEFORE /:elderId route
+router.put('/:elderId/profile', upload.single('profile_photo'), updateElderProfile);
+
 // Create new appointment - MUST BE BEFORE /:elderId route
 router.post('/:elderId/appointments', createAppointment);
 
@@ -69,9 +74,8 @@ router.get('/:elderId/appointments', getElderAppointments);
 router.get('/:elderId/appointments/upcoming', getUpcomingAppointments);
 router.get('/:elderId/appointments/past', getPastAppointments);
 router.get('/:elderId/appointments/:appointmentId', getAppointmentById);
-router.get('/:elderId/appointments', getAllAppointments);
 router.put('/:elderId/appointments/:appointmentId/cancel', cancelAppointment);
-router.put('/:elderId/appointments/:appointmentId/reschedule', rescheduleAppointment);
+router.post('/:elderId/appointments/:appointmentId/join', joinAppointment); // Replace reschedule with join
 
 // Get specific elder by ID
 router.get('/:elderId', getElderById);
@@ -83,3 +87,4 @@ router.put('/:elderId', updateElder);
 router.post('/', createElder);
 
 module.exports = router;
+
