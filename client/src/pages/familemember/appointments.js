@@ -456,7 +456,7 @@ const Appointments = () => {
                   })}
                 </div>
 
-                {/* Load More Button */}
+                {/* Load More Button k */}
                 {pagination.hasMore && (
                   <div className={styles.loadMoreSection}>
                     <button 
