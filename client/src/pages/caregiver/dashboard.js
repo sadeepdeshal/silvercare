@@ -65,22 +65,24 @@ const CaregiverDashboard = () => {
 
     // Fetch care requests for caregiver
     caregiverApi.fetchCareRequests(caregiverId).then((data) => {
-      const transformed = data.map((request) => ({
-        requestId: request.request_id,
-        elderName: request.elder_name,
-        elderAge: request.elder_age,
-        elderAddress: request.elder_address,
-        elderContact: request.elder_contact,
-        medicalConditions: request.medical_conditions,
-        familyMemberName: request.family_member_name,
-        familyMemberPhone: request.family_member_phone,
-        familyMemberEmail: request.family_member_email,
-        startDate: request.start_date,
-        endDate: request.end_date,
-        status: request.status,
-        duration: request.duration,
-        requestDate: request.request_date
-      }));
+      const transformed = data
+        .filter(request => request.status === 'pending') // Only show pending requests
+        .map((request) => ({
+          requestId: request.request_id,
+          elderName: request.elder_name,
+          elderAge: request.elder_age,
+          elderAddress: request.elder_address,
+          elderContact: request.elder_contact,
+          medicalConditions: request.medical_conditions,
+          familyMemberName: request.family_member_name,
+          familyMemberPhone: request.family_member_phone,
+          familyMemberEmail: request.family_member_email,
+          startDate: request.start_date,
+          endDate: request.end_date,
+          status: request.status,
+          duration: request.duration,
+          requestDate: request.request_date
+        }));
       setCareRequests(transformed);
       console.log("Care Requests Data:", transformed);
     });
@@ -141,7 +143,6 @@ const CaregiverDashboard = () => {
                   <div className={styles.careRequestHeader}>
                     <div className={styles.requestInfo}>
                       <h3 className={styles.elderName}>{request.elderName}</h3>
-                      <div className={styles.requestId}>Request #{request.requestId}</div>
                     </div>
                     <div className={`${styles.statusBadge} ${styles[request.status]}`}>
                       {request.status}
