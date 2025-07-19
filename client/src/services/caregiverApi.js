@@ -179,7 +179,52 @@ export const caregiverApi = {
       console.error('API: Error updating care request status:', error);
       throw error;
     }
-  }
+  },
+
+  // Get assigned elders for caregiver(role caregiver)
+  fetchAssignedElders: async (caregiverId) => {
+    try {
+      const response = await axios.get(`${API_BASE}/${caregiverId}/assigned-elders`);
+      return response.data;
+    } catch (error) {
+      console.error('API: Error fetching assigned elders:', error);
+      return [];
+    }
+  },
+
+  // Get number of assigned families for caregiver(role caregiver)
+  getAssignedFamiliesCount: async (caregiverId) => {
+    try {
+      const response = await axios.get(`${API_BASE}/${caregiverId}/assigned-families`);
+      return response.data;
+    } catch (error) {
+      console.error('API: Error fetching assigned families count:', error);
+      return { count: 0 };
+    }
+  },
+
+  // Get number of carelogs(role caregiver)
+  getcarelogsCount: async (caregiverId) => {
+    try {
+      const response = await axios.get(`${API_BASE}/${caregiverId}/carelogs-count`);
+      return response.data;
+    } catch (error) {
+      console.error('API: Error fetching carelogs count:', error);
+      return { count: 0 };
+    }
+  },
+
+  // Get caregiver schedules(role caregiver)
+  fetchSchedules: async (caregiverId) => {
+    try {
+      const response = await axios.get(`${API_BASE}/${caregiverId}/caregiver-schedules`);
+      return response.data;
+    } catch (error) {
+      console.error('API: Error fetching schedules:', error);
+      return [];
+    }
+  },
+
 };
 
 export default caregiverApi;
