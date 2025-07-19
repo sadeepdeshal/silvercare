@@ -1,0 +1,1077 @@
+/* Reports Container */
+.reportsContainer {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  padding-bottom: 2rem;
+}
+
+/* Header Section */
+.headerSection {
+  background: white;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  padding: 2rem 0;
+  margin-bottom: 2rem;
+}
+
+.headerContent {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.backButton {
+  background: #6c757d;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.backButton:hover {
+  background: #5a6268;
+  transform: translateY(-2px);
+}
+
+.headerInfo {
+  flex: 1;
+  min-width: 300px;
+}
+
+.pageTitle {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin: 0 0 0.5rem 0;
+}
+
+.pageSubtitle {
+  font-size: 1.1rem;
+  color: #6c757d;
+  margin: 0;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.dateRangeSelector {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #f8f9fa;
+  padding: 0.5rem;
+  border-radius: 8px;
+}
+
+.dateInput {
+  padding: 0.5rem;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.exportButtons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.exportButton {
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+  color: white;
+  border: none;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.exportButton:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+}
+
+.exportButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Error Message */
+.errorMessage {
+  max-width: 1400px;
+  margin: 0 auto 2rem auto;
+  padding: 0 2rem;
+}
+
+.errorMessage p {
+  background: #f8d7da;
+  color: #721c24;
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid #f5c6cb;
+  margin: 0;
+}
+
+/* Loading State */
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  text-align: center;
+}
+
+.loadingSpinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid #007bff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Access Denied */
+.accessDenied {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  text-align: center;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+.accessDenied h2 {
+  color: #dc3545;
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+.accessDenied p {
+  color: #6c757d;
+  font-size: 1.1rem;
+}
+
+/* Tabs */
+.tabsContainer {
+  max-width: 1400px;
+  margin: 0 auto 2rem auto;
+  padding: 0 2rem;
+}
+
+.tabsWrapper {
+  display: flex;
+  background: white;
+  border-radius: 12px;
+  padding: 0.5rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  overflow-x: auto;
+  gap: 0.5rem;
+}
+
+.tab {
+  flex: 1;
+  min-width: 150px;
+  padding: 1rem 1.5rem;
+  border: none;
+  background: transparent;
+  color: #6c757d;
+  font-size: 1rem;
+  font-weight: 500;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.tab:hover {
+  background: #f8f9fa;
+  color: #495057;
+}
+
+.activeTab {
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+  color: white !important;
+  box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+}
+
+/* Reports Content */
+.reportsContent {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+/* Overview Tab */
+.overviewContent {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.metricsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+.metricCard {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  transition: transform 0.3s ease;
+}
+
+.metricCard:hover {
+  transform: translateY(-5px);
+}
+
+.metricIcon {
+  font-size: 2.5rem;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+  border-radius: 50%;
+  color: white;
+}
+
+.metricContent h3 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin: 0;
+}
+
+.metricContent p {
+  font-size: 1rem;
+  color: #6c757d;
+  margin: 0.25rem 0;
+}
+
+.metricChange {
+  font-size: 0.875rem;
+  color: #28a745;
+  font-weight: 500;
+}
+
+/* Charts Section */
+.chartsSection {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 2rem;
+}
+
+.chartCard {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.chartCard h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0 0 1.5rem 0;
+}
+
+.chartContainer {
+  height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mockChart {
+  display: flex;
+  align-items: end;
+  gap: 1rem;
+  height: 200px;
+  width: 100%;
+}
+
+.chartBar {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.barFill {
+  width: 100%;
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+  border-radius: 4px 4px 0 0;
+  min-height: 20px;
+  transition: all 0.3s ease;
+}
+
+.barLabel {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #6c757d;
+}
+
+.barValue {
+  font-size: 0.75rem;
+  color: #007bff;
+  font-weight: 600;
+}
+
+/* Pie Chart */
+.pieChartContainer {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.pieChart {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  background: conic-gradient(
+    #007bff 0% 36.6%,
+    #28a745 36.6% 55.4%,
+    #ffc107 55.4% 67.9%,
+    #dc3545 67.9% 75%,
+    #6f42c1 75% 78.6%,
+    #e9ecef 78.6% 100%
+  );
+}
+
+.pieLegend {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.legendColor {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+}
+
+/* Activities Section */
+.activitiesSection {
+  grid-column: 1 / -1;
+}
+
+.activitiesCard {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.activitiesCard h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0 0 1.5rem 0;
+}
+
+.activitiesList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.activityItem {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.activityItem:hover {
+  background: #e9ecef;
+  transform: translateX(5px);
+}
+
+.activityIcon {
+  font-size: 1.5rem;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.activityContent {
+  flex: 1;
+}
+
+.activityContent p {
+  margin: 0 0 0.25rem 0;
+  font-weight: 500;
+  color: #2c3e50;
+}
+
+.activityTime {
+  font-size: 0.875rem;
+  color: #6c757d;
+}
+
+/* Users Tab */
+.usersContent {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 2rem;
+}
+
+.statCard {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.statHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #e9ecef;
+}
+
+.statHeader h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0;
+}
+
+.statNumber {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #007bff;
+}
+
+.statBreakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.breakdownItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #f8f9fa;
+}
+
+.breakdownItem:last-child {
+  border-bottom: none;
+}
+
+.growthChart {
+  display: flex;
+  align-items: end;
+  gap: 0.5rem;
+  height: 100px;
+}
+
+.growthBar {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.growthFill {
+  width: 100%;
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  border-radius: 2px 2px 0 0;
+  min-height: 10px;
+}
+
+.growthBar span {
+  font-size: 0.75rem;
+  color: #6c757d;
+}
+
+.activityMetrics {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.metricItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  background: #f8f9fa;
+  border-radius: 6px;
+}
+
+/* Appointments Tab */
+.appointmentsContent {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.appointmentStats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+.appointmentCard {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.appointmentIcon {
+  font-size: 2rem;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #f8f9fa;
+}
+
+.appointmentInfo h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #6c757d;
+  margin: 0 0 0.5rem 0;
+}
+
+.appointmentNumber {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #2c3e50;
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.appointmentPercentage {
+  font-size: 0.875rem;
+  color: #28a745;
+  font-weight: 500;
+}
+
+.topDoctorsSection {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.topDoctorsSection h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0 0 1.5rem 0;
+}
+
+.doctorsList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.doctorCard {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.doctorCard:hover {
+  background: #e9ecef;
+  transform: translateY(-2px);
+}
+
+.doctorRank {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #007bff;
+  width: 40px;
+  text-align: center;
+}
+
+.doctorInfo {
+  flex: 1;
+}
+
+.doctorInfo h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0 0 0.25rem 0;
+}
+
+.doctorInfo p {
+  font-size: 0.875rem;
+  color: #6c757d;
+  margin: 0;
+}
+
+.doctorStats {
+  display: flex;
+  gap: 2rem;
+}
+
+.doctorStat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.doctorStat span:first-child {
+  font-size: 0.75rem;
+  color: #6c757d;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.doctorStat span:last-child {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+/* System Tab */
+.systemContent {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.systemStats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.systemCard {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  transition: transform 0.3s ease;
+}
+
+.systemCard:hover {
+  transform: translateY(-3px);
+}
+
+.systemIcon {
+  font-size: 2rem;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6f42c1 0%, #5a32a3 100%);
+  color: white;
+}
+
+.systemInfo h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #6c757d;
+  margin: 0 0 0.5rem 0;
+}
+
+.systemNumber {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #2c3e50;
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.systemDetail {
+  font-size: 0.875rem;
+  color: #6c757d;
+}
+
+.emergencySection {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.emergencySection h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0 0 1.5rem 0;
+}
+
+.emergencyList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.emergencyCard {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border-left: 4px solid #dc3545;
+  transition: all 0.3s ease;
+}
+
+.emergencyCard:hover {
+  background: #e9ecef;
+  transform: translateX(5px);
+}
+
+.emergencyIcon {
+  font-size: 1.5rem;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.emergencyInfo {
+  flex: 1;
+}
+
+.emergencyInfo h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0 0 0.25rem 0;
+}
+
+.emergencyInfo p {
+  font-size: 0.875rem;
+  color: #6c757d;
+  margin: 0 0 0.25rem 0;
+}
+
+.emergencyTime {
+  font-size: 0.75rem;
+  color: #6c757d;
+}
+
+.emergencyStatus {
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-align: center;
+  min-width: 80px;
+}
+
+.resolved {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.inprogress {
+  background: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeaa7;
+}
+
+.pending {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .chartsSection {
+    grid-template-columns: 1fr;
+  }
+  
+  .pieChartContainer {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .headerContent {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+  
+  .headerActions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .dateRangeSelector {
+    justify-content: center;
+  }
+  
+  .exportButtons {
+    justify-content: center;
+  }
+  
+  .pageTitle {
+    font-size: 2rem;
+    text-align: center;
+  }
+  
+  .pageSubtitle {
+    text-align: center;
+  }
+  
+  .tabsWrapper {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  
+  .tab {
+    min-width: auto;
+    text-align: center;
+  }
+  
+  .metricsGrid,
+  .statsGrid,
+  .appointmentStats,
+  .systemStats {
+    grid-template-columns: 1fr;
+  }
+  
+  .doctorStats {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .doctorStat {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+  
+  .emergencyCard {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+  }
+  
+  .emergencyInfo {
+    order: 1;
+  }
+  
+  .emergencyStatus {
+    order: 2;
+    align-self: center;
+  }
+  
+  .emergencyIcon {
+    order: 0;
+    align-self: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .reportsContainer {
+    padding-bottom: 1rem;
+  }
+  
+  .headerSection {
+    padding: 1.5rem 0;
+  }
+  
+  .headerContent,
+  .reportsContent {
+    padding: 0 1rem;
+  }
+  
+  .pageTitle {
+    font-size: 1.75rem;
+  }
+  
+  .metricCard,
+  .appointmentCard,
+  .systemCard {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
+  
+  .metricIcon,
+  .appointmentIcon,
+  .systemIcon {
+    align-self: center;
+  }
+  
+  .chartCard,
+  .activitiesCard,
+  .topDoctorsSection,
+  .emergencySection {
+    padding: 1rem;
+  }
+  
+  .mockChart {
+    gap: 0.5rem;
+  }
+  
+  .barLabel,
+  .barValue {
+    font-size: 0.75rem;
+  }
+  
+  .doctorCard {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
+  
+  .doctorRank {
+    align-self: center;
+  }
+  
+  .doctorStats {
+    flex-direction: row;
+    justify-content: space-around;
+    width: 100%;
+  }
+}
+
+/* Animation for loading states */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.reportsContent > * {
+  animation: fadeIn 0.5s ease-out;
+}
+
+/* Hover effects for interactive elements */
+.metricCard:hover .metricIcon,
+.appointmentCard:hover .appointmentIcon,
+.systemCard:hover .systemIcon {
+  transform: scale(1.1);
+  transition: transform 0.3s ease;
+}
+
+/* Custom scrollbar for tabs on mobile */
+.tabsWrapper::-webkit-scrollbar {
+  height: 4px;
+}
+
+.tabsWrapper::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 2px;
+}
+
+.tabsWrapper::-webkit-scrollbar-thumb {
+  background: #007bff;
+  border-radius: 2px;
+}
+
+.tabsWrapper::-webkit-scrollbar-thumb:hover {
+  background: #0056b3;
+}
+
+/* Print styles */
+@media print {
+  .headerActions,
+  .backButton,
+  .tabsWrapper {
+    display: none !important;
+  }
+  
+  .reportsContainer {
+    background: white !important;
+  }
+  
+  .metricCard,
+  .chartCard,
+  .activitiesCard,
+  .statCard,
+  .appointmentCard,
+  .systemCard,
+  .topDoctorsSection,
+  .emergencySection {
+    box-shadow: none !important;
+    border: 1px solid #dee2e6 !important;
+    break-inside: avoid;
+  }
+}

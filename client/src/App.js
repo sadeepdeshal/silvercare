@@ -51,6 +51,8 @@ import ElderProfile from "./pages/elder/profile";
 
 // Import admin related
 import AdminUsers from "./pages/admin/users";
+import AdminSettings from "./pages/admin/settings"; 
+import AdminReports from "./pages/admin/reports";
 
 // Optional: Create an Unauthorized component
 const Unauthorized = () => (
@@ -307,6 +309,24 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={["admin"]}>
                 <AdminUsers />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin/settings"
+            element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <AdminSettings />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin/reports"
+            element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <AdminReports />
               </ProtectedRoute>
             }
           />
