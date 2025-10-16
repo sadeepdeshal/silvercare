@@ -1,0 +1,27 @@
+.starRating {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.starFilled {
+  color: #FFD700;
+  font-size: 1.2em;
+}
+
+.starHalf {
+  color: #FFD700;
+  font-size: 1.2em;
+  opacity: 0.5;
+}
+
+.starEmpty {
+  color: #ccc;
+  font-size: 1.2em;
+}
+
+.ratingNumber {
+  margin-left: 4px;
+  color: #666;
+  font-size: 0.9em;
+}

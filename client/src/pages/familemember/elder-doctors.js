@@ -6,6 +6,8 @@ import Navbar from '../../components/navbar';
 import FamilyMemberLayout from '../../components/FamilyMemberLayout';
 import styles from '../../components/css/familymember/elder-doctors.module.css';
 import {feedbackApi} from '../../services/feedbackApi';
+import StarRating from '../../components/StarRating';
+
 
 const ElderDoctors = () => {
   const { currentUser, loading, isAuthenticated } = useAuth();
@@ -429,7 +431,9 @@ const ElderDoctors = () => {
                           <span className={styles.detailIcon}>🆔</span>
                           <div className={styles.detailContent}>
                             <span className={styles.detailLabel}>Rating</span>
-                            <span className={styles.detailValue}>{getDoctorAverageRating(doctor.doctor_id)}</span>
+                            <span className={styles.detailValue}>
+                              <StarRating rating={getDoctorAverageRating(doctor.doctor_id)} />
+                            </span>
                           </div>
                         </div>
 
