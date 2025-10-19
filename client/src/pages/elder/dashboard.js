@@ -24,8 +24,10 @@ const ElderDashboard = () => {
   const [elderDetails, setElderDetails] = useState(null);
   const [upcomingAppointments, setUpcomingAppointments] = useState([]);
   const [pastAppointments, setPastAppointments] = useState([]);
+  const [ongoingAppointments, setOngoingAppointments] = useState([]);
   const [upcomingSessions, setUpcomingSessions] = useState([]);
   const [pastSessions, setPastSessions] = useState([]);
+  const [ongoingSessions, setOngoingSessions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("upcoming");
@@ -120,14 +122,49 @@ const ElderDashboard = () => {
     try {
       setAppointmentsLoading(true);
 
-      // Fetch only 2 appointments for dashboard display
+      // Fetch appointments
       const [upcomingResponse, pastResponse] = await Promise.all([
-        getUpcomingAppointments(elderId, { params: { limit: 2 } }),
-        getPastAppointments(elderId, { params: { limit: 2 } }),
+        getUpcomingAppointments(elderId, { params: { limit: 10 } }),
+        getPastAppointments(elderId, { params: { limit: 10 } }),
       ]);
 
-      setUpcomingAppointments(upcomingResponse.data.appointments || []);
-      setPastAppointments(pastResponse.data.appointments || []);
+        const upcomingAppts = upcomingResponse.data.appointments || [];
+        const pastAppts = pastResponse.data.appointments || [];
+
+        // Filter ongoing appointments: started and within 30 minutes window
+        const now = new Date();
+        const thirtyMinutesAgo = new Date(now.getTime() - 30 * 60 * 1000);
+
+        // Check upcoming appointments that may have started (now or in past) but within 30-min window
+        const ongoingFromUpcoming = upcomingAppts.filter(appt => {
+          const apptTime = new Date(appt.date_time);
+          const thirtyMinutesAfterStart = new Date(apptTime.getTime() + 30 * 60 * 1000);
+          return apptTime <= now && now <= thirtyMinutesAfterStart;
+        });
+
+        // Check past appointments that are still within 30 minutes window from start
+        const ongoingFromPast = pastAppts.filter(appt => {
+          const apptTime = new Date(appt.date_time);
+          const thirtyMinutesAfterStart = new Date(apptTime.getTime() + 30 * 60 * 1000);
+          return apptTime <= now && now <= thirtyMinutesAfterStart;
+        });      // Combine and deduplicate ongoing
+      const ongoing = [...ongoingFromUpcoming, ...ongoingFromPast]
+        .filter((appt, index, self) => 
+          index === self.findIndex(a => a.appointment_id === appt.appointment_id)
+        )
+        .slice(0, 2);
+
+      // Filter out ongoing from upcoming
+      const upcoming = upcomingAppts
+        .filter(appt => {
+          const apptTime = new Date(appt.date_time);
+          return apptTime > now;
+        })
+        .slice(0, 2);
+
+      setUpcomingAppointments(upcoming);
+      setOngoingAppointments(ongoing);
+      setPastAppointments(pastAppts.slice(0, 2));
     } catch (error) {
       console.error("Error fetching appointments:", error);
     } finally {
@@ -139,14 +176,50 @@ const ElderDashboard = () => {
     try {
       setSessionsLoading(true);
 
-      // Fetch only 2 sessions for dashboard display
+      // Fetch sessions
       const [upcomingResponse, pastResponse] = await Promise.all([
-        getUpcomingSessions(elderId, { params: { limit: 2 } }),
-        getPastSessions(elderId, { params: { limit: 2 } }),
+        getUpcomingSessions(elderId, { params: { limit: 10 } }),
+        getPastSessions(elderId, { params: { limit: 10 } }),
       ]);
 
-      setUpcomingSessions(upcomingResponse.data.sessions || []);
-      setPastSessions(pastResponse.data.sessions || []);
+      const upcomingSess = upcomingResponse.data.sessions || [];
+      const pastSess = pastResponse.data.sessions || [];
+
+      // Filter ongoing sessions: started and within 30 minutes window
+      const now = new Date();
+
+      // Check upcoming sessions that may have started (now or in past) but within 30-min window
+      const ongoingFromUpcoming = upcomingSess.filter(sess => {
+        const sessTime = new Date(sess.date_time);
+        const thirtyMinutesAfterStart = new Date(sessTime.getTime() + 30 * 60 * 1000);
+        return sessTime <= now && now <= thirtyMinutesAfterStart;
+      });
+
+      // Check past sessions that are still within 30 minutes window from start
+      const ongoingFromPast = pastSess.filter(sess => {
+        const sessTime = new Date(sess.date_time);
+        const thirtyMinutesAfterStart = new Date(sessTime.getTime() + 30 * 60 * 1000);
+        return sessTime <= now && now <= thirtyMinutesAfterStart;
+      });
+
+      // Combine and deduplicate ongoing
+      const ongoing = [...ongoingFromUpcoming, ...ongoingFromPast]
+        .filter((sess, index, self) => 
+          index === self.findIndex(s => s.session_id === sess.session_id)
+        )
+        .slice(0, 2);
+
+      // Filter out ongoing from upcoming
+      const upcoming = upcomingSess
+        .filter(sess => {
+          const sessTime = new Date(sess.date_time);
+          return sessTime > now;
+        })
+        .slice(0, 2);
+
+      setUpcomingSessions(upcoming);
+      setOngoingSessions(ongoing);
+      setPastSessions(pastSess.slice(0, 2));
     } catch (error) {
       console.error("Error fetching sessions:", error);
     } finally {
@@ -343,10 +416,36 @@ const ElderDashboard = () => {
     );
   };
 
+  const canJoinAppointment = (appointment) => {
+    // Can join if: online appointment AND (upcoming OR ongoing - within 30 min after start)
+    if (appointment.appointment_type !== 'online') return false;
+    
+    const now = new Date();
+    const apptTime = new Date(appointment.date_time);
+    const thirtyMinutesAfterStart = new Date(apptTime.getTime() + 30 * 60 * 1000);
+    
+    // Can join if appointment hasn't started yet OR started but within 30 minutes
+    return (apptTime > now || (apptTime <= now && now <= thirtyMinutesAfterStart)) 
+           && appointment.status !== "cancelled";
+  };
+
   const isUpcomingSession = (session) => {
     return (
       new Date(session.date_time) > new Date() && session.status !== "cancelled"
     );
+  };
+
+  const canJoinSession = (session) => {
+    // Can join if: online session AND (upcoming OR ongoing - within 30 min after start)
+    if (session.session_type !== 'online') return false;
+    
+    const now = new Date();
+    const sessTime = new Date(session.date_time);
+    const thirtyMinutesAfterStart = new Date(sessTime.getTime() + 30 * 60 * 1000);
+    
+    // Can join if session hasn't started yet OR started but within 30 minutes
+    return (sessTime > now || (sessTime <= now && now <= thirtyMinutesAfterStart)) 
+           && session.status !== "cancelled";
   };
 
   const getAge = (dob) => {
@@ -451,15 +550,14 @@ const ElderDashboard = () => {
       </div>
 
       <div className={styles.cardActions}>
-        {appointment.appointment_type === "online" &&
-          isUpcomingAppointment(appointment) && (
-            <button
-              className={styles.joinBtn}
-              onClick={() => handleJoinAppointment(appointment.appointment_id)}
-            >
-              🎥 Join Meeting
-            </button>
-          )}
+        {canJoinAppointment(appointment) && (
+          <button
+            className={styles.joinBtn}
+            onClick={() => handleJoinAppointment(appointment.appointment_id)}
+          >
+            🎥 Join Now
+          </button>
+        )}
         <button
           onClick={() =>
             navigate(`/elder/appointment/${appointment.appointment_id}`)
@@ -546,12 +644,12 @@ const ElderDashboard = () => {
       </div>
 
       <div className={styles.cardActions}>
-        {session.session_type === "online" && isUpcomingSession(session) && (
+        {canJoinSession(session) && (
           <button
             className={styles.joinBtn}
             onClick={() => handleJoinSession(session.session_id)}
           >
-            🎥 Join Session
+            🎥 Join Now
           </button>
         )}
         <button
@@ -726,11 +824,11 @@ const ElderDashboard = () => {
                 </button>
                 <button
                   className={`${styles.tabBtn} ${
-                    activeTab === "past" ? styles.activeTab : ""
+                    activeTab === "ongoing" ? styles.activeTab : ""
                   }`}
-                  onClick={() => setActiveTab("past")}
+                  onClick={() => setActiveTab("ongoing")}
                 >
-                  Past
+                  Ongoing
                 </button>
               </div>
             </div>
@@ -756,15 +854,26 @@ const ElderDashboard = () => {
                         </p>
                       </div>
                     )
-                  ) : pastAppointments.length > 0 ? (
-                    pastAppointments.map(renderAppointmentCard)
+                  ) : activeTab === "ongoing" ? (
+                    ongoingAppointments.length > 0 ? (
+                      ongoingAppointments.map(renderAppointmentCard)
+                    ) : (
+                      <div className={styles.noAppointments}>
+                        <div className={styles.noAppointmentsIcon}>⏱️</div>
+                        <h3>No Ongoing Appointments</h3>
+                        <p>
+                          You don't have any appointments currently in progress.
+                          Check back when your appointment time arrives.
+                        </p>
+                      </div>
+                    )
                   ) : (
                     <div className={styles.noAppointments}>
                       <div className={styles.noAppointmentsIcon}>📋</div>
-                      <h3>No Past Appointments</h3>
+                      <h3>No Ongoing Appointments</h3>
                       <p>
-                        You haven't had any appointments yet. Your appointment
-                        history will appear here.
+                        You don't have any appointments currently in progress.
+                        Check back when your appointment time arrives.
                       </p>
                     </div>
                   )}
@@ -898,11 +1007,11 @@ const ElderDashboard = () => {
                 </button>
                 <button
                   className={`${styles.tabBtn} ${
-                    activeSessionTab === "past" ? styles.activeTab : ""
+                    activeSessionTab === "ongoing" ? styles.activeTab : ""
                   }`}
-                  onClick={() => setActiveSessionTab("past")}
+                  onClick={() => setActiveSessionTab("ongoing")}
                 >
-                  Past
+                  Ongoing
                 </button>
               </div>
             </div>
@@ -928,15 +1037,26 @@ const ElderDashboard = () => {
                         </p>
                       </div>
                     )
-                  ) : pastSessions.length > 0 ? (
-                    pastSessions.map(renderSessionCard)
+                  ) : activeSessionTab === "ongoing" ? (
+                    ongoingSessions.length > 0 ? (
+                      ongoingSessions.map(renderSessionCard)
+                    ) : (
+                      <div className={styles.noAppointments}>
+                        <div className={styles.noAppointmentsIcon}>⏱️</div>
+                        <h3>No Ongoing Sessions</h3>
+                        <p>
+                          You don't have any counselling sessions currently in progress.
+                          Check back when your session time arrives.
+                        </p>
+                      </div>
+                    )
                   ) : (
                     <div className={styles.noAppointments}>
                       <div className={styles.noAppointmentsIcon}>📋</div>
-                      <h3>No Past Sessions</h3>
+                      <h3>No Ongoing Sessions</h3>
                       <p>
-                        You haven't had any counselling sessions yet. Your
-                        session history will appear here.
+                        You don't have any counselling sessions currently in progress.
+                        Check back when your session time arrives.
                       </p>
                     </div>
                   )}

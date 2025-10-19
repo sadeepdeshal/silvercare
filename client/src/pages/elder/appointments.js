@@ -80,10 +80,23 @@ const AllAppointments = () => {
           const now = new Date();
           return aptDate > now && apt.status !== "cancelled";
         });
+      } else if (activeFilter === "ongoing") {
+        // Ongoing: appointment started and still within 30 minutes from start time
+        const now = new Date();
+        filtered = filtered.filter((apt) => {
+          const aptDate = new Date(apt.date_time);
+          const thirtyMinutesAfterStart = new Date(aptDate.getTime() + 30 * 60 * 1000);
+          return aptDate <= now && now <= thirtyMinutesAfterStart && apt.status !== "cancelled";
+        });
       } else if (activeFilter === "past") {
-        filtered = filtered.filter(
-          (apt) => new Date(apt.date_time) < new Date() || apt.status === "completed"
-        );
+        // Past: appointment started more than 30 minutes ago (exclude ongoing)
+        const now = new Date();
+        filtered = filtered.filter((apt) => {
+          const aptDate = new Date(apt.date_time);
+          const thirtyMinutesAfterStart = new Date(aptDate.getTime() + 30 * 60 * 1000);
+          // Include if: started AND more than 30 minutes have passed OR status is completed
+          return (aptDate < now && now > thirtyMinutesAfterStart) || apt.status === "completed";
+        });
       } else if (activeFilter === "cancelled") {
         filtered = filtered.filter((apt) => apt.status === "cancelled");
       }
@@ -200,6 +213,19 @@ const AllAppointments = () => {
     return new Date(appointment.date_time) > new Date() && appointment.status !== "cancelled";
   };
 
+  const canJoinAppointment = (appointment) => {
+    // Can join if: online appointment AND (upcoming OR ongoing - within 30 min after start)
+    if (appointment.appointment_type !== 'online') return false;
+    
+    const now = new Date();
+    const apptTime = new Date(appointment.date_time);
+    const thirtyMinutesAfterStart = new Date(apptTime.getTime() + 30 * 60 * 1000);
+    
+    // Can join if appointment hasn't started yet OR started but within 30 minutes
+    return (apptTime > now || (apptTime <= now && now <= thirtyMinutesAfterStart)) 
+           && appointment.status !== "cancelled";
+  };
+
   if (loading) {
     return (
       <div className={styles.pageContainer}>
@@ -257,7 +283,18 @@ const AllAppointments = () => {
                     const now = new Date();
                     return aptDate > now && apt.status !== "cancelled";
                   }).length },
-                  { key: "past", label: "Past", count: appointments.filter(apt => new Date(apt.date_time) < new Date() || apt.status === "completed").length },
+                  { key: "ongoing", label: "Ongoing", count: appointments.filter(apt => {
+                    const aptDate = new Date(apt.date_time);
+                    const now = new Date();
+                    const thirtyMinutesAfterStart = new Date(aptDate.getTime() + 30 * 60 * 1000);
+                    return aptDate <= now && now <= thirtyMinutesAfterStart && apt.status !== "cancelled";
+                  }).length },
+                  { key: "past", label: "Past", count: appointments.filter(apt => {
+                    const aptDate = new Date(apt.date_time);
+                    const now = new Date();
+                    const thirtyMinutesAfterStart = new Date(aptDate.getTime() + 30 * 60 * 1000);
+                    return (aptDate < now && now > thirtyMinutesAfterStart) || apt.status === "completed";
+                  }).length },
                   { key: "cancelled", label: "Cancelled", count: appointments.filter(apt => apt.status === "cancelled").length }
                 ].map((filter) => (
                   <button
@@ -387,12 +424,12 @@ const AllAppointments = () => {
 
                 {/* Actions */}
                 <div className={styles.cardActions}>
-                  {appointment.appointment_type === 'online' && isUpcomingAppointment(appointment) && (
+                  {canJoinAppointment(appointment) && (
                     <button
                       onClick={() => handleJoinAppointment(appointment.appointment_id)}
                       className={styles.joinBtn}
                     >
-                      🎥 Join Meeting
+                      🎥 Join Now
                     </button>
                   )}
                   <button 
