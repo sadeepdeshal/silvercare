@@ -147,6 +147,14 @@
   display: inline-block;
 }
 
+.rateInfo {
+  font-size: 0.8rem !important;
+  color: #4a5568 !important;
+  background: #e6fffa !important;
+  border: 1px solid #38b2ac;
+  font-weight: 600;
+}
+
 /* Charts Section */
 .chartsSection {
   display: grid;
