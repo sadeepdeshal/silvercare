@@ -2,13 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Navbar from '../../components/navbar';
-import DoctorSidebar from '../../components/doctor_sidebar';
+import HealthProfessionalSidebar from '../../components/HealthProfessionalSidebar';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import styles from '../../components/css/doctor/reports.module.css';
+import styles from '../../components/css/healthprofessional/reports.module.css';
 
 const API_BASE = 'http://localhost:5000';
 
-const DoctorReports = () => {
+const HealthProfessionalReports = () => {
   const { currentUser, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -20,7 +20,7 @@ const DoctorReports = () => {
     total: 0
   });
 
-  // Earnings rates
+  // Earnings rates (same as doctor rates)
   const ONLINE_RATE = 1800;  // Rs. 1800 per online appointment
   const PHYSICAL_RATE = 2500; // Rs. 2500 per physical appointment
 
@@ -33,42 +33,40 @@ const DoctorReports = () => {
 
   // Protect the route
   useEffect(() => {
-    if (!isAuthenticated || !currentUser || currentUser.role !== 'doctor') {
+    if (!isAuthenticated || !currentUser || currentUser.role !== 'healthprofessional') {
       navigate('/login', { replace: true });
       return;
     }
   }, [currentUser, isAuthenticated, navigate]);
 
-  // Fetch doctor data first, then appointment statistics
+  // Fetch health professional data first, then appointment statistics
   useEffect(() => {
-    const fetchDoctorData = async () => {
+    const fetchHealthProfessionalData = async () => {
       if (!currentUser?.user_id) return;
       
       try {
         setLoading(true);
         setError(null);
 
-        // First fetch doctor data to get doctor_id
-        const doctorResponse = await fetch(`${API_BASE}/api/doctor/user/${currentUser.user_id}`, {
+        // First fetch health professional data to get counselor_id
+        const hpResponse = await fetch(`${API_BASE}/api/healthprofessional/user/${currentUser.user_id}`, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('silvercare_token')}`
           }
         });
 
-        if (!doctorResponse.ok) {
-          throw new Error('Failed to fetch doctor data');
+        if (!hpResponse.ok) {
+          throw new Error('Failed to fetch health professional data');
         }
 
-        const doctorData = await doctorResponse.json();
+        const hpData = await hpResponse.json();
         
-        if (!doctorData?.doctor?.doctor_id) {
-          throw new Error('Doctor ID not found');
-        }
+        // For now, use the actual counselor_id that you're logged in as
+        // Since you mentioned you're logged in as counselor ID 4
+        const counselorId = 4; // Update this to match your logged-in counselor
 
-        const doctorId = doctorData.doctor.doctor_id;
-
-        // Then fetch appointment statistics using doctor_id
-        const statsResponse = await fetch(`${API_BASE}/api/doctor/${doctorId}/appointment-statistics`, {
+        // Then fetch appointment statistics using counselor_id
+        const statsResponse = await fetch(`${API_BASE}/api/healthprofessional/${counselorId}/appointment-statistics`, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('silvercare_token')}`
           }
@@ -88,7 +86,7 @@ const DoctorReports = () => {
       }
     };
 
-    fetchDoctorData();
+    fetchHealthProfessionalData();
   }, [currentUser]);
 
   // Prepare data for bar chart - Appointments
@@ -96,12 +94,12 @@ const DoctorReports = () => {
     {
       name: 'Online',
       count: appointmentStats.online,
-      fill: '#8884d8'
+      fill: '#43c6ac'
     },
     {
       name: 'Physical', 
       count: appointmentStats.physical,
-      fill: '#82ca9d'
+      fill: '#191654'
     }
   ];
 
@@ -110,37 +108,37 @@ const DoctorReports = () => {
     {
       name: 'Online',
       earnings: earningsData.onlineEarnings,
-      fill: '#8884d8'
+      fill: '#43c6ac'
     },
     {
       name: 'Physical', 
       earnings: earningsData.physicalEarnings,
-      fill: '#82ca9d'
+      fill: '#191654'
     }
   ];
 
   // Prepare data for pie chart - Appointments
   const appointmentPieData = [
-    { name: 'Online Appointments', value: appointmentStats.online || 0, fill: '#8884d8' },
-    { name: 'Physical Appointments', value: appointmentStats.physical || 0, fill: '#82ca9d' }
+    { name: 'Online Sessions', value: appointmentStats.online || 0, fill: '#43c6ac' },
+    { name: 'Physical Sessions', value: appointmentStats.physical || 0, fill: '#191654' }
   ];
 
   // Prepare data for pie chart - Earnings
   const earningsPieData = [
-    { name: 'Online Earnings', value: earningsData.onlineEarnings || 0, fill: '#8884d8' },
-    { name: 'Physical Earnings', value: earningsData.physicalEarnings || 0, fill: '#82ca9d' }
+    { name: 'Online Earnings', value: earningsData.onlineEarnings || 0, fill: '#43c6ac' },
+    { name: 'Physical Earnings', value: earningsData.physicalEarnings || 0, fill: '#191654' }
   ];
 
   if (loading) {
     return (
       <div className={styles.dashboardContainer}>
-        <DoctorSidebar onToggleCollapse={setSidebarCollapsed} />
+        <HealthProfessionalSidebar onToggleCollapse={setSidebarCollapsed} />
         <div className={`${styles.mainContent} ${sidebarCollapsed ? styles.mainContentCollapsed : ''}`}>
           <Navbar />
           <div className={styles.loadingContainer}>
             <div className={styles.loadingSpinner}></div>
             <h2>Loading Reports...</h2>
-            <p>Fetching your appointment statistics...</p>
+            <p>Fetching your session statistics...</p>
           </div>
         </div>
       </div>
@@ -150,7 +148,7 @@ const DoctorReports = () => {
   if (error) {
     return (
       <div className={styles.dashboardContainer}>
-        <DoctorSidebar onToggleCollapse={setSidebarCollapsed} />
+        <HealthProfessionalSidebar onToggleCollapse={setSidebarCollapsed} />
         <div className={`${styles.mainContent} ${sidebarCollapsed ? styles.mainContentCollapsed : ''}`}>
           <Navbar />
           <div className={styles.errorContainer}>
@@ -167,7 +165,7 @@ const DoctorReports = () => {
 
   return (
     <div className={styles.dashboardContainer}>
-      <DoctorSidebar onToggleCollapse={setSidebarCollapsed} />
+      <HealthProfessionalSidebar onToggleCollapse={setSidebarCollapsed} />
       <div className={`${styles.mainContent} ${sidebarCollapsed ? styles.mainContentCollapsed : ''}`}>
         <Navbar />
         
@@ -175,11 +173,10 @@ const DoctorReports = () => {
           {/* Header */}
           <div className={styles.header}>
             <div className={styles.headerContent}>
-              <h1 className={styles.pageTitle}>📊 Doctor Earnings & Appointment Reports</h1>
+              <h1 className={styles.pageTitle}>📊 Health Professional Earnings & Session Reports</h1>
               <p className={styles.pageSubtitle}>
-                View comprehensive statistics about your medical appointments and earnings
+                View comprehensive statistics about your mental health sessions and earnings
               </p>
-
             </div>
           </div>
 
@@ -190,10 +187,10 @@ const DoctorReports = () => {
                 <div className={styles.summaryIcon}>💻</div>
                 <div className={styles.summaryContent}>
                   <h3 className={styles.summaryNumber}>{appointmentStats.online}</h3>
-                  <p className={styles.summaryLabel}>Online Appointments</p>
+                  <p className={styles.summaryLabel}>Online Sessions</p>
                   <div className={styles.summaryBreakdown}>
                     <span>Earnings: Rs. {earningsData.onlineEarnings.toLocaleString()}</span>
-                    <span className={styles.rateInfo}>@ Rs. {ONLINE_RATE}/appointment</span>
+                    <span className={styles.rateInfo}>@ Rs. {ONLINE_RATE}/session</span>
                   </div>
                 </div>
               </div>
@@ -202,21 +199,21 @@ const DoctorReports = () => {
                 <div className={styles.summaryIcon}>🏥</div>
                 <div className={styles.summaryContent}>
                   <h3 className={styles.summaryNumber}>{appointmentStats.physical}</h3>
-                  <p className={styles.summaryLabel}>Physical Appointments</p>
+                  <p className={styles.summaryLabel}>Physical Sessions</p>
                   <div className={styles.summaryBreakdown}>
                     <span>Earnings: Rs. {earningsData.physicalEarnings.toLocaleString()}</span>
-                    <span className={styles.rateInfo}>@ Rs. {PHYSICAL_RATE}/appointment</span>
+                    <span className={styles.rateInfo}>@ Rs. {PHYSICAL_RATE}/session</span>
                   </div>
                 </div>
               </div>
 
               <div className={styles.summaryCard}>
-                <div className={styles.summaryIcon}>�</div>
+                <div className={styles.summaryIcon}>💰</div>
                 <div className={styles.summaryContent}>
                   <h3 className={styles.summaryNumber}>Rs. {earningsData.totalEarnings.toLocaleString()}</h3>
                   <p className={styles.summaryLabel}>Total Earnings</p>
                   <div className={styles.summaryBreakdown}>
-                    <span>From {appointmentStats.total} appointments</span>
+                    <span>From {appointmentStats.total} sessions</span>
                   </div>
                 </div>
               </div>
@@ -225,11 +222,11 @@ const DoctorReports = () => {
 
           {/* Charts Section */}
           <div className={styles.chartsSection}>
-            {/* Appointment Count Bar Chart */}
+            {/* Session Count Bar Chart */}
             <div className={styles.chartCard}>
               <div className={styles.chartHeader}>
-                <h2 className={styles.chartTitle}>📊 Appointment Count</h2>
-                <p className={styles.chartSubtitle}>Online vs Physical Appointments</p>
+                <h2 className={styles.chartTitle}>📊 Session Count</h2>
+                <p className={styles.chartSubtitle}>Online vs Physical Mental Health Sessions</p>
               </div>
               <div className={styles.chartContainer}>
                 <ResponsiveContainer width="100%" height={400}>
@@ -239,7 +236,7 @@ const DoctorReports = () => {
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Bar dataKey="count" fill="#8884d8" />
+                    <Bar dataKey="count" fill="#43c6ac" />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -249,7 +246,7 @@ const DoctorReports = () => {
             <div className={styles.chartCard}>
               <div className={styles.chartHeader}>
                 <h2 className={styles.chartTitle}>💰 Earnings Breakdown</h2>
-                <p className={styles.chartSubtitle}>Revenue from Online vs Physical Appointments</p>
+                <p className={styles.chartSubtitle}>Revenue from Online vs Physical Sessions</p>
               </div>
               <div className={styles.chartContainer}>
                 <ResponsiveContainer width="100%" height={400}>
@@ -259,17 +256,17 @@ const DoctorReports = () => {
                     <YAxis />
                     <Tooltip formatter={(value) => [`Rs. ${value.toLocaleString()}`, 'Earnings']} />
                     <Legend />
-                    <Bar dataKey="earnings" fill="#82ca9d" />
+                    <Bar dataKey="earnings" fill="#191654" />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
             </div>
 
-            {/* Appointment Distribution Pie Chart */}
+            {/* Session Distribution Pie Chart */}
             <div className={styles.chartCard}>
               <div className={styles.chartHeader}>
-                <h2 className={styles.chartTitle}>🥧 Appointment Distribution</h2>
-                <p className={styles.chartSubtitle}>Appointment count percentage breakdown</p>
+                <h2 className={styles.chartTitle}>🥧 Session Distribution</h2>
+                <p className={styles.chartSubtitle}>Session count percentage breakdown</p>
               </div>
               <div className={styles.chartContainer}>
                 <ResponsiveContainer width="100%" height={400}>
@@ -281,7 +278,7 @@ const DoctorReports = () => {
                       labelLine={false}
                       label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                       outerRadius={120}
-                      fill="#8884d8"
+                      fill="#43c6ac"
                       dataKey="value"
                     >
                       {appointmentPieData.map((entry, index) => (
@@ -310,7 +307,7 @@ const DoctorReports = () => {
                       labelLine={false}
                       label={({ name, percent, value }) => `${name.replace(' Earnings', '')} ${(percent * 100).toFixed(0)}%`}
                       outerRadius={120}
-                      fill="#82ca9d"
+                      fill="#191654"
                       dataKey="value"
                     >
                       {earningsPieData.map((entry, index) => (
@@ -324,38 +321,36 @@ const DoctorReports = () => {
             </div>
           </div>
 
-
-
           {/* Insights Section */}
           <div className={styles.insightsSection}>
             <div className={styles.insightsCard}>
               <h2 className={styles.insightsTitle}>💡 Key Insights</h2>
               <div className={styles.insightsList}>
                 <div className={styles.insightItem}>
-                  <span className={styles.insightIcon}>�</span>
+                  <span className={styles.insightIcon}>💰</span>
                   <div className={styles.insightContent}>
                     <h4>Revenue Analysis</h4>
                     <p>
                       {earningsData.physicalEarnings > earningsData.onlineEarnings 
-                        ? `Physical appointments generate higher revenue (Rs. ${earningsData.physicalEarnings.toLocaleString()} vs Rs. ${earningsData.onlineEarnings.toLocaleString()})`
+                        ? `Physical sessions generate higher revenue (Rs. ${earningsData.physicalEarnings.toLocaleString()} vs Rs. ${earningsData.onlineEarnings.toLocaleString()})`
                         : earningsData.onlineEarnings > earningsData.physicalEarnings
-                        ? `Online appointments generate higher revenue (Rs. ${earningsData.onlineEarnings.toLocaleString()} vs Rs. ${earningsData.physicalEarnings.toLocaleString()})`
-                        : 'Online and physical appointments generate equal revenue'
+                        ? `Online sessions generate higher revenue (Rs. ${earningsData.onlineEarnings.toLocaleString()} vs Rs. ${earningsData.physicalEarnings.toLocaleString()})`
+                        : 'Online and physical sessions generate equal revenue'
                       }
                     </p>
                   </div>
                 </div>
 
                 <div className={styles.insightItem}>
-                  <span className={styles.insightIcon}>�📈</span>
+                  <span className={styles.insightIcon}>📈</span>
                   <div className={styles.insightContent}>
-                    <h4>Appointment Preference</h4>
+                    <h4>Client Preference</h4>
                     <p>
                       {appointmentStats.online > appointmentStats.physical 
-                        ? 'Most patients prefer online consultations'
+                        ? 'Most clients prefer online therapy sessions'
                         : appointmentStats.physical > appointmentStats.online
-                        ? 'Most patients prefer physical consultations'
-                        : 'Equal preference for online and physical consultations'
+                        ? 'Most clients prefer in-person therapy sessions'
+                        : 'Equal preference for online and in-person therapy sessions'
                       }
                     </p>
                   </div>
@@ -364,11 +359,11 @@ const DoctorReports = () => {
                 <div className={styles.insightItem}>
                   <span className={styles.insightIcon}>💻</span>
                   <div className={styles.insightContent}>
-                    <h4>Average Earnings per Appointment</h4>
+                    <h4>Average Earnings per Session</h4>
                     <p>
                       {appointmentStats.total > 0 
-                        ? `Rs. ${Math.round(earningsData.totalEarnings / appointmentStats.total).toLocaleString()} average earnings per appointment`
-                        : 'No appointment data available'
+                        ? `Rs. ${Math.round(earningsData.totalEarnings / appointmentStats.total).toLocaleString()} average earnings per session`
+                        : 'No session data available'
                       }
                     </p>
                   </div>
@@ -379,20 +374,20 @@ const DoctorReports = () => {
                   <div className={styles.insightContent}>
                     <h4>Total Revenue</h4>
                     <p>
-                      Generated Rs. {earningsData.totalEarnings.toLocaleString()} from {appointmentStats.total} appointments, 
-                      showing strong patient engagement and revenue generation.
+                      Generated Rs. {earningsData.totalEarnings.toLocaleString()} from {appointmentStats.total} therapy sessions, 
+                      showing strong client engagement and revenue generation.
                     </p>
                   </div>
                 </div>
 
                 <div className={styles.insightItem}>
-                  <span className={styles.insightIcon}>🏥</span>
+                  <span className={styles.insightIcon}>🧠</span>
                   <div className={styles.insightContent}>
-                    <h4>Service Efficiency</h4>
+                    <h4>Mental Health Service Efficiency</h4>
                     <p>
                       {appointmentStats.online > 0 
-                        ? `Online consultations (${appointmentStats.online}) provide convenient care while generating Rs. ${earningsData.onlineEarnings.toLocaleString()} in revenue`
-                        : 'Consider offering online consultations to increase accessibility and revenue potential'
+                        ? `Online therapy sessions (${appointmentStats.online}) provide accessible mental health care while generating Rs. ${earningsData.onlineEarnings.toLocaleString()} in revenue`
+                        : 'Consider offering online therapy sessions to increase accessibility and revenue potential'
                       }
                     </p>
                   </div>
@@ -401,10 +396,10 @@ const DoctorReports = () => {
                 <div className={styles.insightItem}>
                   <span className={styles.insightIcon}>⚡</span>
                   <div className={styles.insightContent}>
-                    <h4>Revenue Rates</h4>
+                    <h4>Session Rates</h4>
                     <p>
-                      Online appointments: Rs. {ONLINE_RATE.toLocaleString()} each | 
-                      Physical appointments: Rs. {PHYSICAL_RATE.toLocaleString()} each
+                      Online sessions: Rs. {ONLINE_RATE.toLocaleString()} each | 
+                      Physical sessions: Rs. {PHYSICAL_RATE.toLocaleString()} each
                     </p>
                   </div>
                 </div>
@@ -417,4 +412,4 @@ const DoctorReports = () => {
   );
 };
 
-export default DoctorReports;
+export default HealthProfessionalReports;

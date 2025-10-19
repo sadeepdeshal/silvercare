@@ -1,4 +1,4 @@
-/* Doctor Reports Page Styles */
+/* Health Professional Reports Page Styles */
 .dashboardContainer {
   display: flex;
   min-height: 100vh;
@@ -24,7 +24,7 @@
 
 /* Header Section */
 .header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #43c6ac 0%, #191654 100%);
   color: white;
   padding: 40px 0;
   margin: -80px -20px 40px -20px;
@@ -105,7 +105,7 @@
 .summaryIcon {
   font-size: 3rem;
   padding: 20px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #43c6ac 0%, #191654 100%);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -151,7 +151,7 @@
   font-size: 0.8rem !important;
   color: #4a5568 !important;
   background: #e6fffa !important;
-  border: 1px solid #38b2ac;
+  border: 1px solid #43c6ac;
   font-weight: 600;
 }
 
@@ -227,7 +227,7 @@
   padding: 20px;
   background: #f7fafc;
   border-radius: 12px;
-  border-left: 4px solid #667eea;
+  border-left: 4px solid #43c6ac;
 }
 
 .insightIcon {
@@ -272,7 +272,7 @@
   width: 50px;
   height: 50px;
   border: 4px solid #e2e8f0;
-  border-top: 4px solid #667eea;
+  border-top: 4px solid #43c6ac;
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 20px;
@@ -296,7 +296,7 @@
 }
 
 .retryBtn {
-  background: #667eea;
+  background: #43c6ac;
   color: white;
   border: none;
   padding: 12px 24px;
@@ -308,7 +308,7 @@
 }
 
 .retryBtn:hover {
-  background: #5a67d8;
+  background: #38a89d;
   transform: translateY(-2px);
 }
 
