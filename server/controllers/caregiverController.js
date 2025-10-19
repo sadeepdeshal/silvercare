@@ -126,6 +126,7 @@ const getCaregiverById = async (req, res) => {
         c.certifications,
         c.fixed_line,
         c.district,
+        c.day_rate,
         u.name as caregiver_name,
         u.email as caregiver_email,
         u.phone as caregiver_phone,
@@ -144,6 +145,8 @@ const getCaregiverById = async (req, res) => {
     }
     
     console.log('Caregiver found:', result.rows[0].caregiver_name);
+    console.log('Day rate from DB:', result.rows[0].day_rate);
+    console.log('Full caregiver data:', result.rows[0]);
     
     res.json({
       success: true,
@@ -827,11 +830,24 @@ const updateCaregiverProfile = async (req, res) => {
     availability,
     certifications,
     fixed_line,
-    district
+    district,
+    day_rate
   } = req.body;
   
   try {
-    console.log('Updating caregiver profile:', caregiverId, req.body);
+    console.log('=== UPDATE CAREGIVER PROFILE ===');
+    console.log('Updating caregiver profile:', caregiverId);
+    console.log('Request body:', req.body);
+    console.log('Day rate received:', day_rate);
+    console.log('Day rate type:', typeof day_rate);
+    
+    // Convert day_rate to integer or null
+    const dayRateValue = day_rate === '' || day_rate === null || day_rate === undefined || day_rate === 'null'
+      ? null 
+      : parseInt(day_rate, 10);
+    
+    console.log('Day rate after conversion:', dayRateValue);
+    console.log('Day rate after conversion type:', typeof dayRateValue);
     
     // Validate required fields
     if (!name || !email || !phone) {
@@ -870,12 +886,22 @@ const updateCaregiverProfile = async (req, res) => {
       );
       
       // Update caregiver table
-      await client.query(
-        'UPDATE caregiver SET availability = $1, certifications = $2, fixed_line = $3, district = $4 WHERE caregiver_id = $5',
-        [availability, certifications, fixed_line, district, caregiverId]
+      console.log('Updating caregiver table with day_rate:', dayRateValue);
+      const updateResult = await client.query(
+        'UPDATE caregiver SET availability = $1, certifications = $2, fixed_line = $3, district = $4, day_rate = $5 WHERE caregiver_id = $6',
+        [availability, certifications, fixed_line, district, dayRateValue, caregiverId]
       );
+      console.log('UPDATE query executed, rows affected:', updateResult.rowCount);
       
       await client.query('COMMIT');
+      console.log('Transaction COMMITTED successfully');
+      
+      // Verify the update in DB
+      const verifyResult = await client.query(
+        'SELECT day_rate FROM caregiver WHERE caregiver_id = $1',
+        [caregiverId]
+      );
+      console.log('VERIFICATION - day_rate in DB after commit:', verifyResult.rows[0]?.day_rate);
       
       // Fetch updated profile
       const updatedResult = await client.query(`
@@ -886,6 +912,7 @@ const updateCaregiverProfile = async (req, res) => {
           c.certifications,
           c.fixed_line,
           c.district,
+          c.day_rate,
           u.name as caregiver_name,
           u.email as caregiver_email,
           u.phone as caregiver_phone,
@@ -896,13 +923,21 @@ const updateCaregiverProfile = async (req, res) => {
         WHERE c.caregiver_id = $1
       `, [caregiverId]);
       
+      console.log('Updated profile fetched:', updatedResult.rows[0]);
+      console.log('Updated day_rate:', updatedResult.rows[0]?.day_rate);
       console.log('Caregiver profile updated successfully');
       
-      res.json({
+      const responseData = {
         success: true,
         message: 'Profile updated successfully',
         caregiver: updatedResult.rows[0]
-      });
+      };
+      
+      console.log('=== SENDING RESPONSE TO CLIENT ===');
+      console.log('Response day_rate:', responseData.caregiver.day_rate);
+      console.log('Full response:', JSON.stringify(responseData, null, 2));
+      
+      res.json(responseData);
       
     } catch (err) {
       await client.query('ROLLBACK');
