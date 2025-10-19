@@ -457,101 +457,120 @@ const FamilyMemberDashboard = () => {
         </div>
 
         {/* Bottom Grid Section - Elders and Appointments Side by Side */}
-        <div className={styles.bottomGridSection}>
+        <div className={styles.sectionsContainer}>
           {/* Registered Elders Section - Left Half */}
           {elders.length > 0 && (
-            <div className={styles.eldersSection}>
-              <div className={styles.eldersSectionHeader}>
-                <h2 className={styles.sectionTitle}>Your Registered Elders</h2>
-                <p className={styles.eldersSubtitle}>
-                  {elders.length <= 2 
-                    ? "Click on any elder to view their detailed information" 
-                    : `Showing 2 of ${elderCount} registered elders. Click "View All Elders" to see more.`
-                  }
-                </p>
+            <div className={styles.appointmentsSection}>
+              <div className={styles.appointmentsHeader}>
+                <h2>Your Registered Elders</h2>
+                <div className={styles.appointmentTabs}>
+                  <button className={`${styles.tabBtn} ${styles.activeTab}`}>
+                    Registered
+                    {elderCount > 0 && (
+                      <span className={styles.countBadge}>
+                        {elderCount}
+                      </span>
+                    )}
+                  </button>
+                </div>
               </div>
               
-              <div className={styles.eldersLinkContainer}>
+              <div className={styles.appointmentsContent}>
                 {dataLoading ? (
-                  <div className={styles.loadingElders}>
+                  <div className={styles.loadingContainer}>
                     <div className={styles.loadingSpinner}></div>
                     <p>Loading elders...</p>
                   </div>
                 ) : (
-                  <div className={styles.eldersLinkList}>
+                  <div className={styles.appointmentsGrid}>
                     {/* Limit to only 2 elders */}
                     {elders.slice(0, 2).map((elder, index) => {
                       const imageUrl = getImageSrc(elder.profile_photo, 'elder', elder.gender);
-                      console.log('Elder:', elder.name, 'Image URL:', imageUrl);
                       
                       return (
                         <div 
                           key={elder.elder_id} 
-                          className={styles.elderLinkItem}
+                          className={styles.appointmentCard}
                           onClick={() => handleElderDetails(elder.elder_id)}
                         >
-                          <div className={styles.elderLinkContent}>
-                            <div className={styles.elderLinkLeft}>
-                              <div className={styles.elderLinkAvatar}>
+                          <div className={styles.cardHeader}>
+                            <div className={styles.doctorInfo}>
+                              <div className={styles.doctorAvatar}>
                                 {elder.profile_photo ? (
-                                  <>
-                                    <img 
-                                      src={imageUrl}
-                                      alt={elder.name}
-                                      className={styles.elderLinkPhoto}
-                                      onLoad={() => {
-                                        console.log('Image loaded successfully:', imageUrl);
-                                      }}
-                                      onError={(e) => {
-                                        console.log('Image failed to load:', imageUrl);
-                                        console.log('Original path:', elder.profile_photo);
-                                        handleImageError(e, 'elder', elder.gender);
-                                      }}
-                                    />
-                                    <div 
-                                      className={`${styles.elderLinkInitial} fallback-initial`}
-                                      style={{ display: 'none' }}
-                                    >
-                                      {elder.name.charAt(0).toUpperCase()}
-                                    </div>
-                                  </>
+                                  <img 
+                                    src={imageUrl}
+                                    alt={elder.name}
+                                    className={styles.elderProfilePhoto}
+                                    onError={(e) => {
+                                      handleImageError(e, 'elder', elder.gender);
+                                    }}
+                                  />
                                 ) : (
-                                  <div className={styles.elderLinkInitial}>
+                                  <span className={styles.elderInitial}>
                                     {elder.name.charAt(0).toUpperCase()}
-                                  </div>
+                                  </span>
                                 )}
                               </div>
-                              <div className={styles.elderLinkInfo}>
-                                <h3 className={styles.elderLinkName}>{elder.name}</h3>
-                                <div className={styles.elderLinkDetails}>
-                                  <span className={styles.elderLinkDetail}>
-                                    📞 {elder.contact}
-                                  </span>
-                                  <span className={styles.elderLinkDetail}>
-                                    🎂 {new Date(elder.dob).toLocaleDateString()}
-                                  </span>
-                                  <span className={styles.elderLinkDetail}>
-                                    👤 {elder.gender}
-                                  </span>
-                                </div>
-                                {elder.medical_conditions && (
-                                  <p className={styles.elderLinkMedical}>
-                                    🏥 {elder.medical_conditions.substring(0, 80)}
-                                    {elder.medical_conditions.length > 80 ? '...' : ''}
-                                  </p>
-                                )}
+                              <div className={styles.doctorDetails}>
+                                <h3>{elder.name}</h3>
+                                <p className={styles.specialization}>Elder</p>
+                                <p className={styles.institution}>Age: {new Date().getFullYear() - new Date(elder.dob).getFullYear()}</p>
                               </div>
                             </div>
-                            <div className={styles.elderLinkRight}>
-                              <div className={styles.elderLinkArrow}>
-                                <span>→</span>
+                            <div className={styles.statusContainer}>
+                              <span className={styles.statusUpcoming}>
+                                ACTIVE
+                              </span>
+                            </div>
+                          </div>
+                          
+                          <div className={styles.appointmentDetails}>
+                            <div className={styles.appointmentMeta}>
+                              <div className={styles.dateTimeGroup}>
+                                <div className={styles.dateInfo}>
+                                  <span className={styles.dateText}>
+                                    {elder.gender}
+                                  </span>
+                                </div>
+                                <div className={styles.timeInfo}>
+                                  <span className={styles.timeText}>
+                                    {new Date(elder.dob).toLocaleDateString('en-US', { 
+                                      month: 'short', 
+                                      day: 'numeric',
+                                      year: 'numeric'
+                                    })}
+                                  </span>
+                                </div>
                               </div>
-                              <div className={styles.elderLinkAction}>
-                                <span>View Details</span>
+                              <div className={styles.typeIndicator}>
+                                <span className={styles.physicalChip}>
+                                  👤 Elder
+                                </span>
+                              </div>
+                            </div>
+                            
+                            <div className={styles.careDetails}>
+                              <div className={styles.careInfo}>
+                                <span>📞 {elder.contact}</span>
+                                {elder.medical_conditions && (
+                                  <span>🏥 {elder.medical_conditions.substring(0, 40)}{elder.medical_conditions.length > 40 ? '...' : ''}</span>
+                                )}
+                                <span>📅 Registered: {new Date(elder.created_at).toLocaleDateString()}</span>
                               </div>
                             </div>
                           </div>
-                          <div className={styles.elderLinkDivider}></div>
+                          
+                          <div className={styles.cardActions}>
+                            <button 
+                              className={styles.joinBtn}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleElderDetails(elder.elder_id);
+                              }}
+                            >
+                              👁️ View Details
+                            </button>
+                          </div>
                         </div>
                       );
                     })}
@@ -559,139 +578,188 @@ const FamilyMemberDashboard = () => {
                 )}
               </div>
               
-              {/* Show "View All Elders" button if there are more than 2 elders */}
               {elders.length > 2 && (
-                <div className={styles.viewAllElders}>
+                <div className={styles.showAllContainer}>
                   <button 
-                    className={styles.viewAllButton}
+                    className={styles.showAllBtn}
                     onClick={handleViewElders}
                   >
-                    View All Elders ({elderCount})
+                    Show All Elders
                   </button>
                 </div>
               )}
             </div>
           )}
 
-          {/* Upcoming Appointments Section - Right Half - UPDATED WITH REAL DATA */}
+          {/* Upcoming Appointments Section - Right Half */}
           <div className={styles.appointmentsSection}>
-            <div className={styles.appointmentsSectionHeader}>
-              <h2 className={styles.sectionTitle}>Upcoming Appointments</h2>
-              <p className={styles.appointmentsSubtitle}>
-                {appointments.length === 0 
-                  ? "No upcoming appointments scheduled" 
-                  : appointments.length <= 2
-                    ? "Click on any appointment to view details"
-                    : `Showing 2 of ${appointmentCount} upcoming appointments. Click "View All" to see more.`
-                }
-              </p>
+            <div className={styles.appointmentsHeader}>
+              <h2>Upcoming Appointments</h2>
+              <div className={styles.appointmentTabs}>
+                <button className={`${styles.tabBtn} ${styles.activeTab}`}>
+                  Upcoming
+                  {appointmentCount > 0 && (
+                    <span className={styles.countBadge}>
+                      {appointmentCount}
+                    </span>
+                  )}
+                </button>
+              </div>
             </div>
             
-            <div className={styles.appointmentsContainer}>
+            <div className={styles.appointmentsContent}>
               {appointmentsLoading ? (
-                <div className={styles.loadingAppointments}>
+                <div className={styles.loadingContainer}>
                   <div className={styles.loadingSpinner}></div>
                   <p>Loading appointments...</p>
                 </div>
               ) : appointments.length === 0 ? (
                 <div className={styles.noAppointments}>
                   <div className={styles.noAppointmentsIcon}>📅</div>
-                  <p className={styles.noAppointmentsText}>No upcoming appointments</p>
-                  <p className={styles.noAppointmentsSubtext}>
-                    Book an appointment to get started with elder care services
+                  <h3>No Upcoming Appointments</h3>
+                  <p>
+                    No upcoming appointments scheduled for your elders.
+                    Book an appointment to get started with elder care services.
                   </p>
                 </div>
               ) : (
-                <div className={styles.appointmentsList}>
+                <div className={styles.appointmentsGrid}>
                   {/* Limit to only 2 appointments */}
                   {appointments.slice(0, 2).map((appointment, index) => (
                     <div 
                       key={appointment.appointment_id} 
-                      className={styles.appointmentItem}
+                      className={styles.appointmentCard}
                       onClick={() => handleAppointmentDetails(appointment.appointment_id)}
                     >
-                      <div className={styles.appointmentContent}>
-                        <div className={styles.appointmentLeft}>
-                          <div className={styles.appointmentIcon}>
+                      <div className={styles.cardHeader}>
+                        <div className={styles.doctorInfo}>
+                          <div className={styles.doctorAvatar}>
                             {getAppointmentTypeIcon(appointment.appointment_type)}
                           </div>
-                          <div className={styles.appointmentInfo}>
-                            <h3 className={styles.appointmentTitle}>
-                              {appointment.specialization || 'Medical Appointment'}
-                            </h3>
-                            <div className={styles.appointmentDetails}>
-                              <span className={styles.appointmentDetail}>
-                                👤 {appointment.elder_name}
-                              </span>
-                              <span className={styles.appointmentDetail}>
-                                👨‍⚕️ {appointment.doctor_name}
-                              </span>
-                              <span className={styles.appointmentDetail}>
-                                📅 {formatAppointmentDate(appointment.date_time)}
-                              </span>
-                              <span className={styles.appointmentDetail}>
-                                📍 {appointment.doctor_district}
-                              </span>
-                            </div>
-                            {appointment.notes && (
-                              <p className={styles.appointmentNotes}>
-                                📝 {appointment.notes.substring(0, 60)}
-                                {appointment.notes.length > 60 ? '...' : ''}
-                              </p>
-                            )}
+                          <div className={styles.doctorDetails}>
+                            <h3>{appointment.doctor_name}</h3>
+                            <p className={styles.specialization}>{appointment.specialization || 'Medical'}</p>
+                            <p className={styles.institution}>For: {appointment.elder_name}</p>
                           </div>
                         </div>
-                        <div className={styles.appointmentRight}>
-                          {appointment.status === 'confirmed' ? (
-                            <div className={styles.appointmentActions}>
-                              {appointment.appointment_type === 'online' && appointment.meeting_link ? (
-                                <button 
-                                  className={`${styles.primaryBtn} ${styles.joinMeetingBtn}`}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
+                        <div className={styles.statusContainer}>
+                          <span className={`${styles.statusUpcoming} ${styles['status' + appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)]}`}>
+                            {appointment.status.toUpperCase()}
+                          </span>
+                        </div>
+                      </div>
+                      
+                      <div className={styles.appointmentDetails}>
+                        <div className={styles.appointmentMeta}>
+                          <div className={styles.dateTimeGroup}>
+                            <div className={styles.dateInfo}>
+                              <span className={styles.dateText}>
+                                {new Date(appointment.date_time).toLocaleDateString('en-US', { 
+                                  month: 'short', 
+                                  day: 'numeric' 
+                                })}
+                              </span>
+                            </div>
+                            <div className={styles.timeInfo}>
+                              <span className={styles.timeText}>
+                                {new Date(appointment.date_time).toLocaleTimeString('en-US', { 
+                                  hour: '2-digit', 
+                                  minute: '2-digit' 
+                                })}
+                              </span>
+                            </div>
+                          </div>
+                          <div className={styles.typeIndicator}>
+                            <span className={`${styles.typeChip} ${appointment.appointment_type === 'online' ? styles.onlineChip : styles.physicalChip}`}>
+                              {appointment.appointment_type === 'online' ? '💻 Online' : '🏥 Physical'}
+                            </span>
+                          </div>
+                        </div>
+                        
+                        {appointment.notes && (
+                          <div className={styles.appointmentNotes}>
+                            <p>📝 {appointment.notes}</p>
+                          </div>
+                        )}
+                        
+                        <div className={styles.careDetails}>
+                          <div className={styles.careInfo}>
+                            <span>📍 {appointment.doctor_district}</span>
+                            <span>📅 {formatAppointmentDate(appointment.date_time)}</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className={styles.cardActions}>
+                        {appointment.status === 'confirmed' ? (
+                          appointment.appointment_type === 'online' ? (
+                            appointment.meeting_link && appointment.meeting_link.trim() !== '' ? (
+                              <button 
+                                className={`${styles.joinBtn} ${styles.joinMeetingBtn}`}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  try {
                                     const meetingUrl = new URL(appointment.meeting_link);
                                     meetingUrl.searchParams.set('userInfo.displayName', appointment.elder_name || 'Patient');
                                     meetingUrl.searchParams.set('userInfo.email', 'patient@silvercare.com');
                                     meetingUrl.searchParams.set('config.prejoinPageEnabled', 'false');
                                     window.open(meetingUrl.toString(), '_blank');
-                                  }}
-                                >
-                                  🎥 Join Meeting
-                                </button>
-                              ) : (
-                                <button className={styles.secondaryBtn} style={{pointerEvents: 'none'}}>
-                                  Confirmed
-                                </button>
-                              )}
-                            </div>
+                                  } catch (error) {
+                                    console.error('Invalid meeting link:', appointment.meeting_link);
+                                    alert('Invalid meeting link. Please contact support.');
+                                  }
+                                }}
+                              >
+                                🎥 Join Meeting
+                              </button>
+                            ) : (
+                              <button 
+                                className={`${styles.joinBtn} ${styles.pendingBtn}`}
+                                disabled
+                              >
+                                🔗 Waiting for Meeting Link
+                              </button>
+                            )
                           ) : (
-                            <div 
-                              className={`${styles.appointmentStatus} ${styles[appointment.status]}`}
-                              style={{ backgroundColor: getStatusColor(appointment.status) }}
+                            <button 
+                              className={`${styles.joinBtn} ${styles.confirmedBtn}`}
+                              disabled
                             >
-                              {appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}
-                            </div>
-                          )}
-                          <div className={styles.appointmentArrow}>
-                            <span>→</span>
-                          </div>
-                        </div>
+                              ✅ Confirmed Physical
+                            </button>
+                          )
+                        ) : appointment.status === 'pending' ? (
+                          <button 
+                            className={`${styles.joinBtn} ${styles.pendingBtn}`}
+                            disabled
+                          >
+                            ⏳ Pending
+                          </button>
+                        ) : (
+                          <button 
+                            className={styles.joinBtn}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleAppointmentDetails(appointment.appointment_id);
+                            }}
+                          >
+                            👁️ View Details
+                          </button>
+                        )}
                       </div>
-                      <div className={styles.appointmentDivider}></div>
                     </div>
                   ))}
                 </div>
               )}
             </div>
             
-            {/* Show "View All Appointments" button if there are more than 2 appointments */}
             {appointments.length > 2 && (
-              <div className={styles.viewAllAppointments}>
+              <div className={styles.showAllContainer}>
                 <button 
-                  className={styles.viewAllAppointmentsButton}
+                  className={styles.showAllBtn}
                   onClick={handleViewAllAppointments}
                 >
-                  View All Appointments ({appointmentCount})
+                  Show All Appointments
                 </button>
               </div>
             )}
@@ -699,231 +767,257 @@ const FamilyMemberDashboard = () => {
         </div>
 
         {/* Additional Grid Section - Upcoming Sessions and Care Visits Side by Side */}
-        <div className={styles.bottomGridSection}>
-          {/* Upcoming Sessions Section - Left Half */}
+        <div className={styles.sectionsContainer}>
+          {/* Upcoming Sessions Section */}
           <div className={styles.appointmentsSection}>
-            <div className={styles.appointmentsSectionHeader}>
-              <h2 className={styles.sectionTitle}>Upcoming Sessions</h2>
-              <p className={styles.appointmentsSubtitle}>
-                {upcomingSessions.length === 0 
-                  ? "No upcoming counseling sessions scheduled" 
-                  : upcomingSessions.length <= 2
-                    ? "Click on any session to view details"
-                    : `Showing 2 of ${upcomingSessions.length} upcoming sessions. Click "View All" to see more.`
-                }
-              </p>
+            <div className={styles.appointmentsHeader}>
+              <h2>Upcoming Sessions</h2>
+              <div className={styles.appointmentTabs}>
+                <button className={`${styles.tabBtn} ${styles.activeTab}`}>
+                  Upcoming
+                  {upcomingSessions.length > 0 && (
+                    <span className={styles.countBadge}>
+                      {upcomingSessions.length}
+                    </span>
+                  )}
+                </button>
+              </div>
             </div>
             
-            <div className={styles.appointmentsContainer}>
+            <div className={styles.appointmentsContent}>
               {sessionsLoading ? (
-                <div className={styles.loadingAppointments}>
+                <div className={styles.loadingContainer}>
                   <div className={styles.loadingSpinner}></div>
                   <p>Loading sessions...</p>
                 </div>
-              ) : upcomingSessions.length === 0 ? (
-                <div className={styles.noAppointments}>
-                  <div className={styles.noAppointmentsIcon}>🧠</div>
-                  <p className={styles.noAppointmentsText}>No upcoming sessions</p>
-                  <p className={styles.noAppointmentsSubtext}>
-                    Book a counseling session to get started with mental health support
-                  </p>
-                </div>
               ) : (
-                <div className={styles.appointmentsList}>
-                  {/* Limit to only 2 sessions */}
-                  {upcomingSessions.slice(0, 2).map((session, index) => (
-                    <div 
-                      key={session.appointment_id} 
-                      className={styles.appointmentItem}
-                    >
-                      <div className={styles.appointmentContent}>
-                        <div className={styles.appointmentLeft}>
-                          <div className={styles.appointmentIcon}>
-                            🧠
-                          </div>
-                          <div className={styles.appointmentInfo}>
-                            <h3 className={styles.appointmentTitle}>
-                              {session.specialization || 'Counseling Session'}
-                            </h3>
-                            <div className={styles.appointmentDetails}>
-                              <span className={styles.appointmentDetail}>
-                                👤 {session.elder_name}
-                              </span>
-                              <span className={styles.appointmentDetail}>
-                                🧑‍⚕️ {session.counselor_name}
-                              </span>
-                              <span className={styles.appointmentDetail}>
-                                📅 {formatAppointmentDate(session.date_time)}
-                              </span>
-                              <span className={styles.appointmentDetail}>
-                                📍 {session.counselor_district}
-                              </span>
+                <div className={styles.appointmentsGrid}>
+                  {upcomingSessions.length > 0 ? (
+                    upcomingSessions.slice(0, 2).map((session, index) => (
+                      <div key={session.appointment_id} className={styles.appointmentCard}>
+                        <div className={styles.cardHeader}>
+                          <div className={styles.doctorInfo}>
+                            <div className={styles.doctorAvatar}>🧠</div>
+                            <div className={styles.doctorDetails}>
+                              <h3>{session.counselor_name}</h3>
+                              <p className={styles.specialization}>{session.specialization || 'Counseling'}</p>
+                              <p className={styles.institution}>For: {session.elder_name}</p>
                             </div>
-                            {session.notes && (
-                              <p className={styles.appointmentNotes}>
-                                📝 {session.notes.substring(0, 60)}
-                                {session.notes.length > 60 ? '...' : ''}
-                              </p>
-                            )}
+                          </div>
+                          <div className={styles.statusContainer}>
+                            <span className={`${styles.statusUpcoming} ${styles['status' + session.status.charAt(0).toUpperCase() + session.status.slice(1)]}`}>
+                              {session.status.toUpperCase()}
+                            </span>
                           </div>
                         </div>
-                        <div className={styles.appointmentRight}>
-                          {session.status === 'confirmed' ? (
-                            <div className={styles.appointmentActions}>
-                              {session.appointment_type === 'online' && session.meeting_link ? (
-                                <button 
-                                  className={`${styles.primaryBtn} ${styles.joinMeetingBtn}`}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    const meetingUrl = new URL(session.meeting_link);
-                                    meetingUrl.searchParams.set('userInfo.displayName', session.elder_name || 'Patient');
-                                    meetingUrl.searchParams.set('userInfo.email', 'patient@silvercare.com');
-                                    meetingUrl.searchParams.set('config.prejoinPageEnabled', 'false');
-                                    window.open(meetingUrl.toString(), '_blank');
-                                  }}
-                                >
-                                  🎥 Join Session
-                                </button>
-                              ) : (
-                                <button className={styles.secondaryBtn} style={{pointerEvents: 'none'}}>
-                                  Confirmed
-                                </button>
-                              )}
+                        
+                        <div className={styles.appointmentDetails}>
+                          <div className={styles.appointmentMeta}>
+                            <div className={styles.dateTimeGroup}>
+                              <div className={styles.dateInfo}>
+                                <span className={styles.dateText}>
+                                  {new Date(session.date_time).toLocaleDateString('en-US', { 
+                                    month: 'short', 
+                                    day: 'numeric' 
+                                  })}
+                                </span>
+                              </div>
+                              <div className={styles.timeInfo}>
+                                <span className={styles.timeText}>
+                                  {new Date(session.date_time).toLocaleTimeString('en-US', { 
+                                    hour: '2-digit', 
+                                    minute: '2-digit' 
+                                  })}
+                                </span>
+                              </div>
                             </div>
-                          ) : (
-                            <div 
-                              className={`${styles.appointmentStatus} ${styles[session.status]}`}
-                              style={{ backgroundColor: getStatusColor(session.status) }}
-                            >
-                              {session.status.charAt(0).toUpperCase() + session.status.slice(1)}
+                            <div className={styles.typeIndicator}>
+                              <span className={`${styles.typeChip} ${session.appointment_type === 'online' ? styles.onlineChip : styles.physicalChip}`}>
+                                {session.appointment_type === 'online' ? '💻 Online' : '🏥 Physical'}
+                              </span>
+                            </div>
+                          </div>
+                          
+                          {session.notes && (
+                            <div className={styles.appointmentNotes}>
+                              <p>📝 {session.notes}</p>
                             </div>
                           )}
-                          <div className={styles.appointmentArrow}>
-                            <span>→</span>
-                          </div>
+                        </div>
+                        
+                        <div className={styles.cardActions}>
+                          {session.status === 'confirmed' ? (
+                            session.appointment_type === 'online' && session.meeting_link ? (
+                              <button 
+                                className={`${styles.joinBtn} ${styles.joinMeetingBtn}`}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  const meetingUrl = new URL(session.meeting_link);
+                                  meetingUrl.searchParams.set('userInfo.displayName', session.elder_name || 'Patient');
+                                  meetingUrl.searchParams.set('userInfo.email', 'patient@silvercare.com');
+                                  meetingUrl.searchParams.set('config.prejoinPageEnabled', 'false');
+                                  window.open(meetingUrl.toString(), '_blank');
+                                }}
+                              >
+                                🎥 Join Session
+                              </button>
+                            ) : (
+                              <button 
+                                className={`${styles.joinBtn} ${styles.confirmedBtn}`}
+                                disabled
+                              >
+                                ✅ Confirmed
+                              </button>
+                            )
+                          ) : session.status === 'pending' ? (
+                            <button 
+                              className={`${styles.joinBtn} ${styles.pendingBtn}`}
+                              disabled
+                            >
+                              ⏳ Pending
+                            </button>
+                          ) : (
+                            <button 
+                              className={styles.joinBtn}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                // Handle session details view
+                                console.log('View session details:', session.appointment_id);
+                              }}
+                            >
+                              👁️ View Details
+                            </button>
+                          )}
                         </div>
                       </div>
-                      <div className={styles.appointmentDivider}></div>
+                    ))
+                  ) : (
+                    <div className={styles.noAppointments}>
+                      <div className={styles.noAppointmentsIcon}>🧠</div>
+                      <h3>No Upcoming Sessions</h3>
+                      <p>
+                        No upcoming counseling sessions scheduled for your elders. 
+                        Book a new session to get started with mental health support.
+                      </p>
                     </div>
-                  ))}
+                  )}
+                </div>
+              )}
+              
+              {upcomingSessions.length > 2 && (
+                <div className={styles.showAllContainer}>
+                  <button 
+                    className={styles.showAllBtn}
+                    onClick={() => navigate('/family-member/sessions')}
+                  >
+                    Show All Sessions
+                  </button>
                 </div>
               )}
             </div>
-            
-            {/* Show "View All Sessions" button if there are more than 2 sessions */}
-            {upcomingSessions.length > 2 && (
-              <div className={styles.viewAllAppointments}>
-                <button 
-                  className={styles.viewAllAppointmentsButton}
-                  onClick={() => navigate('/family-member/sessions')}
-                >
-                  View All Sessions ({upcomingSessions.length})
-                </button>
-              </div>
-            )}
           </div>
 
-          {/* Upcoming Care Visits Section - Right Half */}
+          {/* Upcoming Care Visits Section */}
           <div className={styles.appointmentsSection}>
-            <div className={styles.appointmentsSectionHeader}>
-              <h2 className={styles.sectionTitle}>Upcoming Care Visits</h2>
-              <p className={styles.appointmentsSubtitle}>
-                {upcomingCareVisits.length === 0 
-                  ? "No upcoming care visits scheduled" 
-                  : upcomingCareVisits.length <= 2
-                    ? "Click on any care visit to view details"
-                    : `Showing 2 of ${upcomingCareVisits.length} upcoming care visits. Click "View All" to see more.`
-                }
-              </p>
+            <div className={styles.appointmentsHeader}>
+              <h2>Care Assignments</h2>
+              <div className={styles.appointmentTabs}>
+                <button className={`${styles.tabBtn} ${styles.activeTab}`}>
+                  Upcoming
+                  {upcomingCareVisits.length > 0 && (
+                    <span className={styles.countBadge}>
+                      {upcomingCareVisits.length}
+                    </span>
+                  )}
+                </button>
+              </div>
             </div>
             
-            <div className={styles.appointmentsContainer}>
+            <div className={styles.appointmentsContent}>
               {careVisitsLoading ? (
-                <div className={styles.loadingAppointments}>
+                <div className={styles.loadingContainer}>
                   <div className={styles.loadingSpinner}></div>
                   <p>Loading care visits...</p>
                 </div>
-              ) : upcomingCareVisits.length === 0 ? (
-                <div className={styles.noAppointments}>
-                  <div className={styles.noAppointmentsIcon}>🧑‍🤝‍🧑</div>
-                  <p className={styles.noAppointmentsText}>No upcoming care visits</p>
-                  <p className={styles.noAppointmentsSubtext}>
-                    Schedule a caregiver visit to provide care for your elders
-                  </p>
-                </div>
               ) : (
-                <div className={styles.appointmentsList}>
-                  {/* Limit to only 2 care visits */}
-                  {upcomingCareVisits.slice(0, 2).map((visit, index) => (
-                    <div 
-                      key={visit.request_id} 
-                      className={styles.appointmentItem}
-                    >
-                      <div className={styles.appointmentContent}>
-                        <div className={styles.appointmentLeft}>
-                          <div className={styles.appointmentIcon}>
-                            🧑‍🤝‍🧑
-                          </div>
-                          <div className={styles.appointmentInfo}>
-                            <h3 className={styles.appointmentTitle}>
-                              Care Visit
-                            </h3>
-                            <div className={styles.appointmentDetails}>
-                              <span className={styles.appointmentDetail}>
-                                👤 {visit.elder_name}
-                              </span>
-                              <span className={styles.appointmentDetail}>
-                                🧑‍⚕️ {visit.caregiver_name}
-                              </span>
-                              <span className={styles.appointmentDetail}>
-                                📅 {new Date(visit.start_date).toLocaleDateString()} - {new Date(visit.end_date).toLocaleDateString()}
-                              </span>
-                              <span className={styles.appointmentDetail}>
-                                📍 {visit.caregiver_district}
-                              </span>
-                              {visit.duration && (
-                                <span className={styles.appointmentDetail}>
-                                  ⏱️ {visit.duration} hours
-                                </span>
-                              )}
+                <div className={styles.appointmentsGrid}>
+                  {upcomingCareVisits.length > 0 ? (
+                    upcomingCareVisits.slice(0, 2).map((visit, index) => (
+                      <div key={visit.request_id} className={styles.appointmentCard}>
+                        <div className={styles.cardHeader}>
+                          <div className={styles.doctorInfo}>
+                            <div className={styles.doctorAvatar}>🧑‍🤝‍🧑</div>
+                            <div className={styles.doctorDetails}>
+                              <h3>{visit.caregiver_name}</h3>
+                              <p className={styles.specialization}>Care Assistant</p>
+                              <p className={styles.institution}>For: {visit.elder_name}</p>
                             </div>
-                            {visit.caregiver_phone && (
-                              <p className={styles.appointmentNotes}>
-                                📞 {visit.caregiver_phone}
-                              </p>
-                            )}
+                          </div>
+                          <div className={styles.statusContainer}>
+                            <span className={`${styles.statusUpcoming} ${styles['status' + visit.status.charAt(0).toUpperCase() + visit.status.slice(1)]}`}>
+                              {visit.status.toUpperCase()}
+                            </span>
                           </div>
                         </div>
-                        <div className={styles.appointmentRight}>
-                          <div 
-                            className={`${styles.appointmentStatus} ${styles[visit.status]}`}
-                            style={{ backgroundColor: getStatusColor(visit.status) }}
-                          >
-                            {visit.status.charAt(0).toUpperCase() + visit.status.slice(1)}
+                        
+                        <div className={styles.appointmentDetails}>
+                          <div className={styles.appointmentMeta}>
+                            <div className={styles.dateTimeGroup}>
+                              <div className={styles.dateInfo}>
+                                <span className={styles.dateText}>
+                                  {new Date(visit.start_date).toLocaleDateString('en-US', { 
+                                    month: 'short', 
+                                    day: 'numeric' 
+                                  })}
+                                </span>
+                              </div>
+                              <div className={styles.timeInfo}>
+                                <span className={styles.timeText}>
+                                  {visit.duration ? `${visit.duration}h` : 'Full Day'}
+                                </span>
+                              </div>
+                            </div>
+                            <div className={styles.typeIndicator}>
+                              <span className={styles.physicalChip}>
+                                🏠 Home Care
+                              </span>
+                            </div>
                           </div>
-                          <div className={styles.appointmentArrow}>
-                            <span>→</span>
+                          
+                          <div className={styles.careDetails}>
+                            <div className={styles.careInfo}>
+                              <span>📍 {visit.caregiver_district}</span>
+                              {visit.caregiver_phone && <span>📞 {visit.caregiver_phone}</span>}
+                              <span>📅 {new Date(visit.start_date).toLocaleDateString()} - {new Date(visit.end_date).toLocaleDateString()}</span>
+                            </div>
                           </div>
                         </div>
                       </div>
-                      <div className={styles.appointmentDivider}></div>
+                    ))
+                  ) : (
+                    <div className={styles.noAppointments}>
+                      <div className={styles.noAppointmentsIcon}>🧑‍🤝‍🧑</div>
+                      <h3>No Care Assignments</h3>
+                      <p>
+                        No upcoming care visits scheduled for your elders. 
+                        Schedule a caregiver visit to provide care support.
+                      </p>
                     </div>
-                  ))}
+                  )}
+                </div>
+              )}
+              
+              {upcomingCareVisits.length > 2 && (
+                <div className={styles.showAllContainer}>
+                  <button 
+                    className={styles.showAllBtn}
+                    onClick={() => navigate('/family-member/care-visits')}
+                  >
+                    Show All Care Visits
+                  </button>
                 </div>
               )}
             </div>
-            
-            {/* Show "View All Care Visits" button if there are more than 2 visits */}
-            {upcomingCareVisits.length > 2 && (
-              <div className={styles.viewAllAppointments}>
-                <button 
-                  className={styles.viewAllAppointmentsButton}
-                  onClick={() => navigate('/family-member/care-visits')}
-                >
-                  View All Care Visits ({upcomingCareVisits.length})
-                </button>
-              </div>
-            )}
           </div>
         </div>
 
