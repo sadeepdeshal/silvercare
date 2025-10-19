@@ -100,8 +100,15 @@ const ElderPage = () => {
       fetchElderData(); // Refresh data
     } catch (error) {
       console.error('Error adding report:', error);
-      alert('Failed to add report. Please try again.');
     }
+  };
+
+  // Helper function to get Sri Lanka date string (UTC+5:30)
+  const getLocalDateString = (date) => {
+    const utcDate = new Date(date);
+    // Convert to Sri Lanka time (UTC+5:30)
+    const sriLankaTime = new Date(utcDate.getTime() + (5.5 * 60 * 60 * 1000));
+    return sriLankaTime.toISOString().split('T')[0];
   };
 
   if (loading) {
@@ -133,9 +140,7 @@ const ElderPage = () => {
               <p><strong>User caregiver_id:</strong> {user?.caregiver_id || 'undefined'}</p>
               <p><strong>Loading state:</strong> {loading ? 'true' : 'false'}</p>
             </div>
-            <button onClick={() => navigate('/caregiver/dashboard')} className={styles.backButton}>
-              Back to Dashboard
-            </button>
+            
           </div>
         </CaregiverLayout>
       </>
@@ -188,116 +193,524 @@ const ElderPage = () => {
     <>
       <Navbar />
       <CaregiverLayout>
-        <div className={styles.elderPage}>
-          <div className={styles.header}>
-            <button onClick={() => navigate('/caregiver/dashboard')} className={styles.backButton}>
-              ← Back to Dashboard
-            </button>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-              
-              <h1 style={{
-                fontSize: '2rem',
-                fontWeight: 700,
-                margin: 0,
+        <div className={styles.elderPage} style={{ fontFamily: "'Segoe UI', sans-serif" }}>
+          {/* Back Button */}
+          <div style={{ marginBottom: '20px' }}>
+            <button 
+              onClick={() => navigate('/caregiver/elders')} 
+              style={{
                 background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text'
-              }}>
-                Elder Care Management
-              </h1>
-            </div>
-          
+                color: 'white',
+                border: 'none',
+                padding: '12px 24px',
+                borderRadius: '12px',
+                fontSize: '14px',
+                fontWeight: 600,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                boxShadow: '0 4px 12px rgba(102, 126, 234, 0.25)',
+                transition: 'all 0.3s ease',
+                fontFamily: "'Segoe UI', sans-serif"
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 6px 16px rgba(102, 126, 234, 0.35)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 4px 12px rgba(102, 126, 234, 0.25)';
+              }}
+            >
+              <span style={{ fontSize: '18px' }}>←</span>
+              Back to all elders
+            </button>
+          </div>
+
+          {/* Header */}
+          <div style={{ marginBottom: '30px' }}>
+            <h1 style={{
+              fontSize: '2rem',
+              fontWeight: 700,
+              margin: 0,
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+              fontFamily: "'Segoe UI', sans-serif"
+            }}>
+              Elder Care Management
+            </h1>
           </div>
 
           <div className={styles.contentGrid}>
-            {/* Elder Details Card */}
-            <div className={styles.card}>
-              <div className={styles.cardHeader}>
-                <span className={styles.cardIcon}>👴</span>
-                <h2>Elder Information</h2>
-              </div>
-              <div className={styles.elderProfile}>
-                <div className={styles.elderAvatar}>
-                  {elder.profile_photo ? (
-                    <img src={elder.profile_photo} alt={elder.name} />
-                  ) : (
-                    <span>{elder.name.split(' ').map(n => n[0]).join('')}</span>
-                  )}
+            {/* Elder Details Card - Creative Design */}
+            <div style={{
+              background: 'linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%)',
+              borderRadius: '24px',
+              padding: '32px',
+              boxShadow: '0 10px 40px rgba(102, 126, 234, 0.15)',
+              border: '2px solid rgba(102, 126, 234, 0.1)',
+              position: 'relative',
+              overflow: 'hidden',
+              fontFamily: "'Segoe UI', sans-serif"
+            }}>
+              {/* Decorative Background Element */}
+              <div style={{
+                position: 'absolute',
+                top: '-50px',
+                right: '-50px',
+                width: '200px',
+                height: '200px',
+                background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%)',
+                borderRadius: '50%',
+                filter: 'blur(40px)'
+              }}></div>
+
+              {/* Header */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                marginBottom: '28px',
+                position: 'relative',
+                zIndex: 1
+              }}>
+                <div style={{
+                  width: '48px',
+                  height: '48px',
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  borderRadius: '12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '24px',
+                  boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)'
+                }}>
+                  👴
                 </div>
-                <div className={styles.elderInfo}>
-                  <h3>{elder.name}</h3>
-                  <p className={styles.inlineInfo}>
-                    <span>{elder.age} years old</span>
-                    <span>•</span>
-                    <span>{elder.gender}</span>
-                  </p>
-                  <div className={styles.elderDetails}>
-                    <div className={styles.detail}>
-                      <span className={styles.label}>Contact:</span>
-                      <span className={styles.value}>{elder.contact}</span>
+                <h2 style={{
+                  fontSize: '1.5rem',
+                  fontWeight: 700,
+                  margin: 0,
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text'
+                }}>
+                  Elder Information
+                </h2>
+              </div>
+
+              {/* Profile Section */}
+              <div style={{
+                position: 'relative',
+                zIndex: 1
+              }}>
+                {/* Details */}
+                <div style={{ flex: 1 }}>
+                  <h3 style={{
+                    fontSize: '1.75rem',
+                    fontWeight: 700,
+                    color: '#1f2937',
+                    margin: '0 0 8px 0'
+                  }}>
+                    {elder.name}
+                  </h3>
+                  <div style={{
+                    display: 'flex',
+                    gap: '12px',
+                    alignItems: 'center',
+                    marginBottom: '20px',
+                    fontSize: '0.95rem',
+                    color: '#6b7280',
+                    fontWeight: 500
+                  }}>
+                    <span style={{
+                      background: 'linear-gradient(135deg, #e0e7ff 0%, #f3e8ff 100%)',
+                      padding: '6px 14px',
+                      borderRadius: '20px',
+                      color: '#667eea',
+                      fontWeight: 600
+                    }}>
+                      {elder.age} years
+                    </span>
+                    <span style={{
+                      background: 'linear-gradient(135deg, #e0e7ff 0%, #f3e8ff 100%)',
+                      padding: '6px 14px',
+                      borderRadius: '20px',
+                      color: '#764ba2',
+                      fontWeight: 600
+                    }}>
+                      {elder.gender}
+                    </span>
+                  </div>
+
+                  {/* Info Grid */}
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(2, 1fr)',
+                    gap: '16px'
+                  }}>
+                    <div style={{
+                      background: 'rgba(255, 255, 255, 0.7)',
+                      padding: '14px',
+                      borderRadius: '12px',
+                      border: '1px solid rgba(102, 126, 234, 0.1)'
+                    }}>
+                      <div style={{
+                        fontSize: '0.75rem',
+                        fontWeight: 600,
+                        color: '#9ca3af',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px',
+                        marginBottom: '4px'
+                      }}>
+                        📞 Contact
+                      </div>
+                      <div style={{
+                        fontSize: '0.95rem',
+                        fontWeight: 600,
+                        color: '#1f2937'
+                      }}>
+                        {elder.contact}
+                      </div>
                     </div>
-                    <div className={styles.detail}>
-                      <span className={styles.label}>Email:</span>
-                      <span className={styles.value}>{elder.email || 'Not provided'}</span>
+
+                    <div style={{
+                      background: 'rgba(255, 255, 255, 0.7)',
+                      padding: '14px',
+                      borderRadius: '12px',
+                      border: '1px solid rgba(102, 126, 234, 0.1)'
+                    }}>
+                      <div style={{
+                        fontSize: '0.75rem',
+                        fontWeight: 600,
+                        color: '#9ca3af',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px',
+                        marginBottom: '4px'
+                      }}>
+                        ✉️ Email
+                      </div>
+                      <div style={{
+                        fontSize: '0.95rem',
+                        fontWeight: 600,
+                        color: '#1f2937',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap'
+                      }}>
+                        {elder.email || 'Not provided'}
+                      </div>
                     </div>
-                    <div className={styles.detail}>
-                      <span className={styles.label}>Address:</span>
-                      <span className={styles.value}>{elder.address}</span>
+
+                    <div style={{
+                      background: 'rgba(255, 255, 255, 0.7)',
+                      padding: '14px',
+                      borderRadius: '12px',
+                      border: '1px solid rgba(102, 126, 234, 0.1)',
+                      gridColumn: 'span 2'
+                    }}>
+                      <div style={{
+                        fontSize: '0.75rem',
+                        fontWeight: 600,
+                        color: '#9ca3af',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px',
+                        marginBottom: '4px'
+                      }}>
+                        📍 Address
+                      </div>
+                      <div style={{
+                        fontSize: '0.95rem',
+                        fontWeight: 600,
+                        color: '#1f2937'
+                      }}>
+                        {elder.address}, {elder.district}
+                      </div>
                     </div>
-                    <div className={styles.detail}>
-                      <span className={styles.label}>District:</span>
-                      <span className={styles.value}>{elder.district}</span>
+
+                    <div style={{
+                      background: 'rgba(255, 255, 255, 0.7)',
+                      padding: '14px',
+                      borderRadius: '12px',
+                      border: '1px solid rgba(102, 126, 234, 0.1)'
+                    }}>
+                      <div style={{
+                        fontSize: '0.75rem',
+                        fontWeight: 600,
+                        color: '#9ca3af',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px',
+                        marginBottom: '4px'
+                      }}>
+                        🆔 NIC
+                      </div>
+                      <div style={{
+                        fontSize: '0.95rem',
+                        fontWeight: 600,
+                        color: '#1f2937'
+                      }}>
+                        {elder.nic}
+                      </div>
                     </div>
-                    <div className={styles.detail}>
-                      <span className={styles.label}>NIC:</span>
-                      <span className={styles.value}>{elder.nic}</span>
-                    </div>
-                    <div className={styles.detail}>
-                      <span className={styles.label}>Medical Conditions:</span>
-                      <span className={styles.value}>{elder.medical_conditions || 'None specified'}</span>
+
+                    <div style={{
+                      background: 'rgba(255, 255, 255, 0.7)',
+                      padding: '14px',
+                      borderRadius: '12px',
+                      border: '1px solid rgba(102, 126, 234, 0.1)'
+                    }}>
+                      <div style={{
+                        fontSize: '0.75rem',
+                        fontWeight: 600,
+                        color: '#9ca3af',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px',
+                        marginBottom: '4px'
+                      }}>
+                        🏥 Medical Conditions
+                      </div>
+                      <div style={{
+                        fontSize: '0.95rem',
+                        fontWeight: 600,
+                        color: '#dc2626'
+                      }}>
+                        {elder.medical_conditions || 'None specified'}
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Family Contact Card */}
+            {/* Family Contact Card - Creative Design */}
             {familyMember && (
-              <div className={styles.card}>
-                <div className={styles.cardHeader}>
-                  <span className={styles.cardIcon}>👨‍👩‍👧‍👦</span>
-                  <h2>Family Contact</h2>
+              <div style={{
+                background: 'linear-gradient(135deg, #fff7ed 0%, #ffffff 100%)',
+                borderRadius: '24px',
+                padding: '32px',
+                boxShadow: '0 10px 40px rgba(251, 146, 60, 0.15)',
+                border: '2px solid rgba(251, 146, 60, 0.1)',
+                position: 'relative',
+                overflow: 'hidden',
+                fontFamily: "'Segoe UI', sans-serif"
+              }}>
+                {/* Decorative Background Element */}
+                <div style={{
+                  position: 'absolute',
+                  top: '-50px',
+                  left: '-50px',
+                  width: '200px',
+                  height: '200px',
+                  background: 'linear-gradient(135deg, rgba(251, 146, 60, 0.1) 0%, rgba(249, 115, 22, 0.1) 100%)',
+                  borderRadius: '50%',
+                  filter: 'blur(40px)'
+                }}></div>
+
+                {/* Header */}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  marginBottom: '28px',
+                  position: 'relative',
+                  zIndex: 1
+                }}>
+                  <div style={{
+                    width: '48px',
+                    height: '48px',
+                    background: 'linear-gradient(135deg, #fb923c 0%, #f97316 100%)',
+                    borderRadius: '12px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '24px',
+                    boxShadow: '0 4px 12px rgba(251, 146, 60, 0.3)'
+                  }}>
+                    👨‍👩‍👧‍👦
+                  </div>
+                  <h2 style={{
+                    fontSize: '1.5rem',
+                    fontWeight: 700,
+                    margin: 0,
+                    background: 'linear-gradient(135deg, #fb923c 0%, #f97316 100%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text'
+                  }}>
+                    Family Contact
+                  </h2>
                 </div>
-                <div className={styles.familyInfo}>
-                  <div className={styles.detail}>
-                    <span className={styles.label}>Name:</span>
-                    <span className={styles.value}>{familyMember.name}</span>
-                  </div>
-                  <div className={styles.detail}>
-                    <span className={styles.label}>Phone:</span>
-                    <span className={styles.value}>
-                      <a href={`tel:${familyMember.phone}`}>{familyMember.phone}</a>
-                    </span>
-                  </div>
-                  <div className={styles.detail}>
-                    <span className={styles.label}>Email:</span>
-                    <span className={styles.value}>
-                      <a href={`mailto:${familyMember.email}`}>{familyMember.email}</a>
-                    </span>
-                  </div>
-                  <div className={styles.detail}>
-                    <span className={styles.label}>Fixed Line:</span>
-                    <span className={styles.value}>
-                      {familyMember.phone_fixed ? 
-                        <a href={`tel:${familyMember.phone_fixed}`}>{familyMember.phone_fixed}</a> : 
-                        'Not provided'
-                      }
-                    </span>
-                  </div>
-                  <div className={styles.detail}>
-                    <span className={styles.label}>Address:</span>
-                    <span className={styles.value}>{familyMember.address || 'Not provided'}</span>
+
+                {/* Family Details */}
+                <div style={{
+                  position: 'relative',
+                  zIndex: 1
+                }}>
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(2, 1fr)',
+                    gap: '16px'
+                  }}>
+                    <div style={{
+                      background: 'rgba(255, 255, 255, 0.8)',
+                      padding: '16px',
+                      borderRadius: '12px',
+                      border: '1px solid rgba(251, 146, 60, 0.15)',
+                      gridColumn: 'span 2'
+                    }}>
+                      <div style={{
+                        fontSize: '0.75rem',
+                        fontWeight: 600,
+                        color: '#9ca3af',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px',
+                        marginBottom: '6px'
+                      }}>
+                        👤 Name
+                      </div>
+                      <div style={{
+                        fontSize: '1.25rem',
+                        fontWeight: 700,
+                        color: '#1f2937'
+                      }}>
+                        {familyMember.name}
+                      </div>
+                    </div>
+
+                    <div style={{
+                      background: 'rgba(255, 255, 255, 0.8)',
+                      padding: '16px',
+                      borderRadius: '12px',
+                      border: '1px solid rgba(251, 146, 60, 0.15)'
+                    }}>
+                      <div style={{
+                        fontSize: '0.75rem',
+                        fontWeight: 600,
+                        color: '#9ca3af',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px',
+                        marginBottom: '6px'
+                      }}>
+                        📱 Mobile
+                      </div>
+                      <a 
+                        href={`tel:${familyMember.phone}`}
+                        style={{
+                          fontSize: '1rem',
+                          fontWeight: 700,
+                          color: '#f97316',
+                          textDecoration: 'none',
+                          display: 'block',
+                          transition: 'all 0.3s ease'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.color = '#ea580c';
+                          e.currentTarget.style.transform = 'scale(1.05)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.color = '#f97316';
+                          e.currentTarget.style.transform = 'scale(1)';
+                        }}
+                      >
+                        {familyMember.phone}
+                      </a>
+                    </div>
+
+                    <div style={{
+                      background: 'rgba(255, 255, 255, 0.8)',
+                      padding: '16px',
+                      borderRadius: '12px',
+                      border: '1px solid rgba(251, 146, 60, 0.15)'
+                    }}>
+                      <div style={{
+                        fontSize: '0.75rem',
+                        fontWeight: 600,
+                        color: '#9ca3af',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px',
+                        marginBottom: '6px'
+                      }}>
+                        ☎️ Landline
+                      </div>
+                      <div style={{
+                        fontSize: '1rem',
+                        fontWeight: 700,
+                        color: '#1f2937'
+                      }}>
+                        {familyMember.phone_fixed || 'Not provided'}
+                      </div>
+                    </div>
+
+                    <div style={{
+                      background: 'rgba(255, 255, 255, 0.8)',
+                      padding: '16px',
+                      borderRadius: '12px',
+                      border: '1px solid rgba(251, 146, 60, 0.15)',
+                      gridColumn: 'span 2'
+                    }}>
+                      <div style={{
+                        fontSize: '0.75rem',
+                        fontWeight: 600,
+                        color: '#9ca3af',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px',
+                        marginBottom: '6px'
+                      }}>
+                        ✉️ Email
+                      </div>
+                      <a 
+                        href={`mailto:${familyMember.email}`}
+                        style={{
+                          fontSize: '1rem',
+                          fontWeight: 700,
+                          color: '#f97316',
+                          textDecoration: 'none',
+                          display: 'block',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                          transition: 'all 0.3s ease'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.color = '#ea580c';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.color = '#f97316';
+                        }}
+                      >
+                        {familyMember.email}
+                      </a>
+                    </div>
+
+                    <div style={{
+                      background: 'rgba(255, 255, 255, 0.8)',
+                      padding: '16px',
+                      borderRadius: '12px',
+                      border: '1px solid rgba(251, 146, 60, 0.15)',
+                      gridColumn: 'span 2'
+                    }}>
+                      <div style={{
+                        fontSize: '0.75rem',
+                        fontWeight: 600,
+                        color: '#9ca3af',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px',
+                        marginBottom: '6px'
+                      }}>
+                        🏠 Address
+                      </div>
+                      <div style={{
+                        fontSize: '1rem',
+                        fontWeight: 700,
+                        color: '#1f2937'
+                      }}>
+                        {familyMember.address || 'Not provided'}
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -448,8 +861,11 @@ const ElderPage = () => {
                   const displayMonth = filterMonth === '' ? new Date().getMonth() : parseInt(filterMonth);
                   const displayYear = filterYear === '' ? new Date().getFullYear() : parseInt(filterYear);
                   const daysInMonth = new Date(displayYear, displayMonth + 1, 0).getDate();
-                  const today = new Date();
-                  today.setHours(0, 0, 0, 0);
+                  
+                  // Get today's date in Sri Lanka timezone
+                  const now = new Date();
+                  const sriLankaToday = new Date(now.getTime() + (5.5 * 60 * 60 * 1000));
+                  const todayStr = sriLankaToday.toISOString().split('T')[0];
                   
                   // Get assignment date range
                   const assignmentStart = elder.start_date ? new Date(elder.start_date) : null;
@@ -480,12 +896,12 @@ const ElderPage = () => {
                     const dateStr = `${displayYear}-${String(displayMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                     const dayReport = carelogs.find(report => {
                       if (!report.date) return false;
-                      const reportDate = new Date(report.date).toISOString().split('T')[0];
+                      const reportDate = getLocalDateString(report.date);
                       return reportDate === dateStr;
                     });
                     
-                    const isToday = targetDate.getTime() === today.getTime();
-                    const isPast = targetDate < today;
+                    const isToday = dateStr === todayStr;
+                    const isPast = dateStr < todayStr;
                     const hasReport = dayReport && dayReport.carelog_id;
                     
                     return (
