@@ -33,28 +33,10 @@ useEffect(() => {
   fetchCareRequests();
 }, [user, debouncedSearchTerm]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Auto-update status from 'confirmed' to 'completed' if end_date has passed
-  useEffect(() => {
-    if (!careRequests || careRequests.length === 0) return;
-    const today = new Date();
-    today.setHours(0,0,0,0);
-    careRequests.forEach(async (request) => {
-      if (request.status === 'confirmed' || request.status === 'approved') {
-        const endDate = new Date(request.end_date);
-        endDate.setHours(0,0,0,0);
-        if (endDate.getTime() < today.getTime()) {
-          // Update status in backend
-          try {
-            await caregiverApi.updateCareRequestStatus(request.request_id, 'completed');
-            // Refresh the data to show updated status
-            fetchCareRequests();
-          } catch (err) {
-            console.error('Error updating status to completed:', err);
-          }
-        }
-      }
-    });
-  }, [careRequests]); // eslint-disable-line react-hooks/exhaustive-deps
+  // NOTE: Do NOT auto-update status to 'completed'
+  // Status stays as 'confirmed' in database
+  // Display logic shows if assignment is past/current based on end_date
+  
 
   const fetchCareRequests = async () => {
     try {
