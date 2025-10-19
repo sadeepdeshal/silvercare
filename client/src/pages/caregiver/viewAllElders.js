@@ -110,6 +110,15 @@ const ViewAllElders = () => {
     if (statusFilter && statusFilter !== 'all') {
       const todayString = new Date().toISOString().split('T')[0];
       
+      // Helper function to convert UTC date to Sri Lanka timezone date string
+      const getLocalDateString = (utcDateString) => {
+        if (!utcDateString) return null;
+        const date = new Date(utcDateString);
+        // Convert to Sri Lanka time (UTC+5:30)
+        const localDate = new Date(date.getTime() + (5.5 * 60 * 60 * 1000));
+        return localDate.toISOString().split('T')[0];
+      };
+      
       console.log('🔍 Filtering by status:', statusFilter);
       console.log('📅 Today:', todayString);
       console.log('📊 Elders before filter:', filtered.length);
@@ -117,12 +126,12 @@ const ViewAllElders = () => {
       if (statusFilter === 'completed') {
         // Show completed: end_date < today (past assignments)
         filtered = filtered.filter(elder => {
-          if (!elder.end_date) {
-            console.log(`❌ ${elder.name}: No end_date`);
+          if (!elder.end_date || elder.status.toLowerCase() !== 'confirmed') {
+            console.log(`❌ ${elder.name}: No end_date or status not confirmed (${elder.status})`);
             return false;
           }
-          // Extract date string directly without timezone conversion
-          const endDateString = elder.end_date.split('T')[0];
+          // Convert to Sri Lanka timezone before comparison (same as stats calculation)
+          const endDateString = getLocalDateString(elder.end_date);
           const isCompleted = endDateString < todayString;
           console.log(`${isCompleted ? '✅' : '❌'} ${elder.name}: end_date=${endDateString}, isCompleted=${isCompleted}`);
           return isCompleted;
@@ -130,12 +139,12 @@ const ViewAllElders = () => {
       } else if (statusFilter === 'confirmed') {
         // Show confirmed: end_date >= today (active/ongoing)
         filtered = filtered.filter(elder => {
-          if (!elder.end_date) {
-            console.log(`❌ ${elder.name}: No end_date`);
+          if (!elder.end_date || elder.status.toLowerCase() !== 'confirmed') {
+            console.log(`❌ ${elder.name}: No end_date or status not confirmed (${elder.status})`);
             return false;
           }
-          // Extract date string directly without timezone conversion
-          const endDateString = elder.end_date.split('T')[0];
+          // Convert to Sri Lanka timezone before comparison (same as stats calculation)
+          const endDateString = getLocalDateString(elder.end_date);
           const isConfirmed = endDateString >= todayString;
           console.log(`${isConfirmed ? '✅' : '❌'} ${elder.name}: end_date=${endDateString}, isConfirmed=${isConfirmed}`);
           return isConfirmed;

@@ -100,8 +100,15 @@ const ElderPage = () => {
       fetchElderData(); // Refresh data
     } catch (error) {
       console.error('Error adding report:', error);
-      alert('Failed to add report. Please try again.');
     }
+  };
+
+  // Helper function to get Sri Lanka date string (UTC+5:30)
+  const getLocalDateString = (date) => {
+    const utcDate = new Date(date);
+    // Convert to Sri Lanka time (UTC+5:30)
+    const sriLankaTime = new Date(utcDate.getTime() + (5.5 * 60 * 60 * 1000));
+    return sriLankaTime.toISOString().split('T')[0];
   };
 
   if (loading) {
@@ -133,9 +140,7 @@ const ElderPage = () => {
               <p><strong>User caregiver_id:</strong> {user?.caregiver_id || 'undefined'}</p>
               <p><strong>Loading state:</strong> {loading ? 'true' : 'false'}</p>
             </div>
-            <button onClick={() => navigate('/caregiver/dashboard')} className={styles.backButton}>
-              Back to Dashboard
-            </button>
+            
           </div>
         </CaregiverLayout>
       </>
@@ -188,230 +193,884 @@ const ElderPage = () => {
     <>
       <Navbar />
       <CaregiverLayout>
-        <div className={styles.elderPage}>
-          <div className={styles.header}>
-            <button onClick={() => navigate('/caregiver/dashboard')} className={styles.backButton}>
-              ← Back to Dashboard
-            </button>
-            <h1>Elder Care Management</h1>
+        <div className={styles.elderPage} style={{ fontFamily: "'Segoe UI', sans-serif" }}>
+          {/* Back Button */}
+          <div style={{ marginBottom: '20px' }}>
             <button 
-              className={styles.addReportButton}
-              onClick={() => setShowReportModal(true)}
+              onClick={() => navigate('/caregiver/elders')} 
+              style={{
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                color: 'white',
+                border: 'none',
+                padding: '12px 24px',
+                borderRadius: '12px',
+                fontSize: '14px',
+                fontWeight: 600,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                boxShadow: '0 4px 12px rgba(102, 126, 234, 0.25)',
+                transition: 'all 0.3s ease',
+                fontFamily: "'Segoe UI', sans-serif"
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 6px 16px rgba(102, 126, 234, 0.35)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 4px 12px rgba(102, 126, 234, 0.25)';
+              }}
             >
-              📝 Add Daily Report
+              <span style={{ fontSize: '18px' }}>←</span>
+              Back to all elders
             </button>
           </div>
 
+          {/* Header */}
+          <div style={{ marginBottom: '30px' }}>
+            <h1 style={{
+              fontSize: '2rem',
+              fontWeight: 700,
+              margin: 0,
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+              fontFamily: "'Segoe UI', sans-serif"
+            }}>
+              Elder Care Management
+            </h1>
+          </div>
+
           <div className={styles.contentGrid}>
-            {/* Elder Details Card */}
-            <div className={styles.card}>
-              <div className={styles.cardHeader}>
-                <span className={styles.cardIcon}>👴</span>
-                <h2>Elder Information</h2>
-              </div>
-              <div className={styles.elderProfile}>
-                <div className={styles.elderAvatar}>
-                  {elder.profile_photo ? (
-                    <img src={elder.profile_photo} alt={elder.name} />
-                  ) : (
-                    <span>{elder.name.split(' ').map(n => n[0]).join('')}</span>
-                  )}
+            {/* Elder Details Card - Creative Design */}
+            <div style={{
+              background: 'linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%)',
+              borderRadius: '24px',
+              padding: '32px',
+              boxShadow: '0 10px 40px rgba(102, 126, 234, 0.15)',
+              border: '2px solid rgba(102, 126, 234, 0.1)',
+              position: 'relative',
+              overflow: 'hidden',
+              fontFamily: "'Segoe UI', sans-serif"
+            }}>
+              {/* Decorative Background Element */}
+              <div style={{
+                position: 'absolute',
+                top: '-50px',
+                right: '-50px',
+                width: '200px',
+                height: '200px',
+                background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%)',
+                borderRadius: '50%',
+                filter: 'blur(40px)'
+              }}></div>
+
+              {/* Header */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                marginBottom: '28px',
+                position: 'relative',
+                zIndex: 1
+              }}>
+                <div style={{
+                  width: '48px',
+                  height: '48px',
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  borderRadius: '12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '24px',
+                  boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)'
+                }}>
+                  👴
                 </div>
-                <div className={styles.elderInfo}>
-                  <h3>{elder.name}</h3>
-                  <p className={styles.inlineInfo}>
-                    <span>{elder.age} years old</span>
-                    <span>•</span>
-                    <span>{elder.gender}</span>
-                  </p>
-                  <div className={styles.elderDetails}>
-                    <div className={styles.detail}>
-                      <span className={styles.label}>Contact:</span>
-                      <span className={styles.value}>{elder.contact}</span>
+                <h2 style={{
+                  fontSize: '1.5rem',
+                  fontWeight: 700,
+                  margin: 0,
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text'
+                }}>
+                  Elder Information
+                </h2>
+              </div>
+
+              {/* Profile Section */}
+              <div style={{
+                position: 'relative',
+                zIndex: 1
+              }}>
+                {/* Details */}
+                <div style={{ flex: 1 }}>
+                  <h3 style={{
+                    fontSize: '1.75rem',
+                    fontWeight: 700,
+                    color: '#1f2937',
+                    margin: '0 0 8px 0'
+                  }}>
+                    {elder.name}
+                  </h3>
+                  <div style={{
+                    display: 'flex',
+                    gap: '12px',
+                    alignItems: 'center',
+                    marginBottom: '20px',
+                    fontSize: '0.95rem',
+                    color: '#6b7280',
+                    fontWeight: 500
+                  }}>
+                    <span style={{
+                      background: 'linear-gradient(135deg, #e0e7ff 0%, #f3e8ff 100%)',
+                      padding: '6px 14px',
+                      borderRadius: '20px',
+                      color: '#667eea',
+                      fontWeight: 600
+                    }}>
+                      {elder.age} years
+                    </span>
+                    <span style={{
+                      background: 'linear-gradient(135deg, #e0e7ff 0%, #f3e8ff 100%)',
+                      padding: '6px 14px',
+                      borderRadius: '20px',
+                      color: '#764ba2',
+                      fontWeight: 600
+                    }}>
+                      {elder.gender}
+                    </span>
+                  </div>
+
+                  {/* Info Grid */}
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(2, 1fr)',
+                    gap: '16px'
+                  }}>
+                    <div style={{
+                      background: 'rgba(255, 255, 255, 0.7)',
+                      padding: '14px',
+                      borderRadius: '12px',
+                      border: '1px solid rgba(102, 126, 234, 0.1)'
+                    }}>
+                      <div style={{
+                        fontSize: '0.75rem',
+                        fontWeight: 600,
+                        color: '#9ca3af',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px',
+                        marginBottom: '4px'
+                      }}>
+                        📞 Contact
+                      </div>
+                      <div style={{
+                        fontSize: '0.95rem',
+                        fontWeight: 600,
+                        color: '#1f2937'
+                      }}>
+                        {elder.contact}
+                      </div>
                     </div>
-                    <div className={styles.detail}>
-                      <span className={styles.label}>Email:</span>
-                      <span className={styles.value}>{elder.email || 'Not provided'}</span>
+
+                    <div style={{
+                      background: 'rgba(255, 255, 255, 0.7)',
+                      padding: '14px',
+                      borderRadius: '12px',
+                      border: '1px solid rgba(102, 126, 234, 0.1)'
+                    }}>
+                      <div style={{
+                        fontSize: '0.75rem',
+                        fontWeight: 600,
+                        color: '#9ca3af',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px',
+                        marginBottom: '4px'
+                      }}>
+                        ✉️ Email
+                      </div>
+                      <div style={{
+                        fontSize: '0.95rem',
+                        fontWeight: 600,
+                        color: '#1f2937',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap'
+                      }}>
+                        {elder.email || 'Not provided'}
+                      </div>
                     </div>
-                    <div className={styles.detail}>
-                      <span className={styles.label}>Address:</span>
-                      <span className={styles.value}>{elder.address}</span>
+
+                    <div style={{
+                      background: 'rgba(255, 255, 255, 0.7)',
+                      padding: '14px',
+                      borderRadius: '12px',
+                      border: '1px solid rgba(102, 126, 234, 0.1)',
+                      gridColumn: 'span 2'
+                    }}>
+                      <div style={{
+                        fontSize: '0.75rem',
+                        fontWeight: 600,
+                        color: '#9ca3af',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px',
+                        marginBottom: '4px'
+                      }}>
+                        📍 Address
+                      </div>
+                      <div style={{
+                        fontSize: '0.95rem',
+                        fontWeight: 600,
+                        color: '#1f2937'
+                      }}>
+                        {elder.address}, {elder.district}
+                      </div>
                     </div>
-                    <div className={styles.detail}>
-                      <span className={styles.label}>District:</span>
-                      <span className={styles.value}>{elder.district}</span>
+
+                    <div style={{
+                      background: 'rgba(255, 255, 255, 0.7)',
+                      padding: '14px',
+                      borderRadius: '12px',
+                      border: '1px solid rgba(102, 126, 234, 0.1)'
+                    }}>
+                      <div style={{
+                        fontSize: '0.75rem',
+                        fontWeight: 600,
+                        color: '#9ca3af',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px',
+                        marginBottom: '4px'
+                      }}>
+                        🆔 NIC
+                      </div>
+                      <div style={{
+                        fontSize: '0.95rem',
+                        fontWeight: 600,
+                        color: '#1f2937'
+                      }}>
+                        {elder.nic}
+                      </div>
                     </div>
-                    <div className={styles.detail}>
-                      <span className={styles.label}>NIC:</span>
-                      <span className={styles.value}>{elder.nic}</span>
-                    </div>
-                    <div className={styles.detail}>
-                      <span className={styles.label}>Medical Conditions:</span>
-                      <span className={styles.value}>{elder.medical_conditions || 'None specified'}</span>
+
+                    <div style={{
+                      background: 'rgba(255, 255, 255, 0.7)',
+                      padding: '14px',
+                      borderRadius: '12px',
+                      border: '1px solid rgba(102, 126, 234, 0.1)'
+                    }}>
+                      <div style={{
+                        fontSize: '0.75rem',
+                        fontWeight: 600,
+                        color: '#9ca3af',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px',
+                        marginBottom: '4px'
+                      }}>
+                        🏥 Medical Conditions
+                      </div>
+                      <div style={{
+                        fontSize: '0.95rem',
+                        fontWeight: 600,
+                        color: '#dc2626'
+                      }}>
+                        {elder.medical_conditions || 'None specified'}
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Family Contact Card */}
+            {/* Family Contact Card - Creative Design */}
             {familyMember && (
-              <div className={styles.card}>
-                <div className={styles.cardHeader}>
-                  <span className={styles.cardIcon}>👨‍👩‍👧‍👦</span>
-                  <h2>Family Contact</h2>
+              <div style={{
+                background: 'linear-gradient(135deg, #fff7ed 0%, #ffffff 100%)',
+                borderRadius: '24px',
+                padding: '32px',
+                boxShadow: '0 10px 40px rgba(251, 146, 60, 0.15)',
+                border: '2px solid rgba(251, 146, 60, 0.1)',
+                position: 'relative',
+                overflow: 'hidden',
+                fontFamily: "'Segoe UI', sans-serif"
+              }}>
+                {/* Decorative Background Element */}
+                <div style={{
+                  position: 'absolute',
+                  top: '-50px',
+                  left: '-50px',
+                  width: '200px',
+                  height: '200px',
+                  background: 'linear-gradient(135deg, rgba(251, 146, 60, 0.1) 0%, rgba(249, 115, 22, 0.1) 100%)',
+                  borderRadius: '50%',
+                  filter: 'blur(40px)'
+                }}></div>
+
+                {/* Header */}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  marginBottom: '28px',
+                  position: 'relative',
+                  zIndex: 1
+                }}>
+                  <div style={{
+                    width: '48px',
+                    height: '48px',
+                    background: 'linear-gradient(135deg, #fb923c 0%, #f97316 100%)',
+                    borderRadius: '12px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '24px',
+                    boxShadow: '0 4px 12px rgba(251, 146, 60, 0.3)'
+                  }}>
+                    👨‍👩‍👧‍👦
+                  </div>
+                  <h2 style={{
+                    fontSize: '1.5rem',
+                    fontWeight: 700,
+                    margin: 0,
+                    background: 'linear-gradient(135deg, #fb923c 0%, #f97316 100%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text'
+                  }}>
+                    Family Contact
+                  </h2>
                 </div>
-                <div className={styles.familyInfo}>
-                  <div className={styles.detail}>
-                    <span className={styles.label}>Name:</span>
-                    <span className={styles.value}>{familyMember.name}</span>
-                  </div>
-                  <div className={styles.detail}>
-                    <span className={styles.label}>Phone:</span>
-                    <span className={styles.value}>
-                      <a href={`tel:${familyMember.phone}`}>{familyMember.phone}</a>
-                    </span>
-                  </div>
-                  <div className={styles.detail}>
-                    <span className={styles.label}>Email:</span>
-                    <span className={styles.value}>
-                      <a href={`mailto:${familyMember.email}`}>{familyMember.email}</a>
-                    </span>
-                  </div>
-                  <div className={styles.detail}>
-                    <span className={styles.label}>Fixed Line:</span>
-                    <span className={styles.value}>
-                      {familyMember.phone_fixed ? 
-                        <a href={`tel:${familyMember.phone_fixed}`}>{familyMember.phone_fixed}</a> : 
-                        'Not provided'
-                      }
-                    </span>
-                  </div>
-                  <div className={styles.detail}>
-                    <span className={styles.label}>Address:</span>
-                    <span className={styles.value}>{familyMember.address || 'Not provided'}</span>
+
+                {/* Family Details */}
+                <div style={{
+                  position: 'relative',
+                  zIndex: 1
+                }}>
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(2, 1fr)',
+                    gap: '16px'
+                  }}>
+                    <div style={{
+                      background: 'rgba(255, 255, 255, 0.8)',
+                      padding: '16px',
+                      borderRadius: '12px',
+                      border: '1px solid rgba(251, 146, 60, 0.15)',
+                      gridColumn: 'span 2'
+                    }}>
+                      <div style={{
+                        fontSize: '0.75rem',
+                        fontWeight: 600,
+                        color: '#9ca3af',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px',
+                        marginBottom: '6px'
+                      }}>
+                        👤 Name
+                      </div>
+                      <div style={{
+                        fontSize: '1.25rem',
+                        fontWeight: 700,
+                        color: '#1f2937'
+                      }}>
+                        {familyMember.name}
+                      </div>
+                    </div>
+
+                    <div style={{
+                      background: 'rgba(255, 255, 255, 0.8)',
+                      padding: '16px',
+                      borderRadius: '12px',
+                      border: '1px solid rgba(251, 146, 60, 0.15)'
+                    }}>
+                      <div style={{
+                        fontSize: '0.75rem',
+                        fontWeight: 600,
+                        color: '#9ca3af',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px',
+                        marginBottom: '6px'
+                      }}>
+                        📱 Mobile
+                      </div>
+                      <a 
+                        href={`tel:${familyMember.phone}`}
+                        style={{
+                          fontSize: '1rem',
+                          fontWeight: 700,
+                          color: '#f97316',
+                          textDecoration: 'none',
+                          display: 'block',
+                          transition: 'all 0.3s ease'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.color = '#ea580c';
+                          e.currentTarget.style.transform = 'scale(1.05)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.color = '#f97316';
+                          e.currentTarget.style.transform = 'scale(1)';
+                        }}
+                      >
+                        {familyMember.phone}
+                      </a>
+                    </div>
+
+                    <div style={{
+                      background: 'rgba(255, 255, 255, 0.8)',
+                      padding: '16px',
+                      borderRadius: '12px',
+                      border: '1px solid rgba(251, 146, 60, 0.15)'
+                    }}>
+                      <div style={{
+                        fontSize: '0.75rem',
+                        fontWeight: 600,
+                        color: '#9ca3af',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px',
+                        marginBottom: '6px'
+                      }}>
+                        ☎️ Landline
+                      </div>
+                      <div style={{
+                        fontSize: '1rem',
+                        fontWeight: 700,
+                        color: '#1f2937'
+                      }}>
+                        {familyMember.phone_fixed || 'Not provided'}
+                      </div>
+                    </div>
+
+                    <div style={{
+                      background: 'rgba(255, 255, 255, 0.8)',
+                      padding: '16px',
+                      borderRadius: '12px',
+                      border: '1px solid rgba(251, 146, 60, 0.15)',
+                      gridColumn: 'span 2'
+                    }}>
+                      <div style={{
+                        fontSize: '0.75rem',
+                        fontWeight: 600,
+                        color: '#9ca3af',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px',
+                        marginBottom: '6px'
+                      }}>
+                        ✉️ Email
+                      </div>
+                      <a 
+                        href={`mailto:${familyMember.email}`}
+                        style={{
+                          fontSize: '1rem',
+                          fontWeight: 700,
+                          color: '#f97316',
+                          textDecoration: 'none',
+                          display: 'block',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                          transition: 'all 0.3s ease'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.color = '#ea580c';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.color = '#f97316';
+                        }}
+                      >
+                        {familyMember.email}
+                      </a>
+                    </div>
+
+                    <div style={{
+                      background: 'rgba(255, 255, 255, 0.8)',
+                      padding: '16px',
+                      borderRadius: '12px',
+                      border: '1px solid rgba(251, 146, 60, 0.15)',
+                      gridColumn: 'span 2'
+                    }}>
+                      <div style={{
+                        fontSize: '0.75rem',
+                        fontWeight: 600,
+                        color: '#9ca3af',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px',
+                        marginBottom: '6px'
+                      }}>
+                        🏠 Address
+                      </div>
+                      <div style={{
+                        fontSize: '1rem',
+                        fontWeight: 700,
+                        color: '#1f2937'
+                      }}>
+                        {familyMember.address || 'Not provided'}
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
             )}
           </div>
 
-          {/* Daily Reports Section */}
+          {/* Carelog Calendar Section */}
           <div className={styles.reportsSection}>
             <div className={styles.sectionHeader}>
-              <h2>Daily Care Reports</h2>
-              <span className={styles.reportCount}>{filteredCarelogs.length} reports</span>
+              <h2>Carelogs</h2>
             </div>
-
-            {/* Filter Controls */}
-            <div className={styles.filterControls}>
-              <div className={styles.filterGroup}>
-                <label>Filter by Month:</label>
-                <select
-                  className={styles.filterSelect}
-                  value={filterMonthDropdown}
-                  onChange={e => {
-                    setFilterMonthDropdown(e.target.value);
-                    setFilterMonth(''); // clear manual input if dropdown used
-                  }}
-                >
-                  <option value="">-- Select Month --</option>
-                  {getMonthsList().map(m => (
-                    <option key={m.value} value={m.value}>{m.label}</option>
-                  ))}
-                </select>
-              </div>
-              
-              <div className={styles.filterGroup}>
-                <label>Year (optional):</label>
-                <input
-                  type="number"
-                  className={styles.filterInput}
-                  placeholder="e.g. 2025"
-                  min="1900"
-                  max="2100"
-                  value={filterYear === '1989' ? '' : filterYear}
-                  autoComplete="off"
-                  onChange={e => setFilterYear(e.target.value.replace(/[^0-9]/g, '').slice(0, 4))}
-                />
-              </div>
-              <div className={styles.filterGroup}>
-                <label>Filter by Date:</label>
-                <input
-                  type="date"
-                  className={styles.filterInput}
-                  value={filterDate}
-                  onChange={e => setFilterDate(e.target.value)}
-                />
-              </div>
-              <button
-                type="button"
-                className={styles.clearFilterBtn}
-                onClick={() => { setFilterMonth(''); setFilterMonthDropdown(''); setFilterYear(''); setFilterDate(''); }}
+            {/* Month Navigation */}
+            <div style={{
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              borderRadius: '16px',
+              padding: '20px',
+              marginBottom: '24px',
+              boxShadow: '0 4px 15px rgba(102, 126, 234, 0.3)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '16px'
+            }}>
+              <button 
+                onClick={() => {
+                  const newMonth = filterMonth === '' ? new Date().getMonth() - 1 : parseInt(filterMonth) - 1;
+                  const newYear = filterYear === '' ? new Date().getFullYear() : parseInt(filterYear);
+                  
+                  if (newMonth < 0) {
+                    setFilterMonth('11');
+                    setFilterYear((newYear - 1).toString());
+                  } else {
+                    setFilterMonth(newMonth.toString());
+                    setFilterYear(newYear.toString());
+                  }
+                }}
+                style={{
+                  background: 'rgba(255, 255, 255, 0.2)',
+                  color: 'white',
+                  border: '2px solid rgba(255, 255, 255, 0.3)',
+                  borderRadius: '10px',
+                  padding: '10px 18px',
+                  fontSize: '18px',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  backdropFilter: 'blur(10px)'
+                }}
+                onMouseEnter={(e) => e.target.style.background = 'rgba(255, 255, 255, 0.3)'}
+                onMouseLeave={(e) => e.target.style.background = 'rgba(255, 255, 255, 0.2)'}
               >
-                Clear Filters
+                ←
+              </button>
+              
+              <select
+                value={filterMonth === '' ? new Date().getMonth().toString() : filterMonth}
+                onChange={(e) => setFilterMonth(e.target.value)}
+                style={{
+                  padding: '10px 16px',
+                  fontSize: '15px',
+                  fontWeight: 600,
+                  border: '2px solid rgba(255, 255, 255, 0.3)',
+                  borderRadius: '10px',
+                  background: 'rgba(255, 255, 255, 0.95)',
+                  color: '#667eea',
+                  cursor: 'pointer',
+                  minWidth: '140px',
+                  transition: 'all 0.3s ease',
+                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+                  outline: 'none'
+                }}
+              >
+                {getMonthsList().map((month, index) => (
+                  <option key={index} value={index.toString()}>
+                    {month.label}
+                  </option>
+                ))}
+              </select>
+              
+              <select
+                value={filterYear === '' ? new Date().getFullYear().toString() : filterYear}
+                onChange={(e) => setFilterYear(e.target.value)}
+                style={{
+                  padding: '10px 14px',
+                  fontSize: '15px',
+                  fontWeight: 600,
+                  border: '2px solid rgba(255, 255, 255, 0.3)',
+                  borderRadius: '10px',
+                  background: 'rgba(255, 255, 255, 0.95)',
+                  color: '#764ba2',
+                  cursor: 'pointer',
+                  width: '100px',
+                  height: '42px',
+                  transition: 'all 0.3s ease',
+                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+                  outline: 'none'
+                }}
+              >
+                {Array.from({ length: 26 }, (_, i) => 2015 + i).map(year => (
+                  <option key={year} value={year.toString()}>
+                    {year}
+                  </option>
+                ))}
+              </select>
+              
+              <button 
+                onClick={() => {
+                  const newMonth = filterMonth === '' ? new Date().getMonth() + 1 : parseInt(filterMonth) + 1;
+                  const newYear = filterYear === '' ? new Date().getFullYear() : parseInt(filterYear);
+                  
+                  if (newMonth > 11) {
+                    setFilterMonth('0');
+                    setFilterYear((newYear + 1).toString());
+                  } else {
+                    setFilterMonth(newMonth.toString());
+                    setFilterYear(newYear.toString());
+                  }
+                }}
+                style={{
+                  background: 'rgba(255, 255, 255, 0.2)',
+                  color: 'white',
+                  border: '2px solid rgba(255, 255, 255, 0.3)',
+                  borderRadius: '10px',
+                  padding: '10px 18px',
+                  fontSize: '18px',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  backdropFilter: 'blur(10px)'
+                }}
+                onMouseEnter={(e) => e.target.style.background = 'rgba(255, 255, 255, 0.3)'}
+                onMouseLeave={(e) => e.target.style.background = 'rgba(255, 255, 255, 0.2)'}
+              >
+                →
               </button>
             </div>
 
-            <div className={styles.reportsList}>
-              {filteredCarelogs.length === 0 ? (
-                <div className={styles.noReports}>
-                  <span style={{fontSize: '2.5rem', marginBottom: '12px'}}>📋</span>
-                  <span style={{color: '#667eea', fontWeight: 600, fontSize: '1.2rem'}}>No Reports Yet</span>
-                  <span style={{color: '#718096', fontSize: '1rem', marginTop: '8px'}}>Start documenting daily care by adding your first report.</span>
-                </div>
-              ) : (
-                filteredCarelogs.map(report => (
-                  <div key={report.carelog_id} className={styles.reportCard}>
-                    <div className={styles.reportHeader}>
-                      <span className={styles.reportDate}>
-                        {new Date(report.date).toLocaleDateString('en-US', {
-                          weekday: 'long',
-                          year: 'numeric',
-                          month: 'long',
-                          day: 'numeric'
-                        })}
-                      </span>
-                      <span className={`${styles.moodBadge} ${styles[report.mood]}`}>
-                        {report.mood === 'good' && '😊'} 
-                        {report.mood === 'neutral' && '😐'} 
-                        {report.mood === 'bad' && '😞'} 
-                        {report.mood}
-                      </span>
-                    </div>
-                    <div className={styles.reportContent}>
-                      <div className={styles.reportField}>
-                        <strong>General Notes:</strong>
-                        <p>{report.notes}</p>
+            {/* Calendar Grid */}
+            <div style={{
+              background: 'linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%)',
+              borderRadius: '24px',
+              padding: '36px',
+              boxShadow: '0 8px 32px rgba(102, 126, 234, 0.12)',
+              border: '1px solid rgba(102, 126, 234, 0.1)'
+            }}>
+              <div style={{display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '20px'}}>
+                {(() => {
+                  const displayMonth = filterMonth === '' ? new Date().getMonth() : parseInt(filterMonth);
+                  const displayYear = filterYear === '' ? new Date().getFullYear() : parseInt(filterYear);
+                  const daysInMonth = new Date(displayYear, displayMonth + 1, 0).getDate();
+                  
+                  // Get today's date in Sri Lanka timezone
+                  const now = new Date();
+                  const sriLankaToday = new Date(now.getTime() + (5.5 * 60 * 60 * 1000));
+                  const todayStr = sriLankaToday.toISOString().split('T')[0];
+                  
+                  // Get assignment date range
+                  const assignmentStart = elder.start_date ? new Date(elder.start_date) : null;
+                  const assignmentEnd = elder.end_date ? new Date(elder.end_date) : null;
+                  
+                  if (assignmentStart) assignmentStart.setHours(0, 0, 0, 0);
+                  if (assignmentEnd) assignmentEnd.setHours(0, 0, 0, 0);
+                  
+                  const calendarDays = [];
+                  for (let day = 1; day <= daysInMonth; day++) {
+                    const targetDate = new Date(displayYear, displayMonth, day);
+                    targetDate.setHours(0, 0, 0, 0);
+                    
+                    // Only include dates within assignment period
+                    if (assignmentStart && assignmentEnd) {
+                      if (targetDate >= assignmentStart && targetDate <= assignmentEnd) {
+                        calendarDays.push(day);
+                      }
+                    } else {
+                      calendarDays.push(day);
+                    }
+                  }
+                  
+                  return calendarDays.map((day, index) => {
+                    const targetDate = new Date(displayYear, displayMonth, day);
+                    targetDate.setHours(0, 0, 0, 0);
+                    
+                    const dateStr = `${displayYear}-${String(displayMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                    const dayReport = carelogs.find(report => {
+                      if (!report.date) return false;
+                      const reportDate = getLocalDateString(report.date);
+                      return reportDate === dateStr;
+                    });
+                    
+                    const isToday = dateStr === todayStr;
+                    const isPast = dateStr < todayStr;
+                    const hasReport = dayReport && dayReport.carelog_id;
+                    
+                    return (
+                      <div
+                        key={index}
+                        onClick={() => {
+                          if (hasReport) {
+                            // Show report details
+                            alert(`Report for ${dateStr}:\n\nMood: ${dayReport.mood}\n\nNotes: ${dayReport.notes}\n\nHealth: ${dayReport.health_status || 'N/A'}\n\nActivities: ${dayReport.activities || 'N/A'}\n\nConcerns: ${dayReport.concerns || 'N/A'}`);
+                          } else if (isToday) {
+                            // Open modal to submit report for today
+                            setShowReportModal(true);
+                          }
+                        }}
+                        style={{
+                          background: isToday 
+                            ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' 
+                            : hasReport
+                              ? 'linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%)'
+                              : 'linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%)',
+                          border: isToday 
+                            ? '3px solid #764ba2' 
+                            : hasReport
+                              ? '2px solid #10b981' 
+                              : '2px solid #e5e7eb',
+                          borderRadius: '20px',
+                          padding: '20px 16px',
+                          cursor: (hasReport || isToday) ? 'pointer' : 'default',
+                          transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                          minHeight: '120px',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          textAlign: 'center',
+                          position: 'relative',
+                          boxShadow: isToday 
+                            ? '0 8px 24px rgba(118, 75, 162, 0.35)' 
+                            : hasReport
+                              ? '0 4px 12px rgba(16, 185, 129, 0.15)'
+                              : '0 2px 6px rgba(0, 0, 0, 0.04)',
+                          opacity: (hasReport || isToday) ? 1 : 0.5,
+                          transform: 'scale(1)'
+                        }}
+                        onMouseEnter={(e) => {
+                          if (hasReport || isToday) {
+                            e.currentTarget.style.transform = 'scale(1.05) translateY(-4px)';
+                            e.currentTarget.style.boxShadow = isToday 
+                              ? '0 12px 32px rgba(118, 75, 162, 0.45)' 
+                              : '0 12px 28px rgba(16, 185, 129, 0.25)';
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          if (hasReport || isToday) {
+                            e.currentTarget.style.transform = 'scale(1) translateY(0px)';
+                            e.currentTarget.style.boxShadow = isToday 
+                              ? '0 8px 24px rgba(118, 75, 162, 0.35)' 
+                              : '0 4px 12px rgba(16, 185, 129, 0.15)';
+                          }
+                        }}
+                      >
+                        {isToday && (
+                          <div style={{
+                            position: 'absolute',
+                            top: '10px',
+                            right: '10px',
+                            background: 'rgba(255, 255, 255, 0.95)',
+                            color: '#764ba2',
+                            fontSize: '10px',
+                            fontWeight: 700,
+                            padding: '5px 10px',
+                            borderRadius: '20px',
+                            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+                            letterSpacing: '0.5px'
+                          }}>
+                            TODAY
+                          </div>
+                        )}
+                        
+                        <div style={{
+                          fontSize: '13px', 
+                          fontWeight: 700, 
+                          color: isToday ? 'rgba(255, 255, 255, 0.9)' : '#9ca3af', 
+                          marginBottom: '10px',
+                          textTransform: 'uppercase',
+                          letterSpacing: '1px'
+                        }}>
+                          {['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'][targetDate.getDay()]}
+                        </div>
+                        
+                        <div style={{
+                          fontSize: '32px', 
+                          fontWeight: 800, 
+                          color: isToday ? '#ffffff' : hasReport ? '#10b981' : '#9ca3af',
+                          marginBottom: '12px',
+                          textShadow: isToday ? '0 2px 4px rgba(0, 0, 0, 0.1)' : 'none'
+                        }}>
+                          {day}
+                        </div>
+                        
+                        {hasReport && (
+                          <div style={{
+                            fontSize: '10px', 
+                            fontWeight: 700, 
+                            color: '#065f46',
+                            background: 'linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%)',
+                            padding: '7px 14px',
+                            borderRadius: '20px',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.8px',
+                            border: '2px solid #10b981',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '5px',
+                            boxShadow: '0 2px 8px rgba(16, 185, 129, 0.2)'
+                          }}>
+                            <span style={{fontSize: '12px'}}>✓</span>
+                            {dayReport.mood === 'good' && '😊'}
+                            {dayReport.mood === 'neutral' && '😐'}
+                            {dayReport.mood === 'bad' && '😞'}
+                          </div>
+                        )}
+                        
+                        {!hasReport && isToday && (
+                          <div style={{
+                            fontSize: '10px', 
+                            fontWeight: 700, 
+                            color: '#ffffff',
+                            background: 'rgba(255, 255, 255, 0.25)',
+                            padding: '7px 14px',
+                            borderRadius: '20px',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.8px',
+                            border: '2px solid rgba(255, 255, 255, 0.5)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '5px',
+                            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)'
+                          }}>
+                            <span style={{fontSize: '12px'}}>+</span>
+                            Submit
+                          </div>
+                        )}
+                        
+                        {!hasReport && !isToday && isPast && (
+                          <div style={{
+                            fontSize: '10px', 
+                            fontWeight: 700, 
+                            color: '#dc2626',
+                            background: 'linear-gradient(135deg, #fee2e2 0%, #fecaca 100%)',
+                            padding: '7px 14px',
+                            borderRadius: '20px',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.8px',
+                            border: '2px solid #f87171',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '5px',
+                            boxShadow: '0 2px 8px rgba(239, 68, 68, 0.2)'
+                          }}>
+                            <span style={{fontSize: '12px'}}>✗</span>
+                            Missed
+                          </div>
+                        )}
                       </div>
-                      {report.health_status && (
-                        <div className={styles.reportField}>
-                          <strong>Health Status:</strong>
-                          <p>{report.health_status}</p>
-                        </div>
-                      )}
-                      {report.medications_given && (
-                        <div className={styles.reportField}>
-                          <strong>Medications Given:</strong>
-                          <p>{report.medications_given}</p>
-                        </div>
-                      )}
-                      {report.activities && (
-                        <div className={styles.reportField}>
-                          <strong>Activities:</strong>
-                          <p>{report.activities}</p>
-                        </div>
-                      )}
-                      {report.concerns && (
-                        <div className={styles.reportField}>
-                          <strong>Concerns:</strong>
-                          <p>{report.concerns}</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))
-              )}
+                    );
+                  });
+                })()}
+              </div>
             </div>
           </div>
 
@@ -420,7 +1079,7 @@ const ElderPage = () => {
             <div className={styles.modalOverlay} onClick={() => setShowReportModal(false)}>
               <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
                 <div className={styles.modalHeader}>
-                  <h2>Add Daily Report for {elder.name}</h2>
+                  <h2>Add Carelog for {elder.name}</h2>
                   <button 
                     className={styles.closeButton}
                     onClick={() => setShowReportModal(false)}

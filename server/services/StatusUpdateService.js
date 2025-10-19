@@ -98,6 +98,10 @@ class StatusUpdateService {
           cancelledResult.rows.map(r => `Request ${r.request_id}`));
       }
       
+      // NOTE: Status stays as 'confirmed' throughout assignment lifecycle
+      // Display logic determines if assignment is "past" based on end_date comparison
+      // No auto-update to 'completed' status
+      /*
       // Update approved requests to completed when end date has passed
       const completedResult = await pool.query(`
         UPDATE carerequest 
@@ -111,10 +115,11 @@ class StatusUpdateService {
         console.log(`Updated ${completedResult.rows.length} approved requests to completed:`, 
           completedResult.rows.map(r => `Request ${r.request_id}`));
       }
+      */
       
       return {
         cancelled: cancelledResult.rows.length,
-        completed: completedResult.rows.length
+        completed: 0 // Always 0 since we don't auto-update to completed
       };
       
     } catch (error) {
@@ -138,6 +143,8 @@ class StatusUpdateService {
         RETURNING request_id;
       `, [caregiverId]);
       
+      // NOTE: Status stays as 'confirmed' - no auto-update to completed
+      /*
       // Update approved requests to completed
       const completedResult = await pool.query(`
         UPDATE carerequest 
@@ -147,10 +154,11 @@ class StatusUpdateService {
         AND end_date < CURRENT_DATE
         RETURNING request_id;
       `, [caregiverId]);
+      */
       
       return {
         cancelled: cancelledResult.rows.length,
-        completed: completedResult.rows.length
+        completed: 0 // Always 0 since we don't auto-update to completed
       };
       
     } catch (error) {
@@ -174,6 +182,8 @@ class StatusUpdateService {
         RETURNING request_id;
       `, [familyId]);
       
+      // NOTE: Status stays as 'confirmed' - no auto-update to completed
+      /*
       // Update approved requests to completed
       const completedResult = await pool.query(`
         UPDATE carerequest 
@@ -183,10 +193,11 @@ class StatusUpdateService {
         AND end_date < CURRENT_DATE
         RETURNING request_id;
       `, [familyId]);
+      */
       
       return {
         cancelled: cancelledResult.rows.length,
-        completed: completedResult.rows.length
+        completed: 0 // Always 0 since we don't auto-update to completed
       };
       
     } catch (error) {
