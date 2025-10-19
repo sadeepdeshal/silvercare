@@ -693,7 +693,12 @@ const ElderDashboard = () => {
                   </div>
                   <div className={styles.familyActions}>
                     <button className={styles.callBtn}>📞</button>
-                    <button className={styles.messageBtn}>💬</button>
+                    <button 
+                      className={styles.messageBtn}
+                      onClick={() => navigate('/elder/family-chat')}
+                    >
+                      💬
+                    </button>
                   </div>
                 </div>
               </div>
