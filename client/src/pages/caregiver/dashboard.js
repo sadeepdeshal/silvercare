@@ -694,45 +694,11 @@ const CaregiverDashboard = () => {
                     </div>
                   </div>
                   <div className={styles.requestDetail}>
-<<<<<<< HEAD
-                    <span className={styles.label}>Time Left:</span>
-                    {(() => {
-                      const now = new Date();
-                      const start = new Date(request.startDate);
-                      
-                      // Get today's date without time for comparison
-                      const today = new Date();
-                      today.setHours(0, 0, 0, 0);
-                      const startDateOnly = new Date(start);
-                      startDateOnly.setHours(0, 0, 0, 0);
-                      
-                      let colorClass;
-                      if (startDateOnly < today) {
-                        // Overdue - red color
-                        colorClass = styles.timeLeftRed;
-                      } else if (startDateOnly.getTime() === today.getTime()) {
-                        // Started today - red color
-                        colorClass = styles.timeLeftRed;
-                      } else {
-                        // Future date - green or red based on days
-                        const diffMs = start - now;
-                        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-                        colorClass = diffDays <= 2 ? styles.timeLeftRed : styles.timeLeftGreen;
-                      }
-
-                      return (
-                        <span className={colorClass}>
-                          {getTimeLeft(request.startDate)}
-                        </span>
-                      );
-                    })()}
-=======
                     <span className={styles.label}>Time Left to Accept:</span>
                     <RequestCountdownTimer 
                       requestDate={request.requestDate} 
                       status={request.status}
                     />
->>>>>>> development
                   </div>
                   <div className={styles.careRequestActions}>
                     <button 
