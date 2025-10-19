@@ -9,6 +9,7 @@ import { useAuth } from '../../context/AuthContext';
 import DailyCareReportModal from '../../components/DailyCareReportModal.js';
 import SuccessNotification from '../../components/SuccessNotification.js';
 import ErrorModal from '../../components/ErrorModal.js';
+import RequestCountdownTimer from '../../components/RequestCountdownTimer.jsx';
 
 const CaregiverDashboard = () => {
   const { user } = useAuth(); // <-- pulls from logged-in context
@@ -693,6 +694,7 @@ const CaregiverDashboard = () => {
                     </div>
                   </div>
                   <div className={styles.requestDetail}>
+<<<<<<< HEAD
                     <span className={styles.label}>Time Left:</span>
                     {(() => {
                       const now = new Date();
@@ -724,6 +726,13 @@ const CaregiverDashboard = () => {
                         </span>
                       );
                     })()}
+=======
+                    <span className={styles.label}>Time Left to Accept:</span>
+                    <RequestCountdownTimer 
+                      requestDate={request.requestDate} 
+                      status={request.status}
+                    />
+>>>>>>> development
                   </div>
                   <div className={styles.careRequestActions}>
                     <button 
