@@ -9,6 +9,7 @@ import {
 } from '../../services/elderApi2';
 import styles from '../../components/css/elder/sessions.module.css';
 import ElderLayout from '../../components/ElderLayout';
+import InfoModal from '../../components/InfoModal.jsx';
 
 const AllSessions = () => {
   const { currentUser } = useAuth();
@@ -20,6 +21,8 @@ const AllSessions = () => {
   const [filteredSessions, setFilteredSessions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showInfoModal, setShowInfoModal] = useState(false);
+  const [modalMessage, setModalMessage] = useState('');
   
   // Filter and search states
   const [activeFilter, setActiveFilter] = useState("all");
@@ -132,7 +135,8 @@ const AllSessions = () => {
   const handleJoinSession = async (sessionId) => {
     try {
       if (!elderDetails?.elder_id) {
-        alert('Elder details not found');
+        setModalMessage('Elder details not found');
+        setShowInfoModal(true);
         return;
       }
 
@@ -144,7 +148,8 @@ const AllSessions = () => {
         window.open(response.data.meetingUrl, '_blank');
       } else {
         console.error('Session join failed:', response.data);
-        alert(response.data.error || 'Failed to join session');
+        setModalMessage(response.data.error || 'Failed to join session');
+        setShowInfoModal(true);
       }
     } catch (error) {
       console.error('Error joining session:', error);
@@ -152,7 +157,8 @@ const AllSessions = () => {
       
       // Show the actual error message from the server
       const errorMessage = error.response?.data?.error || 'Failed to join session. Please try again.';
-      alert(errorMessage);
+      setModalMessage(errorMessage);
+      setShowInfoModal(true);
     }
   };
 
@@ -304,7 +310,6 @@ const AllSessions = () => {
                   { key: "all", label: "All", count: sessions.length },
                   { key: "upcoming", label: "Upcoming", count: sessions.filter(session => new Date(session.date_time) > new Date() && session.status !== "cancelled").length },
                   { key: "past", label: "Past", count: sessions.filter(session => new Date(session.date_time) < new Date() || session.status === "completed").length },
-                  { key: "completed", label: "Completed", count: sessions.filter(session => session.status === "completed").length },
                   { key: "cancelled", label: "Cancelled", count: sessions.filter(session => session.status === "cancelled").length }
                 ].map((filter) => (
                   <button
@@ -497,6 +502,14 @@ const AllSessions = () => {
         )}
       </div>
       </ElderLayout>
+      
+      <InfoModal
+        isOpen={showInfoModal}
+        onClose={() => setShowInfoModal(false)}
+        title="Session Join"
+        message={modalMessage}
+        icon="⏰"
+      />
     </div>
   );
 };

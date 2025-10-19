@@ -16,6 +16,7 @@ import {
 } from "../../services/elderApi2";
 import styles from "../../components/css/elder/dashboard.module.css";
 import ElderLayout from "../../components/ElderLayout";
+import InfoModal from "../../components/InfoModal.jsx";
 
 const ElderDashboard = () => {
   const { currentUser } = useAuth();
@@ -32,6 +33,8 @@ const ElderDashboard = () => {
   const [appointmentsLoading, setAppointmentsLoading] = useState(false);
   const [sessionsLoading, setSessionsLoading] = useState(false);
   const [statsLoading, setStatsLoading] = useState(false);
+  const [showInfoModal, setShowInfoModal] = useState(false);
+  const [modalMessage, setModalMessage] = useState('');
 
   // Care assignments state
   const [careAssignments, setCareAssignments] = useState([]);
@@ -182,7 +185,9 @@ const ElderDashboard = () => {
       }
     } catch (error) {
       console.error("Error joining appointment:", error);
-      alert(error.response?.data?.error || "Failed to join appointment");
+      const errorMessage = error.response?.data?.error || "Failed to join appointment";
+      setModalMessage(errorMessage);
+      setShowInfoModal(true);
     }
   };
 
@@ -195,7 +200,9 @@ const ElderDashboard = () => {
       }
     } catch (error) {
       console.error("Error joining session:", error);
-      alert(error.response?.data?.error || "Failed to join session");
+      const errorMessage = error.response?.data?.error || "Failed to join session";
+      setModalMessage(errorMessage);
+      setShowInfoModal(true);
     }
   };
 
@@ -692,7 +699,6 @@ const ElderDashboard = () => {
                     <strong>{elderDetails.family_member.name}</strong>
                   </div>
                   <div className={styles.familyActions}>
-                    <button className={styles.callBtn}>📞</button>
                     <button className={styles.messageBtn}>💬</button>
                   </div>
                 </div>
@@ -812,7 +818,7 @@ const ElderDashboard = () => {
                   )}
                 </div>
                 <button
-                  className={styles.weekNavBtn}
+                  className={`${styles.weekNavBtn} ${styles.nextWeekBtn}`}
                   onClick={() => handleWeekChange("next")}
                 >
                   Next Week &#8250;
@@ -1049,6 +1055,14 @@ const ElderDashboard = () => {
           )}
         </div>
       </ElderLayout>
+      
+      <InfoModal
+        isOpen={showInfoModal}
+        onClose={() => setShowInfoModal(false)}
+        title="Join Meeting"
+        message={modalMessage}
+        icon="⏰"
+      />
     </div>
   );
 };
