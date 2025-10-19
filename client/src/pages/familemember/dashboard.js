@@ -336,7 +336,7 @@ const FamilyMemberDashboard = () => {
                 <h3 className={styles.statNumber}>
                   {caregiversLoading ? '...' : activeCaregiverCount}
                 </h3>
-                <p className={styles.statLabel}>Active Caregivers</p>
+                <p className={styles.statLabel}>Caregivers</p>
               </div>
             </div>
             <div className={styles.statCard}>
