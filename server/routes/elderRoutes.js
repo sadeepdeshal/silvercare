@@ -28,7 +28,11 @@ const {
   
   // NEW: Caregiver booking functions
   getCaregiversByElderDistrict,
-  getCaregiverBookingInfo
+  getCaregiverBookingInfo,
+
+  //NEW: Feedback functions
+  getfeedbackbyDoctorId,
+  addFeedbackForDoctor
 
 } = require('../controllers/elderController');
 
@@ -174,5 +178,9 @@ router.post('/:elderId/healthcare-professional-confirm-payment', confirmPaymentA
 // Cleanup route (for maintenance)
 router.delete('/cleanup-expired-bookings', cleanupExpiredBookings);
 
+
+//Get the feedback for doctor
+router.get('/:elderId/doctor/:doctorId/feedback', getfeedbackbyDoctorId);
+router.post('/:elderId/doctor/:doctorId/feedback', addFeedbackForDoctor);
 module.exports = router;
 

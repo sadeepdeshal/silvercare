@@ -3268,6 +3268,62 @@ const getCaregiverBookingInfo = async (req, res) => {
   }
 };
 
+const getfeedbackbyDoctorId = async (req, res) => {
+  const { doctorId } = req.params;
+
+  try {
+    console.log('Fetching feedback for doctor:', doctorId);
+
+    const feedbackResult = await pool.query(`
+      SELECT rating , feedback from feedback_doctor
+      WHERE doctor_id = $1
+    `, [doctorId]);
+
+    console.log('Found feedback entries:', feedbackResult.rows.length);
+
+    res.json({
+      success: true,
+      feedbacks: feedbackResult.rows
+    });
+    console.log('Feedback data sent successfully', feedbackResult.rows);
+    
+  } catch (err) {
+    console.error('Error fetching feedback:', err);
+    res.status(500).json({ 
+      success: false,
+      error: 'Error fetching feedback data' 
+    });
+  }
+};
+
+const addFeedbackForDoctor = async (req, res) => {
+  const { doctorId } = req.params;
+  const { rating, feedback } = req.body;
+
+  try {
+    console.log('Adding feedback for doctor:', doctorId, 'Rating:', rating, 'Feedback:', feedback);
+
+    const insertResult = await pool.query(`
+      INSERT INTO feedback_doctor (doctor_id, rating, feedback)
+      VALUES ($1, $2, $3)
+      RETURNING doctor_id, rating, feedback
+    `, [doctorId, rating, feedback]);
+
+    console.log('Feedback added successfully:', insertResult.rows[0]);
+
+    res.json({
+      success: true,
+      feedback: insertResult.rows[0]
+    });
+  } catch (err) {
+    console.error('Error adding feedback:', err);
+    res.status(500).json({
+      success: false,
+      error: 'Error adding feedback data'
+    });
+  }
+};
+
 module.exports = {
   getEldersByFamilyMember,
   getElderCount,
@@ -3302,7 +3358,11 @@ module.exports = {
   
   // NEW: Caregiver booking functions
   getCaregiversByElderDistrict,
-  getCaregiverBookingInfo
+  getCaregiverBookingInfo,
+
+  // Feedback functions
+  getfeedbackbyDoctorId,
+  addFeedbackForDoctor
 };
 
 
