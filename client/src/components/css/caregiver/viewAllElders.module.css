@@ -254,9 +254,9 @@
 }
 
 .statusConfirmed {
-  background: linear-gradient(135deg, #bfdbfe 0%, #93c5fd 100%);
-  color: #1e40af;
-  border: 1px solid #3b82f6;
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  color: #065f46;
+  border: 1px solid #10b981;
 }
 
 .statusCompleted {

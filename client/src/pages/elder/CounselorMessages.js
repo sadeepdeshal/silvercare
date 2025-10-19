@@ -158,12 +158,6 @@ const CounselorMessages = () => {
                         <div className={styles.counselorDetails}>
                           <p><strong>Email:</strong> <span>{counselor.counselor_email}</span></p>
                           <p><strong>Contact:</strong> <span>{counselor.counselor_contact}</span></p>
-                          <p><strong>Specialization:</strong> <span>{counselor.specialization}</span></p>
-                          <p><strong>Experience:</strong> <span>{counselor.years_of_experience} years</span></p>
-                          <p><strong>Institution:</strong> <span>{counselor.current_institution}</span></p>
-                          <p><strong>License:</strong> <span>{counselor.license_number}</span></p>
-                          <p><strong>District:</strong> <span>{counselor.counselor_district}</span></p>
-                          <p><strong>Latest Session:</strong> <span>{formatDate(counselor.latest_appointment_date)}</span></p>
                         </div>
                         
                         <div className={styles.counselorStats}>
