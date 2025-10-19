@@ -156,12 +156,6 @@ const FamilyMessages = () => {
                           {familyMember.address && (
                             <p><strong>Address:</strong> <span>{familyMember.address}</span></p>
                           )}
-                          {familyMember.phone_fixed && (
-                            <p><strong>Fixed Phone:</strong> <span>{familyMember.phone_fixed}</span></p>
-                          )}
-                          {familyMember.elders_names && (
-                            <p><strong>Caring for:</strong> <span>{familyMember.elders_names}</span></p>
-                          )}
                         </div>
                         
                         <div className={styles.familyMemberStats}>

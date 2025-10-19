@@ -174,20 +174,12 @@ const DoctorMessages = () => {
                         <div className={styles.doctorDetails}>
                           <p><strong>Specialization:</strong> <span>{doctor.specialization}</span></p>
                           <p><strong>Experience:</strong> <span>{doctor.years_experience} years</span></p>
-                          <p><strong>Institution:</strong> <span>{doctor.current_institution}</span></p>
-                          <p><strong>Phone:</strong> <span>{doctor.doctor_phone}</span></p>
-                          <p><strong>Latest Appointment:</strong> <span>{formatDate(doctor.latest_appointment_date)}</span></p>
-                          <p><strong>Confirmed Appointments:</strong> <span>{doctor.confirmed_appointments}</span></p>
                         </div>
                         
                         <div className={styles.doctorStats}>
                           <div className={styles.statItem}>
                             <span className={styles.statNumber}>{doctor.total_appointments}</span>
                             <span className={styles.statLabel}>Total</span>
-                          </div>
-                          <div className={styles.statItem}>
-                            <span className={styles.statNumber}>{doctor.confirmed_appointments}</span>
-                            <span className={styles.statLabel}>Confirmed</span>
                           </div>
                           <div className={styles.statItem}>
                             <span className={styles.statNumber}>{doctor.completed_appointments}</span>
