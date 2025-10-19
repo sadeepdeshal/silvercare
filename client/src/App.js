@@ -27,6 +27,7 @@ import { MentalHealthProfessionalReg } from "./pages/healthproffesional/signup";
 import { HealthProfessionalRegStep2 } from "./pages/healthproffesional/signup-step2";
 import { HealthProfessionalRegStep3 } from "./pages/healthproffesional/signup-step3";
 import HealthProfessionalDashboard from "./pages/healthproffesional/dashboard";
+import HealthProfessionalReports from "./pages/healthproffesional/reports";
 import { DoctorRegStep2 } from "./pages/doctor/signup-step2";
 // Import new appointment components
 
@@ -507,6 +508,15 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={["healthprofessional"]}>
                 <HealthProfessionalFamilyMessages />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/healthprofessional/reports"
+            element={
+              <ProtectedRoute allowedRoles={["healthprofessional"]}>
+                <HealthProfessionalReports />
               </ProtectedRoute>
             }
           />

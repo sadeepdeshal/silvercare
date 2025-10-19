@@ -1518,6 +1518,7 @@ const getUpcomingAppointmentsByFamily = async (req, res) => {
         a.status::text as status,
         a.notes,
         a.appointment_type,
+        a.meeting_link,
         a.created_at,
         a.updated_at,
         e.name as elder_name,
