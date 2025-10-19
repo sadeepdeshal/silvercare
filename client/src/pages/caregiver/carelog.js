@@ -17,6 +17,9 @@ const Carelogs = () => {
   const [showReportModal, setShowReportModal] = useState(false);
   const [selectedCarelog, setSelectedCarelog] = useState(null);
   
+  // Cache to store fetched monthly data
+  const [monthlyCache, setMonthlyCache] = useState({});
+  
   // Error modal state
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [errorModalMessage, setErrorModalMessage] = useState('');
@@ -47,6 +50,14 @@ const Carelogs = () => {
       setShowReportModal(false);
       setSelectedCarelog(null);
       
+      // Clear cache for current month to force refresh
+      const cacheKey = `${currentYear}-${currentMonth}`;
+      setMonthlyCache(prev => {
+        const newCache = { ...prev };
+        delete newCache[cacheKey];
+        return newCache;
+      });
+      
       // Refresh data after a short delay
       setTimeout(() => {
         fetchMonthlyReports(currentMonth, currentYear);
@@ -67,6 +78,15 @@ const Carelogs = () => {
     
     if (!caregiverId) {
       console.error('❌ No caregiver_id found!');
+      return;
+    }
+    
+    // Check cache first
+    const cacheKey = `${year}-${month}`;
+    if (monthlyCache[cacheKey]) {
+      console.log('✅ Using cached data for', cacheKey);
+      setMonthlyReports(monthlyCache[cacheKey]);
+      setLoading(false);
       return;
     }
     
@@ -111,6 +131,12 @@ const Carelogs = () => {
       
       console.log('📊 All monthly reports combined:', allReports);
       setMonthlyReports(allReports);
+      
+      // Cache the result
+      setMonthlyCache(prev => ({
+        ...prev,
+        [cacheKey]: allReports
+      }));
       
     } catch (error) {
       console.error('❌ Error fetching monthly reports:', error);
@@ -249,10 +275,12 @@ const Carelogs = () => {
       <>
         <Navbar />
         <CaregiverLayout>
-          <div style={{ minHeight: '60vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-            <div style={{ width: 60, height: 60, border: '6px solid #e2e8f0', borderTop: '6px solid #667eea', borderRadius: '50%', animation: 'spin 1s linear infinite', marginBottom: 24 }} />
-            <p style={{ color: '#667eea', fontSize: 20, fontWeight: 500 }}>Loading carelogs...</p>
-            <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
+          <div style={{ padding: '30px', minHeight: '100vh', backgroundColor: '#f5f7fa', fontFamily: "'Segoe UI', sans-serif" }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '50vh' }}>
+              <div style={{ width: 50, height: 50, border: '4px solid #e2e8f0', borderTop: '4px solid #667eea', borderRadius: '50%', animation: 'spin 0.8s linear infinite', marginBottom: 20 }} />
+              <p style={{ color: '#667eea', fontSize: 18, fontWeight: 500 }}>Loading care logs...</p>
+              <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
+            </div>
           </div>
         </CaregiverLayout>
       </>
@@ -261,15 +289,9 @@ const Carelogs = () => {
 
   // Get calendar days
   const daysInMonth = getDaysInMonth(currentMonth, currentYear);
-  const firstDayOfMonth = getFirstDayOfMonth(currentMonth, currentYear);
   const calendarDays = [];
   
-  // Add empty cells for days before the first day
-  for (let i = 0; i < firstDayOfMonth; i++) {
-    calendarDays.push(null);
-  }
-  
-  // Add actual days
+  // Add actual days only (no empty cells)
   for (let day = 1; day <= daysInMonth; day++) {
     calendarDays.push(day);
   }
@@ -278,122 +300,150 @@ const Carelogs = () => {
     <>
       <Navbar />
       <CaregiverLayout>
-        <div style={{ padding: '24px', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', minHeight: '100vh' }}>
+        <div style={{ padding: '30px', minHeight: '100vh', backgroundColor: '#f5f7fa', fontFamily: "'Segoe UI', sans-serif" }}>
           {/* Header */}
-          <div style={{ 
-            marginBottom: '32px', 
-            padding: '32px', 
-            background: 'white', 
-            borderRadius: '20px', 
-            boxShadow: '0 4px 16px rgba(102, 126, 234, 0.10)',
-            textAlign: 'center'
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '32px',
+            background: 'white',
+            padding: '20px 28px',
+            borderRadius: '16px',
+            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.05)'
           }}>
             <h1 style={{
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center',
-              gap: 12,
-              fontSize: '2.5rem',
+              color: '#2c3e50',
+              fontSize: '2rem',
               fontWeight: 700,
-              color: '#2b4c7e',
               margin: 0,
-              marginBottom: '8px'
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text'
             }}>
-              <span role="img" aria-label="Carelogs" style={{fontSize: '3rem'}}>📝</span> 
-              Care Logs Calendar
+              Care Logs
             </h1>
-            <p style={{
-              color: '#718096',
-              fontSize: '1.1rem',
-              margin: 0
-            }}>
-              Track and manage your daily care reports with elder assignments
-            </p>
           </div>
 
           {/* Month Navigation */}
           <div style={{
-            background: 'white',
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
             borderRadius: '16px',
-            padding: '24px',
+            padding: '20px',
             marginBottom: '24px',
-            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)',
+            boxShadow: '0 4px 15px rgba(102, 126, 234, 0.3)',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'space-between'
+            justifyContent: 'center',
+            gap: '16px'
           }}>
             <button 
               onClick={goToPreviousMonth}
               style={{
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                background: 'rgba(255, 255, 255, 0.2)',
                 color: 'white',
-                border: 'none',
-                borderRadius: '12px',
-                padding: '12px 24px',
-                fontSize: '16px',
-                fontWeight: 600,
+                border: '2px solid rgba(255, 255, 255, 0.3)',
+                borderRadius: '10px',
+                padding: '10px 18px',
+                fontSize: '18px',
+                fontWeight: 700,
                 cursor: 'pointer',
-                transition: 'all 0.3s ease'
+                transition: 'all 0.3s ease',
+                backdropFilter: 'blur(10px)'
+              }}
+              onMouseEnter={(e) => e.target.style.background = 'rgba(255, 255, 255, 0.3)'}
+              onMouseLeave={(e) => e.target.style.background = 'rgba(255, 255, 255, 0.2)'}
+            >
+              ←
+            </button>
+            
+            <select
+              value={currentMonth}
+              onChange={(e) => setCurrentMonth(parseInt(e.target.value))}
+              style={{
+                padding: '10px 16px',
+                fontSize: '15px',
+                fontWeight: 600,
+                border: '2px solid rgba(255, 255, 255, 0.3)',
+                borderRadius: '10px',
+                background: 'rgba(255, 255, 255, 0.95)',
+                color: '#667eea',
+                cursor: 'pointer',
+                minWidth: '140px',
+                transition: 'all 0.3s ease',
+                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+                outline: 'none'
               }}
             >
-              ← Previous Month
-            </button>
-            <h2 style={{
-              fontSize: '1.8rem',
-              fontWeight: 700,
-              color: '#2b4c7e',
-              margin: 0
-            }}>
-              {months[currentMonth]} {currentYear}
-            </h2>
+              {months.map((month, index) => (
+                <option key={index} value={index}>
+                  {month}
+                </option>
+              ))}
+            </select>
+            
+            <select
+              value={currentYear}
+              onChange={(e) => setCurrentYear(parseInt(e.target.value))}
+              size="1"
+              style={{
+                padding: '10px 14px',
+                fontSize: '15px',
+                fontWeight: 600,
+                border: '2px solid rgba(255, 255, 255, 0.3)',
+                borderRadius: '10px',
+                background: 'rgba(255, 255, 255, 0.95)',
+                color: '#764ba2',
+                cursor: 'pointer',
+                minWidth: '100px',
+                maxHeight: '140px',
+                overflowY: 'auto',
+                transition: 'all 0.3s ease',
+                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+                outline: 'none',
+                scrollbarWidth: 'thin',
+                scrollbarColor: '#764ba2 rgba(255, 255, 255, 0.3)'
+              }}
+            >
+              {Array.from({ length: 26 }, (_, i) => 2015 + i).map(year => (
+                <option key={year} value={year}>
+                  {year}
+                </option>
+              ))}
+            </select>
+            
             <button 
               onClick={goToNextMonth}
               style={{
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                background: 'rgba(255, 255, 255, 0.2)',
                 color: 'white',
-                border: 'none',
-                borderRadius: '12px',
-                padding: '12px 24px',
-                fontSize: '16px',
-                fontWeight: 600,
+                border: '2px solid rgba(255, 255, 255, 0.3)',
+                borderRadius: '10px',
+                padding: '10px 18px',
+                fontSize: '18px',
+                fontWeight: 700,
                 cursor: 'pointer',
-                transition: 'all 0.3s ease'
+                transition: 'all 0.3s ease',
+                backdropFilter: 'blur(10px)'
               }}
+              onMouseEnter={(e) => e.target.style.background = 'rgba(255, 255, 255, 0.3)'}
+              onMouseLeave={(e) => e.target.style.background = 'rgba(255, 255, 255, 0.2)'}
             >
-              Next Month →
+              →
             </button>
           </div>
 
           {/* Calendar */}
           <div style={{
-            background: 'white',
-            borderRadius: '20px',
-            padding: '32px',
-            boxShadow: '0 4px 16px rgba(102, 126, 234, 0.10)'
+            background: 'linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%)',
+            borderRadius: '24px',
+            padding: '36px',
+            boxShadow: '0 8px 32px rgba(102, 126, 234, 0.12)',
+            border: '1px solid rgba(102, 126, 234, 0.1)'
           }}>
-            {/* Day Headers */}
-            <div style={{
-              display: 'grid', 
-              gridTemplateColumns: 'repeat(7, 1fr)', 
-              gap: '16px', 
-              marginBottom: '20px'
-            }}>
-              {['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].map(day => (
-                <div key={day} style={{
-                  textAlign: 'center',
-                  fontSize: '14px',
-                  fontWeight: 600,
-                  color: '#4a5568',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.5px'
-                }}>
-                  {day.substring(0, 3)}
-                </div>
-              ))}
-            </div>
-
             {/* Calendar Days */}
-            <div style={{display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '16px'}}>
+            <div style={{display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '20px'}}>
               {calendarDays.map((day, index) => {
                 if (!day) {
                   return <div key={index} />;
@@ -418,107 +468,154 @@ const Carelogs = () => {
                     key={index}
                     onClick={() => handleDateClick(day, dayReport)}
                     style={{
-                      background: isToday ? 'linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%)' : '#ffffff',
-                      border: isToday ? '3px solid #10b981' : '2px solid #e2e8f0',
-                      borderRadius: '16px',
+                      background: isToday 
+                        ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' 
+                        : hasElderAssignment 
+                          ? 'linear-gradient(135deg, #ffffff 0%, #faf5ff 100%)'
+                          : 'linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%)',
+                      border: isToday 
+                        ? '3px solid #764ba2' 
+                        : hasElderAssignment 
+                          ? '2px solid #e9d5ff' 
+                          : '2px solid #e5e7eb',
+                      borderRadius: '20px',
                       padding: '20px 16px',
                       cursor: hasElderAssignment ? 'pointer' : 'default',
-                      transition: 'all 0.3s ease',
-                      minHeight: '140px',
+                      transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                      minHeight: '150px',
                       display: 'flex',
                       flexDirection: 'column',
                       alignItems: 'center',
                       justifyContent: 'center',
                       textAlign: 'center',
                       position: 'relative',
-                      boxShadow: isToday ? '0 4px 16px rgba(16, 185, 129, 0.2)' : '0 2px 8px rgba(0, 0, 0, 0.05)',
-                      opacity: hasElderAssignment ? 1 : 0.6
+                      boxShadow: isToday 
+                        ? '0 8px 24px rgba(118, 75, 162, 0.35)' 
+                        : hasElderAssignment
+                          ? '0 4px 12px rgba(102, 126, 234, 0.08)'
+                          : '0 2px 6px rgba(0, 0, 0, 0.04)',
+                      opacity: hasElderAssignment ? 1 : 0.5,
+                      transform: 'scale(1)'
                     }}
                     onMouseEnter={(e) => {
                       if (hasElderAssignment) {
-                        e.currentTarget.style.transform = 'translateY(-2px)';
-                        e.currentTarget.style.boxShadow = '0 8px 24px rgba(102, 126, 234, 0.15)';
+                        e.currentTarget.style.transform = 'scale(1.05) translateY(-4px)';
+                        e.currentTarget.style.boxShadow = isToday
+                          ? '0 12px 36px rgba(118, 75, 162, 0.45)'
+                          : '0 12px 28px rgba(102, 126, 234, 0.18)';
                       }
                     }}
                     onMouseLeave={(e) => {
                       if (hasElderAssignment) {
-                        e.currentTarget.style.transform = 'translateY(0px)';
-                        e.currentTarget.style.boxShadow = isToday ? '0 4px 16px rgba(16, 185, 129, 0.2)' : '0 2px 8px rgba(0, 0, 0, 0.05)';
+                        e.currentTarget.style.transform = 'scale(1) translateY(0px)';
+                        e.currentTarget.style.boxShadow = isToday 
+                          ? '0 8px 24px rgba(118, 75, 162, 0.35)' 
+                          : hasElderAssignment
+                            ? '0 4px 12px rgba(102, 126, 234, 0.08)'
+                            : '0 2px 6px rgba(0, 0, 0, 0.04)';
                       }
                     }}
                   >
                     {isToday && (
                       <div style={{
                         position: 'absolute',
-                        top: '8px',
-                        right: '8px',
-                        backgroundColor: '#10b981',
-                        color: 'white',
+                        top: '10px',
+                        right: '10px',
+                        background: 'rgba(255, 255, 255, 0.95)',
+                        color: '#764ba2',
                         fontSize: '10px',
-                        fontWeight: 600,
-                        padding: '4px 8px',
-                        borderRadius: '12px'
+                        fontWeight: 700,
+                        padding: '5px 10px',
+                        borderRadius: '20px',
+                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+                        letterSpacing: '0.5px'
                       }}>
                         TODAY
                       </div>
                     )}
                     
                     <div style={{
-                      fontSize: '14px', 
-                      fontWeight: 600, 
-                      color: '#4a5568', 
-                      marginBottom: '8px',
-                      textTransform: 'uppercase'
+                      fontSize: '13px', 
+                      fontWeight: 700, 
+                      color: isToday ? 'rgba(255, 255, 255, 0.9)' : '#9ca3af', 
+                      marginBottom: '10px',
+                      textTransform: 'uppercase',
+                      letterSpacing: '1px'
                     }}>
                       {['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'][targetDate.getDay()]}
                     </div>
                     
                     <div style={{
-                      fontSize: '28px', 
-                      fontWeight: 700, 
-                      color: isToday ? '#065f46' : '#2d3748',
-                      marginBottom: '12px'
+                      fontSize: '32px', 
+                      fontWeight: 800, 
+                      color: isToday ? '#ffffff' : hasElderAssignment ? '#667eea' : '#9ca3af',
+                      marginBottom: '12px',
+                      textShadow: isToday ? '0 2px 4px rgba(0, 0, 0, 0.1)' : 'none'
                     }}>
                       {day}
                     </div>
                     
                     <div style={{
                       fontSize: '12px', 
-                      color: '#718096', 
+                      color: isToday ? 'rgba(255, 255, 255, 0.95)' : '#6b7280', 
                       marginBottom: '12px',
-                      fontWeight: 500,
-                      lineHeight: '1.3'
+                      fontWeight: 600,
+                      lineHeight: '1.4',
+                      maxWidth: '100%',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap'
                     }}>
                       {dayReport && dayReport.elder_name && dayReport.elder_name !== 'No care today' ? (
-                        <span style={{color: '#4a5568', fontWeight: 600}}>{dayReport.elder_name}</span>
+                        <span style={{
+                          color: isToday ? '#ffffff' : '#667eea', 
+                          fontWeight: 700,
+                          display: 'inline-block',
+                          padding: '2px 8px',
+                          background: isToday ? 'rgba(255, 255, 255, 0.2)' : 'rgba(102, 126, 234, 0.1)',
+                          borderRadius: '8px'
+                        }}>
+                          {dayReport.elder_name}
+                        </span>
                       ) : (
-                        <span style={{color: '#a0aec0', fontStyle: 'italic'}}>No care today</span>
+                        <span style={{
+                          color: isToday ? 'rgba(255, 255, 255, 0.7)' : '#cbd5e1', 
+                          fontStyle: 'italic',
+                          fontSize: '11px'
+                        }}>
+                          No care today
+                        </span>
                       )}
                     </div>
                     
                     {shouldShowStatus && (
                       <div style={{
-                        fontSize: '11px', 
-                        fontWeight: 600, 
+                        fontSize: '10px', 
+                        fontWeight: 700, 
                         color: hasReport ? '#065f46' : '#dc2626',
-                        backgroundColor: hasReport ? '#d1fae5' : '#fee2e2',
-                        padding: '6px 12px',
+                        background: hasReport 
+                          ? 'linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%)'
+                          : 'linear-gradient(135deg, #fee2e2 0%, #fecaca 100%)',
+                        padding: '7px 14px',
                         borderRadius: '20px',
                         textTransform: 'uppercase',
-                        letterSpacing: '0.5px',
-                        border: hasReport ? '1px solid #10b981' : '1px solid #f87171',
+                        letterSpacing: '0.8px',
+                        border: hasReport ? '2px solid #10b981' : '2px solid #f87171',
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '4px'
+                        gap: '5px',
+                        boxShadow: hasReport 
+                          ? '0 2px 8px rgba(16, 185, 129, 0.2)'
+                          : '0 2px 8px rgba(239, 68, 68, 0.2)'
                       }}>
                         {hasReport ? (
                           <>
-                            <span style={{fontSize: '10px'}}>📤</span>
+                            <span style={{fontSize: '12px'}}>✓</span>
                             Uploaded
                           </>
                         ) : (
                           <>
-                            <span style={{fontSize: '10px'}}>⚠️</span>
+                            <span style={{fontSize: '12px'}}>✗</span>
                             Not Uploaded
                           </>
                         )}
@@ -527,21 +624,22 @@ const Carelogs = () => {
                     
                     {hasElderAssignment && isFuture && (
                       <div style={{
-                        fontSize: '11px', 
-                        fontWeight: 500, 
-                        color: '#6b7280',
-                        backgroundColor: '#f9fafb',
-                        padding: '6px 12px',
+                        fontSize: '10px', 
+                        fontWeight: 700, 
+                        color: '#667eea',
+                        background: 'linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%)',
+                        padding: '7px 14px',
                         borderRadius: '20px',
                         textTransform: 'uppercase',
-                        letterSpacing: '0.5px',
-                        border: '1px solid #d1d5db',
+                        letterSpacing: '0.8px',
+                        border: '2px solid #c7d2fe',
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '4px'
+                        gap: '5px',
+                        boxShadow: '0 2px 8px rgba(102, 126, 234, 0.15)'
                       }}>
-                        <span style={{fontSize: '10px'}}>⏳</span>
-                        Future care
+                        <span style={{fontSize: '12px'}}>⏰</span>
+                        Scheduled
                       </div>
                     )}
                   </div>
@@ -582,3 +680,4 @@ const Carelogs = () => {
 };
 
 export default Carelogs;
+

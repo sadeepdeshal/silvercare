@@ -598,11 +598,17 @@ const getElderDetails = async (req, res) => {
         u.email as family_email,
         u.phone as family_phone,
         fm.address as family_address,
-        fm.phone_fixed as family_phone_fixed
+        fm.phone_fixed as family_phone_fixed,
+        cr.start_date,
+        cr.end_date,
+        cr.status as assignment_status
       FROM elder e
       JOIN familymember fm ON e.family_id = fm.family_id
       JOIN "User" u ON fm.user_id = u.user_id
-      WHERE e.elder_id = $1;
+      LEFT JOIN carerequest cr ON e.elder_id = cr.elder_id
+      WHERE e.elder_id = $1
+      ORDER BY cr.start_date DESC
+      LIMIT 1;
     `;
     
     console.log('Backend: Executing query:', query);
@@ -632,7 +638,10 @@ const getElderDetails = async (req, res) => {
       profile_photo: data.profile_photo,
       email: data.email,
       district: data.district,
-      created_at: data.created_at
+      created_at: data.created_at,
+      start_date: data.start_date,
+      end_date: data.end_date,
+      assignment_status: data.assignment_status
     };
     
     const familyMember = {

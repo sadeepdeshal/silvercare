@@ -193,13 +193,21 @@ const ElderPage = () => {
             <button onClick={() => navigate('/caregiver/dashboard')} className={styles.backButton}>
               ← Back to Dashboard
             </button>
-            <h1>Elder Care Management</h1>
-            <button 
-              className={styles.addReportButton}
-              onClick={() => setShowReportModal(true)}
-            >
-              📝 Add Daily Report
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+              
+              <h1 style={{
+                fontSize: '2rem',
+                fontWeight: 700,
+                margin: 0,
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text'
+              }}>
+                Elder Care Management
+              </h1>
+            </div>
+          
           </div>
 
           <div className={styles.contentGrid}>
@@ -296,122 +304,357 @@ const ElderPage = () => {
             )}
           </div>
 
-          {/* Daily Reports Section */}
+          {/* Carelog Calendar Section */}
           <div className={styles.reportsSection}>
             <div className={styles.sectionHeader}>
-              <h2>Daily Care Reports</h2>
-              <span className={styles.reportCount}>{filteredCarelogs.length} reports</span>
+              <h2>Carelogs</h2>
             </div>
-
-            {/* Filter Controls */}
-            <div className={styles.filterControls}>
-              <div className={styles.filterGroup}>
-                <label>Filter by Month:</label>
-                <select
-                  className={styles.filterSelect}
-                  value={filterMonthDropdown}
-                  onChange={e => {
-                    setFilterMonthDropdown(e.target.value);
-                    setFilterMonth(''); // clear manual input if dropdown used
-                  }}
-                >
-                  <option value="">-- Select Month --</option>
-                  {getMonthsList().map(m => (
-                    <option key={m.value} value={m.value}>{m.label}</option>
-                  ))}
-                </select>
-              </div>
-              
-              <div className={styles.filterGroup}>
-                <label>Year (optional):</label>
-                <input
-                  type="number"
-                  className={styles.filterInput}
-                  placeholder="e.g. 2025"
-                  min="1900"
-                  max="2100"
-                  value={filterYear === '1989' ? '' : filterYear}
-                  autoComplete="off"
-                  onChange={e => setFilterYear(e.target.value.replace(/[^0-9]/g, '').slice(0, 4))}
-                />
-              </div>
-              <div className={styles.filterGroup}>
-                <label>Filter by Date:</label>
-                <input
-                  type="date"
-                  className={styles.filterInput}
-                  value={filterDate}
-                  onChange={e => setFilterDate(e.target.value)}
-                />
-              </div>
-              <button
-                type="button"
-                className={styles.clearFilterBtn}
-                onClick={() => { setFilterMonth(''); setFilterMonthDropdown(''); setFilterYear(''); setFilterDate(''); }}
+            {/* Month Navigation */}
+            <div style={{
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              borderRadius: '16px',
+              padding: '20px',
+              marginBottom: '24px',
+              boxShadow: '0 4px 15px rgba(102, 126, 234, 0.3)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '16px'
+            }}>
+              <button 
+                onClick={() => {
+                  const newMonth = filterMonth === '' ? new Date().getMonth() - 1 : parseInt(filterMonth) - 1;
+                  const newYear = filterYear === '' ? new Date().getFullYear() : parseInt(filterYear);
+                  
+                  if (newMonth < 0) {
+                    setFilterMonth('11');
+                    setFilterYear((newYear - 1).toString());
+                  } else {
+                    setFilterMonth(newMonth.toString());
+                    setFilterYear(newYear.toString());
+                  }
+                }}
+                style={{
+                  background: 'rgba(255, 255, 255, 0.2)',
+                  color: 'white',
+                  border: '2px solid rgba(255, 255, 255, 0.3)',
+                  borderRadius: '10px',
+                  padding: '10px 18px',
+                  fontSize: '18px',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  backdropFilter: 'blur(10px)'
+                }}
+                onMouseEnter={(e) => e.target.style.background = 'rgba(255, 255, 255, 0.3)'}
+                onMouseLeave={(e) => e.target.style.background = 'rgba(255, 255, 255, 0.2)'}
               >
-                Clear Filters
+                ←
+              </button>
+              
+              <select
+                value={filterMonth === '' ? new Date().getMonth().toString() : filterMonth}
+                onChange={(e) => setFilterMonth(e.target.value)}
+                style={{
+                  padding: '10px 16px',
+                  fontSize: '15px',
+                  fontWeight: 600,
+                  border: '2px solid rgba(255, 255, 255, 0.3)',
+                  borderRadius: '10px',
+                  background: 'rgba(255, 255, 255, 0.95)',
+                  color: '#667eea',
+                  cursor: 'pointer',
+                  minWidth: '140px',
+                  transition: 'all 0.3s ease',
+                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+                  outline: 'none'
+                }}
+              >
+                {getMonthsList().map((month, index) => (
+                  <option key={index} value={index.toString()}>
+                    {month.label}
+                  </option>
+                ))}
+              </select>
+              
+              <select
+                value={filterYear === '' ? new Date().getFullYear().toString() : filterYear}
+                onChange={(e) => setFilterYear(e.target.value)}
+                style={{
+                  padding: '10px 14px',
+                  fontSize: '15px',
+                  fontWeight: 600,
+                  border: '2px solid rgba(255, 255, 255, 0.3)',
+                  borderRadius: '10px',
+                  background: 'rgba(255, 255, 255, 0.95)',
+                  color: '#764ba2',
+                  cursor: 'pointer',
+                  width: '100px',
+                  height: '42px',
+                  transition: 'all 0.3s ease',
+                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+                  outline: 'none'
+                }}
+              >
+                {Array.from({ length: 26 }, (_, i) => 2015 + i).map(year => (
+                  <option key={year} value={year.toString()}>
+                    {year}
+                  </option>
+                ))}
+              </select>
+              
+              <button 
+                onClick={() => {
+                  const newMonth = filterMonth === '' ? new Date().getMonth() + 1 : parseInt(filterMonth) + 1;
+                  const newYear = filterYear === '' ? new Date().getFullYear() : parseInt(filterYear);
+                  
+                  if (newMonth > 11) {
+                    setFilterMonth('0');
+                    setFilterYear((newYear + 1).toString());
+                  } else {
+                    setFilterMonth(newMonth.toString());
+                    setFilterYear(newYear.toString());
+                  }
+                }}
+                style={{
+                  background: 'rgba(255, 255, 255, 0.2)',
+                  color: 'white',
+                  border: '2px solid rgba(255, 255, 255, 0.3)',
+                  borderRadius: '10px',
+                  padding: '10px 18px',
+                  fontSize: '18px',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  backdropFilter: 'blur(10px)'
+                }}
+                onMouseEnter={(e) => e.target.style.background = 'rgba(255, 255, 255, 0.3)'}
+                onMouseLeave={(e) => e.target.style.background = 'rgba(255, 255, 255, 0.2)'}
+              >
+                →
               </button>
             </div>
 
-            <div className={styles.reportsList}>
-              {filteredCarelogs.length === 0 ? (
-                <div className={styles.noReports}>
-                  <span style={{fontSize: '2.5rem', marginBottom: '12px'}}>📋</span>
-                  <span style={{color: '#667eea', fontWeight: 600, fontSize: '1.2rem'}}>No Reports Yet</span>
-                  <span style={{color: '#718096', fontSize: '1rem', marginTop: '8px'}}>Start documenting daily care by adding your first report.</span>
-                </div>
-              ) : (
-                filteredCarelogs.map(report => (
-                  <div key={report.carelog_id} className={styles.reportCard}>
-                    <div className={styles.reportHeader}>
-                      <span className={styles.reportDate}>
-                        {new Date(report.date).toLocaleDateString('en-US', {
-                          weekday: 'long',
-                          year: 'numeric',
-                          month: 'long',
-                          day: 'numeric'
-                        })}
-                      </span>
-                      <span className={`${styles.moodBadge} ${styles[report.mood]}`}>
-                        {report.mood === 'good' && '😊'} 
-                        {report.mood === 'neutral' && '😐'} 
-                        {report.mood === 'bad' && '😞'} 
-                        {report.mood}
-                      </span>
-                    </div>
-                    <div className={styles.reportContent}>
-                      <div className={styles.reportField}>
-                        <strong>General Notes:</strong>
-                        <p>{report.notes}</p>
+            {/* Calendar Grid */}
+            <div style={{
+              background: 'linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%)',
+              borderRadius: '24px',
+              padding: '36px',
+              boxShadow: '0 8px 32px rgba(102, 126, 234, 0.12)',
+              border: '1px solid rgba(102, 126, 234, 0.1)'
+            }}>
+              <div style={{display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '20px'}}>
+                {(() => {
+                  const displayMonth = filterMonth === '' ? new Date().getMonth() : parseInt(filterMonth);
+                  const displayYear = filterYear === '' ? new Date().getFullYear() : parseInt(filterYear);
+                  const daysInMonth = new Date(displayYear, displayMonth + 1, 0).getDate();
+                  const today = new Date();
+                  today.setHours(0, 0, 0, 0);
+                  
+                  // Get assignment date range
+                  const assignmentStart = elder.start_date ? new Date(elder.start_date) : null;
+                  const assignmentEnd = elder.end_date ? new Date(elder.end_date) : null;
+                  
+                  if (assignmentStart) assignmentStart.setHours(0, 0, 0, 0);
+                  if (assignmentEnd) assignmentEnd.setHours(0, 0, 0, 0);
+                  
+                  const calendarDays = [];
+                  for (let day = 1; day <= daysInMonth; day++) {
+                    const targetDate = new Date(displayYear, displayMonth, day);
+                    targetDate.setHours(0, 0, 0, 0);
+                    
+                    // Only include dates within assignment period
+                    if (assignmentStart && assignmentEnd) {
+                      if (targetDate >= assignmentStart && targetDate <= assignmentEnd) {
+                        calendarDays.push(day);
+                      }
+                    } else {
+                      calendarDays.push(day);
+                    }
+                  }
+                  
+                  return calendarDays.map((day, index) => {
+                    const targetDate = new Date(displayYear, displayMonth, day);
+                    targetDate.setHours(0, 0, 0, 0);
+                    
+                    const dateStr = `${displayYear}-${String(displayMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                    const dayReport = carelogs.find(report => {
+                      if (!report.date) return false;
+                      const reportDate = new Date(report.date).toISOString().split('T')[0];
+                      return reportDate === dateStr;
+                    });
+                    
+                    const isToday = targetDate.getTime() === today.getTime();
+                    const isPast = targetDate < today;
+                    const hasReport = dayReport && dayReport.carelog_id;
+                    
+                    return (
+                      <div
+                        key={index}
+                        onClick={() => {
+                          if (hasReport) {
+                            // Show report details
+                            alert(`Report for ${dateStr}:\n\nMood: ${dayReport.mood}\n\nNotes: ${dayReport.notes}\n\nHealth: ${dayReport.health_status || 'N/A'}\n\nActivities: ${dayReport.activities || 'N/A'}\n\nConcerns: ${dayReport.concerns || 'N/A'}`);
+                          } else if (isToday) {
+                            // Open modal to submit report for today
+                            setShowReportModal(true);
+                          }
+                        }}
+                        style={{
+                          background: isToday 
+                            ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' 
+                            : hasReport
+                              ? 'linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%)'
+                              : 'linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%)',
+                          border: isToday 
+                            ? '3px solid #764ba2' 
+                            : hasReport
+                              ? '2px solid #10b981' 
+                              : '2px solid #e5e7eb',
+                          borderRadius: '20px',
+                          padding: '20px 16px',
+                          cursor: (hasReport || isToday) ? 'pointer' : 'default',
+                          transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                          minHeight: '120px',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          textAlign: 'center',
+                          position: 'relative',
+                          boxShadow: isToday 
+                            ? '0 8px 24px rgba(118, 75, 162, 0.35)' 
+                            : hasReport
+                              ? '0 4px 12px rgba(16, 185, 129, 0.15)'
+                              : '0 2px 6px rgba(0, 0, 0, 0.04)',
+                          opacity: (hasReport || isToday) ? 1 : 0.5,
+                          transform: 'scale(1)'
+                        }}
+                        onMouseEnter={(e) => {
+                          if (hasReport || isToday) {
+                            e.currentTarget.style.transform = 'scale(1.05) translateY(-4px)';
+                            e.currentTarget.style.boxShadow = isToday 
+                              ? '0 12px 32px rgba(118, 75, 162, 0.45)' 
+                              : '0 12px 28px rgba(16, 185, 129, 0.25)';
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          if (hasReport || isToday) {
+                            e.currentTarget.style.transform = 'scale(1) translateY(0px)';
+                            e.currentTarget.style.boxShadow = isToday 
+                              ? '0 8px 24px rgba(118, 75, 162, 0.35)' 
+                              : '0 4px 12px rgba(16, 185, 129, 0.15)';
+                          }
+                        }}
+                      >
+                        {isToday && (
+                          <div style={{
+                            position: 'absolute',
+                            top: '10px',
+                            right: '10px',
+                            background: 'rgba(255, 255, 255, 0.95)',
+                            color: '#764ba2',
+                            fontSize: '10px',
+                            fontWeight: 700,
+                            padding: '5px 10px',
+                            borderRadius: '20px',
+                            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+                            letterSpacing: '0.5px'
+                          }}>
+                            TODAY
+                          </div>
+                        )}
+                        
+                        <div style={{
+                          fontSize: '13px', 
+                          fontWeight: 700, 
+                          color: isToday ? 'rgba(255, 255, 255, 0.9)' : '#9ca3af', 
+                          marginBottom: '10px',
+                          textTransform: 'uppercase',
+                          letterSpacing: '1px'
+                        }}>
+                          {['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'][targetDate.getDay()]}
+                        </div>
+                        
+                        <div style={{
+                          fontSize: '32px', 
+                          fontWeight: 800, 
+                          color: isToday ? '#ffffff' : hasReport ? '#10b981' : '#9ca3af',
+                          marginBottom: '12px',
+                          textShadow: isToday ? '0 2px 4px rgba(0, 0, 0, 0.1)' : 'none'
+                        }}>
+                          {day}
+                        </div>
+                        
+                        {hasReport && (
+                          <div style={{
+                            fontSize: '10px', 
+                            fontWeight: 700, 
+                            color: '#065f46',
+                            background: 'linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%)',
+                            padding: '7px 14px',
+                            borderRadius: '20px',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.8px',
+                            border: '2px solid #10b981',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '5px',
+                            boxShadow: '0 2px 8px rgba(16, 185, 129, 0.2)'
+                          }}>
+                            <span style={{fontSize: '12px'}}>✓</span>
+                            {dayReport.mood === 'good' && '😊'}
+                            {dayReport.mood === 'neutral' && '😐'}
+                            {dayReport.mood === 'bad' && '😞'}
+                          </div>
+                        )}
+                        
+                        {!hasReport && isToday && (
+                          <div style={{
+                            fontSize: '10px', 
+                            fontWeight: 700, 
+                            color: '#ffffff',
+                            background: 'rgba(255, 255, 255, 0.25)',
+                            padding: '7px 14px',
+                            borderRadius: '20px',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.8px',
+                            border: '2px solid rgba(255, 255, 255, 0.5)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '5px',
+                            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)'
+                          }}>
+                            <span style={{fontSize: '12px'}}>+</span>
+                            Submit
+                          </div>
+                        )}
+                        
+                        {!hasReport && !isToday && isPast && (
+                          <div style={{
+                            fontSize: '10px', 
+                            fontWeight: 700, 
+                            color: '#dc2626',
+                            background: 'linear-gradient(135deg, #fee2e2 0%, #fecaca 100%)',
+                            padding: '7px 14px',
+                            borderRadius: '20px',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.8px',
+                            border: '2px solid #f87171',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '5px',
+                            boxShadow: '0 2px 8px rgba(239, 68, 68, 0.2)'
+                          }}>
+                            <span style={{fontSize: '12px'}}>✗</span>
+                            Missed
+                          </div>
+                        )}
                       </div>
-                      {report.health_status && (
-                        <div className={styles.reportField}>
-                          <strong>Health Status:</strong>
-                          <p>{report.health_status}</p>
-                        </div>
-                      )}
-                      {report.medications_given && (
-                        <div className={styles.reportField}>
-                          <strong>Medications Given:</strong>
-                          <p>{report.medications_given}</p>
-                        </div>
-                      )}
-                      {report.activities && (
-                        <div className={styles.reportField}>
-                          <strong>Activities:</strong>
-                          <p>{report.activities}</p>
-                        </div>
-                      )}
-                      {report.concerns && (
-                        <div className={styles.reportField}>
-                          <strong>Concerns:</strong>
-                          <p>{report.concerns}</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))
-              )}
+                    );
+                  });
+                })()}
+              </div>
             </div>
           </div>
 
@@ -420,7 +663,7 @@ const ElderPage = () => {
             <div className={styles.modalOverlay} onClick={() => setShowReportModal(false)}>
               <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
                 <div className={styles.modalHeader}>
-                  <h2>Add Daily Report for {elder.name}</h2>
+                  <h2>Add Carelog for {elder.name}</h2>
                   <button 
                     className={styles.closeButton}
                     onClick={() => setShowReportModal(false)}
