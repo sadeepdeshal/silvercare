@@ -215,7 +215,6 @@
 .submenuLink.active {
   background: #10B981; /* Green background for active submenu */
   color: white;
-  border-left: 3px solid #065F46;
 }
 
 .submenuLabel {
