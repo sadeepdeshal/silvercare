@@ -38,6 +38,7 @@ import PaymentSuccess from './pages/familemember/payment-success';
 
 import AllAppointments from "./pages/elder/appointments";
 import AppointmentDetails from "./pages/elder/appointment-details";
+import ProfessionalAppointmentDetails from "./pages/healthproffesional/appointments";
 import AllSessions from "./pages/elder/sessions";
 import SessionDetails from "./pages/elder/session-details";
 
@@ -56,6 +57,7 @@ import CaregiverProfile from "./pages/familemember/profile";
 import FamilyMemberProfile from "./pages/familemember/profile";
 import HealthProfessionalProfile from "./pages/healthproffesional/profile";
 import ElderProfile from "./pages/elder/profile";
+import AllElderDetails  from "./pages/elder/elder-details";
 
 // Import admin related
 import AdminUsers from "./pages/admin/users";
@@ -389,6 +391,22 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={["elder"]}>
                 <ElderDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/healthprofessional/elders"
+            element={
+              <ProtectedRoute>
+                <AllElderDetails/>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/healthprofessional/sessions"
+            element={
+              <ProtectedRoute>
+                <ProfessionalAppointmentDetails/>
               </ProtectedRoute>
             }
           />
