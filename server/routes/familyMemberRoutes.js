@@ -24,4 +24,10 @@ router.get('/:userId/elder/:elderId/carelog', familyMemberController.getElderCar
 // Get carelog status for date range (for calendar display)
 router.get('/:userId/elder/:elderId/carelog-status', familyMemberController.getElderCarelogStatus);
 
+// Get upcoming sessions for family member's elders
+router.get('/:userId/sessions/upcoming', familyMemberController.getUpcomingSessions);
+
+// Get upcoming care visits for family member's elders
+router.get('/:userId/care-visits/upcoming', familyMemberController.getUpcomingCareVisits);
+
 module.exports = router;

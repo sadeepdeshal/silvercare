@@ -343,10 +343,147 @@ const getAppointmentStatistics = async (req, res) => {
   }
 };
 
+// Get upcoming sessions for family member's elders
+const getUpcomingSessions = async (req, res) => {
+  const { userId } = req.params;
+  
+  try {
+    console.log('Fetching upcoming sessions for family member:', userId);
+    
+    // First, get the family_id from user_id
+    const familyResult = await pool.query(`
+      SELECT family_id FROM familymember WHERE user_id = $1
+    `, [userId]);
+    
+    if (familyResult.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: 'Family member not found'
+      });
+    }
+    
+    const familyId = familyResult.rows[0].family_id;
+    
+    const today = new Date();
+    
+    // Get upcoming counseling sessions for all elders in this family
+    const result = await pool.query(`
+      SELECT 
+        ca.appointment_id,
+        ca.elder_id,
+        ca.counselor_id,
+        ca.date_time,
+        ca.appointment_type,
+        ca.status,
+        ca.meeting_link,
+        ca.notes,
+        e.name as elder_name,
+        c.counselor_id as counselor_user_id,
+        u.name as counselor_name,
+        u.email as counselor_email,
+        u.phone as counselor_phone,
+        c.specialization,
+        c.district as counselor_district
+      FROM counselor_appointment ca
+      INNER JOIN elder e ON ca.elder_id = e.elder_id
+      INNER JOIN counselor c ON ca.counselor_id = c.counselor_id
+      INNER JOIN "User" u ON c.user_id = u.user_id
+      WHERE e.family_id = $1 
+        AND ca.date_time > $2
+        AND ca.status IN ('pending', 'confirmed', 'approved')
+      ORDER BY ca.date_time ASC
+      LIMIT 10
+    `, [familyId, today]);
+    
+    res.json({
+      success: true,
+      sessions: result.rows,
+      count: result.rows.length
+    });
+    
+  } catch (err) {
+    console.error('Error fetching upcoming sessions:', err);
+    res.status(500).json({ 
+      success: false,
+      error: 'Error fetching upcoming sessions' 
+    });
+  }
+};
+
+// Get upcoming care visits for family member's elders
+const getUpcomingCareVisits = async (req, res) => {
+  const { userId } = req.params;
+  
+  try {
+    console.log('Fetching upcoming care visits for family member:', userId);
+    
+    // First, get the family_id from user_id
+    const familyResult = await pool.query(`
+      SELECT family_id FROM familymember WHERE user_id = $1
+    `, [userId]);
+    
+    if (familyResult.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: 'Family member not found'
+      });
+    }
+    
+    const familyId = familyResult.rows[0].family_id;
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    // Get upcoming care visits for all elders in this family
+    const result = await pool.query(`
+      SELECT 
+        cr.request_id,
+        cr.caregiver_id,
+        cr.elder_id,
+        cr.start_date,
+        cr.end_date,
+        cr.status,
+        cr.duration,
+        e.name as elder_name,
+        u.name as caregiver_name,
+        u.email as caregiver_email,
+        u.phone as caregiver_phone,
+        c.certifications,
+        c.fixed_line as caregiver_fixed_line,
+        c.district as caregiver_district,
+        c.availability
+      FROM carerequest cr
+      INNER JOIN elder e ON cr.elder_id = e.elder_id
+      INNER JOIN caregiver c ON cr.caregiver_id = c.caregiver_id
+      INNER JOIN "User" u ON c.user_id = u.user_id
+      WHERE e.family_id = $1 
+        AND cr.status IN ('approved', 'completed', 'confirmed')
+        AND cr.end_date >= $2
+      ORDER BY cr.start_date ASC
+      LIMIT 10
+    `, [familyId, today]);
+    
+    res.json({
+      success: true,
+      careVisits: result.rows,
+      count: result.rows.length
+    });
+    
+  } catch (err) {
+    console.error('Error fetching upcoming care visits:', err);
+    res.status(500).json({ 
+      success: false,
+      error: 'Error fetching upcoming care visits' 
+    });
+  }
+};
+
 module.exports = {
   getFamilyMemberDetails,
   updateFamilyMemberDetails,
   getAppointmentStatistics,
   getElderCarelogByDate,
-  getElderCarelogStatus
+  getElderCarelogStatus,
+  getUpcomingSessions,
+  getUpcomingCareVisits
 };

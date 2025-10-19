@@ -88,5 +88,37 @@ export const familyMemberApi = {
         carelogStatus: []
       };
     }
+  },
+
+  // Get upcoming sessions for family member's elders
+  getUpcomingSessions: async (userId) => {
+    try {
+      const response = await axios.get(`${API_BASE}/family-member/${userId}/sessions/upcoming`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching upcoming sessions:', error);
+      return {
+        success: false,
+        message: error.message || 'Failed to fetch upcoming sessions',
+        sessions: [],
+        count: 0
+      };
+    }
+  },
+
+  // Get upcoming care visits for family member's elders
+  getUpcomingCareVisits: async (userId) => {
+    try {
+      const response = await axios.get(`${API_BASE}/family-member/${userId}/care-visits/upcoming`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching upcoming care visits:', error);
+      return {
+        success: false,
+        message: error.message || 'Failed to fetch upcoming care visits',
+        careVisits: [],
+        count: 0
+      };
+    }
   }
 };
