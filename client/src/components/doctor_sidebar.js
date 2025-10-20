@@ -161,6 +161,9 @@ const DoctorSidebar = ({ onItemClick, onToggleCollapse }) => {
       case 'consultation-history':
         navigate('/doctor/consultation-history');
         break;
+      case 'reports':
+        navigate('/doctor/reports');
+        break;
       case 'profile-settings':
         navigate('/doctor/profile');
         break;
@@ -243,6 +246,12 @@ const DoctorSidebar = ({ onItemClick, onToggleCollapse }) => {
         { key: 'virtual-consultations', label: 'Virtual Consultations', path: '/doctor/virtual-consultations' },
         { key: 'consultation-history', label: 'History', path: '/doctor/consultation-history' }
       ]
+    },
+    {
+      key: 'reports',
+      label: 'Reports',
+      icon: '📊',
+      path: '/doctor/reports'
     },
     {
       key: 'settings',
