@@ -1,44 +1,51 @@
 /* General Styles */
-body {
-    /* padding-top: 0px; */
-}
-
 .landingPage {
   background: #f9fafb;
   min-height: 100vh;
   color: #1a2e35;
 }
 
-/* Navigation Bar */
+/* Navigation Bar - Using shared navbar styles */
 .navbar {
-  background: #ffffff;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  position: sticky;
+  background: white;
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
   z-index: 1000;
-  padding: 1rem 0;
+  backdrop-filter: blur(10px);
 }
 
 .navContainer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  max-width: 1280px;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 0 1.5rem;
-  height: 80px;
+  padding: 0 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 70px;
 }
 
 .navLogo {
   display: flex;
   align-items: center;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.navLogo:hover {
+  transform: scale(1.05);
 }
 
 .logoImage {
-  height: 60px;
+  height: 260px;
   width: auto;
+  max-width: 250px;
   object-fit: contain;
+  display: block;
   transition: transform 0.3s ease;
+  margin-left: -200px;
 }
 
 .logoImage:hover {
@@ -48,72 +55,65 @@ body {
 .navLinks {
   display: flex;
   align-items: center;
-  gap: 2rem;
+  gap: 40px;
+  margin-left: auto;
+  margin-right: 20px;
 }
 
 .navLink {
-  background: none;
-  border: none;
-  color: #1a2e35;
-  font-size: 1.1rem;
+  color: black;
+  font-size: 16px;
   font-weight: 500;
   cursor: pointer;
-  padding: 0.5rem 1rem;
+  padding: 8px 16px;
+  border-radius: 25px;
+  transition: all 0.3s ease;
   position: relative;
-  transition: color 0.3s ease;
-}
-
-.navLink::after {
-  content: '';
-  position: absolute;
-  bottom: -2px;
-  left: 0;
-  width: 0;
-  height: 2px;
-  background: #2b6cb0;
-  transition: width 0.3s ease;
-}
-
-.navLink:hover::after {
-  width: 100%;
+  text-decoration: none;
+  background: none;
+  border: none;
 }
 
 .navLink:hover {
-  color: #2b6cb0;
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
 }
 
 .loginBtn {
-  background: transparent;
-  border: 2px solid #2b6cb0;
-  color: #2b6cb0;
+  background: black;
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  padding: 10px 25px;
   border-radius: 25px;
-  padding: 0.6rem 1.5rem;
-  font-size: 1rem;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
 }
 
 .loginBtn:hover {
-  background: #2b6cb0;
-  color: #ffffff;
+  background: #333;
+  transform: translateY(-2px);
 }
 
 .getStartedBtn {
-  background: #2b6cb0;
-  color: #ffffff;
+  background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+  color: white;
   border: none;
+  padding: 12px 30px;
   border-radius: 25px;
-  padding: 0.6rem 1.5rem;
-  font-size: 1rem;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(238, 90, 36, 0.3);
 }
 
 .getStartedBtn:hover {
-  background: #1c4e80;
+  background: linear-gradient(135deg, #ee5a24, #ff6b6b);
   transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(238, 90, 36, 0.4);
 }
 
 /* Hero Section */
@@ -122,7 +122,7 @@ body {
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  padding: 100px 0;
+  padding: 170px 0 100px 0; /* Add top padding for fixed navbar */
   color: #ffffff;
 }
 
@@ -643,15 +643,34 @@ body {
 
 @media (max-width: 768px) {
   .navContainer {
-    flex-direction: column;
-    height: auto;
-    padding: 1rem;
+    padding: 0 15px;
+    height: 60px;
+  }
+
+  .logoImage {
+    height: 45px;
+    max-width: 180px;
+    margin-left: 0;
   }
 
   .navLinks {
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 1rem;
+    gap: 15px;
+    margin-right: 10px;
+  }
+
+  .navLink {
+    font-size: 14px;
+    padding: 6px 12px;
+  }
+
+  .loginBtn,
+  .getStartedBtn {
+    font-size: 12px;
+    padding: 8px 20px;
+  }
+
+  .hero {
+    padding: 120px 0 80px 0; /* Adjust for mobile navbar height */
   }
 
   .heroTitle {
@@ -682,6 +701,46 @@ body {
   .footerContent {
     grid-template-columns: 1fr;
     text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .logoImage {
+    height: 40px;
+    max-width: 160px;
+  }
+
+  .navLinks {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .hero {
+    padding: 100px 0 60px 0;
+  }
+
+  .heroTitle {
+    font-size: 1.8rem;
+  }
+
+  .sectionTitle {
+    font-size: 1.8rem;
+  }
+
+  .testimonialCard {
+    padding: 1.5rem;
+  }
+
+  .testimonialText {
+    font-size: 1rem;
+  }
+
+  .aboutContent {
+    padding: 1rem;
+  }
+
+  .aboutText {
+    font-size: 1rem;
   }
 }
 

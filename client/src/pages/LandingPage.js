@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import styles from './LandingPage.module.css';
 import logoSilver from '../components/images/logo_silver.png';
 import familyMemberIcon from '../components/images/family-member1.png';
@@ -9,6 +10,7 @@ import aboutImage from '../components/images/banner.jpg';
 
 const LandingPage = () => {
   const navigate = useNavigate();
+  const { currentUser, isAuthenticated } = useAuth();
   const [currentSlide, setCurrentSlide] = useState(0);
 
   const features = [
@@ -28,6 +30,46 @@ const LandingPage = () => {
       description: 'Manage professional profiles, approve appointments, and provide medical advice.'
     },
   ];
+
+  const handleDashboardNavigation = () => {
+    console.log('Navigation clicked - Auth state:', { isAuthenticated, currentUser });
+    
+    if (isAuthenticated && currentUser) {
+      console.log('User role:', currentUser.role);
+      switch (currentUser.role) {
+        case 'elder':
+          console.log('Navigating to elder dashboard');
+          navigate('/elder/dashboard');
+          break;
+        case 'family_member':
+          console.log('Navigating to family member dashboard');
+          navigate('/family-member/dashboard');
+          break;
+        case 'healthprofessional':
+          console.log('Navigating to health professional dashboard');
+          navigate('/healthprofessional/dashboard');
+          break;
+        case 'caregiver':
+          console.log('Navigating to caregiver dashboard');
+          navigate('/caregiver/dashboard');
+          break;
+        case 'doctor':
+          console.log('Navigating to doctor dashboard');
+          navigate('/doctor/dashboard');
+          break;
+        case 'admin':
+          console.log('Navigating to admin dashboard');
+          navigate('/admin/dashboard');
+          break;
+        default:
+          console.log('Unknown role, navigating to login');
+          navigate('/login');
+      }
+    } else {
+      console.log('Not authenticated, navigating to login');
+      navigate('/login');
+    }
+  };
 
   const testimonials = [
     {
@@ -94,12 +136,20 @@ const LandingPage = () => {
             <button onClick={() => scrollToSection('testimonials')} className={styles.navLink}>
               Testimonials
             </button>
-            <button onClick={handleLogin} className={styles.loginBtn}>
-              Login
-            </button>
-            <button onClick={handleGetStarted} className={styles.getStartedBtn}>
-              Get Started
-            </button>
+            {isAuthenticated ? (
+              <button onClick={handleDashboardNavigation} className={styles.loginBtn}>
+                Dashboard
+              </button>
+            ) : (
+              <>
+                <button onClick={handleLogin} className={styles.loginBtn}>
+                  Login
+                </button>
+                <button onClick={handleGetStarted} className={styles.getStartedBtn}>
+                  Get Started
+                </button>
+              </>
+            )}
           </div>
         </div>
       </nav>
@@ -113,16 +163,32 @@ const LandingPage = () => {
               <span className={styles.highlight}> Management Platform</span>
             </h1>
             <p className={styles.heroSubtitle}>
-              Connect senior citizens with family members, doctors, caregivers, and mental health professionals.
-              Ensuring safety, comfort, and dignity for the elderly across Sri Lanka.
+              {isAuthenticated 
+                ? `Welcome back! Access your personalized dashboard to manage your elder care needs.`
+                : `Connect senior citizens with family members, doctors, caregivers, and mental health professionals.
+                  Ensuring safety, comfort, and dignity for the elderly across Sri Lanka.`
+              }
             </p>
             <div className={styles.heroButtons}>
-              <button onClick={handleGetStarted} className={styles.primaryBtn}>
-                Get Started Today
-              </button>
-              <button onClick={() => scrollToSection('features')} className={styles.secondaryBtn}>
-                Learn More
-              </button>
+              {isAuthenticated ? (
+                <>
+                  <button onClick={handleDashboardNavigation} className={styles.primaryBtn}>
+                    Go to Dashboard
+                  </button>
+                  <button onClick={() => scrollToSection('features')} className={styles.secondaryBtn}>
+                    Learn More
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button onClick={handleGetStarted} className={styles.primaryBtn}>
+                    Get Started Today
+                  </button>
+                  <button onClick={() => scrollToSection('features')} className={styles.secondaryBtn}>
+                    Learn More
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -230,17 +296,30 @@ const LandingPage = () => {
       <section className={styles.cta}>
         <div className={styles.container}>
           <div className={styles.ctaContent}>
-            <h2 className={styles.ctaTitle}>Ready to Get Started?</h2>
+            <h2 className={styles.ctaTitle}>
+              {isAuthenticated ? 'Welcome to SilverCare!' : 'Ready to Get Started?'}
+            </h2>
             <p className={styles.ctaSubtitle}>
-              Join thousands of families who trust SilverCare for their elder care needs
+              {isAuthenticated 
+                ? 'Access your personalized dashboard to manage all your elder care needs'
+                : 'Join thousands of families who trust SilverCare for their elder care needs'
+              }
             </p>
             <div className={styles.ctaButtons}>
-              <button onClick={handleGetStarted} className={styles.ctaPrimaryBtn}>
-                Register Now
-              </button>
-              <button onClick={handleLogin} className={styles.ctaSecondaryBtn}>
-                Sign In
-              </button>
+              {isAuthenticated ? (
+                <button onClick={handleDashboardNavigation} className={styles.ctaPrimaryBtn}>
+                  Go to My Dashboard
+                </button>
+              ) : (
+                <>
+                  <button onClick={handleGetStarted} className={styles.ctaPrimaryBtn}>
+                    Register Now
+                  </button>
+                  <button onClick={handleLogin} className={styles.ctaSecondaryBtn}>
+                    Sign In
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>

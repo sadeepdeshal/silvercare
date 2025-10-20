@@ -1,22 +1,22 @@
 .container {
   min-height: 100vh;
-  background-color: #f8fafc;
+  background-color: #ffffff;
 }
 
 .content {
-  max-width: 800px;
+  max-width: 900px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 40px 20px;
 }
 
 .successHeader {
   text-align: center;
   background: white;
   padding: 40px 20px;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
   margin-bottom: 30px;
-  border: 2px solid #10b981;
+  border: 1px solid rgba(226, 232, 240, 0.6);
 }
 
 .successIcon {
@@ -26,7 +26,7 @@
 }
 
 .successTitle {
-  color: #10b981;
+  color: #1e40af;
   margin: 0 0 10px 0;
   font-size: 32px;
   font-weight: 700;
@@ -43,53 +43,55 @@
 .nextStepsCard,
 .notesCard {
   background: white;
-  border-radius: 12px;
-  padding: 25px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 20px;
+  padding: 32px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
   margin-bottom: 20px;
+  border: 1px solid rgba(226, 232, 240, 0.6);
 }
 
 .appointmentCard {
-  border: 2px solid #3b82f6;
+  border: 1px solid rgba(226, 232, 240, 0.6);
 }
 
 .paymentCard {
-  border: 2px solid #10b981;
+  border: 1px solid rgba(226, 232, 240, 0.6);
 }
 
 .nextStepsCard {
-  border: 2px solid #f59e0b;
+  border: 1px solid rgba(226, 232, 240, 0.6);
 }
 
 .notesCard {
-  border: 2px solid #ef4444;
+  border: 1px solid rgba(226, 232, 240, 0.6);
 }
 
 .cardHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
-  padding-bottom: 15px;
-  border-bottom: 2px solid #f1f5f9;
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #dbeafe;
 }
 
 .cardHeader h2 {
-  color: #1e293b;
+  color: #1e40af;
   margin: 0;
-  font-size: 20px;
-  font-weight: 600;
+  font-size: 1.3rem;
+  font-weight: 700;
 }
 
 .appointmentId,
 .transactionId {
-  background: #f1f5f9;
-  color: #475569;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: 600;
+  background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+  color: #1e40af;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 700;
   font-family: 'Courier New', monospace;
+  border: 1px solid #93c5fd;
 }
 
 .appointmentDetails,
@@ -121,7 +123,7 @@
 }
 
 .statusPending {
-  color: #f59e0b !important;
+  color: #3b82f6 !important;
 }
 
 .statusSuccess {
@@ -170,9 +172,9 @@
 
 .actionButtons {
   display: flex;
-  gap: 15px;
+  gap: 20px;
   justify-content: center;
-  margin-top: 30px;
+  margin-top: 40px;
   flex-wrap: wrap;
 }
 
@@ -180,54 +182,58 @@
   background: #3b82f6;
   color: white;
   border: none;
-  padding: 15px 25px;
-  border-radius: 8px;
+  padding: 16px 32px;
+  border-radius: 12px;
   cursor: pointer;
-  font-weight: 600;
-  font-size: 16px;
-  transition: all 0.2s;
-  min-width: 180px;
+  font-weight: 700;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  min-width: 200px;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
 
 .primaryButton:hover {
   background: #2563eb;
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
 }
 
 .secondaryButton {
-  background: #10b981;
-  color: white;
-  border: none;
-  padding: 15px 25px;
-  border-radius: 8px;
+  background: white;
+  color: #3b82f6;
+  border: 2px solid #3b82f6;
+  padding: 16px 32px;
+  border-radius: 12px;
   cursor: pointer;
-  font-weight: 600;
-  font-size: 16px;
-  transition: all 0.2s;
-  min-width: 180px;
+  font-weight: 700;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  min-width: 200px;
 }
 
 .secondaryButton:hover {
-  background: #059669;
-  transform: translateY(-1px);
+  background: #f0f9ff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
 }
 
 .tertiaryButton {
-  background: #f59e0b;
+  background: #64748b;
   color: white;
   border: none;
-  padding: 15px 25px;
-  border-radius: 8px;
+  padding: 16px 32px;
+  border-radius: 12px;
   cursor: pointer;
-  font-weight: 600;
-  font-size: 16px;
-  transition: all 0.2s;
-  min-width: 180px;
+  font-weight: 700;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  min-width: 200px;
 }
 
 .tertiaryButton:hover {
-  background: #d97706;
-  transform: translateY(-1px);
+  background: #475569;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(100, 116, 139, 0.3);
 }
 
 .loadingContainer {
@@ -276,8 +282,153 @@
   100% { transform: rotate(360deg); }
 }
 
+/* Success Animation Styles */
+.successAnimation {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 32px;
+}
+
+.checkmarkCircle {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 32px rgba(59, 130, 246, 0.3);
+  animation: scaleIn 0.5s ease-out;
+}
+
+.checkmark {
+  font-size: 48px;
+  color: #1e40af;
+  font-weight: bold;
+}
+
+@keyframes scaleIn {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Success Message Styles */
+.successMessage {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.successMessage h1.title,
+.successMessage .title,
+.title {
+  font-size: 2.5rem;
+  margin: 0 0 12px 0;
+  font-weight: 800;
+  color: #1e40af !important;
+  background: none !important;
+  -webkit-background-clip: unset !important;
+  -webkit-text-fill-color: #1e40af !important;
+  background-clip: unset !important;
+  letter-spacing: -0.5px;
+}
+
+.successMessage .subtitle {
+  font-size: 1.1rem;
+  color: #64748b;
+  margin: 0;
+  font-weight: 500;
+}
+
+/* Details Card Styles */
+.detailsCard {
+  background: white;
+  border-radius: 20px;
+  padding: 32px;
+  margin-bottom: 40px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(226, 232, 240, 0.6);
+}
+
+.detailsCard .cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 28px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #dbeafe;
+}
+
+.detailsCard .cardTitle {
+  margin: 0;
+  color: #1e40af;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.confirmedBadge {
+  background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+  color: #1e40af;
+  padding: 8px 20px;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  border: 2px solid #3b82f6;
+}
+
+.detailsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+
+.detailItem {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.detailContent {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.detailLabel {
+  color: #64748b;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.detailValue {
+  color: #1e293b;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.detailValue.statusSuccess {
+  color: #10b981;
+  font-weight: 700;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
+  .detailsGrid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
   .actionButtons {
     flex-direction: column;
     align-items: center;
@@ -305,5 +456,9 @@
   .nextStep {
     flex-direction: column;
     text-align: center;
+  }
+
+  .successMessage .title {
+    font-size: 2rem;
   }
 }

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { messagesApi } from '../../services/messagesApi';
 import styles from './Chat.module.css';
 
-const Chat = ({ currentUser, selectedDoctor, onClose }) => {
+const Chat = ({ currentUser, selectedDoctor, senderType = 'family_member', receiverType = 'doctor', onClose }) => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(false);
@@ -81,8 +81,8 @@ const Chat = ({ currentUser, selectedDoctor, onClose }) => {
       console.log('Chat.js - Sending message:', {
         from: currentUser.user_id,
         to: selectedDoctor.user_id,  // Changed from doctor_id to user_id
-        senderType: 'family_member',
-        receiverType: 'doctor',
+        senderType: senderType,
+        receiverType: receiverType,
         message: messageToSend,
         selectedDoctorObject: selectedDoctor
       });
@@ -90,8 +90,8 @@ const Chat = ({ currentUser, selectedDoctor, onClose }) => {
       const response = await messagesApi.sendMessage(
         currentUser.user_id,
         selectedDoctor.user_id,  // Changed from doctor_id to user_id
-        'family_member',
-        'doctor',
+        senderType,
+        receiverType,
         messageToSend
       );
 
@@ -101,8 +101,8 @@ const Chat = ({ currentUser, selectedDoctor, onClose }) => {
           message_id: response.message_id,
           sender_id: currentUser.user_id,
           receiver_id: selectedDoctor.user_id,  // Changed from doctor_id to user_id
-          sender_type: 'family_member',
-          receiver_type: 'doctor',
+          sender_type: senderType,
+          receiver_type: receiverType,
           message_text: messageToSend,
           sent_at: new Date().toISOString(),
           is_read: false,

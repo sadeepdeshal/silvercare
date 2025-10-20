@@ -1506,75 +1506,39 @@ const getUpcomingAppointmentsByFamily = async (req, res) => {
     const familyId = familyMemberResult.rows[0].family_id;
     console.log('Found family_id:', familyId);
     
-    // Get upcoming appointments (doctor + counselor) for this family
+    // Get upcoming appointments (doctor only) for this family
     const result = await pool.query(
       `
-      (
-        SELECT 
-          a.appointment_id,
-          a.elder_id,
-          a.family_id,
-          a.doctor_id,
-          NULL::INTEGER as counselor_id,
-          a.doctor_id as provider_id,
-          a.date_time,
-          a.status,
-          a.notes,
-          a.appointment_type,
-          a.created_at,
-          a.updated_at,
-          e.name as elder_name,
-          e.contact as elder_contact,
-          e.gender as elder_gender,
-          u.name as provider_name,
-          u.email as provider_email,
-          u.phone as provider_phone,
-          d.specialization,
-          d.current_institution,
-          d.district as provider_district,
-          'doctor' as provider_role
-        FROM appointment a
-        INNER JOIN elder e ON a.elder_id = e.elder_id
-        INNER JOIN doctor d ON a.doctor_id = d.doctor_id
-        INNER JOIN "User" u ON d.user_id = u.user_id
-        WHERE a.family_id = $1 
-          AND a.date_time > CURRENT_TIMESTAMP
-          AND a.status IN ('confirmed')
-      )
-      UNION ALL
-      (
-        SELECT 
-          ca.appointment_id,
-          ca.elder_id,
-          ca.family_id,
-          NULL::INTEGER as doctor_id,
-          ca.counselor_id,
-          ca.counselor_id as provider_id,
-          ca.date_time,
-          ca.status,
-          ca.notes,
-          ca.appointment_type,
-          ca.created_at,
-          ca.updated_at,
-          e.name as elder_name,
-          e.contact as elder_contact,
-          e.gender as elder_gender,
-          u.name as provider_name,
-          u.email as provider_email,
-          u.phone as provider_phone,
-          c.specialization,
-          c.current_institution,
-          c.district as provider_district,
-          'counselor' as provider_role
-        FROM counselor_appointment ca
-        INNER JOIN elder e ON ca.elder_id = e.elder_id
-        INNER JOIN counselor c ON ca.counselor_id = c.counselor_id
-        INNER JOIN "User" u ON c.user_id = u.user_id
-        WHERE ca.family_id = $1 
-          AND ca.date_time > CURRENT_TIMESTAMP
-          AND ca.status IN ('confirmed')
-      )
-      ORDER BY date_time ASC
+      SELECT 
+        a.appointment_id,
+        a.elder_id,
+        a.family_id,
+        a.doctor_id,
+        a.date_time,
+        a.status::text as status,
+        a.notes,
+        a.appointment_type,
+        a.meeting_link,
+        a.created_at,
+        a.updated_at,
+        e.name as elder_name,
+        e.contact as elder_contact,
+        e.gender as elder_gender,
+        u.name as provider_name,
+        u.email as provider_email,
+        u.phone as provider_phone,
+        d.specialization,
+        d.current_institution,
+        d.district as provider_district,
+        'doctor' as provider_role
+      FROM appointment a
+      INNER JOIN elder e ON a.elder_id = e.elder_id
+      INNER JOIN doctor d ON a.doctor_id = d.doctor_id
+      INNER JOIN "User" u ON d.user_id = u.user_id
+      WHERE a.family_id = $1 
+        AND a.date_time > CURRENT_TIMESTAMP
+        AND a.status IN ('confirmed')
+      ORDER BY a.date_time ASC
       LIMIT 10
       `,
       [familyId]
@@ -2108,17 +2072,15 @@ const getElderAppointments = async (req, res) => {
   try {
     console.log('Getting appointments for elder ID:', elderId);
     
-    // Query for both doctor and healthcare professional appointments using UNION
+    // Query for only doctor appointments (no counselor appointments)
     const result = await pool.query(
       `SELECT 
         a.appointment_id,
         a.elder_id,
         a.family_id,
         a.doctor_id,
-        NULL::INTEGER as counselor_id,
-        a.doctor_id as provider_id,
         a.date_time,
-        a.status,
+        a.status::text as status,
         a.notes,
         a.appointment_type,
         a.created_at,
@@ -2133,36 +2095,8 @@ const getElderAppointments = async (req, res) => {
       INNER JOIN doctor d ON a.doctor_id = d.doctor_id
       INNER JOIN "User" u ON d.user_id = u.user_id
       INNER JOIN elder e ON a.elder_id = e.elder_id
-      WHERE a.elder_id = $1 AND a.doctor_id IS NOT NULL
-      
-      UNION ALL
-      
-      SELECT 
-        ca.appointment_id,
-        ca.elder_id,
-        ca.family_id,
-        NULL::INTEGER as doctor_id,
-        ca.counselor_id,
-        ca.counselor_id as provider_id,
-        ca.date_time,
-        ca.status,
-        ca.notes,
-        ca.appointment_type,
-        ca.created_at,
-        ca.updated_at,
-        u.name as provider_name,
-        c.specialization,
-        c.current_institution,
-        e.name as elder_name,
-        'healthcare_professional' as provider_type,
-        'counselor' as provider_role
-      FROM counselor_appointment ca 
-      INNER JOIN counselor c ON ca.counselor_id = c.counselor_id
-      INNER JOIN "User" u ON c.user_id = u.user_id
-      INNER JOIN elder e ON ca.elder_id = e.elder_id
-      WHERE ca.elder_id = $1
-      
-      ORDER BY date_time DESC`,
+      WHERE a.elder_id = $1 
+      ORDER BY a.date_time DESC`,
       [elderId]
     );
     
@@ -3237,6 +3171,211 @@ const bulkUpdateElders = async (req, res) => {
   }
 };
 
+// NEW: Get caregivers by elder's district
+const getCaregiversByElderDistrict = async (req, res) => {
+  const { elderId } = req.params;
+  
+  try {
+    console.log('Fetching caregivers for elder:', elderId);
+    
+    // First, get elder's district
+    const elderResult = await pool.query(
+      'SELECT district, name, age, gender, contact, medical_conditions FROM elder WHERE elder_id = $1',
+      [elderId]
+    );
+    
+    if (elderResult.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: 'Elder not found'
+      });
+    }
+    
+    const elderInfo = elderResult.rows[0];
+    console.log('Elder district:', elderInfo.district);
+    
+    // Get caregivers from the same district who are available with ratings
+    const caregiversResult = await pool.query(`
+      SELECT 
+        c.caregiver_id,
+        c.user_id,
+        c.availability,
+        c.certifications,
+        c.fixed_line,
+        c.district,
+        c.day_rate,
+        u.name as caregiver_name,
+        u.email as caregiver_email,
+        u.phone as caregiver_phone,
+        u.created_at,
+        COALESCE(ROUND(AVG(fc.rating)::numeric, 1), 0) as average_rating,
+        COUNT(fc.id) as total_reviews
+      FROM caregiver c
+      INNER JOIN "User" u ON c.user_id = u.user_id
+      LEFT JOIN feedback_caregiver fc ON c.caregiver_id = fc.caregiver_id
+      WHERE c.district = $1 
+        AND u.role = 'caregiver' 
+        AND c.availability = 'available'
+      GROUP BY c.caregiver_id, c.user_id, c.availability, c.certifications, 
+               c.fixed_line, c.district, c.day_rate, u.name, u.email, u.phone, u.created_at
+      ORDER BY u.created_at DESC
+    `, [elderInfo.district]);
+    
+    console.log('Found caregivers:', caregiversResult.rows.length);
+    
+    // Log rating data for debugging
+    if (caregiversResult.rows.length > 0) {
+      console.log('Sample caregiver with rating data:', {
+        name: caregiversResult.rows[0].caregiver_name,
+        average_rating: caregiversResult.rows[0].average_rating,
+        total_reviews: caregiversResult.rows[0].total_reviews
+      });
+    }
+    
+    res.json({
+      success: true,
+      caregivers: caregiversResult.rows,
+      elderInfo: {
+        name: elderInfo.name,
+        district: elderInfo.district,
+        age: elderInfo.age
+      }
+    });
+    
+  } catch (err) {
+    console.error('Error fetching caregivers:', err);
+    res.status(500).json({ 
+      success: false,
+      error: 'Error fetching caregivers data' 
+    });
+  }
+};
+
+// NEW: Get caregiver booking info (both elder and caregiver details)
+const getCaregiverBookingInfo = async (req, res) => {
+  const { elderId, caregiverId } = req.params;
+  
+  try {
+    console.log('Fetching booking info for elder:', elderId, 'caregiver:', caregiverId);
+    
+    // Get caregiver details
+    const caregiverResult = await pool.query(`
+      SELECT 
+        c.caregiver_id,
+        c.user_id,
+        c.availability,
+        c.certifications,
+        c.fixed_line,
+        c.district,
+        c.day_rate as daily_rate,
+        u.name,
+        u.email,
+        u.phone
+      FROM caregiver c
+      INNER JOIN "User" u ON c.user_id = u.user_id
+      WHERE c.caregiver_id = $1
+    `, [caregiverId]);
+    
+    if (caregiverResult.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: 'Caregiver not found'
+      });
+    }
+    
+    // Get elder details
+    const elderResult = await pool.query(`
+      SELECT 
+        elder_id,
+        name,
+        dob,
+        gender,
+        contact,
+        district,
+        medical_conditions,
+        EXTRACT(YEAR FROM AGE(dob)) as age
+      FROM elder
+      WHERE elder_id = $1
+    `, [elderId]);
+    
+    if (elderResult.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: 'Elder not found'
+      });
+    }
+    
+    res.json({
+      success: true,
+      caregiver: caregiverResult.rows[0],
+      elder: elderResult.rows[0]
+    });
+    
+  } catch (err) {
+    console.error('Error fetching booking info:', err);
+    res.status(500).json({ 
+      success: false,
+      error: 'Error fetching booking information' 
+    });
+  }
+};
+
+const getfeedbackbyDoctorId = async (req, res) => {
+  const { doctorId } = req.params;
+
+  try {
+    console.log('Fetching feedback for doctor:', doctorId);
+
+    const feedbackResult = await pool.query(`
+      SELECT rating , feedback from feedback_doctor
+      WHERE doctor_id = $1
+    `, [doctorId]);
+
+    console.log('Found feedback entries:', feedbackResult.rows.length);
+
+    res.json({
+      success: true,
+      feedbacks: feedbackResult.rows
+    });
+    console.log('Feedback data sent successfully', feedbackResult.rows);
+    
+  } catch (err) {
+    console.error('Error fetching feedback:', err);
+    res.status(500).json({ 
+      success: false,
+      error: 'Error fetching feedback data' 
+    });
+  }
+};
+
+const addFeedbackForDoctor = async (req, res) => {
+  const { doctorId } = req.params;
+  const { rating, feedback } = req.body;
+
+  try {
+    console.log('Adding feedback for doctor:', doctorId, 'Rating:', rating, 'Feedback:', feedback);
+
+    const insertResult = await pool.query(`
+      INSERT INTO feedback_doctor (doctor_id, rating, feedback)
+      VALUES ($1, $2, $3)
+      RETURNING doctor_id, rating, feedback
+    `, [doctorId, rating, feedback]);
+
+    console.log('Feedback added successfully:', insertResult.rows[0]);
+
+    res.json({
+      success: true,
+      feedback: insertResult.rows[0]
+    });
+  } catch (err) {
+    console.error('Error adding feedback:', err);
+    res.status(500).json({
+      success: false,
+      error: 'Error adding feedback data'
+    });
+  }
+};
+
 module.exports = {
   getEldersByFamilyMember,
   getElderCount,
@@ -3267,7 +3406,15 @@ module.exports = {
   cancelTemporaryBooking,
   cleanupExpiredBookings,
   createTemporaryHealthcareProfessionalBooking,
-  confirmPaymentAndCreateHealthcareProfessionalAppointment
+  confirmPaymentAndCreateHealthcareProfessionalAppointment,
+  
+  // NEW: Caregiver booking functions
+  getCaregiversByElderDistrict,
+  getCaregiverBookingInfo,
+
+  // Feedback functions
+  getfeedbackbyDoctorId,
+  addFeedbackForDoctor
 };
 
 

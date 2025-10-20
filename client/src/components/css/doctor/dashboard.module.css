@@ -873,3 +873,235 @@
     padding: 1rem;
   }
 }
+
+/* Full Width Container Styles */
+.fullWidthContainer {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+/* Enhanced Appointment Item Styles */
+.appointmentItem {
+  display: grid;
+  grid-template-columns: 150px auto 1fr auto;
+  gap: 1.5rem;
+  align-items: center;
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 1px solid #e2e8f0;
+  transition: all 0.3s ease;
+}
+
+.appointmentItem:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.appointmentPatientInfo {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.patientDetails h4 {
+  margin: 0 0 0.25rem 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2d3748;
+}
+
+.patientMeta {
+  font-size: 0.9rem;
+  color: #718096;
+  margin: 0.25rem 0;
+}
+
+.medicalConditions {
+  font-size: 0.85rem;
+  color: #e53e3e;
+  margin: 0.25rem 0;
+  background: #fed7d7;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.appointmentDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.appointmentType {
+  font-weight: 600;
+  color: #4a5568;
+  margin: 0;
+}
+
+.appointmentStatus {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.statusBadge {
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.statusConfirmed {
+  background: #c6f6d5;
+  color: #22543d;
+}
+
+.statusPending {
+  background: #fed7a1;
+  color: #744210;
+}
+
+.statusCancelled {
+  background: #fed7d7;
+  color: #742a2a;
+}
+
+.appointmentNotes {
+  font-size: 0.85rem;
+  color: #4a5568;
+  font-style: italic;
+  margin: 0;
+}
+
+.appointmentActions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.dateLabel {
+  font-size: 0.8rem;
+  color: #718096;
+  display: block;
+  margin-top: 0.25rem;
+}
+
+/* Consultations Container Styles */
+.consultationsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.dateGroup {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 1px solid #e2e8f0;
+}
+
+.dateHeader {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 1rem 1.5rem;
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.consultationItem {
+  display: grid;
+  grid-template-columns: 100px auto 1fr auto;
+  gap: 1rem;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid #e2e8f0;
+  transition: background 0.3s ease;
+}
+
+.consultationItem:last-child {
+  border-bottom: none;
+}
+
+.consultationItem:hover {
+  background: #f7fafc;
+}
+
+.consultationTime {
+  text-align: center;
+}
+
+.consultationInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.consultationName {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2d3748;
+}
+
+.consultationDetails {
+  font-size: 0.9rem;
+  color: #718096;
+  margin: 0;
+}
+
+.consultationType {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #4a5568;
+  margin: 0;
+}
+
+.consultationStatus {
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.consultationActions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Responsive Design for New Pages */
+@media (max-width: 1024px) {
+  .appointmentItem {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    text-align: center;
+  }
+  
+  .appointmentPatientInfo {
+    justify-content: center;
+  }
+  
+  .consultationItem {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    text-align: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .fullWidthContainer {
+    padding: 0 1rem;
+  }
+  
+  .appointmentActions,
+  .consultationActions {
+    flex-direction: row;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+}

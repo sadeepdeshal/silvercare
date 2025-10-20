@@ -1,485 +1,555 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+﻿import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import Navbar from '../../components/navbar';
 import ElderLayout from '../../components/ElderLayout';
 import styles from '../../components/css/elder/caregivers.module.css';
-import Navbar from '../../components/navbar';
+import { 
+  getElderDetailsByEmail,
+  getCareAssignmentsByWeek 
+} from '../../services/elderApi2';
+import { 
+  getUpcomingCareAssignments
+} from '../../services/caregiverApi';
 
-const ElderCaregivers = () => {
+const Caregivers = () => {
   const { currentUser } = useAuth();
-  const navigate = useNavigate();
+  const [elderDetails, setElderDetails] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('active');
-  const [selectedCaregiver, setSelectedCaregiver] = useState(null);
-  const [showModal, setShowModal] = useState(false);
+  const [error, setError] = useState(null);
 
-  // Dummy data for caregivers
-  const [caregivers] = useState([
-    {
-      id: 1,
-      name: 'Sarah Johnson',
-      specialization: 'Personal Care & Mobility',
-      experience: '8 years',
-      rating: 4.9,
-      location: 'Downtown District',
-      phone: '+1 234-567-8901',
-      email: 'sarah.johnson@silvercare.com',
-      avatar: null,
-      status: 'active',
-      availableHours: 'Mon-Fri 8AM-6PM',
-      languages: ['English', 'Spanish'],
-      certifications: ['CNA', 'CPR', 'First Aid'],
-      bio: 'Compassionate caregiver with 8 years of experience in elderly care. Specialized in mobility assistance and personal care.',
-      services: ['Personal hygiene assistance', 'Medication reminders', 'Mobility support', 'Light housekeeping'],
-      nextVisit: '2025-07-23T09:00:00Z',
-      totalHours: 240,
-      completedTasks: 156
-    },
-    {
-      id: 2,
-      name: 'Michael Chen',
-      specialization: 'Medical Care & Therapy',
-      experience: '12 years',
-      rating: 4.8,
-      location: 'North District',
-      phone: '+1 234-567-8902',
-      email: 'michael.chen@silvercare.com',
-      avatar: null,
-      status: 'active',
-      availableHours: 'Tue-Sat 7AM-3PM',
-      languages: ['English', 'Mandarin'],
-      certifications: ['RN', 'Physical Therapy Assistant', 'CPR'],
-      bio: 'Registered nurse with extensive experience in geriatric care and physical therapy assistance.',
-      services: ['Medication management', 'Physical therapy support', 'Health monitoring', 'Emergency response'],
-      nextVisit: '2025-07-24T07:30:00Z',
-      totalHours: 180,
-      completedTasks: 98
-    },
-    {
-      id: 3,
-      name: 'Emma Rodriguez',
-      specialization: 'Companionship & Activities',
-      experience: '5 years',
-      rating: 4.7,
-      location: 'South District',
-      phone: '+1 234-567-8903',
-      email: 'emma.rodriguez@silvercare.com',
-      avatar: null,
-      status: 'active',
-      availableHours: 'Mon-Wed-Fri 2PM-8PM',
-      languages: ['English', 'Spanish', 'French'],
-      certifications: ['Companion Care', 'Activity Therapy', 'Mental Health First Aid'],
-      bio: 'Dedicated companion caregiver focused on emotional support and engaging activities for seniors.',
-      services: ['Companionship', 'Social activities', 'Transportation', 'Meal preparation'],
-      nextVisit: '2025-07-25T14:00:00Z',
-      totalHours: 320,
-      completedTasks: 201
-    },
-    {
-      id: 4,
-      name: 'David Thompson',
-      specialization: 'Night Care & Monitoring',
-      experience: '6 years',
-      rating: 4.6,
-      location: 'Central District',
-      phone: '+1 234-567-8904',
-      email: 'david.thompson@silvercare.com',
-      avatar: null,
-      status: 'on-leave',
-      availableHours: 'Mon-Thu 10PM-6AM',
-      languages: ['English'],
-      certifications: ['Night Care Specialist', 'CPR', 'Sleep Disorder Management'],
-      bio: 'Experienced night shift caregiver specializing in overnight monitoring and emergency response.',
-      services: ['Overnight monitoring', 'Sleep assistance', 'Emergency response', 'Safety checks'],
-      nextVisit: null,
-      totalHours: 150,
-      completedTasks: 89
-    }
-  ]);
+  // Upcoming care schedule state
+  const [upcomingAssignments, setUpcomingAssignments] = useState([]);
+  const [upcomingLoading, setUpcomingLoading] = useState(false);
 
-  // Dummy care schedule data
-  const [careSchedule] = useState([
-    {
-      id: 1,
-      caregiverId: 1,
-      caregiverName: 'Sarah Johnson',
-      date: '2025-07-23',
-      startTime: '09:00',
-      endTime: '13:00',
-      services: ['Personal hygiene', 'Medication reminder', 'Light housekeeping'],
-      status: 'scheduled'
-    },
-    {
-      id: 2,
-      caregiverId: 2,
-      caregiverName: 'Michael Chen',
-      date: '2025-07-24',
-      startTime: '07:30',
-      endTime: '11:30',
-      services: ['Health monitoring', 'Physical therapy', 'Medication management'],
-      status: 'scheduled'
-    },
-    {
-      id: 3,
-      caregiverId: 3,
-      caregiverName: 'Emma Rodriguez',
-      date: '2025-07-25',
-      startTime: '14:00',
-      endTime: '18:00',
-      services: ['Companionship', 'Social activities', 'Meal preparation'],
-      status: 'scheduled'
-    }
-  ]);
+  // Monthly calendar state
+  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [monthlyAssignments, setMonthlyAssignments] = useState([]);
+  const [monthlyLoading, setMonthlyLoading] = useState(false);
 
+  // Modal state for day details
+  const [selectedDay, setSelectedDay] = useState(null);
+  const [showDayModal, setShowDayModal] = useState(false);
+  const [selectedDayAssignments, setSelectedDayAssignments] = useState([]);
+
+  // Scroll to top when component mounts
   useEffect(() => {
-    // Simulate loading
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 1000);
-
-    return () => clearTimeout(timer);
+    window.scrollTo(0, 0);
   }, []);
 
-  const handleBackToDashboard = () => {
-    navigate('/elder/dashboard');
-  };
+  // Fetch elder details
+  useEffect(() => {
+    const fetchElderDetails = async () => {
+      if (!currentUser?.email) return;
 
-  const handleViewDetails = (caregiver) => {
-    setSelectedCaregiver(caregiver);
-    setShowModal(true);
-  };
+      try {
+        setLoading(true);
+        console.log('====== CAREGIVERS PAGE LOADING ======');
+        console.log('Fetching elder details for email:', currentUser.email);
+        
+        const response = await getElderDetailsByEmail(currentUser.email);
+        console.log('Elder details received:', response.data);
+        console.log('Elder ID:', response.data.elder_id);
+        console.log('Elder Name:', response.data.name);
+        
+        setElderDetails(response.data);
 
-  const handleCloseModal = () => {
-    setShowModal(false);
-    setSelectedCaregiver(null);
-  };
+        // Fetch upcoming assignments
+        if (response.data?.elder_id) {
+          console.log('Fetching care assignments for elder_id:', response.data.elder_id);
+          await fetchUpcomingAssignments(response.data.elder_id);
+          await fetchMonthlyAssignments(response.data.elder_id, currentMonth);
+        } else {
+          console.error('No elder_id found!');
+        }
 
-  const handleContactCaregiver = (caregiver, method) => {
-    if (method === 'call') {
-      window.open(`tel:${caregiver.phone}`);
-    } else if (method === 'message') {
-      // Navigate to messaging page or open messaging modal
-      console.log(`Send message to ${caregiver.name}`);
+        setLoading(false);
+      } catch (err) {
+        console.error('Error fetching elder details:', err);
+        setError('Failed to load your details');
+        setLoading(false);
+      }
+    };
+
+    fetchElderDetails();
+  }, [currentUser.email]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Fetch upcoming assignments
+  const fetchUpcomingAssignments = async (elderId) => {
+    try {
+      setUpcomingLoading(true);
+      const response = await getUpcomingCareAssignments(elderId);
+      console.log('Upcoming assignments:', response.data);
+      setUpcomingAssignments(response.data.assignments || []);
+      setUpcomingLoading(false);
+    } catch (err) {
+      console.error('Error fetching upcoming assignments:', err);
+      setUpcomingLoading(false);
     }
   };
 
+  // Fetch monthly assignments (using week endpoint)
+  const fetchMonthlyAssignments = async (elderId, month) => {
+    try {
+      setMonthlyLoading(true);
+      console.log('=== Fetching Monthly Assignments (via weeks) ===');
+      console.log('Elder ID:', elderId);
+      console.log('Month:', month);
+      
+      // Get first day of the month
+      const year = month.getFullYear();
+      const monthNum = month.getMonth();
+      const firstDay = new Date(year, monthNum, 1);
+      const lastDay = new Date(year, monthNum + 1, 0);
+      
+      // Find the Sunday before or on the first day
+      const startOfFirstWeek = new Date(firstDay);
+      startOfFirstWeek.setDate(firstDay.getDate() - firstDay.getDay());
+      
+      const allDailyAssignments = [];
+      const weeksToFetch = [];
+      
+      // Calculate all week starts we need to fetch
+      let currentWeekStart = new Date(startOfFirstWeek);
+      while (currentWeekStart <= lastDay) {
+        weeksToFetch.push(new Date(currentWeekStart));
+        currentWeekStart.setDate(currentWeekStart.getDate() + 7);
+      }
+      
+      console.log(`Fetching ${weeksToFetch.length} weeks of data...`);
+      
+      // Fetch all weeks
+      const weekPromises = weeksToFetch.map(weekStart =>
+        getCareAssignmentsByWeek(elderId, weekStart.toISOString().split('T')[0])
+      );
+      
+      const weekResponses = await Promise.all(weekPromises);
+      
+      // Combine all daily assignments and filter to only this month
+      weekResponses.forEach(response => {
+        if (response.data.success && response.data.dailyAssignments) {
+          response.data.dailyAssignments.forEach(day => {
+            const dayDate = new Date(day.date);
+            // Only include days that are in the target month
+            if (dayDate.getMonth() === monthNum && dayDate.getFullYear() === year) {
+              allDailyAssignments.push(day);
+            }
+          });
+        }
+      });
+      
+      console.log('Total daily assignments for month:', allDailyAssignments.length);
+      console.log('Days with assignments:', allDailyAssignments.filter(d => d.assignments.length > 0).length);
+      
+      setMonthlyAssignments(allDailyAssignments);
+      setMonthlyLoading(false);
+    } catch (err) {
+      console.error('Error fetching monthly assignments:', err);
+      setMonthlyLoading(false);
+    }
+  };
+
+  // Month navigation
+  const handleMonthChange = (direction) => {
+    const newMonth = new Date(currentMonth);
+    if (direction === 'prev') {
+      newMonth.setMonth(currentMonth.getMonth() - 1);
+    } else {
+      newMonth.setMonth(currentMonth.getMonth() + 1);
+    }
+    setCurrentMonth(newMonth);
+    if (elderDetails?.elder_id) {
+      fetchMonthlyAssignments(elderDetails.elder_id, newMonth);
+    }
+  };
+
+  const goToCurrentMonth = () => {
+    const today = new Date();
+    setCurrentMonth(today);
+    if (elderDetails?.elder_id) {
+      fetchMonthlyAssignments(elderDetails.elder_id, today);
+    }
+  };
+
+  // Handle day click
+  const handleDayClick = async (date, assignments) => {
+    if (assignments && assignments.length > 0) {
+      setSelectedDay(date);
+      setSelectedDayAssignments(assignments);
+      setShowDayModal(true);
+    }
+  };
+
+  // Format date helpers
   const formatDate = (dateString) => {
-    if (!dateString) return 'Not scheduled';
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      weekday: 'short',
-      month: 'short',
-      day: 'numeric'
+    return date.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
     });
   };
 
-  const formatTime = (dateString) => {
-    if (!dateString) return '';
-    const date = new Date(dateString);
-    return date.toLocaleTimeString('en-US', {
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true
+  const formatMonthYear = (date) => {
+    return date.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'long' 
     });
   };
 
-  const getInitials = (name) => {
-    return name.split(' ').map(n => n[0]).join('');
+  const isCurrentMonth = () => {
+    const today = new Date();
+    return currentMonth.getMonth() === today.getMonth() && 
+           currentMonth.getFullYear() === today.getFullYear();
   };
 
-  const activeCaregivers = caregivers.filter(c => c.status === 'active');
-  const inactiveCaregivers = caregivers.filter(c => c.status !== 'active');
+  const isToday = (date) => {
+    const today = new Date();
+    const checkDate = new Date(date);
+    return today.getDate() === checkDate.getDate() &&
+           today.getMonth() === checkDate.getMonth() &&
+           today.getFullYear() === checkDate.getFullYear();
+  };
+
+  // Generate calendar days
+  const generateCalendarDays = () => {
+    const year = currentMonth.getFullYear();
+    const month = currentMonth.getMonth();
+    
+    console.log('=== Generating Calendar Days ===');
+    console.log('Current Month:', currentMonth);
+    console.log('Year:', year, 'Month:', month);
+    console.log('Monthly Assignments Array:', monthlyAssignments);
+    
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const startingDayOfWeek = firstDay.getDay();
+    const daysInMonth = lastDay.getDate();
+
+    const days = [];
+
+    // Add empty cells for days before the first day of the month
+    for (let i = 0; i < startingDayOfWeek; i++) {
+      days.push({ isEmpty: true });
+    }
+
+    // Add days of the month
+    for (let day = 1; day <= daysInMonth; day++) {
+      const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      
+      // Find assignments for this date from the array
+      const dayData = monthlyAssignments.find(d => d.date === dateStr);
+      const assignments = dayData ? dayData.assignments : [];
+      
+      if (day <= 5) { // Log first 5 days for debugging
+        console.log(`Day ${day} (${dateStr}):`, assignments.length, 'assignments', assignments);
+      }
+      
+      days.push({
+        date: dateStr,
+        day: day,
+        assignments: assignments,
+        isToday: isToday(dateStr)
+      });
+    }
+
+    console.log('Total days generated:', days.length);
+    return days;
+  };
 
   if (loading) {
     return (
-      <>
+      <div className={styles.pageContainer}>
         <Navbar />
         <ElderLayout>
           <div className={styles.loadingContainer}>
             <div className={styles.loadingSpinner}></div>
-            <p>Loading your caregivers...</p>
+            <p>Loading your care information...</p>
           </div>
         </ElderLayout>
-      </>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className={styles.pageContainer}>
+        <Navbar />
+        <ElderLayout>
+          <div className={styles.errorContainer}>
+            <div className={styles.errorIcon}>⚠️</div>
+            <h2>Error Loading Care Information</h2>
+            <p>{error}</p>
+            <button 
+              className={styles.retryBtn}
+              onClick={() => window.location.reload()}
+            >
+              Retry
+            </button>
+          </div>
+        </ElderLayout>
+      </div>
     );
   }
 
   return (
-    <>
+    <div className={styles.pageContainer}>
       <Navbar />
       <ElderLayout>
-        
-      <div className={styles.caregiversContainer}>
-        <div className={styles.caregiversContent}>
-          {/* Header */}
+        <div className={styles.contentWrapper}>
+          {/* Page Header */}
           <div className={styles.pageHeader}>
             <div className={styles.headerContent}>
-              <div className={styles.headerInfo}>
-                <h1>My Care Team</h1>
-                <p>Manage your caregivers and care schedule</p>
-              </div>
-              <button 
-                onClick={handleBackToDashboard}
-                className={styles.backButton}
-              >
-                ← Back to Dashboard
-              </button>
+              <h1>My Caregivers</h1>
+              <p>View and manage your care assignments</p>
             </div>
           </div>
 
-          {/* Stats Cards */}
-          <div className={styles.statsGrid}>
-            <div className={styles.statsCard}>
-              <div className={styles.statsIcon}>👥</div>
-              <div className={styles.statsContent}>
-                <h3>Active Caregivers</h3>
-                <div className={styles.statsNumber}>{activeCaregivers.length}</div>
-              </div>
-            </div>
-            <div className={styles.statsCard}>
-              <div className={styles.statsIcon}>📅</div>
-              <div className={styles.statsContent}>
-                <h3>Scheduled Visits</h3>
-                <div className={styles.statsNumber}>{careSchedule.length}</div>
-              </div>
-            </div>
-            <div className={styles.statsCard}>
-              <div className={styles.statsIcon}>⭐</div>
-              <div className={styles.statsContent}>
-                <h3>Average Rating</h3>
-                <div className={styles.statsNumber}>4.8</div>
-              </div>
-            </div>
-            <div className={styles.statsCard}>
-              <div className={styles.statsIcon}>🕒</div>
-              <div className={styles.statsContent}>
-                <h3>Total Care Hours</h3>
-                <div className={styles.statsNumber}>890</div>
-              </div>
-            </div>
-          </div>
-
-          {/* Care Schedule Section */}
-          <div className={styles.scheduleSection}>
+          {/* Upcoming Care Schedule Section */}
+          <div className={styles.section}>
             <div className={styles.sectionHeader}>
               <h2>Upcoming Care Schedule</h2>
-              <button className={styles.viewAllBtn}>View All</button>
+              <p>Your scheduled care sessions in the coming days</p>
             </div>
-            <div className={styles.scheduleGrid}>
-              {careSchedule.map((schedule) => (
-                <div key={schedule.id} className={styles.scheduleCard}>
-                  <div className={styles.scheduleHeader}>
-                    <div className={styles.scheduleDate}>
-                      <div className={styles.dateText}>{schedule.date}</div>
-                      <div className={styles.timeText}>
-                        {schedule.startTime} - {schedule.endTime}
+
+            <div className={styles.sectionContent}>
+              {upcomingLoading ? (
+                <div className={styles.loadingContainer}>
+                  <div className={styles.loadingSpinner}></div>
+                  <p>Loading upcoming assignments...</p>
+                </div>
+              ) : upcomingAssignments.length > 0 ? (
+                <div className={styles.upcomingGrid}>
+                  {upcomingAssignments.map((assignment, index) => (
+                    <div key={index} className={styles.upcomingCard}>
+                      <div className={styles.cardHeader}>
+                        <div className={styles.caregiverIcon}>👨‍⚕️</div>
+                        <div className={styles.cardHeaderInfo}>
+                          <h3>{assignment.caregiver_name}</h3>
+                          <span className={styles.statusBadge}>
+                            {assignment.status.charAt(0).toUpperCase() + assignment.status.slice(1)}
+                          </span>
+                        </div>
+                      </div>
+                      
+                      <div className={styles.cardBody}>
+                        <div className={styles.infoRow}>
+                          <span className={styles.infoLabel}>📞 Phone:</span>
+                          <span className={styles.infoValue}>{assignment.caregiver_phone}</span>
+                        </div>
+                        
+                        <div className={styles.infoRow}>
+                          <span className={styles.infoLabel}> Start Date:</span>
+                          <span className={styles.infoValue}>{formatDate(assignment.start_date)}</span>
+                        </div>
+                        
+                        <div className={styles.infoRow}>
+                          <span className={styles.infoLabel}>End Date:</span>
+                          <span className={styles.infoValue}>{formatDate(assignment.end_date)}</span>
+                        </div>
+                        
+                        
                       </div>
                     </div>
-                    <div className={styles.statusBadge}>
-                      {schedule.status}
-                    </div>
-                  </div>
-                  <div className={styles.scheduleContent}>
-                    <h4>{schedule.caregiverName}</h4>
-                    <div className={styles.servicesList}>
-                      {schedule.services.map((service, index) => (
-                        <span key={index} className={styles.serviceTag}>
-                          {service}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
+                  ))}
                 </div>
-              ))}
+              ) : (
+                <div className={styles.noData}>
+                  <div className={styles.noDataIcon}>📋</div>
+                  <h3>No Upcoming Care Sessions</h3>
+                  <p>You don't have any care sessions scheduled at the moment.</p>
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Caregivers Section */}
-          <div className={styles.caregiversSection}>
+          {/* Monthly Calendar Section */}
+          <div className={styles.section}>
             <div className={styles.sectionHeader}>
-              <h2>My Caregivers</h2>
-              <div className={styles.tabContainer}>
-                <button
-                  className={`${styles.tabBtn} ${activeTab === 'active' ? styles.activeTab : ''}`}
-                  onClick={() => setActiveTab('active')}
-                >
-                  Active ({activeCaregivers.length})
-                </button>
-                <button
-                  className={`${styles.tabBtn} ${activeTab === 'inactive' ? styles.activeTab : ''}`}
-                  onClick={() => setActiveTab('inactive')}
-                >
-                  On Leave ({inactiveCaregivers.length})
-                </button>
-              </div>
+              <h2>📆 My Care Assignments</h2>
+              <p>Monthly calendar view of your care schedule</p>
             </div>
 
-            <div className={styles.caregiversGrid}>
-              {(activeTab === 'active' ? activeCaregivers : inactiveCaregivers).map((caregiver) => (
-                <div key={caregiver.id} className={styles.caregiverCard}>
-                  <div className={styles.caregiverHeader}>
-                    <div className={styles.caregiverInfo}>
-                      <div className={styles.caregiverAvatar}>
-                        {caregiver.avatar ? (
-                          <img src={caregiver.avatar} alt={caregiver.name} />
+            <div className={styles.calendarNavigation}>
+              <button 
+                className={styles.navBtn}
+                onClick={() => handleMonthChange('prev')}
+              >
+                &#8249; Previous Month
+              </button>
+              
+              <div className={styles.monthDisplay}>
+                <span className={styles.monthText}>{formatMonthYear(currentMonth)}</span>
+                {!isCurrentMonth() && (
+                  <button 
+                    className={styles.currentMonthBtn}
+                    onClick={goToCurrentMonth}
+                  >
+                    This Month
+                  </button>
+                )}
+              </div>
+              
+              <button 
+                className={styles.navBtn}
+                onClick={() => handleMonthChange('next')}
+              >
+                Next Month &#8250;
+              </button>
+            </div>
+
+            <div className={styles.calendarContent}>
+              {monthlyLoading ? (
+                <div className={styles.loadingContainer}>
+                  <div className={styles.loadingSpinner}></div>
+                  <p>Loading calendar...</p>
+                </div>
+              ) : (
+                <>
+                  {/* Day headers */}
+                  <div className={styles.calendarHeader}>
+                    <div className={styles.dayHeader}>Sun</div>
+                    <div className={styles.dayHeader}>Mon</div>
+                    <div className={styles.dayHeader}>Tue</div>
+                    <div className={styles.dayHeader}>Wed</div>
+                    <div className={styles.dayHeader}>Thu</div>
+                    <div className={styles.dayHeader}>Fri</div>
+                    <div className={styles.dayHeader}>Sat</div>
+                  </div>
+
+                  {/* Calendar grid */}
+                  <div className={styles.calendarGrid}>
+                    {generateCalendarDays().length === 0 ? (
+                      <div style={{gridColumn: '1 / -1', textAlign: 'center', padding: '40px'}}>
+                        <p>No calendar days generated</p>
+                      </div>
+                    ) : (
+                      generateCalendarDays().map((dayInfo, index) => (
+                        dayInfo.isEmpty ? (
+                          <div key={`empty-${index}`} className={styles.emptyDay}></div>
                         ) : (
-                          getInitials(caregiver.name)
-                        )}
-                      </div>
-                      <div className={styles.caregiverDetails}>
-                        <h3>{caregiver.name}</h3>
-                        <p className={styles.specialization}>{caregiver.specialization}</p>
-                        <div className={styles.rating}>
-                          <span className={styles.stars}>⭐ {caregiver.rating}</span>
-                          <span className={styles.experience}>• {caregiver.experience}</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className={styles.statusIndicator}>
-                      <span className={`${styles.status} ${styles[caregiver.status.replace('-', '')]}`}>
-                        {caregiver.status === 'active' ? 'Available' : 'On Leave'}
+                          <div 
+                            key={dayInfo.date}
+                            className={`${styles.calendarDay} ${
+                              dayInfo.isToday ? styles.todayDay : ''
+                            } ${
+                              dayInfo.assignments.length > 0 ? styles.hasAssignment : ''
+                            }`}
+                            onClick={() => handleDayClick(dayInfo.date, dayInfo.assignments)}
+                          >
+                            <div className={styles.dayNumber}>{dayInfo.day}</div>
+                            
+                            {dayInfo.isToday && (
+                              <div className={styles.todayBadge}>Today</div>
+                            )}
+                            
+                            {dayInfo.assignments.length > 0 && (
+                              <div className={styles.assignmentsPreview}>
+                                {dayInfo.assignments.map((assignment, idx) => (
+                                  <div key={idx} className={styles.assignmentPreviewItem}>
+                                    <div className={styles.caregiverNamePreview}>
+                                      {assignment.caregiver_name}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        )
+                      ))
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      </ElderLayout>
+
+      {/* Day Details Modal */}
+      {showDayModal && (
+        <div className={styles.modal} onClick={() => setShowDayModal(false)}>
+          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <div>
+                <h3>Care Assignments</h3>
+                <div className={styles.modalDate}>{formatDate(selectedDay)}</div>
+              </div>
+              <button 
+                className={styles.closeBtn}
+                onClick={() => setShowDayModal(false)}
+              >
+                ×
+              </button>
+            </div>
+
+            <div className={styles.modalBody}>
+              {selectedDayAssignments.map((assignment, index) => (
+                <div key={index} className={styles.modalAssignmentCard}>
+                  <div className={styles.modalCardHeader}>
+                    <div className={styles.modalCaregiverIcon}>👨‍⚕️</div>
+                    <div>
+                      <h4>{assignment.caregiver_name}</h4>
+                      <span className={styles.modalStatusBadge}>
+                        {assignment.status.charAt(0).toUpperCase() + assignment.status.slice(1)}
                       </span>
                     </div>
                   </div>
 
-                  <div className={styles.caregiverMeta}>
-                    <div className={styles.metaItem}>
-                      <span className={styles.metaLabel}>Location:</span>
-                      <span className={styles.metaValue}>{caregiver.location}</span>
+                  <div className={styles.modalCardBody}>
+                    <div className={styles.modalInfoRow}>
+                      <span className={styles.modalInfoLabel}>📞 Phone:</span>
+                      <span className={styles.modalInfoValue}>{assignment.caregiver_phone}</span>
                     </div>
-                    <div className={styles.metaItem}>
-                      <span className={styles.metaLabel}>Available:</span>
-                      <span className={styles.metaValue}>{caregiver.availableHours}</span>
-                    </div>
-                    <div className={styles.metaItem}>
-                      <span className={styles.metaLabel}>Next Visit:</span>
-                      <span className={styles.metaValue}>
-                        {caregiver.nextVisit ? 
-                          `${formatDate(caregiver.nextVisit)} at ${formatTime(caregiver.nextVisit)}` :
-                          'Not scheduled'
-                        }
-                      </span>
-                    </div>
-                  </div>
 
-                  <div className={styles.caregiverActions}>
-                    <button
-                      onClick={() => handleContactCaregiver(caregiver, 'call')}
-                      className={styles.callBtn}
-                      title="Call caregiver"
-                    >
-                      📞
-                    </button>
-                    <button
-                      onClick={() => handleContactCaregiver(caregiver, 'message')}
-                      className={styles.messageBtn}
-                      title="Send message"
-                    >
-                      💬
-                    </button>
-                    <button
-                      onClick={() => handleViewDetails(caregiver)}
-                      className={styles.detailsBtn}
-                    >
-                      View Details
-                    </button>
+                    {assignment.caregiver_fixed_line && (
+                      <div className={styles.modalInfoRow}>
+                        <span className={styles.modalInfoLabel}>☎️ Fixed Line:</span>
+                        <span className={styles.modalInfoValue}>{assignment.caregiver_fixed_line}</span>
+                      </div>
+                    )}
+
+                    <div className={styles.modalInfoRow}>
+                      <span className={styles.modalInfoLabel}>📍 District:</span>
+                      <span className={styles.modalInfoValue}>{assignment.caregiver_district}</span>
+                    </div>
+
+                    <div className={styles.modalInfoRow}>
+                      <span className={styles.modalInfoLabel}>📧 Email:</span>
+                      <span className={styles.modalInfoValue}>{assignment.caregiver_email}</span>
+                    </div>
+
+                    <div className={styles.modalInfoRow}>
+                      <span className={styles.modalInfoLabel}>📆 Start Date:</span>
+                      <span className={styles.modalInfoValue}>{formatDate(assignment.start_date)}</span>
+                    </div>
+
+                    <div className={styles.modalInfoRow}>
+                      <span className={styles.modalInfoLabel}>📆 End Date:</span>
+                      <span className={styles.modalInfoValue}>{formatDate(assignment.end_date)}</span>
+                    </div>
+
+                    {assignment.duration && (
+                      <div className={styles.modalInfoRow}>
+                        <span className={styles.modalInfoLabel}>⏱️ Duration:</span>
+                        <span className={styles.modalInfoValue}>{assignment.duration}</span>
+                      </div>
+                    )}
+
+                    {assignment.certifications && (
+                      <div className={styles.modalCertifications}>
+                        <span className={styles.modalInfoLabel}>🎓 Certifications:</span>
+                        <span className={styles.modalCertificationsValue}>{assignment.certifications}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
             </div>
           </div>
         </div>
-
-        {/* Caregiver Details Modal */}
-        {showModal && selectedCaregiver && (
-          <div className={styles.modal} onClick={handleCloseModal}>
-            <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-              <div className={styles.modalHeader}>
-                <h3>{selectedCaregiver.name}</h3>
-                <button onClick={handleCloseModal} className={styles.closeBtn}>
-                  ×
-                </button>
-              </div>
-              <div className={styles.modalBody}>
-                <div className={styles.caregiverProfile}>
-                  <div className={styles.profileSection}>
-                    <div className={styles.profileAvatar}>
-                      {selectedCaregiver.avatar ? (
-                        <img src={selectedCaregiver.avatar} alt={selectedCaregiver.name} />
-                      ) : (
-                        getInitials(selectedCaregiver.name)
-                      )}
-                    </div>
-                    <div className={styles.profileInfo}>
-                      <h4>{selectedCaregiver.name}</h4>
-                      <p>{selectedCaregiver.specialization}</p>
-                      <div className={styles.profileMeta}>
-                        <span>⭐ {selectedCaregiver.rating} rating</span>
-                        <span>• {selectedCaregiver.experience} experience</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className={styles.profileDetails}>
-                    <div className={styles.detailSection}>
-                      <h5>About</h5>
-                      <p>{selectedCaregiver.bio}</p>
-                    </div>
-
-                    <div className={styles.detailSection}>
-                      <h5>Services</h5>
-                      <div className={styles.servicesList}>
-                        {selectedCaregiver.services.map((service, index) => (
-                          <span key={index} className={styles.serviceTag}>
-                            {service}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className={styles.detailSection}>
-                      <h5>Certifications</h5>
-                      <div className={styles.certificationsList}>
-                        {selectedCaregiver.certifications.map((cert, index) => (
-                          <span key={index} className={styles.certificationTag}>
-                            {cert}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className={styles.detailSection}>
-                      <h5>Languages</h5>
-                      <p>{selectedCaregiver.languages.join(', ')}</p>
-                    </div>
-
-                    <div className={styles.detailSection}>
-                      <h5>Contact Information</h5>
-                      <p>📞 {selectedCaregiver.phone}</p>
-                      <p>📧 {selectedCaregiver.email}</p>
-                    </div>
-
-                    <div className={styles.statsSection}>
-                      <div className={styles.statItem}>
-                        <span className={styles.statNumber}>{selectedCaregiver.totalHours}</span>
-                        <span className={styles.statLabel}>Total Hours</span>
-                      </div>
-                      <div className={styles.statItem}>
-                        <span className={styles.statNumber}>{selectedCaregiver.completedTasks}</span>
-                        <span className={styles.statLabel}>Tasks Completed</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-      
-    </ElderLayout>
-    </>
+      )}
+    </div>
   );
 };
 
-export default ElderCaregivers;
+export default Caregivers;

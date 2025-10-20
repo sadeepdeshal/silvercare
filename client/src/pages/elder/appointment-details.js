@@ -9,6 +9,7 @@ import {
 } from "../../services/elderApi2";
 import styles from "../../components/css/elder/appointment-details.module.css";
 import ElderLayout from "../../components/ElderLayout";
+import InfoModal from "../../components/InfoModal.jsx";
 
 const AppointmentDetails = () => {
   const { currentUser } = useAuth();
@@ -21,6 +22,8 @@ const AppointmentDetails = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
+  const [showInfoModal, setShowInfoModal] = useState(false);
+  const [modalMessage, setModalMessage] = useState('');
 
   // Scroll to top when component mounts
   useEffect(() => {
@@ -64,7 +67,9 @@ const AppointmentDetails = () => {
       }
     } catch (error) {
       console.error("Error joining appointment:", error);
-      alert(error.response?.data?.error || "Failed to join appointment");
+      const errorMessage = error.response?.data?.error || "Failed to join appointment";
+      setModalMessage(errorMessage);
+      setShowInfoModal(true);
     } finally {
       setActionLoading(false);
     }
@@ -398,6 +403,14 @@ const AppointmentDetails = () => {
         </div>
       </div>
       </ElderLayout>
+      
+      <InfoModal
+        isOpen={showInfoModal}
+        onClose={() => setShowInfoModal(false)}
+        title="Join Appointment"
+        message={modalMessage}
+        icon="⏰"
+      />
     </div>
   );
 };

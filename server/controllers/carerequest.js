@@ -49,7 +49,7 @@ const getCareAssignmentsByWeek = async (req, res) => {
       INNER JOIN caregiver c ON cr.caregiver_id = c.caregiver_id
       INNER JOIN "User" u ON c.user_id = u.user_id
       WHERE cr.elder_id = $3 
-      AND cr.status IN ('approved', 'completed')
+      AND cr.status IN ('approved', 'completed','confirmed')
       AND (
         (cr.start_date <= $2 AND cr.end_date >= $1) OR
         (cr.start_date >= $1 AND cr.start_date <= $2) OR
@@ -156,7 +156,7 @@ const getDayCareAssignments = async (req, res) => {
       INNER JOIN "User" u ON c.user_id = u.user_id
       INNER JOIN elder e ON cr.elder_id = e.elder_id
       WHERE cr.elder_id = $1 
-      AND cr.status IN ('approved', 'completed')
+      AND cr.status IN ('approved', 'completed','confirmed')
       AND $2 >= cr.start_date 
       AND $2 <= cr.end_date
       ORDER BY cr.start_date ASC
@@ -251,8 +251,183 @@ const getCareAssignmentStats = async (req, res) => {
   }
 };
 
+// Get upcoming care assignments for an elder
+const getUpcomingCareAssignments = async (req, res) => {
+  const { elderId } = req.params;
+  
+  try {
+    console.log('Fetching upcoming care assignments for elder:', elderId);
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    // Get care assignments that are active now or starting in the future
+    const result = await pool.query(`
+      SELECT 
+        cr.request_id,
+        cr.caregiver_id,
+        cr.elder_id,
+        cr.start_date,
+        cr.end_date,
+        cr.status,
+        cr.duration,
+        u.name as caregiver_name,
+        u.email as caregiver_email,
+        u.phone as caregiver_phone,
+        c.certifications,
+        c.fixed_line as caregiver_fixed_line,
+        c.district as caregiver_district,
+        c.availability
+      FROM carerequest cr
+      INNER JOIN caregiver c ON cr.caregiver_id = c.caregiver_id
+      INNER JOIN "User" u ON c.user_id = u.user_id
+      WHERE cr.elder_id = $1 
+      AND cr.status IN ('approved', 'completed', 'confirmed')
+      AND cr.end_date >= $2
+      ORDER BY cr.start_date ASC
+      LIMIT 10
+    `, [elderId, today]);
+    
+    res.json({
+      success: true,
+      assignments: result.rows,
+      count: result.rows.length
+    });
+    
+  } catch (err) {
+    console.error('Error fetching upcoming care assignments:', err);
+    res.status(500).json({ 
+      success: false,
+      error: 'Error fetching upcoming care assignments' 
+    });
+  }
+};
+
+// Get care assignments by month for calendar view
+const getCareAssignmentsByMonth = async (req, res) => {
+  const { elderId } = req.params;
+  const { startDate, endDate } = req.query;
+  
+  try {
+    console.log('Fetching care assignments for elder:', elderId);
+    console.log('Date range:', startDate, 'to', endDate);
+    
+    if (!startDate || !endDate) {
+      return res.status(400).json({
+        success: false,
+        error: 'Start date and end date are required'
+      });
+    }
+    
+    const monthStart = new Date(startDate);
+    monthStart.setHours(0, 0, 0, 0);
+    
+    const monthEnd = new Date(endDate);
+    monthEnd.setHours(23, 59, 59, 999);
+    
+    // Get care assignments for the month
+    const result = await pool.query(`
+      SELECT 
+        cr.request_id,
+        cr.caregiver_id,
+        cr.elder_id,
+        cr.start_date,
+        cr.end_date,
+        cr.status,
+        cr.duration,
+        u.name as caregiver_name,
+        u.email as caregiver_email,
+        u.phone as caregiver_phone,
+        c.certifications,
+        c.fixed_line as caregiver_fixed_line,
+        c.district as caregiver_district,
+        c.availability
+      FROM carerequest cr
+      INNER JOIN caregiver c ON cr.caregiver_id = c.caregiver_id
+      INNER JOIN "User" u ON c.user_id = u.user_id
+      WHERE cr.elder_id = $3 
+      AND cr.status IN ('approved', 'completed', 'confirmed')
+      AND (
+        (cr.start_date <= $2 AND cr.end_date >= $1) OR
+        (cr.start_date >= $1 AND cr.start_date <= $2) OR
+        (cr.end_date >= $1 AND cr.end_date <= $2)
+      )
+      ORDER BY cr.start_date ASC
+    `, [monthStart, monthEnd, elderId]);
+    
+    // Create daily assignments array for the month
+    const dailyAssignments = [];
+    
+    // Get today's date in Sri Lanka timezone for proper comparison
+    const today = new Date();
+    const todayDateString = today.getFullYear() + '-' + 
+                           String(today.getMonth() + 1).padStart(2, '0') + '-' + 
+                           String(today.getDate()).padStart(2, '0');
+    
+    // Calculate number of days in the month
+    const daysInMonth = new Date(monthEnd.getFullYear(), monthEnd.getMonth() + 1, 0).getDate();
+    
+    console.log('Total assignments found:', result.rows.length);
+    if (result.rows.length > 0) {
+      console.log('Sample assignment:', result.rows[0]);
+    }
+    
+    for (let i = 1; i <= daysInMonth; i++) {
+      const currentDate = new Date(monthStart.getFullYear(), monthStart.getMonth(), i);
+      currentDate.setHours(0, 0, 0, 0);
+      
+      const dayAssignments = result.rows.filter(assignment => {
+        const assignmentStart = new Date(assignment.start_date);
+        assignmentStart.setHours(0, 0, 0, 0);
+        const assignmentEnd = new Date(assignment.end_date);
+        assignmentEnd.setHours(23, 59, 59, 999);
+        
+        const isInRange = currentDate >= assignmentStart && currentDate <= assignmentEnd;
+        
+        if (i <= 5 && isInRange) { // Log first 5 days with assignments
+          console.log(`Day ${i}: currentDate=${currentDate.toISOString()}, start=${assignmentStart.toISOString()}, end=${assignmentEnd.toISOString()}, caregiver=${assignment.caregiver_name}`);
+        }
+        
+        return isInRange;
+      });
+      
+      const currentDateString = currentDate.getFullYear() + '-' + 
+                               String(currentDate.getMonth() + 1).padStart(2, '0') + '-' + 
+                               String(currentDate.getDate()).padStart(2, '0');
+      
+      dailyAssignments.push({
+        date: currentDateString,
+        dayName: currentDate.toLocaleDateString('en-US', { weekday: 'long' }),
+        isToday: currentDateString === todayDateString,
+        assignments: dayAssignments
+      });
+    }
+    
+    res.json({
+      success: true,
+      monthStart: monthStart.getFullYear() + '-' + 
+                 String(monthStart.getMonth() + 1).padStart(2, '0') + '-' + 
+                 String(monthStart.getDate()).padStart(2, '0'),
+      monthEnd: monthEnd.getFullYear() + '-' + 
+               String(monthEnd.getMonth() + 1).padStart(2, '0') + '-' + 
+               String(monthEnd.getDate()).padStart(2, '0'),
+      dailyAssignments: dailyAssignments,
+      totalAssignments: result.rows.length
+    });
+    
+  } catch (err) {
+    console.error('Error fetching monthly care assignments:', err);
+    res.status(500).json({ 
+      success: false,
+      error: 'Error fetching monthly care assignments' 
+    });
+  }
+};
+
 module.exports = {
   getCareAssignmentsByWeek,
   getDayCareAssignments,
-  getCareAssignmentStats
+  getCareAssignmentStats,
+  getUpcomingCareAssignments,
+  getCareAssignmentsByMonth
 };

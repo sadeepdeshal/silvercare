@@ -1,10 +1,11 @@
 .adminNavbar {
   background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  position: sticky;
+  position: fixed;
   top: 0;
   z-index: 1000;
   border-bottom: 3px solid #007bff;
+  width: 100%;
 }
 
 .navContainer {
@@ -35,14 +36,15 @@
 }
 
 .logoIcon {
-  font-size: 2rem;
-  background: white;
-  padding: 0.5rem;
-  border-radius: 50%;
+  margin-right: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  /* backdrop-filter: blur(10px); */
 }
 
 .logoText {

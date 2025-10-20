@@ -715,6 +715,53 @@ export const elderApi = {
       console.error('API: Error confirming healthcare professional payment:', error);
       throw error;
     }
+  },
+
+  // ==================== FEEDBACK FUNCTIONS ====================
+  // Get feedback for doctor by elder
+  getfeedbackbyDoctorId: async (elderId, doctorId) => {
+    try {
+      console.log('API: Fetching feedback for doctor ID:', doctorId, 'by elder ID:', elderId);
+      const response = await fetch(`${API_BASE}/${elderId}/doctor/${doctorId}/feedback`);
+      const data = await response.json();
+      
+      console.log('API: Feedback response:', data);
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to fetch feedback for doctor');
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('API: Error fetching feedback for doctor:', error);
+      throw error;
+    }
+  },
+
+  // Add feedback for doctor by elder
+  addFeedbackForDoctor: async (elderId, doctorId, feedbackData) => {
+    try {
+      console.log('API: Adding feedback for doctor ID:', doctorId, 'by elder ID:', elderId, 'with data:', feedbackData);
+      const response = await fetch(`${API_BASE}/${elderId}/doctor/${doctorId}/feedback`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(feedbackData),
+      });
+      
+      const data = await response.json();
+      console.log('API: Add feedback response:', data);
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to add feedback for doctor');
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('API: Error adding feedback for doctor:', error);
+      throw error;
+    }
   }
 
   // ==================== END HEALTHCARE PROFESSIONAL SYSTEM ====================

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Navbar from '../../components/navbar';
 import DoctorSidebar from '../../components/doctor_sidebar';
@@ -6,12 +7,14 @@ import WelcomeModal from '../../components/WelcomeModal';
 import OnboardingTour from '../../components/OnboardingTour';
 import OnlineMeetingInterface from '../../components/OnlineMeetingInterface';
 import { joinAppointment } from '../../services/doctorMeetingApi';
+import { getImageSrc, handleImageError } from '../../utils/imageUtils';
 import styles from '../../components/css/doctor/dashboard.module.css';
 
 const API_BASE = "http://localhost:5000"; // Change if your backend runs elsewhere
 
 const DoctorDashboard = () => {
   const { currentUser, logout } = useAuth();
+  const navigate = useNavigate();
   const token = localStorage.getItem('silvercare_token');
   const [dashboardData, setDashboardData] = useState({
     todaysAppointments: [],
@@ -381,9 +384,10 @@ const DoctorDashboard = () => {
               <div className={styles.nextPatientCard}>
                 <div className={styles.patientHeader}>
                   <img 
-                    src={nextPatient.avatar || "https://randomuser.me/api/portraits/men/1.jpg"} 
+                    src={getImageSrc(nextPatient.avatar, 'elder', nextPatient.gender)} 
                     alt={nextPatient.name} 
                     className={styles.patientAvatar} 
+                    onError={(e) => handleImageError(e, 'elder', nextPatient.gender)}
                   />
                   <div className={styles.patientInfo}>
                     <h3 className={styles.patientName}>{nextPatient.name}</h3>
@@ -447,9 +451,10 @@ const DoctorDashboard = () => {
                 {consultations.map(c => (
                   <div key={c.id + c.date + c.time} className={styles.consultationItem}>
                     <img 
-                      src={c.avatar || "https://randomuser.me/api/portraits/men/2.jpg"} 
+                      src={getImageSrc(c.avatar, 'elder')} 
                       alt={c.name} 
                       className={styles.consultationAvatar} 
+                      onError={(e) => handleImageError(e, 'elder')}
                     />
                     <div className={styles.consultationInfo}>
                       <h4 className={styles.consultationName}>{c.name}</h4>
@@ -558,11 +563,11 @@ const DoctorDashboard = () => {
               </div>
             </div>
             
-            <div className={styles.quickActionCard}>
+            <div className={styles.quickActionCard} onClick={() => navigate('/doctor/reports')} style={{ cursor: 'pointer' }}>
               <div className={styles.quickActionIcon}>📊</div>
               <div className={styles.quickActionContent}>
                 <h3 className={styles.quickActionTitle}>View Reports</h3>
-                <p className={styles.quickActionDescription}>Check patient reports and analytics</p>
+                <p className={styles.quickActionDescription}>Physical and Online appointment statistics</p>
               </div>
             </div>
             
