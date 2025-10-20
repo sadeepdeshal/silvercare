@@ -144,3 +144,317 @@ const AppointmentDetails = () => {
     setSessionData(filteredData.slice(offset, offset + limit)); // Filter and paginate
     setPagination({ total: filteredData.length, limit, offset, hasMore: (offset + limit) < filteredData.length });
   };
+
+  if (loading) {
+    return (
+      <div style={styles.container}>
+        <HealthProfessionalSidebar onToggleCollapse={setSidebarCollapsed} />
+        <div style={{...styles.mainContent, marginLeft: sidebarCollapsed ? '80px' : '250px'}}>
+          <Navbar />
+          <div style={styles.loadingContainer}>
+            <div style={styles.spinner}></div>
+            <p>Loading appointments...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div style={styles.container}>
+      <HealthProfessionalSidebar onToggleCollapse={setSidebarCollapsed} />
+      <div style={{...styles.mainContent, marginLeft: sidebarCollapsed ? '80px' : '250px'}}>
+        <Navbar />
+        
+        <div style={styles.content}>
+          <div style={styles.header}>
+            <h1 style={styles.title}>Appointment Details</h1>
+            <p style={styles.subtitle}>View and manage your scheduled appointments</p>
+          </div>
+
+          {errorMessage && (
+            <div style={styles.errorMessage}>
+              <span>⚠️</span>
+              {errorMessage}
+            </div>
+          )}
+
+          <div style={styles.filterContainer}>
+            <label style={styles.filterLabel}>Filter by Appointment Status:</label>
+            <select
+              value={statusFilter}
+              onChange={handleStatusFilterChange}
+              style={styles.filterSelect}
+            >
+              <option value="">All Statuses</option>
+              <option value="confirmed">Confirmed</option>
+              <option value="completed">Completed</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+            {/* Search Component */}
+            <label style={styles.filterLabel}>Search:</label>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={handleSearchChange}
+              placeholder="Search by name or ID..."
+              style={{
+                padding: '10px',
+                borderRadius: '8px',
+                border: '1px solid #e2e8f0',
+                background: '#ffffff',
+                fontSize: '0.875rem',
+                color: '#1e293b',
+                width: '200px',
+                boxSizing: 'border-box'
+              }}
+            />
+          </div>
+
+          {sessionData.length === 0 && !errorMessage && (
+            <div style={styles.emptyMessage}>No appointments scheduled.</div>
+          )}
+
+          <div style={styles.tableContainer}>
+            <table style={styles.table}>
+              <thead>
+                <tr>
+                  <th style={styles.th}>Appointment ID</th>
+                  <th style={styles.th}>Elder Name</th>
+                  <th style={styles.th}>Date & Time</th>
+                  <th style={styles.th}>Status</th>
+                  <th style={styles.th}>Session Type</th>
+                  <th style={styles.th}>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sessionData.map((session, index) => (
+                  <React.Fragment key={session.session_id}>
+                    <tr 
+                      style={{
+                        ...styles.tr,
+                        ...(expandedRow === index ? styles.expandedRowBg : {})
+                      }}
+                      onMouseEnter={(e) => {
+                        if (expandedRow !== index) {
+                          e.currentTarget.style.background = 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (expandedRow !== index) {
+                          e.currentTarget.style.background = 'transparent';
+                        }
+                      }}
+                    >
+                      <td style={styles.td}>
+                        <strong style={styles.idText}>{session.session_id}</strong>
+                      </td>
+                      <td style={styles.td}>
+                        <div style={styles.nameCell}>
+                          {session.elder_photo ? (
+                            <img 
+                              src={`http://localhost:5000/api/healthprofessional/${session.elder_photo.replace(/\\/g, '/')}`} 
+                              alt={session.elder_name} 
+                              style={styles.avatar}
+                              onError={(e) => {
+                                e.target.style.display = 'none';
+                                const placeholder = e.target.nextSibling;
+                                if (placeholder) placeholder.style.display = 'flex';
+                              }}
+                            />
+                          ) : (
+                            <div style={styles.avatarPlaceholder}>
+                              {session.elder_name?.charAt(0).toUpperCase()}
+                            </div>
+                          )}
+                          <div>
+                            <div style={styles.nameText}>{session.elder_name}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td style={styles.td}>
+                        <span style={styles.ageText}>{formatDate(session.date_time)}</span>
+                      </td>
+                      <td style={styles.td}>
+                        <span style={{
+                          ...styles.statusBadge,
+                          ...(session.status === 'confirmed' ? styles.statusActive : session.status === 'completed' ? styles.statusCompleted : session.status === 'cancelled' ? styles.statusInactive : {})
+                        }}>
+                          {session.status || 'N/A'}
+                        </span>
+                      </td>
+                      <td style={styles.td}>
+                        <span style={styles.districtText}>{session.session_type || 'N/A'}</span>
+                      </td>
+                      <td style={styles.td}>
+                        <button 
+                          onClick={() => toggleRow(index)}
+                          style={styles.expandBtn}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.background = 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)';
+                            e.currentTarget.style.transform = 'translateY(-2px)';
+                            e.currentTarget.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.35)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.background = 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)';
+                            e.currentTarget.style.transform = 'translateY(0)';
+                            e.currentTarget.style.boxShadow = 'none';
+                          }}
+                        >
+                          {expandedRow === index ? '▼ Hide Details' : '► View Details'}
+                        </button>
+                      </td>
+                    </tr>
+                    
+                    {expandedRow === index && (
+                      <tr style={styles.detailsRow}>
+                        <td colSpan="6" style={styles.detailsTd}>
+                          <div style={styles.expandedContent}>
+                            <div style={styles.detailsGrid}>
+                              {/* Appointment Details */}
+                              <div style={styles.detailSection}>
+                                <h3 style={styles.detailSectionTitle}>📅 Appointment Details</h3>
+                                <div style={styles.detailGrid}>
+                                  <div style={styles.detailItem}>
+                                    <label style={styles.detailLabel}>Date & Time</label>
+                                    <span style={styles.detailValue}>{formatDate(session.date_time)}</span>
+                                  </div>
+                                  <div style={styles.detailItem}>
+                                    <label style={styles.detailLabel}>Session Type</label>
+                                    <span style={styles.detailValue}>{session.session_type || 'N/A'}</span>
+                                  </div>
+                                  <div style={styles.detailItem}>
+                                    <label style={styles.detailLabel}>Duration</label>
+                                    <span style={styles.detailValue}>{session.session_duration || 'N/A'}</span>
+                                  </div>
+                                  <div style={styles.detailItem}>
+                                    <label style={styles.detailLabel}>Meeting Link</label>
+                                    <span style={styles.detailValue}>
+                                      <a href={session.meeting_link} target="_blank" rel="noopener noreferrer">{session.meeting_link || 'N/A'}</a>
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Notes and Concerns */}
+                              <div style={styles.detailSection}>
+                                <h3 style={styles.detailSectionTitle}>📝 Notes & Concerns</h3>
+                                <div style={styles.detailGrid}>
+                                  <div style={{...styles.detailItem, gridColumn: '1 / -1'}}>
+                                    <label style={styles.detailLabel}>Notes</label>
+                                    <span style={styles.medicalValue}>{session.notes || 'No notes available'}</span>
+                                  </div>
+                                  <div style={{...styles.detailItem, gridColumn: '1 / -1'}}>
+                                    <label style={styles.detailLabel}>Patient Concerns</label>
+                                    <span style={styles.medicalValue}>{session.patient_concerns || 'No concerns recorded'}</span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Elder Information */}
+                              <div style={styles.detailSection}>
+                                <h3 style={styles.detailSectionTitle}>👤 Elder Information</h3>
+                                <div style={styles.detailGrid}>
+                                  <div style={styles.detailItem}>
+                                    <label style={styles.detailLabel}>Name</label>
+                                    <span style={styles.detailValue}>{session.elder_name}</span>
+                                  </div>
+                                  <div style={styles.detailItem}>
+                                    <label style={styles.detailLabel}>Contact</label>
+                                    <span style={styles.detailValue}>{session.elder_contact}</span>
+                                  </div>
+                                  <div style={styles.detailItem}>
+                                    <label style={styles.detailLabel}>Gender</label>
+                                    <span style={styles.detailValue}>{session.elder_gender}</span>
+                                  </div>
+                                  <div style={styles.detailItem}>
+                                    <label style={styles.detailLabel}>Age</label>
+                                    <span style={styles.detailValue}>{calculateAge(session.elder_dob)} years</span>
+                                  </div>
+                                  <div style={styles.detailItem}>
+                                    <label style={styles.detailLabel}>District</label>
+                                    <span style={styles.detailValue}>{session.elder_district}</span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Counselor Information */}
+                              <div style={styles.detailSection}>
+                                <h3 style={styles.detailSectionTitle}>👨‍⚕️ Counselor Information</h3>
+                                <div style={styles.detailGrid}>
+                                  <div style={styles.detailItem}>
+                                    <label style={styles.detailLabel}>Name</label>
+                                    <span style={styles.detailValue}>{session.counselor_name}</span>
+                                  </div>
+                                  <div style={styles.detailItem}>
+                                    <label style={styles.detailLabel}>Email</label>
+                                    <span style={styles.detailValue}>{session.counselor_email}</span>
+                                  </div>
+                                  <div style={styles.detailItem}>
+                                    <label style={styles.detailLabel}>Phone</label>
+                                    <span style={styles.detailValue}>{session.counselor_phone}</span>
+                                  </div>
+                                  <div style={styles.detailItem}>
+                                    <label style={styles.detailLabel}>Specialization</label>
+                                    <span style={styles.detailValue}>{session.specialization}</span>
+                                  </div>
+                                  <div style={styles.detailItem}>
+                                    <label style={styles.detailLabel}>Institution</label>
+                                    <span style={styles.detailValue}>{session.current_institution}</span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Timestamps */}
+                              <div style={styles.detailSection}>
+                                <h3 style={styles.detailSectionTitle}>⏰ Timestamps</h3>
+                                <div style={styles.detailGrid}>
+                                  <div style={styles.detailItem}>
+                                    <label style={styles.detailLabel}>Created At</label>
+                                    <span style={styles.detailValue}>{formatDate(session.created_at)}</span>
+                                  </div>
+                                  <div style={styles.detailItem}>
+                                    <label style={styles.detailLabel}>Updated At</label>
+                                    <span style={styles.detailValue}>{formatDate(session.updated_at)}</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </React.Fragment>
+                ))}
+              </tbody>
+            </table>
+
+            {/* Pagination Controls */}
+            {sessionData.length > 0 && (
+              <div style={styles.paginationContainer}>
+                <button
+                  style={styles.paginationButton}
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                >
+                  Previous
+                </button>
+                <span style={styles.paginationInfo}>
+                  Page {currentPage} of {Math.ceil(pagination.total / limit)}
+                </span>
+                <button
+                  style={styles.paginationButton}
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={!pagination.hasMore}
+                >
+                  Next
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
