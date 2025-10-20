@@ -38,9 +38,6 @@ const FamilyMemberSidebar = ({ onItemClick }) => {
       case 'elder-profiles':
         navigate('/family-member/elders');
         break;
-      case 'medical-history':
-        navigate('/family-member/medical-history');
-        break;
       case 'book-appointment':
         navigate('/family-member/elders');
         break;
@@ -57,14 +54,8 @@ const FamilyMemberSidebar = ({ onItemClick }) => {
       case 'appointment-history':
         navigate('/family-member/appointment-history');
         break;
-      case 'prescriptions':
-        navigate('/family-member/prescriptions');
-        break;
-      case 'lab-reports':
-        navigate('/family-member/lab-reports');
-        break;
-      case 'wellness-updates':
-        navigate('/family-member/wellness-updates');
+      case 'reports':
+        navigate('/family-member/reports');
         break;
       case 'elder-chat':
         navigate('/family-member/elder-messages');
@@ -97,13 +88,7 @@ const FamilyMemberSidebar = ({ onItemClick }) => {
         navigate('/family-member/mental-health-reports');
         break;
       case 'profile-settings':
-        navigate('/family-member/profile-settings');
-        break;
-      case 'privacy-settings':
-        navigate('/family-member/privacy-settings');
-        break;
-      case 'notification-settings':
-        navigate('/family-member/notification-settings');
+        navigate('/family-member/profile');
         break;
       default:
         console.log('Navigation not implemented for:', item.key);
@@ -129,8 +114,7 @@ const FamilyMemberSidebar = ({ onItemClick }) => {
       hasSubmenu: true,
       submenu: [
         { key: 'register-elder', label: 'Register Elder', path: '/family-member/elder-signup' },
-        { key: 'elder-profiles', label: 'Elder Profiles', path: '/family-member/elders' },
-        { key: 'medical-history', label: 'Medical History', path: '/family-member/medical-history' }
+        { key: 'elder-profiles', label: 'Elder Profiles', path: '/family-member/elders' }
       ]
     },
     {
@@ -146,15 +130,10 @@ const FamilyMemberSidebar = ({ onItemClick }) => {
       ]
     },
     {
-      key: 'medical-records',
+      key: 'reports',
       label: 'Reports',
       icon: '📋',
-      hasSubmenu: true,
-      submenu: [
-        { key: 'prescriptions', label: 'Prescriptions', path: '/family-member/prescriptions' },
-        { key: 'lab-reports', label: 'Lab Reports', path: '/family-member/lab-reports' },
-        { key: 'wellness-updates', label: 'Wellness Updates', path: '/family-member/wellness-updates' }
-      ]
+      path: '/family-member/reports'
     },
     {
       key: 'communications',
@@ -198,9 +177,7 @@ const FamilyMemberSidebar = ({ onItemClick }) => {
       icon: '⚙️',
       hasSubmenu: true,
       submenu: [
-        { key: 'profile-settings', label: 'Profile Settings', path: '/family-member/profile-settings' },
-        { key: 'privacy-settings', label: 'Privacy Settings', path: '/family-member/privacy-settings' },
-        { key: 'notification-settings', label: 'Notification Settings', path: '/family-member/notification-settings' }
+        { key: 'profile-settings', label: 'Profile Settings', path: '/family-member/profile' }
       ]
     }
   ];
