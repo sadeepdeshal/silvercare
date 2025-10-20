@@ -76,7 +76,16 @@ const getAdminDashboard = async (req, res) => {
     console.log('Pending health professionals data:', pendingHealthProfessionalsResult.rows);
     
     const pendingHealthProfessionals = pendingHealthProfessionalsResult.rows;
-
+    //get total revenue
+    const revenueQuery = `
+      SELECT 
+        COALESCE(SUM(amount), 0) as total_revenue
+      FROM payment
+    `;
+    
+    const revenueResult = await pool.query(revenueQuery);
+    const revenue = parseFloat(revenueResult.rows[0]?.total_revenue || 0);
+    console.log('Total revenue:', revenue);
     // Get recent registrations
     const recentRegistrationsQuery = `
       SELECT user_id, name, email, role, created_at
@@ -122,7 +131,8 @@ const getAdminDashboard = async (req, res) => {
         pendingHealthProfessionals: pendingHealthProfessionals, // Add health professionals data
         recentRegistrations: recentRegistrations,
         newBookings: newBookings,
-        monthlySignups: monthlySignups
+        monthlySignups: monthlySignups,
+        revenue: revenue
       }
     };
 
@@ -131,6 +141,7 @@ const getAdminDashboard = async (req, res) => {
     console.log('- Stats pending_doctors:', stats.pending_doctors);
     console.log('- Pending health professionals count:', pendingHealthProfessionals.length);
     console.log('- Stats pending_health_professionals:', stats.pending_health_professionals);
+    console.log('- Total revenue:', revenue);
     console.log('=== ADMIN DASHBOARD DEBUG END ===');
 
     res.json(responseData);
@@ -423,9 +434,39 @@ const getAllUsers = async (req, res) => {
   }
 };
 
+const changeStatus = async (req, res) => {
+  try {
+    // Route: PUT /change-status/:id/:status
+    const { id, status } = req.params;
+    console.log(`Changing status for user ID: ${id} to ${status}`);
+
+    // Use clear parameter order: SET status = $1 WHERE user_id = $2
+    const result = await pool.query(
+      'UPDATE caregiver SET status = $1 WHERE user_id = $2 RETURNING *',
+      [status, id]
+    );
+
+    if (!result || result.rows.length === 0) {
+      console.log(`No caregiver row updated for user_id=${id}`);
+      return res.status(404).json({ success: false, error: 'User not found' });
+    }
+
+    console.log('User status changed successfully:', result.rows[0]);
+    return res.json({ success: true, data: result.rows[0] });
+  } catch (error) {
+    console.error('Error changing user status:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to change user status',
+      details: error.message
+    });
+  }
+};
+
 module.exports = {
   getAdminDashboard,
   approveProfessional,
   rejectProfessional,
+  changeStatus,
   getAllUsers
 };

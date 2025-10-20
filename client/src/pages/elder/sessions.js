@@ -9,6 +9,7 @@ import {
 } from '../../services/elderApi2';
 import styles from '../../components/css/elder/sessions.module.css';
 import ElderLayout from '../../components/ElderLayout';
+import InfoModal from '../../components/InfoModal.jsx';
 
 const AllSessions = () => {
   const { currentUser } = useAuth();
@@ -20,6 +21,8 @@ const AllSessions = () => {
   const [filteredSessions, setFilteredSessions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showInfoModal, setShowInfoModal] = useState(false);
+  const [modalMessage, setModalMessage] = useState('');
   
   // Filter and search states
   const [activeFilter, setActiveFilter] = useState("all");
@@ -52,6 +55,7 @@ const AllSessions = () => {
           const sessionsResponse = await getAllSessions(elderData.elder_id);
           
           if (sessionsResponse.data.success) {
+            console.log('Sessions data:', sessionsResponse.data.sessions);
             setSessions(sessionsResponse.data.sessions);
           } else {
             setError(sessionsResponse.data.error || 'Failed to fetch sessions');
@@ -82,11 +86,22 @@ const AllSessions = () => {
           const now = new Date();
           return sessionDate > now && session.status !== 'cancelled';
         });
-      } else if (activeFilter === "past") {
+      } else if (activeFilter === "ongoing") {
+        // Ongoing: session started and still within 30 minutes from start time
+        const now = new Date();
         filtered = filtered.filter(session => {
           const sessionDate = new Date(session.date_time);
-          const now = new Date();
-          return sessionDate <= now || session.status === 'completed';
+          const thirtyMinutesAfterStart = new Date(sessionDate.getTime() + 30 * 60 * 1000);
+          return sessionDate <= now && now <= thirtyMinutesAfterStart && session.status !== 'cancelled';
+        });
+      } else if (activeFilter === "past") {
+        // Past: session started more than 30 minutes ago (exclude ongoing)
+        const now = new Date();
+        filtered = filtered.filter(session => {
+          const sessionDate = new Date(session.date_time);
+          const thirtyMinutesAfterStart = new Date(sessionDate.getTime() + 30 * 60 * 1000);
+          // Include if: started AND more than 30 minutes have passed OR status is completed
+          return (sessionDate < now && now > thirtyMinutesAfterStart) || session.status === 'completed';
         });
       } else {
         filtered = filtered.filter(session => session.status === activeFilter);
@@ -131,21 +146,30 @@ const AllSessions = () => {
   const handleJoinSession = async (sessionId) => {
     try {
       if (!elderDetails?.elder_id) {
-        alert('Elder details not found');
+        setModalMessage('Elder details not found');
+        setShowInfoModal(true);
         return;
       }
 
+      console.log('Attempting to join session:', sessionId, 'for elder:', elderDetails.elder_id);
       const response = await joinSession(elderDetails.elder_id, sessionId);
       
       if (response.data.success) {
         // Redirect to the meeting link
-        window.open(response.data.meetingLink, '_blank');
+        window.open(response.data.meetingUrl, '_blank');
       } else {
-        alert(response.data.error || 'Failed to join session');
+        console.error('Session join failed:', response.data);
+        setModalMessage(response.data.error || 'Failed to join session');
+        setShowInfoModal(true);
       }
-    } catch (err) {
-      console.error('Error joining session:', err);
-      alert('Failed to join session. Please try again.');
+    } catch (error) {
+      console.error('Error joining session:', error);
+      console.error('Error response:', error.response?.data);
+      
+      // Show the actual error message from the server
+      const errorMessage = error.response?.data?.error || 'Failed to join session. Please try again.';
+      setModalMessage(errorMessage);
+      setShowInfoModal(true);
     }
   };
 
@@ -233,6 +257,19 @@ const AllSessions = () => {
     return sessionDate > now && session.status !== 'cancelled';
   };
 
+  const canJoinSession = (session) => {
+    // Can join if: online session AND (upcoming OR ongoing - within 30 min after start)
+    if (session.session_type !== 'online') return false;
+    
+    const now = new Date();
+    const sessTime = new Date(session.date_time);
+    const thirtyMinutesAfterStart = new Date(sessTime.getTime() + 30 * 60 * 1000);
+    
+    // Can join if session hasn't started yet OR started but within 30 minutes
+    return (sessTime > now || (sessTime <= now && now <= thirtyMinutesAfterStart)) 
+           && session.status !== "cancelled";
+  };
+
   if (loading) {
     return (
       <div className={styles.pageContainer}>
@@ -296,8 +333,18 @@ const AllSessions = () => {
                 {[
                   { key: "all", label: "All", count: sessions.length },
                   { key: "upcoming", label: "Upcoming", count: sessions.filter(session => new Date(session.date_time) > new Date() && session.status !== "cancelled").length },
-                  { key: "past", label: "Past", count: sessions.filter(session => new Date(session.date_time) < new Date() || session.status === "completed").length },
-                  { key: "completed", label: "Completed", count: sessions.filter(session => session.status === "completed").length },
+                  { key: "ongoing", label: "Ongoing", count: sessions.filter(session => {
+                    const sessionDate = new Date(session.date_time);
+                    const now = new Date();
+                    const thirtyMinutesAfterStart = new Date(sessionDate.getTime() + 30 * 60 * 1000);
+                    return sessionDate <= now && now <= thirtyMinutesAfterStart && session.status !== "cancelled";
+                  }).length },
+                  { key: "past", label: "Past", count: sessions.filter(session => {
+                    const sessionDate = new Date(session.date_time);
+                    const now = new Date();
+                    const thirtyMinutesAfterStart = new Date(sessionDate.getTime() + 30 * 60 * 1000);
+                    return (sessionDate < now && now > thirtyMinutesAfterStart) || session.status === "completed";
+                  }).length },
                   { key: "cancelled", label: "Cancelled", count: sessions.filter(session => session.status === "cancelled").length }
                 ].map((filter) => (
                   <button
@@ -419,12 +466,12 @@ const AllSessions = () => {
                 </div>
 
                 <div className={styles.cardActions}>
-                  {session.session_type === 'online' && isUpcomingSession(session) && (
+                  {canJoinSession(session) && (
                     <button
                       className={styles.joinBtn}
                       onClick={() => handleJoinSession(session.session_id)}
                     >
-                      🎥 Join Session
+                      🎥 Join Now
                     </button>
                   )}
                   <button 
@@ -490,6 +537,14 @@ const AllSessions = () => {
         )}
       </div>
       </ElderLayout>
+      
+      <InfoModal
+        isOpen={showInfoModal}
+        onClose={() => setShowInfoModal(false)}
+        title="Session Join"
+        message={modalMessage}
+        icon="⏰"
+      />
     </div>
   );
 };

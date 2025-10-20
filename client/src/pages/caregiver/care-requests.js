@@ -5,6 +5,7 @@ import CaregiverLayout from '../../components/CaregiverLayout';
 import caregiverApi from '../../services/caregiverApi2';
 import { useAuth } from '../../context/AuthContext';
 import styles from "../../components/css/caregiver/care-requests.module.css";
+import RequestCountdownTimer from '../../components/RequestCountdownTimer.jsx';
 
 const CareRequests = () => {
   const { user } = useAuth();
@@ -32,28 +33,10 @@ useEffect(() => {
   fetchCareRequests();
 }, [user, debouncedSearchTerm]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Auto-update status from 'approved' to 'completed' if end_date has passed
-  useEffect(() => {
-    if (!careRequests || careRequests.length === 0) return;
-    const today = new Date();
-    today.setHours(0,0,0,0);
-    careRequests.forEach(async (request) => {
-      if (request.status === 'approved') {
-        const endDate = new Date(request.end_date);
-        endDate.setHours(0,0,0,0);
-        if (endDate.getTime() < today.getTime()) {
-          // Update status in backend
-          try {
-            await caregiverApi.updateCareRequestStatus(request.request_id, 'completed');
-            // Refresh the data to show updated status
-            fetchCareRequests();
-          } catch (err) {
-            console.error('Error updating status to completed:', err);
-          }
-        }
-      }
-    });
-  }, [careRequests]); // eslint-disable-line react-hooks/exhaustive-deps
+  // NOTE: Do NOT auto-update status to 'completed'
+  // Status stays as 'confirmed' in database
+  // Display logic shows if assignment is past/current based on end_date
+  
 
   const fetchCareRequests = async () => {
     try {
@@ -80,7 +63,7 @@ useEffect(() => {
     if (status === 'all') return careRequests;
     // Show completed if status was approved and end_date has passed
     return careRequests.map(request => {
-      if (request.status === 'approved') {
+      if (request.status === 'confirmed' || request.status === 'approved') {
         const endDate = new Date(request.end_date);
         const today = new Date();
         // Remove time part for date-only comparison
@@ -89,11 +72,16 @@ useEffect(() => {
         if (endDate.getTime() < today.getTime()) {
           return { ...request, status: 'completed' };
         } else if (endDate.getTime() === today.getTime()) {
-          return { ...request, status: 'approved' };
+          return { ...request, status: 'confirmed' };
         }
       }
       return request;
-    }).filter(request => request.status === status);
+    }).filter(request => {
+      if (status === 'confirmed') {
+        return request.status === 'confirmed' || request.status === 'approved';
+      }
+      return request.status === status;
+    });
   };
 
   const getTabCount = (status) => {
@@ -189,9 +177,8 @@ useEffect(() => {
   const tabs = [
     { key: 'all', label: 'All Requests', count: getTabCount('all') },
     { key: 'pending', label: 'Pending', count: getTabCount('pending') },
-    { key: 'approved', label: 'Approved', count: getTabCount('approved') },
     { key: 'confirmed', label: 'Confirmed', count: getTabCount('confirmed') },
-    { key: 'cancelled', label: 'Rejected', count: getTabCount('cancelled') },
+    { key: 'cancelled', label: 'Cancelled', count: getTabCount('cancelled') },
     { key: 'completed', label: 'Completed', count: getTabCount('completed') }
   ];
 
@@ -238,7 +225,6 @@ useEffect(() => {
           <div className={styles.header}>
             
             <h1>Care Requests</h1>
-            <p>Manage and view all your care requests</p>
           </div>
 
           {/* Search Section */}
@@ -250,11 +236,9 @@ useEffect(() => {
               onChange={(e) => setSearchTerm(e.target.value)}
               className={styles.searchInput}
             />
-            {searchTerm && (
-              <button onClick={handleClearSearch} className={styles.clearSearchButton}>
-                Clear Search
-              </button>
-            )}
+            <button onClick={handleClearSearch} className={styles.clearSearchButton}>
+              Clear Filters
+            </button>
           </div>
 
           {/* Tabs */}
@@ -295,27 +279,48 @@ useEffect(() => {
             ) : (
               <div className={styles.requestsList}>
                 {currentRequests.map((request, index) => {
-                  // For confirmed status, if start date < today, add green border/background
+                  // Determine display status and styling
+                  const today = new Date();
+                  today.setHours(0,0,0,0);
+                  
+                  const startDate = new Date(request.start_date);
+                  startDate.setHours(0,0,0,0);
+                  
+                  const endDate = new Date(request.end_date);
+                  endDate.setHours(0,0,0,0);
+                  
+                  let displayStatus = request.status === 'approved' ? 'confirmed' : request.status;
                   let confirmedPast = false;
-                  if (request.status === 'confirmed') {
-                    const today = new Date();
-                    today.setHours(0,0,0,0);
-                    const start = new Date(request.start_date);
-                    start.setHours(0,0,0,0);
-                    if (start < today) confirmedPast = true;
+                  let isCompleted = false;
+                  
+                  // Check if it's a confirmed/approved assignment
+                  if (request.status === 'confirmed' || request.status === 'approved') {
+                    // If end_date < today, show as completed
+                    if (endDate < today) {
+                      displayStatus = 'completed';
+                      isCompleted = true;
+                    }
+                    // If start_date < today AND end_date >= today, it's active
+                    else if (startDate < today && endDate >= today) {
+                      confirmedPast = true;
+                    }
                   }
+                  
                   return (
                     <div
                       key={request.request_id || index}
-                      className={styles.requestCard}
-                      style={confirmedPast ? { border: '2px solid #10b981', background: '#d1fae5' } : {}}
+                      className={`${styles.requestCard} ${confirmedPast ? styles.activeAssignment : ''}`}
                     >
                       <div className={styles.requestHeader}>
                         <div className={styles.requestInfo}>
                           <h3 className={styles.elderName}>{request.elder_name}</h3>
+                          {confirmedPast && (
+                            <span className={styles.activeLabel}>🟢 Active Assignment</span>
+                          )}
+                          
                         </div>
-                        <div className={`${styles.statusBadge} ${styles[request.status]}`}>
-                          {request.status}
+                        <div className={`${styles.statusBadge} ${styles[displayStatus]}`}>
+                          {displayStatus}
                         </div>
                       </div>
 
@@ -375,20 +380,14 @@ useEffect(() => {
                         </div>
                       </div>
                     </div>
-                      {/* Show time left only in pending tab */}
-                      {(request?.status === 'pending' || request?.status === 'approved') && (
+                      {/* Show countdown timer for pending requests */}
+                      {request?.status === 'pending' && (
                         <div className={styles.timeLeftRow}>
-                          <span className={styles.label}>Time Left:</span>
-                          <span className={(() => {
-                            const timeLeft = getTimeLeft(request.start_date);
-                            if (request.status === 'approved' && timeLeft === 'Started') {
-                              return styles.greenText;
-                            }
-                            // Existing color logic for other cases
-                            return (new Date(request.start_date) - new Date() < 7 * 24 * 60 * 60 * 1000 ? styles.redText : styles.greenText);
-                          })()}>
-                            {getTimeLeft(request.start_date)}
-                          </span>
+                          <span className={styles.label}>Time Left to Accept:</span>
+                          <RequestCountdownTimer 
+                            requestDate={request.request_date}
+                            status={request.status}
+                          />
                         </div>
                       )}
                     <div className={styles.requestActions}>

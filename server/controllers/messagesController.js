@@ -124,6 +124,106 @@ const messagesController = {
         message: 'Failed to fetch unread count'
       });
     }
+  },
+
+  // Get healthcare professionals who have appointments with family member's elders
+  getHealthcareProfessionalsWithAppointments: async (req, res) => {
+    try {
+      const { familyUserId } = req.params;
+
+      const query = `
+        SELECT DISTINCT 
+          u.user_id,
+          u.name as counselor_name,
+          u.email as counselor_email,
+          u.phone as counselor_phone,
+          c.counselor_id,
+          c.specialization,
+          c.years_of_experience,
+          c.current_institution,
+          c.district as counselor_district,
+          COUNT(DISTINCT ca.appointment_id) as total_appointments,
+          COUNT(DISTINCT CASE WHEN ca.status = 'confirmed' THEN ca.appointment_id END) as confirmed_appointments,
+          COUNT(DISTINCT CASE WHEN ca.status = 'completed' THEN ca.appointment_id END) as completed_appointments,
+          STRING_AGG(DISTINCT e.name, ', ') as elders_treated,
+          MAX(ca.date_time) as latest_appointment_date
+        FROM "User" u
+        JOIN counselor c ON u.user_id = c.user_id
+        JOIN counselor_appointment ca ON c.counselor_id = ca.counselor_id
+        JOIN elder e ON ca.elder_id = e.elder_id
+        JOIN familymember fm ON e.family_id = fm.family_id
+        WHERE fm.user_id = $1 
+          AND ca.status IN ('confirmed', 'completed')
+          AND c.status = 'confirmed'
+        GROUP BY 
+          u.user_id, u.name, u.email, u.phone, 
+          c.counselor_id, c.specialization, c.years_of_experience, 
+          c.current_institution, c.district
+        ORDER BY latest_appointment_date DESC
+      `;
+
+      const result = await db.query(query, [familyUserId]);
+
+      res.json({
+        success: true,
+        healthcareProfessionals: result.rows
+      });
+
+    } catch (error) {
+      console.error('Error fetching healthcare professionals with appointments:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch healthcare professionals'
+      });
+    }
+  },
+
+  // Get family members who have elders that have appointments with this healthcare professional
+  getFamilyMembersWithAppointments: async (req, res) => {
+    try {
+      const { healthcareProfessionalUserId } = req.params;
+
+      const query = `
+        SELECT DISTINCT 
+          u.user_id,
+          u.name as family_member_name,
+          u.email as family_member_email,
+          u.phone as family_member_phone,
+          fm.family_id,
+          fm.address,
+          fm.phone_fixed,
+          COUNT(DISTINCT ca.appointment_id) as total_appointments,
+          COUNT(DISTINCT CASE WHEN ca.status = 'confirmed' THEN ca.appointment_id END) as confirmed_appointments,
+          COUNT(DISTINCT CASE WHEN ca.status = 'completed' THEN ca.appointment_id END) as completed_appointments,
+          STRING_AGG(DISTINCT e.name, ', ') as elders_under_care,
+          MAX(ca.date_time) as latest_appointment_date
+        FROM "User" u
+        JOIN familymember fm ON u.user_id = fm.user_id
+        JOIN elder e ON fm.family_id = e.family_id
+        JOIN counselor_appointment ca ON e.elder_id = ca.elder_id
+        JOIN counselor c ON ca.counselor_id = c.counselor_id
+        WHERE c.user_id = $1 
+          AND ca.status IN ('confirmed', 'completed')
+        GROUP BY 
+          u.user_id, u.name, u.email, u.phone, 
+          fm.family_id, fm.address, fm.phone_fixed
+        ORDER BY latest_appointment_date DESC
+      `;
+
+      const result = await db.query(query, [healthcareProfessionalUserId]);
+
+      res.json({
+        success: true,
+        familyMembers: result.rows
+      });
+
+    } catch (error) {
+      console.error('Error fetching family members with appointments:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch family members'
+      });
+    }
   }
 };
 

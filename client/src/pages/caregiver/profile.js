@@ -22,7 +22,8 @@ const Profile = () => {
     availability: '',
     certifications: '',
     fixed_line: '',
-    district: ''
+    district: '',
+    day_rate: ''
   });
   const [passwordForm, setPasswordForm] = useState({
     currentPassword: '',
@@ -36,10 +37,25 @@ const Profile = () => {
     }
   }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Debug effect to log profileData changes
+  useEffect(() => {
+    console.log('=== PROFILE DATA CHANGED ===');
+    console.log('Current profileData:', profileData);
+    console.log('Current profileData.availability:', profileData?.availability);
+    console.log('Current profileData.day_rate:', profileData?.day_rate);
+    console.log('Day rate type:', typeof profileData?.day_rate);
+  }, [profileData]);
+
   const fetchProfileData = async () => {
     try {
       setLoading(true);
       const response = await caregiverApi.getCaregiverById(user.caregiver_id);
+      
+      console.log('=== FETCHING PROFILE DATA ===');
+      console.log('Response:', response);
+      console.log('Caregiver data:', response.caregiver);
+      console.log('Day rate from API:', response.caregiver?.day_rate);
+      
       if (response.success) {
         setProfileData(response.caregiver);
         setEditForm({
@@ -49,8 +65,11 @@ const Profile = () => {
           availability: response.caregiver.availability || '',
           certifications: response.caregiver.certifications || '',
           fixed_line: response.caregiver.fixed_line || '',
-          district: response.caregiver.district || ''
+          district: response.caregiver.district || '',
+          day_rate: response.caregiver.day_rate || ''
         });
+        
+        console.log('Set day_rate in editForm:', response.caregiver.day_rate || '');
       }
     } catch (error) {
       console.error('Error fetching profile:', error);
@@ -74,7 +93,8 @@ const Profile = () => {
       availability: profileData.availability || '',
       certifications: profileData.certifications || '',
       fixed_line: profileData.fixed_line || '',
-      district: profileData.district || ''
+      district: profileData.district || '',
+      day_rate: profileData.day_rate || ''
     });
   };
 
@@ -91,6 +111,11 @@ const Profile = () => {
       setError(null);
       setSuccess(null);
       
+      // Convert day_rate to number or null
+      const dayRateValue = editForm.day_rate === '' || editForm.day_rate === null || editForm.day_rate === undefined 
+        ? null 
+        : Number(editForm.day_rate);
+      
       const updateData = {
         name: editForm.name,
         email: editForm.email,
@@ -98,16 +123,58 @@ const Profile = () => {
         availability: editForm.availability,
         certifications: editForm.certifications,
         fixed_line: editForm.fixed_line,
-        district: editForm.district
+        district: editForm.district,
+        day_rate: dayRateValue
       };
+      
+      console.log('=== SAVING PROFILE ===');
+      console.log('Update data being sent:', updateData);
+      console.log('Day rate value:', dayRateValue);
+      console.log('Day rate type:', typeof dayRateValue);
+      console.log('Original editForm.day_rate:', editForm.day_rate);
       
       const response = await caregiverApi.updateCaregiverProfile(user.caregiver_id, updateData);
       
+      console.log('=== UPDATE RESPONSE ===');
+      console.log('Full response object:', JSON.stringify(response, null, 2));
+      console.log('Response.success:', response.success);
+      console.log('Response.caregiver:', response.caregiver);
+      console.log('Response.caregiver.day_rate:', response.caregiver?.day_rate);
+      console.log('Type of day_rate:', typeof response.caregiver?.day_rate);
+      
       if (response.success) {
+        console.log('=== UPDATING STATE WITH RESPONSE ===');
+        console.log('Response caregiver object:', response.caregiver);
+        console.log('Availability from response:', response.caregiver.availability);
+        console.log('Day rate from response:', response.caregiver.day_rate);
+        
+        // Update profileData with response
         setProfileData(response.caregiver);
+        
+        // Update editForm with response data
+        const newEditForm = {
+          name: response.caregiver.caregiver_name || '',
+          email: response.caregiver.caregiver_email || '',
+          phone: response.caregiver.caregiver_phone || '',
+          availability: response.caregiver.availability || '',
+          certifications: response.caregiver.certifications || '',
+          fixed_line: response.caregiver.fixed_line || '',
+          district: response.caregiver.district || '',
+          day_rate: response.caregiver.day_rate || ''
+        };
+        
+        console.log('New editForm values:', newEditForm);
+        console.log('New editForm.availability:', newEditForm.availability);
+        console.log('New editForm.day_rate:', newEditForm.day_rate);
+        
+        setEditForm(newEditForm);
         setIsEditing(false);
         setSuccess('Profile updated successfully!');
         setTimeout(() => setSuccess(null), 3000);
+        
+        // Re-fetch profile data to ensure sync with database
+        console.log('Re-fetching profile data to confirm update...');
+        await fetchProfileData();
       }
     } catch (error) {
       console.error('Error updating profile:', error);
@@ -245,7 +312,6 @@ const Profile = () => {
           </button>
           <div className={styles.header}>
             <h1>My Profile</h1>
-            <p>Manage your professional information and settings</p>
           </div>
 
           {/* Success/Error Messages */}
@@ -272,6 +338,30 @@ const Profile = () => {
                   <p className={styles.role}>Professional Caregiver</p>
                   <div className={`${styles.statusBadge} ${styles[profileData?.availability]}`}>
                     {profileData?.availability}
+                  </div>
+                  {/* Rating Display */}
+                  <div className={styles.ratingSection}>
+                    <div className={styles.stars}>
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <span
+                          key={star}
+                          className={styles.star}
+                          style={{
+                            color: star <= Math.round(profileData?.average_rating || 0) ? '#fbbf24' : '#d1d5db'
+                          }}
+                        >
+                          ★
+                        </span>
+                      ))}
+                    </div>
+                    <span className={styles.ratingText}>
+                      {profileData?.average_rating > 0 
+                        ? `${profileData.average_rating} / 5.0` 
+                        : 'No ratings yet'}
+                    </span>
+                    <span className={styles.reviewCount}>
+                      ({profileData?.total_reviews || 0} {profileData?.total_reviews === 1 ? 'review' : 'reviews'})
+                    </span>
                   </div>
                 </div>
               </div>
@@ -409,7 +499,6 @@ const Profile = () => {
                         className={styles.select}
                       >
                         <option value="available">Available</option>
-                        <option value="busy">Busy</option>
                         <option value="unavailable">Unavailable</option>
                       </select>
                     ) : (
@@ -421,6 +510,26 @@ const Profile = () => {
                   <div className={styles.infoItem}>
                     <label>Member Since</label>
                     <span>{new Date(profileData?.created_at).toLocaleDateString()}</span>
+                  </div>
+                  <div className={styles.infoItem}>
+                    <label>Day Rate</label>
+                    {isEditing ? (
+                      <input
+                        type="number"
+                        name="day_rate"
+                        value={editForm.day_rate}
+                        onChange={handleInputChange}
+                        className={styles.input}
+                        placeholder="Enter day rate in Rs."
+                        min="0"
+                      />
+                    ) : (
+                      <span>
+                        {profileData?.day_rate !== null && profileData?.day_rate !== undefined && profileData?.day_rate !== ''
+                          ? `Rs. ${profileData.day_rate}` 
+                          : 'Not set'}
+                      </span>
+                    )}
                   </div>
                 </div>
                 <div className={styles.certificationsSection}>

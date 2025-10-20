@@ -9,11 +9,8 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  margin-bottom: 2rem;
-  background: white;
+  margin-bottom: 0.5rem;
   padding: 1.5rem;
-  border-radius: 15px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
 .header h1 {
@@ -90,6 +87,7 @@
   color: #94a3b8;
 }
 
+
 .clearSearchButton {
   padding: 0.75rem 1.5rem;
   background: linear-gradient(135deg, #ff6b6b, #ee5a52);
@@ -99,7 +97,6 @@
   cursor: pointer;
   font-weight: 600;
   transition: all 0.3s ease;
-  font-size: 0.9rem;
 }
 
 .clearSearchButton:hover {
@@ -208,6 +205,63 @@
 .requestCard:hover {
   transform: translateY(-5px);
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+/* Active Assignment (Confirmed & Started) */
+.requestCard.activeAssignment {
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  border: 3px solid #10b981;
+  box-shadow: 
+    0 4px 20px rgba(16, 185, 129, 0.25),
+    0 0 0 1px rgba(16, 185, 129, 0.1);
+}
+
+.requestCard.activeAssignment::before {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  height: 5px;
+}
+
+.requestCard.activeAssignment:hover {
+  transform: translateY(-5px);
+  box-shadow: 
+    0 8px 30px rgba(16, 185, 129, 0.35),
+    0 0 0 1px rgba(16, 185, 129, 0.2);
+}
+
+.activeLabel {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #065f46;
+  background: rgba(16, 185, 129, 0.15);
+  padding: 0.35rem 0.75rem;
+  border-radius: 20px;
+  margin-top: 0.5rem;
+  border: 1px solid #10b981;
+  letter-spacing: 0.5px;
+  animation: pulse 2s infinite;
+}
+
+.completedLabel {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #6b21a8;
+  background: rgba(168, 85, 247, 0.15);
+  padding: 0.35rem 0.75rem;
+  border-radius: 20px;
+  margin-top: 0.5rem;
+  border: 1px solid #a855f7;
+  letter-spacing: 0.5px;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
 }
 
 .requestHeader {

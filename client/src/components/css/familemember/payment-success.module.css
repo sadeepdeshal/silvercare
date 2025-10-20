@@ -1,0 +1,416 @@
+/* Payment Success Page Styles */
+
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  gap: 1.5rem;
+}
+
+.loadingSpinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #4a90e2;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.content {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Success Animation */
+.successAnimation {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2rem;
+  animation: scaleIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes scaleIn {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.checkmarkCircle {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 40px rgba(17, 153, 142, 0.4);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 10px 40px rgba(17, 153, 142, 0.4);
+  }
+  50% {
+    box-shadow: 0 10px 60px rgba(17, 153, 142, 0.6);
+  }
+}
+
+.checkmark {
+  color: white;
+  font-size: 60px;
+  font-weight: bold;
+  animation: checkmarkAppear 0.5s 0.3s both;
+}
+
+@keyframes checkmarkAppear {
+  from {
+    opacity: 0;
+    transform: scale(0);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Success Message */
+.successMessage {
+  text-align: center;
+  color: white;
+  margin-bottom: 2.5rem;
+}
+
+.title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.subtitle {
+  font-size: 1.2rem;
+  opacity: 0.95;
+  font-weight: 500;
+}
+
+/* Details Card */
+.detailsCard {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.6s 0.2s both;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.cardTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0;
+}
+
+.confirmedBadge {
+  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  box-shadow: 0 4px 15px rgba(17, 153, 142, 0.3);
+}
+
+/* Details Grid */
+.detailsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+.detailItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 12px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.detailItem:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.detailIcon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.detailContent {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+}
+
+.detailLabel {
+  font-size: 0.85rem;
+  color: #6c757d;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.detailValue {
+  font-size: 1.1rem;
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+.statusSuccess {
+  color: #28a745;
+}
+
+/* Next Steps Card */
+.nextStepsCard {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.6s 0.4s both;
+}
+
+.nextStepsTitle {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 1.5rem;
+}
+
+.nextStepsList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.nextStepItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  background: #f8f9fa;
+  border-radius: 10px;
+  border-left: 4px solid #667eea;
+  transition: all 0.3s;
+}
+
+.nextStepItem:hover {
+  background: #e9ecef;
+  transform: translateX(5px);
+}
+
+.nextStepItem:last-child {
+  margin-bottom: 0;
+}
+
+.stepIcon {
+  font-size: 1.3rem;
+  flex-shrink: 0;
+}
+
+/* Action Buttons */
+.actionButtons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  animation: slideUp 0.6s 0.6s both;
+}
+
+.primaryButton {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 30px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+  min-width: 200px;
+}
+
+.primaryButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+}
+
+.primaryButton:active {
+  transform: translateY(0);
+}
+
+.secondaryButton {
+  background: white;
+  color: #667eea;
+  border: 2px solid #667eea;
+  padding: 1rem 2rem;
+  border-radius: 30px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  min-width: 200px;
+}
+
+.secondaryButton:hover {
+  background: #667eea;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.secondaryButton:active {
+  transform: translateY(0);
+}
+
+/* Support Info */
+.supportInfo {
+  text-align: center;
+  animation: slideUp 0.6s 0.8s both;
+}
+
+.supportText {
+  color: white;
+  font-size: 0.95rem;
+  opacity: 0.9;
+}
+
+.supportLink {
+  color: white;
+  text-decoration: underline;
+  font-weight: 600;
+  transition: opacity 0.2s;
+}
+
+.supportLink:hover {
+  opacity: 0.8;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .title {
+    font-size: 2rem;
+  }
+
+  .subtitle {
+    font-size: 1rem;
+  }
+
+  .detailsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .actionButtons {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .primaryButton,
+  .secondaryButton {
+    width: 100%;
+  }
+
+  .detailsCard,
+  .nextStepsCard {
+    padding: 1.5rem;
+  }
+
+  .checkmarkCircle {
+    width: 100px;
+    height: 100px;
+  }
+
+  .checkmark {
+    font-size: 50px;
+  }
+}
+
+@media (max-width: 480px) {
+  .content {
+    padding: 1rem 0.5rem;
+  }
+
+  .title {
+    font-size: 1.5rem;
+  }
+
+  .cardHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .detailsCard,
+  .nextStepsCard {
+    padding: 1rem;
+  }
+}

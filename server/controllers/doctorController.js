@@ -271,6 +271,22 @@ const getAppointmentHistoryWithFamilyMember = async (req, res) => {
   }
 };
 
+// Get appointment statistics for a doctor
+const getDoctorAppointmentStatistics = async (req, res) => {
+  try {
+    const { doctorId } = req.params;
+    if (!doctorId) {
+      return res.status(400).json({ error: 'Doctor ID is required' });
+    }
+    
+    const statistics = await doctorModel.getDoctorAppointmentStatistics(doctorId);
+    res.json(statistics);
+  } catch (error) {
+    console.error('Error fetching appointment statistics:', error);
+    res.status(500).json({ error: 'Error fetching appointment statistics' });
+  }
+};
+
 module.exports = {
   getDoctorAppointments,
   getUpcomingAppointments,
@@ -282,5 +298,6 @@ module.exports = {
   updateDoctorProfile,
   getFamilyMembersWithAppointments,
   getAppointmentHistoryWithFamilyMember,
-  joinAppointment
+  joinAppointment,
+  getDoctorAppointmentStatistics
 };

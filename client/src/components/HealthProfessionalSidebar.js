@@ -5,6 +5,7 @@ import styles from './css/doctor_sidebar.module.css';
 const HealthProfessionalSidebar = ({ onToggleCollapse }) => {
   const [activeMenuItem, setActiveMenuItem] = useState('dashboard');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [expandedMenus, setExpandedMenus] = useState({});
   const navigate = useNavigate();
 
   const handleToggleSidebar = () => {
@@ -13,8 +14,21 @@ const HealthProfessionalSidebar = ({ onToggleCollapse }) => {
   };
 
   const handleMenuItemClick = (item) => {
-    setActiveMenuItem(item.key);
-    navigate(item.path);
+    if (item.subItems) {
+      // Toggle submenu
+      setExpandedMenus(prev => ({
+        ...prev,
+        [item.key]: !prev[item.key]
+      }));
+    } else {
+      setActiveMenuItem(item.key);
+      navigate(item.path);
+    }
+  };
+
+  const handleSubMenuItemClick = (parentKey, subItem) => {
+    setActiveMenuItem(subItem.key);
+    navigate(subItem.path);
   };
 
   const sidebarItems = [
@@ -23,7 +37,16 @@ const HealthProfessionalSidebar = ({ onToggleCollapse }) => {
     { key: 'elders', label: 'Patients', icon: '👴', path: '/healthprofessional/elders' },
     { key: 'sessions', label: 'Sessions', icon: '🗓️', path: '/healthprofessional/sessions' },
     { key: 'consultations', label: 'Consultations', icon: '💬', path: '/healthprofessional/consultations' },
-    { key: 'messages', label: 'Messages', icon: '✉️', path: '/healthprofessional/messages' },
+    { key: 'reports', label: 'Reports', icon: '📊', path: '/healthprofessional/reports' },
+    { 
+      key: 'messages', 
+      label: 'Messages', 
+      icon: '✉️',
+      subItems: [
+        { key: 'elder-chat', label: 'Elder Chat', icon: '👴', path: '/healthprofessional/messages' },
+        { key: 'family-chat', label: 'Family Chat', icon: '👨‍👩‍👧‍👦', path: '/healthprofessional/family-messages' },
+      ]
+    },
   ];
 
   return (
@@ -59,8 +82,35 @@ const HealthProfessionalSidebar = ({ onToggleCollapse }) => {
                 title={sidebarCollapsed ? item.label : ''}
               >
                 <span className={styles.menuIcon}>{item.icon}</span>
-                {!sidebarCollapsed && <span className={styles.menuLabel}>{item.label}</span>}
+                {!sidebarCollapsed && (
+                  <>
+                    <span className={styles.menuLabel}>{item.label}</span>
+                    {item.subItems && (
+                      <span className={styles.submenuArrow}>
+                        {expandedMenus[item.key] ? '▼' : '▶'}
+                      </span>
+                    )}
+                  </>
+                )}
               </div>
+              
+              {/* Submenu */}
+              {item.subItems && expandedMenus[item.key] && !sidebarCollapsed && (
+                <ul className={styles.submenu}>
+                  {item.subItems.map((subItem) => (
+                    <li key={subItem.key} className={styles.submenuItem}>
+                      <div
+                        className={`${styles.submenuLink} ${activeMenuItem === subItem.key ? styles.active : ''}`}
+                        onClick={() => handleSubMenuItemClick(item.key, subItem)}
+                        title={subItem.label}
+                      >
+                        <span className={styles.menuIcon}>{subItem.icon}</span>
+                        <span className={styles.submenuLabel}>{subItem.label}</span>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </li>
           ))}
         </ul>

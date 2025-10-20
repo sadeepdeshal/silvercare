@@ -9,6 +9,7 @@ import { useAuth } from '../../context/AuthContext';
 import DailyCareReportModal from '../../components/DailyCareReportModal.js';
 import SuccessNotification from '../../components/SuccessNotification.js';
 import ErrorModal from '../../components/ErrorModal.js';
+import RequestCountdownTimer from '../../components/RequestCountdownTimer.jsx';
 
 const CaregiverDashboard = () => {
   const { user } = useAuth(); // <-- pulls from logged-in context
@@ -17,7 +18,7 @@ const CaregiverDashboard = () => {
   const [careRequests, setCareRequests] = useState([]);
   const [carelog, setCarelogCount] = useState([]);
   const [completedShifts, setCompletedShifts] = useState(0);
-  const [totalHoursWorked, setTotalHoursWorked] = useState(0);
+ // const [totalHoursWorked, setTotalHoursWorked] = useState(0);
   const [families, setFamilies] = useState([]);
   const [loading, setLoading] = useState(true);
   // Upcoming shifts fetched from backend
@@ -106,6 +107,10 @@ const CaregiverDashboard = () => {
     try {
       console.log('Refreshing dashboard data...');
       
+      // Get today's date for comparison
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
       const results = await Promise.all([
         caregiverApi.fetchCareRequests(caregiverId),
         caregiverApi.fetchUpcomingShifts(caregiverId)
@@ -115,6 +120,39 @@ const CaregiverDashboard = () => {
       
       // Update care requests - this will get the latest status updates
       if (Array.isArray(careRequestsData)) {
+        // Count unique elder IDs with status 'confirmed'
+        const uniqueElderIds = Array.from(new Set(
+          careRequestsData
+            .filter(request => request.status === 'confirmed')
+            .map(request => request.elder_id)
+            .filter(Boolean)
+        ));
+        
+        // Transform elder data for display
+        const transformedElders = uniqueElderIds.map(elderId => {
+          const elderRequest = careRequestsData.find(req => req.elder_id === elderId && req.status === 'confirmed');
+          return {
+            elder_id: elderId,
+            name: elderRequest?.elder_name || 'Unknown',
+            age: elderRequest?.elder_age || 'N/A',
+            duration: elderRequest?.duration || 'N/A',
+            status: elderRequest?.status || 'confirmed',
+            family_id: elderRequest?.family_id
+          };
+        });
+        
+        setElders(transformedElders);
+        
+        // Count unique family IDs with status 'confirmed'
+        const uniqueFamilyIds = Array.from(new Set(
+          careRequestsData
+            .filter(request => request.status === 'confirmed')
+            .map(request => request.family_id)
+            .filter(Boolean)
+        ));
+        
+        setFamilies(uniqueFamilyIds);
+        
         const pendingRequests = careRequestsData
           .filter(request => request.status === 'pending')
           .map((request) => ({
@@ -135,8 +173,13 @@ const CaregiverDashboard = () => {
           }));
         setCareRequests(pendingRequests);
         
-        // Update completion stats
-        const completedCount = careRequestsData.filter(request => request.status === 'completed').length;
+        // Update completion stats - check if end_date < today for confirmed requests
+        const completedCount = careRequestsData.filter(request => {
+          if (request.status !== 'confirmed') return false;
+          const endDate = new Date(request.end_date);
+          endDate.setHours(0, 0, 0, 0);
+          return endDate < today;
+        }).length;
         setCompletedShifts(completedCount);
       }
       
@@ -160,99 +203,63 @@ const CaregiverDashboard = () => {
     const caregiverId = user.caregiver_id;
     setLoading(true);
     Promise.all([
-      caregiverApi.fetchAssignedElders(caregiverId).then((data) => {
-        console.log('Raw elder data from API:', data);
-        const transformed = data.map((elder) => ({
-          elder_id: elder.elder_id, // Add this missing field!
-          name: elder.name,
-          age: elder.age,
-          duration: elder.duration || "N/A",
-          status: elder.status,
-          family_id: elder.family_id,
-        }));
-        console.log('Transformed elder data:', transformed);
-        setElders(transformed);
-      }),
-      caregiverApi.getAssignedFamiliesCount(caregiverId).then((data) => {
-        const count = Number(data.count);
-        if (!isNaN(count)) {
-          const dummyFamilies = Array.from({ length: count }, (_, i) => ({
-            elder: `Family ${i + 1}`
-          }));
-          setFamilies(dummyFamilies);
-        } else {
-          setFamilies([]);
-        }
-      }),
-      caregiverApi.getcarelogsCount(caregiverId).then((data) => {
-        const count = Number(data.count);
-        if (!isNaN(count)) {
-          setCarelogCount(count);
-        } else {
-          setCarelogCount(0);
-        }
-      }).catch(error => {
-        setCarelogCount(0);
-      }),
       caregiverApi.fetchCareRequests(caregiverId).then((data) => {
-        // Get all family IDs from carerequest table for this caregiver, status approved or completed
-        const allFamilyIds = Array.isArray(data)
-          ? data.filter(request => request.status === 'confirmed' || request.status === 'completed')
+        // Get today's date for comparison
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        if (Array.isArray(data)) {
+          // Count unique elder IDs with status 'confirmed'
+          const uniqueElderIds = Array.from(new Set(
+            data
+              .filter(request => request.status === 'confirmed')
+              .map(request => request.elder_id)
+              .filter(Boolean)
+          ));
+          
+          // Transform elder data for display
+          const transformedElders = uniqueElderIds.map(elderId => {
+            const elderRequest = data.find(req => req.elder_id === elderId && req.status === 'confirmed');
+            return {
+              elder_id: elderId,
+              name: elderRequest?.elder_name || 'Unknown',
+              age: elderRequest?.elder_age || 'N/A',
+              duration: elderRequest?.duration || 'N/A',
+              status: elderRequest?.status || 'confirmed',
+              family_id: elderRequest?.family_id
+            };
+          });
+          
+          console.log('Unique confirmed elders:', transformedElders);
+          setElders(transformedElders);
+          
+          // Count unique family IDs with status 'confirmed'
+          const uniqueFamilyIds = Array.from(new Set(
+            data
+              .filter(request => request.status === 'confirmed')
               .map(request => request.family_id)
               .filter(Boolean)
-          : [];
-        // Get unique family IDs
-        const uniqueFamilyIdsFromRequests = Array.from(new Set(allFamilyIds));
-        setFamilies(uniqueFamilyIdsFromRequests);
+          ));
+          
+          console.log('Unique confirmed family IDs:', uniqueFamilyIds);
+          setFamilies(uniqueFamilyIds);
+        } else {
+          setElders([]);
+          setFamilies([]);
+        }
 
-        // Count completed shifts
+        // Count completed shifts - check if end_date < today for confirmed requests
         const completedCount = Array.isArray(data)
-          ? data.filter(request => request.status === 'completed').length
+          ? data.filter(request => {
+              if (request.status !== 'confirmed') return false;
+              const endDate = new Date(request.end_date);
+              endDate.setHours(0, 0, 0, 0);
+              return endDate < today;
+            }).length
           : 0;
         setCompletedShifts(completedCount);
 
-        // Calculate total hours worked
-        let totalHours = 0;
-        if (Array.isArray(data)) {
-          const today = new Date();
-          today.setHours(0, 0, 0, 0);
-          data.forEach(request => {
-            if (request.status === 'completed') {
-              // duration is in days, multiply by 24
-              const days = Number(request.duration);
-              if (!isNaN(days)) {
-                totalHours += days * 24;
-                console.log(`Completed request ${request.request_id}: days=${days}, hours=${days * 24}`);
-              } else if (request.start_date && request.end_date) {
-                // fallback: calculate days from dates
-                const start = new Date(request.start_date);
-                const end = new Date(request.end_date);
-                const diffDays = Math.round((end - start) / (1000 * 60 * 60 * 24)) + 1;
-                totalHours += diffDays * 24;
-                console.log(`Completed request ${request.request_id}: days=${diffDays}, hours=${diffDays * 24} (from dates)`);
-              }
-            } else if (request.status === 'confirmed') {
-              // calculate hours from start_date to day before today (inclusive)
-              if (request.start_date) {
-                const start = new Date(request.start_date);
-                start.setHours(0, 0, 0, 0);
-                let end = new Date(today);
-                end.setDate(end.getDate() - 1); // day before today
-                end.setHours(0, 0, 0, 0);
-                if (end >= start) {
-                  // Calculate days inclusive
-                  const diffDays = Math.round((end - start) / (1000 * 60 * 60 * 24)) + 1;
-                  const diffHours = diffDays * 24;
-                  totalHours += diffHours > 0 ? diffHours : 0;
-                  console.log(`Confirmed request ${request.request_id}: days=${diffDays}, hours=${diffHours}`);
-                }
-              }
-            }
-          });
-        }
-        setTotalHoursWorked(totalHours);
-
-        // Keep your existing careRequests logic
+        // Keep your existing careRequests logic for pending requests
         const transformed = Array.isArray(data)
           ? data.filter(request => request.status === 'pending')
             .map((request) => ({
@@ -285,16 +292,46 @@ const CaregiverDashboard = () => {
     });
   }, []);
 
-  // Helper function to calculate week range
+  // Helper function to get Sri Lanka date string in YYYY-MM-DD format
+  const getSriLankaDateString = (date = new Date()) => {
+    // Create a copy to avoid mutating the original
+    const d = new Date(date);
+    // Get Sri Lanka time by adding 5.5 hours (in milliseconds)
+    const sriLankaTime = new Date(d.getTime() + (5.5 * 60 * 60 * 1000));
+    // Return YYYY-MM-DD format
+    return sriLankaTime.toISOString().split('T')[0];
+  };
+
+  // Helper function to calculate week range in Sri Lanka timezone
   const getWeekRange = (weekOffset = 0) => {
+    // Get current time in Sri Lanka
     const now = new Date();
-    const start = new Date(now);
-    start.setDate(now.getDate() - now.getDay() + 1 + weekOffset * 7); // Monday
-    start.setHours(0,0,0,0);
-    const end = new Date(start);
-    end.setDate(start.getDate() + 6); // Sunday
-    end.setHours(23,59,59,999);
-    return { start, end };
+    const sriLankaOffset = 5.5 * 60 * 60 * 1000;
+    const sriLankaNow = new Date(now.getTime() + sriLankaOffset);
+    
+    // Get day of week (0 = Sunday, 1 = Monday, etc.)
+    const dayOfWeek = sriLankaNow.getUTCDay();
+    
+    // Calculate days to Monday (if today is Sunday, go back 6 days to get to Monday)
+    const daysToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+    
+    // Calculate Monday of the current week + offset
+    const monday = new Date(sriLankaNow);
+    monday.setUTCDate(sriLankaNow.getUTCDate() + daysToMonday + (weekOffset * 7));
+    monday.setUTCHours(0, 0, 0, 0);
+    
+    // Calculate Sunday (6 days after Monday)
+    const sunday = new Date(monday);
+    sunday.setUTCDate(monday.getUTCDate() + 6);
+    sunday.setUTCHours(23, 59, 59, 999);
+    
+    // Format as YYYY-MM-DD
+    const startStr = monday.toISOString().split('T')[0];
+    const endStr = sunday.toISOString().split('T')[0];
+    
+    console.log(`Week range calculated (Sri Lanka time): ${startStr} to ${endStr}`);
+    
+    return { start: monday, end: sunday, startStr, endStr };
   };
 
   // Function to fetch shifts for a specific week
@@ -303,15 +340,15 @@ const CaregiverDashboard = () => {
     
     console.log(`Fetching shifts for week offset: ${weekOffset}`);
     setLoadingWeeklyShifts(true);
-    const { start, end } = getWeekRange(weekOffset);
+    const { startStr, endStr } = getWeekRange(weekOffset);
     
-    console.log(`Week range: ${start.toISOString().split('T')[0]} to ${end.toISOString().split('T')[0]}`);
+    console.log(`Week range: ${startStr} to ${endStr}`);
     
     try {
       const data = await caregiverApi.fetchUpcomingShifts(
         user.caregiver_id,
-        start.toISOString().split('T')[0], // Format as YYYY-MM-DD
-        end.toISOString().split('T')[0]
+        startStr,
+        endStr
       );
       console.log(`Week ${weekOffset} shifts data:`, data);
       setWeeklyShifts(data);
@@ -329,18 +366,18 @@ const CaregiverDashboard = () => {
     
     console.log(`Fetching daily reports for week offset: ${weekOffset}`);
     setLoadingReports(true);
-    const { start, end } = getWeekRange(weekOffset);
+    const { startStr, endStr } = getWeekRange(weekOffset);
     
     try {
       const data = await caregiverApi.fetchWeeklyReports(
         user.caregiver_id,
-        start.toISOString().split('T')[0],
-        end.toISOString().split('T')[0]
+        startStr,
+        endStr
       );
       console.log(`Week ${weekOffset} reports data:`, data);
       
       // Log today's specific data for debugging
-      const today = new Date().toISOString().split('T')[0];
+      const today = getSriLankaDateString();
       const todayData = data.find(report => report.date === today);
       console.log(`Today (${today}) report data:`, todayData);
       
@@ -426,6 +463,7 @@ const CaregiverDashboard = () => {
     console.log('Elder ID:', dayData.elder_id);
     console.log('Elder name:', dayData.elder_name);
     console.log('Has existing report:', dayData.hasReport);
+    console.log('Existing report data:', dayData.existingReport);
     
     // Check if this is a past date
     const clickedDate = new Date(dayData.date);
@@ -438,24 +476,46 @@ const CaregiverDashboard = () => {
     console.log('Is past date:', clickedDate < today);
     
     const isPastDate = clickedDate < today;
+    const isToday = clickedDate.getTime() === today.getTime();
     
-    // Handle past dates
-    if (isPastDate) {
-      if (dayData.hasReport) {
-        // Past date with existing report - open in read-only mode
-        console.log('Opening past date report in read-only mode');
-        setSelectedReportDay({...dayData, isReadOnly: true});
+    if (dayData.hasReport) {
+      // Has existing report
+      if (isToday) {
+        // Today's report - can be edited
+        console.log('Opening today\'s report (editable)');
+        setSelectedReportDay({
+          ...dayData,
+          isReadOnly: false,
+          existingReport: dayData.existingReport || {}
+        });
         setShowReportModal(true);
-      } else {
-        // Past date without report - show error modal
-        setErrorModalMessage('Cannot upload reports for past dates. Reports must be submitted on the same day or current date.');
-        setShowErrorModal(true);
-        return;
+      } else if (isPastDate) {
+        // Past date report - read-only
+        console.log('Opening past date report (read-only)');
+        setSelectedReportDay({
+          ...dayData,
+          isReadOnly: true,
+          existingReport: dayData.existingReport || {}
+        });
+        setShowReportModal(true);
       }
     } else {
-      // Current or future date - normal operation
-      setSelectedReportDay(dayData);
-      setShowReportModal(true);
+      // No existing report
+      if (isToday) {
+        // Today - can upload new report
+        console.log('Opening new report form for today');
+        setSelectedReportDay({
+          ...dayData,
+          isReadOnly: false,
+          existingReport: null
+        });
+        setShowReportModal(true);
+      } else if (isPastDate) {
+        // Past date without report - show error
+        console.log('Cannot upload report for past date');
+        setErrorModalMessage('Cannot upload reports for past dates. Reports must be submitted on the same day.');
+        setShowErrorModal(true);
+      }
     }
   };
 
@@ -475,16 +535,24 @@ const CaregiverDashboard = () => {
   // --- Week-by-week filtering for confirmed shifts ---
 
   // Only show confirmed shifts from the general upcoming shifts for summary card
-  const confirmedShifts = useMemo(() =>
-    upcomingShifts.filter(s => s.status && s.status.toLowerCase() === 'confirmed'),
-    [upcomingShifts]
+  const confirmedShifts = useMemo(() => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // Reset time to start of day for accurate comparison
+  
+  return upcomingShifts.filter(s => 
+    s.status && 
+    s.status.toLowerCase() === 'confirmed' &&
+    new Date(s.start_date) >= today
   );
+}, [upcomingShifts]);
 
-  const { start: weekStart, end: weekEnd } = getWeekRange(currentWeek);
+  const { start: weekStart, end: weekEnd, startStr, endStr } = getWeekRange(currentWeek);
 
-  // Format dates with month names (no year)
-  const formatDateWithMonth = (date) => {
-    const options = { month: 'short', day: 'numeric' };
+  // Format dates with month names (no year) - use the string versions to avoid timezone conversion
+  const formatDateWithMonth = (dateStr) => {
+    const [year, month, day] = dateStr.split('-');
+    const date = new Date(Date.UTC(parseInt(year), parseInt(month) - 1, parseInt(day)));
+    const options = { month: 'short', day: 'numeric', timeZone: 'UTC' };
     return date.toLocaleDateString('en-US', options);
   };
 
@@ -497,7 +565,7 @@ const CaregiverDashboard = () => {
   };
 
   const weekLabel = getWeekLabel(currentWeek);
-  const dateRange = `${formatDateWithMonth(weekStart)} - ${formatDateWithMonth(weekEnd)}`;
+  const dateRange = `${formatDateWithMonth(startStr)} - ${formatDateWithMonth(endStr)}`;
   
   // Format the display: show brackets only for This Week, Next Week, Last Week
   const weekRangeLabel = weekLabel ? `${dateRange} (${weekLabel})` : dateRange;
@@ -509,7 +577,7 @@ const CaregiverDashboard = () => {
   const isNextWeekDisabled = false;
 
   // Filter elders with status 'approved' or 'completed'
-  const filteredElders = elders.filter(e => e.status === 'confirmed' || e.status === 'completed');
+  const filteredElders = elders.filter(e => e.status === 'confirmed');
   // Get unique family IDs from filtered elders
   //const uniqueFamilyIds = Array.from(new Set(filteredElders.map(e => e.family_id))).filter(Boolean);
 
@@ -532,7 +600,7 @@ const CaregiverDashboard = () => {
             <span role="img" aria-label="Elders">👥</span>
           </div>
           <div className={styles.cardContent}>
-            <span className={styles.cardLabel}>Elders</span>
+            <span className={styles.cardLabel}>Assigned Elders</span>
             <span className={styles.cardNumber}>{filteredElders.length}</span>
           </div>
         </div>
@@ -541,11 +609,11 @@ const CaregiverDashboard = () => {
             <span role="img" aria-label="Families">👨‍👩‍👧‍👦</span>
           </div>
           <div className={styles.cardContent}>
-            <span className={styles.cardLabel}>Families</span>
+            <span className={styles.cardLabel}>Assigned Families</span>
             <span className={styles.cardNumber}>{families.length}</span>
           </div>
         </div>
-        <div className={styles.card}>
+        {/*<div className={styles.card}>
           <div className={styles.cardIcon} style={{background: 'linear-gradient(135deg, #ffb347 0%, #ffcc33 100%)'}}>
             <span role="img" aria-label="Carelogs">📝</span>
           </div>
@@ -553,7 +621,7 @@ const CaregiverDashboard = () => {
             <span className={styles.cardLabel}>Carelogs</span>
             <span className={styles.cardNumber}>{carelog}</span>
           </div>
-        </div>
+        </div>*/}
         <div className={styles.card}>
           <div className={styles.cardIcon} style={{background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'}}>
             <span role="img" aria-label="Upcoming">📅</span>
@@ -563,11 +631,22 @@ const CaregiverDashboard = () => {
             <span className={styles.cardNumber}>{filteredUpcomingShifts.length}</span>
           </div>
         </div>
+
+        <div className={styles.card}>
+          <div className={styles.cardIcon} style={{background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'}}>
+            <span role="img" aria-label="Completed">✅</span>
+          </div>
+          <div className={styles.cardContent}>
+            <span className={styles.cardLabel}>Completed Shifts</span>
+            <span className={styles.cardNumber}>{completedShifts}</span>
+          </div>
+        </div>
+
       </div>
 
       <div className={styles.dashboardgrid}>
 
-        <section className={styles.performanceStats}>
+        {/*<section className={styles.performanceStats}>
           <h2 style={{display: 'flex', alignItems: 'center', gap: 8}}>
             <span role="img" aria-label="Performance">🏆</span> Performance Stats
           </h2>
@@ -587,7 +666,7 @@ const CaregiverDashboard = () => {
               <span className={styles.statValue}>{totalHoursWorked}</span>
             </div>
           </div>
-        </section>
+        </section>*/}
 
         <section className={styles.carerequest}>
           <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px'}}>
@@ -621,7 +700,7 @@ const CaregiverDashboard = () => {
                     <div className={styles.requestDetail}>
                       <span className={styles.label}>Duration:</span>
                       <span className={styles.value}>
-                        {new Date(request.startDate).toLocaleDateString()} - {new Date(request.endDate).toLocaleDateString()}
+                        {request.duration}
                       </span>
                     </div>
                     
@@ -635,37 +714,11 @@ const CaregiverDashboard = () => {
                     </div>
                   </div>
                   <div className={styles.requestDetail}>
-                    <span className={styles.label}>Time Left:</span>
-                    {(() => {
-                      const now = new Date();
-                      const start = new Date(request.startDate);
-                      
-                      // Get today's date without time for comparison
-                      const today = new Date();
-                      today.setHours(0, 0, 0, 0);
-                      const startDateOnly = new Date(start);
-                      startDateOnly.setHours(0, 0, 0, 0);
-                      
-                      let colorClass;
-                      if (startDateOnly < today) {
-                        // Overdue - red color
-                        colorClass = styles.timeLeftRed;
-                      } else if (startDateOnly.getTime() === today.getTime()) {
-                        // Started today - normal color
-                        colorClass = '';
-                      } else {
-                        // Future date - green or red based on days
-                        const diffMs = start - now;
-                        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-                        colorClass = diffDays <= 2 ? styles.timeLeftRed : styles.timeLeftGreen;
-                      }
-
-                      return (
-                        <span className={colorClass}>
-                          {getTimeLeft(request.startDate)}
-                        </span>
-                      );
-                    })()}
+                    <span className={styles.label}>Time Left to Accept:</span>
+                    <RequestCountdownTimer 
+                      requestDate={request.requestDate} 
+                      status={request.status}
+                    />
                   </div>
                   <div className={styles.careRequestActions}>
                     <button 
@@ -702,11 +755,11 @@ const CaregiverDashboard = () => {
                   setCurrentWeek(currentWeek - 1);
                 }}
                 disabled={isPrevWeekDisabled}
-                style={{fontSize: '18px', padding: '6px 8px'}}
+                style={{padding: '6px 8px'}}
               >
                 ← Prev Week
               </button>
-              <span className={styles.weekNavLabel} style={{margin: '0 4px', fontSize: '18px', whiteSpace: 'nowrap', textAlign: 'center'}}>
+              <span className={styles.weekNavLabel} style={{margin: '0 4px', whiteSpace: 'nowrap', textAlign: 'center'}}>
                 {weekRangeLabel}
               </span>
               <button
@@ -715,7 +768,7 @@ const CaregiverDashboard = () => {
                   setCurrentWeek(currentWeek + 1);
                 }}
                 disabled={isNextWeekDisabled}
-                style={{fontSize: '18px', padding: '6px 8px'}}
+                style={{padding: '6px 8px'}}
               >
                 Next Week→
               </button>
@@ -760,8 +813,8 @@ const CaregiverDashboard = () => {
                     // Overdue - red color
                     colorClass = styles.timeLeftRed;
                   } else if (startDateOnly.getTime() === today.getTime()) {
-                    // Started today - normal color
-                    colorClass = '';
+                    // Started today - red color
+                    colorClass = styles.timeLeftRed;
                   } else {
                     // Future date - green or red based on days
                     const diffMs = start - now;
@@ -775,7 +828,6 @@ const CaregiverDashboard = () => {
                         <span className={styles.shiftDate}>
                           {start.toLocaleDateString()} - {shift.end_date ? new Date(shift.end_date).toLocaleDateString() : 'TBD'}
                         </span>
-                        <span className={styles.shiftTime}>{shift.duration}</span>
                       </div>
                       <div className={styles.shiftDetails}>
                         <span className={styles.label}>Location:</span>
@@ -830,14 +882,18 @@ const CaregiverDashboard = () => {
             <button
               className={styles.weekNavBtn}
               onClick={() => setCurrentReportWeek(prev => prev - 1)}
-              style={{fontSize: '18px', padding: '6px 8px'}}
+              style={{padding: '6px 8px'}}
             >
               ← Prev Week
             </button>
-            <span className={styles.weekNavLabel} style={{margin: '0 4px', fontSize: '18px', whiteSpace: 'nowrap', textAlign: 'center'}}>
+            <span className={styles.weekNavLabel} style={{margin: '0 4px', whiteSpace: 'nowrap', textAlign: 'center'}}>
               {(() => {
-                const { start: reportStart, end: reportEnd } = getWeekRange(currentReportWeek);
-                const formatDateWithMonth = (date) => date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                const { startStr: reportStartStr, endStr: reportEndStr } = getWeekRange(currentReportWeek);
+                const formatDateStr = (dateStr) => {
+                  const [year, month, day] = dateStr.split('-');
+                  const date = new Date(Date.UTC(parseInt(year), parseInt(month) - 1, parseInt(day)));
+                  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
+                };
                 const getWeekLabel = (weekOffset) => {
                   if (weekOffset === 0) return 'This Week';
                   if (weekOffset === 1) return 'Next Week';
@@ -845,14 +901,14 @@ const CaregiverDashboard = () => {
                   return null;
                 };
                 const weekLabel = getWeekLabel(currentReportWeek);
-                const dateRange = `${formatDateWithMonth(reportStart)} - ${formatDateWithMonth(reportEnd)}`;
+                const dateRange = `${formatDateStr(reportStartStr)} - ${formatDateStr(reportEndStr)}`;
                 return weekLabel ? `${dateRange} (${weekLabel})` : dateRange;
               })()}
             </span>
             <button
               className={styles.weekNavBtn}
               onClick={() => setCurrentReportWeek(prev => prev + 1)}
-              style={{fontSize: '18px', padding: '6px 8px'}}
+              style={{padding: '6px 8px'}}
             >
               Next Week→
             </button>

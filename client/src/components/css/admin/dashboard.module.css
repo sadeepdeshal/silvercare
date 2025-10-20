@@ -18,7 +18,7 @@
 .dashboardContainer {
   min-height: 100vh;
   background: linear-gradient(135deg, var(--background-start) 0%, var(--background-end) 100%);
-  padding: 2rem;
+  /* padding: 2rem; */
   color: var(--text-primary);
   font-family: 'Inter', sans-serif;
 }

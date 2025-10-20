@@ -32,6 +32,7 @@ const AdminDashboard = () => {
     pendingDoctors: [],
     pendingHealthProfessionals: [],
     recentRegistrations: [],
+    revenue: 0,
     stats: {
       family_members: 0,
       elders: 0,
@@ -41,6 +42,7 @@ const AdminDashboard = () => {
       upcoming_appointments: 0,
       pending_health_professionals: 0,
       active_health_professionals: 0,
+      total_revenue: 0
     }
   });
 
@@ -88,6 +90,7 @@ const AdminDashboard = () => {
             pendingDoctors: response.data.pendingDoctors || [],
             pendingHealthProfessionals: response.data.pendingHealthProfessionals || [],
             recentRegistrations: response.data.recentRegistrations || [],
+            revenue: response.data.revenue || 0,
             stats: {
               family_members: response.data.stats?.family_members || 0,
               elders: response.data.stats?.elders || 0,
@@ -96,7 +99,8 @@ const AdminDashboard = () => {
               pending_doctors: response.data.stats?.pending_doctors || 0,
               upcoming_appointments: response.data.stats?.upcoming_appointments || 0,
               pending_health_professionals: response.data.stats?.pending_health_professionals || 0,
-              active_health_professionals: response.data.stats?.active_health_professionals || 0
+              active_health_professionals: response.data.stats?.active_health_professionals || 0,
+              total_revenue: response.data.stats?.total_revenue || 0
             }
           };
 
@@ -217,7 +221,7 @@ const AdminDashboard = () => {
     );
   }
 
-  const { stats, recentRegistrations, pendingDoctors, pendingHealthProfessionals } = dashboardData;
+  const { stats, recentRegistrations, pendingDoctors, pendingHealthProfessionals , revenue } = dashboardData;
 
   const getRoleIcon = (role) => {
     switch (role) {
@@ -275,10 +279,10 @@ const AdminDashboard = () => {
               </div>
             </div>
             <div className={`${styles.statCard} ${styles.statCard4}`}>
-              <div className={styles.statIcon}>📆</div>
+              <div className={styles.statIcon}></div>
               <div className={styles.statContent}>
-                <h3 className={styles.statNumber}>{dataLoading ? '...' : stats.upcoming_appointments}</h3>
-                <p className={styles.statLabel}>Upcoming Appointments</p>
+                <h3 className={styles.statNumber}>{dataLoading ? '...' : dashboardData.revenue}</h3>
+                <p className={styles.statLabel}>Total Revenue</p>
               </div>
             </div>
           </div>

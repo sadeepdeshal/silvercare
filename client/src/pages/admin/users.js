@@ -418,10 +418,10 @@ const AdminUsers = () => {
                               onChange={(e) => handleStatusUpdate(user.user_id, e.target.value)}
                             >
                               <option value="active">Active</option>
-                              <option value="confirmed">Confirmed</option>
-                              <option value="pending">Pending</option>
+                              {/* <option value="confirmed">Confirmed</option> */}
+                              {/* <option value="pending">Pending</option> */}
                               <option value="inactive">Inactive</option>
-                              <option value="suspended">Suspended</option>
+                              {/* <option value="suspended">Suspended</option> */}
                             </select>
                           )}
                         </div>

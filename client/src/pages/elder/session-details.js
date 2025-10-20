@@ -9,6 +9,7 @@ import {
 } from '../../services/elderApi2';
 import styles from '../../components/css/elder/session-details.module.css';
 import ElderLayout from '../../components/ElderLayout';
+import InfoModal from '../../components/InfoModal.jsx';
 
 const SessionDetails = () => {
   const { currentUser } = useAuth();
@@ -21,6 +22,8 @@ const SessionDetails = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
+  const [showInfoModal, setShowInfoModal] = useState(false);
+  const [modalMessage, setModalMessage] = useState('');
 
   // Scroll to top when component mounts
   useEffect(() => {
@@ -64,21 +67,32 @@ const SessionDetails = () => {
       setActionLoading(true);
       
       if (!elderDetails?.elder_id) {
-        alert('Elder details not found');
+        setModalMessage('Elder details not found');
+        setShowInfoModal(true);
         return;
       }
 
+      console.log('Attempting to join session:', sessionId, 'for elder:', elderDetails.elder_id);
       const response = await joinSession(elderDetails.elder_id, sessionId);
+      
+      console.log('Join session response:', response.data);
       
       if (response.data.success) {
         // Redirect to the meeting link
-        window.open(response.data.meetingLink, '_blank');
+        window.open(response.data.meetingUrl, '_blank');
       } else {
-        alert(response.data.error || 'Failed to join session');
+        console.error('Session join failed:', response.data);
+        setModalMessage(response.data.error || 'Failed to join session');
+        setShowInfoModal(true);
       }
-    } catch (err) {
-      console.error('Error joining session:', err);
-      alert('Failed to join session. Please try again.');
+    } catch (error) {
+      console.error('Error joining session:', error);
+      console.error('Error response:', error.response?.data);
+      
+      // Show the actual error message from the server
+      const errorMessage = error.response?.data?.error || 'Failed to join session. Please try again.';
+      setModalMessage(errorMessage);
+      setShowInfoModal(true);
     } finally {
       setActionLoading(false);
     }
@@ -273,14 +287,6 @@ const SessionDetails = () => {
                     {session.session_type === 'online' ? '💻 Video Call Session' : '🏥 In-Person Session'}
                   </span>
                 </div>
-                {session.session_type === 'physical' && (
-                  <div className={styles.infoItem}>
-                    <span className={styles.infoLabel}>Location:</span>
-                    <span className={styles.infoValue}>
-                      {session.current_institution}
-                    </span>
-                  </div>
-                )}
                 <div className={styles.infoItem}>
                   <span className={styles.infoLabel}>Session Number:</span>
                   <span className={styles.infoValue}>#{session.session_id}</span>
@@ -431,6 +437,14 @@ const SessionDetails = () => {
         </div>
       </div>
       </ElderLayout>
+      
+      <InfoModal
+        isOpen={showInfoModal}
+        onClose={() => setShowInfoModal(false)}
+        title="Session Join"
+        message={modalMessage}
+        icon="⏰"
+      />
     </div>
   );
 };

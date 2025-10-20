@@ -1,0 +1,576 @@
+/* Today's Care Report Styles */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: #ffffff;
+}
+
+.content {
+  flex: 1;
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* Loading and Error States */
+.loadingContainer,
+.accessDenied {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+  color: white;
+  text-align: center;
+}
+
+.loadingSpinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-top: 4px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Header Section */
+.header {
+  background: white;
+  border-radius: 15px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.headerContent {
+  text-align: center;
+}
+
+.title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.subtitle {
+  font-size: 1.2rem;
+  color: #7f8c8d;
+  margin-bottom: 1rem;
+}
+
+.reportInfo {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.reportBadge {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.reportDate {
+  color: #7f8c8d;
+  font-size: 0.9rem;
+}
+
+/* Summary Stats */
+.summarySection {
+  margin-bottom: 2rem;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+.statCard {
+  background: white;
+  border-radius: 15px;
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.statCard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.statIcon {
+  font-size: 2.5rem;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+}
+
+.statContent {
+  flex: 1;
+}
+
+.statNumber {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin: 0;
+}
+
+.statLabel {
+  color: #7f8c8d;
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+/* Search Section */
+.searchSection {
+  background: white;
+  border-radius: 15px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.searchContainer {
+  position: relative;
+  flex: 1;
+  min-width: 300px;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 1rem 3rem 1rem 1rem;
+  border: 2px solid #e9ecef;
+  border-radius: 10px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.searchIcon {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.2rem;
+  color: #7f8c8d;
+}
+
+.elderCount {
+  color: #7f8c8d;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Error Message */
+.errorMessage {
+  background: #ff6b6b;
+  color: white;
+  padding: 1rem;
+  border-radius: 10px;
+  margin-bottom: 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.retryButton {
+  background: white;
+  color: #ff6b6b;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+/* Loading Content */
+.loadingContent {
+  background: white;
+  border-radius: 15px;
+  padding: 3rem;
+  text-align: center;
+  color: #7f8c8d;
+}
+
+/* Empty State */
+.emptyState {
+  background: white;
+  border-radius: 15px;
+  padding: 3rem;
+  text-align: center;
+  color: #7f8c8d;
+}
+
+.emptyIcon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+.clearSearchButton,
+.registerButton {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  margin-top: 1rem;
+}
+
+/* Elders List */
+.eldersList {
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.listHeader {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  padding: 1.5rem;
+}
+
+.listTitle {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+/* Elder Report Card */
+.elderReportCard {
+  border-bottom: 1px solid #e9ecef;
+  transition: background-color 0.3s ease;
+}
+
+.elderReportCard:last-child {
+  border-bottom: none;
+}
+
+.elderReportCard:hover {
+  background-color: #f8f9fa;
+}
+
+/* Elder Report Header */
+.elderReportHeader {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.elderNumber {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.elderAvatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 3px solid #667eea;
+}
+
+.elderPhoto {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.elderInitial {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.elderBasicInfo {
+  flex: 1;
+}
+
+.elderName {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.elderMeta {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.elderAge {
+  color: #7f8c8d;
+  font-size: 0.9rem;
+}
+
+.elderStatus {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #27ae60;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.statusDot {
+  width: 8px;
+  height: 8px;
+  background: #27ae60;
+  border-radius: 50%;
+}
+
+.elderActions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.viewButton {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: transform 0.2s ease;
+}
+
+.viewButton:hover {
+  transform: translateY(-2px);
+}
+
+/* Elder Care Details */
+.elderCareDetails {
+  padding: 1.5rem;
+}
+
+.careGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.careSection {
+  background: #f8f9fa;
+  border-radius: 10px;
+  padding: 1rem;
+}
+
+.careSectionTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 1rem 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.careSectionIcon {
+  font-size: 1.2rem;
+}
+
+.careDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.careItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 1rem;
+}
+
+.careLabel {
+  font-weight: 600;
+  color: #7f8c8d;
+  min-width: 120px;
+  font-size: 0.9rem;
+}
+
+.careValue {
+  flex: 1;
+  color: #2c3e50;
+  font-size: 0.9rem;
+  word-break: break-word;
+}
+
+/* Quick Actions */
+.quickActions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding-top: 1rem;
+  border-top: 1px solid #e9ecef;
+}
+
+.actionButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: white;
+  color: #667eea;
+  border: 2px solid #667eea;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+}
+
+.actionButton:hover {
+  background: #667eea;
+  color: white;
+  transform: translateY(-2px);
+}
+
+.actionIcon {
+  font-size: 1rem;
+}
+
+/* Report Footer */
+.reportFooter {
+  background: white;
+  border-radius: 15px;
+  padding: 2rem;
+  margin-top: 2rem;
+  text-align: center;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.footerContent {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.footerText {
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 0.5rem;
+}
+
+.footerNote {
+  color: #7f8c8d;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .content {
+    padding: 1rem;
+  }
+  
+  .title {
+    font-size: 2rem;
+  }
+  
+  .subtitle {
+    font-size: 1rem;
+  }
+  
+  .statsGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .searchSection {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .searchContainer {
+    min-width: auto;
+  }
+  
+  .elderReportHeader {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 1rem;
+  }
+  
+  .elderMeta {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .careGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .quickActions {
+    justify-content: center;
+  }
+  
+  .careItem {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  
+  .careLabel {
+    min-width: auto;
+  }
+}

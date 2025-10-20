@@ -1,0 +1,528 @@
+.container {
+  min-height: 100vh;
+  background: #ffffff;
+  margin: 0;
+  padding: 0;
+  position: relative;
+}
+
+.content {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 32px 40px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Header Styles */
+.header {
+  background: linear-gradient(135deg, #ffffff 0%, #fefefe 100%);
+  border-radius: 20px;
+  padding: 40px 36px;
+  margin-bottom: 40px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(226, 232, 240, 0.6);
+  backdrop-filter: blur(10px);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.headerContent {
+  flex: 1;
+}
+
+.backButton {
+  background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 4px 12px rgba(100, 116, 139, 0.3);
+  flex-shrink: 0;
+}
+
+.backButton:hover {
+  background: linear-gradient(135deg, #475569 0%, #334155 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(100, 116, 139, 0.4);
+}
+
+.title {
+  color: #1e293b;
+  font-size: 2rem;
+  font-weight: 800;
+  margin: 0 0 12px 0;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #3b82f6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+}
+
+.subtitle {
+  color: #64748b;
+  font-size: 1.05rem;
+  margin: 0;
+}
+
+/* Search Section */
+.searchSection {
+  margin-bottom: 32px;
+}
+
+.searchBox {
+  position: relative;
+  max-width: 600px;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 16px 48px 16px 20px;
+  border: 2px solid #e2e8f0;
+  border-radius: 16px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.15);
+  transform: translateY(-1px);
+}
+
+.searchIcon {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.5rem;
+  color: #3b82f6;
+}
+
+/* Main Content */
+.mainContent {
+  min-height: 400px;
+}
+
+/* Loading State */
+.loadingState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+}
+
+.loadingSpinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #e2e8f0;
+  border-top-color: #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1.5rem;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loadingState h2 {
+  font-size: 1.5rem;
+  color: #1a202c;
+  margin-bottom: 0.5rem;
+}
+
+.loadingState p {
+  font-size: 1rem;
+  color: #64748b;
+}
+
+/* Error State */
+.errorState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(226, 232, 240, 0.5);
+}
+
+.errorIcon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+.errorState h2 {
+  font-size: 1.8rem;
+  color: #ef4444;
+  margin-bottom: 0.5rem;
+  font-weight: 700;
+}
+
+.errorState p {
+  font-size: 1rem;
+  color: #64748b;
+  margin-bottom: 1.5rem;
+}
+
+.retryButton {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  border: none;
+  padding: 14px 32px;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.3);
+}
+
+.retryButton:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(239, 68, 68, 0.4);
+}
+
+/* Empty State */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(226, 232, 240, 0.5);
+}
+
+.emptyIcon {
+  font-size: 5rem;
+  margin-bottom: 1.5rem;
+  opacity: 0.6;
+  filter: grayscale(20%);
+}
+
+.emptyState h2 {
+  font-size: 1.8rem;
+  color: #1e293b;
+  margin-bottom: 0.5rem;
+  font-weight: 700;
+}
+
+.emptyState p {
+  font-size: 1rem;
+  color: #64748b;
+  margin-bottom: 1.5rem;
+  max-width: 500px;
+  line-height: 1.6;
+}
+
+.registerButton {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  border: none;
+  padding: 16px 40px;
+  border-radius: 14px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
+  letter-spacing: 0.3px;
+}
+
+.registerButton:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 30px rgba(59, 130, 246, 0.4);
+}
+
+/* Elders Grid */
+.eldersGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+/* Elder Card */
+.elderCard {
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(226, 232, 240, 0.5);
+}
+
+.elderCard:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+.elderCardHeader {
+  padding: 24px;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.5);
+}
+
+.elderAvatar {
+  position: relative;
+  width: 70px;
+  height: 70px;
+  flex-shrink: 0;
+}
+
+.elderPhoto {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 3px solid white;
+}
+
+.elderInitial {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  font-weight: 700;
+  border: 3px solid white;
+}
+
+.elderHeaderInfo {
+  flex: 1;
+}
+
+.elderName {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #1a202c;
+  margin: 0 0 0.25rem 0;
+}
+
+.elderAge {
+  font-size: 0.9rem;
+  color: #64748b;
+  margin: 0;
+}
+
+.elderCardBody {
+  padding: 1.5rem;
+  flex: 1;
+}
+
+.elderInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.infoRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.infoLabel {
+  font-size: 0.9rem;
+  color: #64748b;
+  font-weight: 600;
+  min-width: 100px;
+}
+
+.infoValue {
+  font-size: 0.9rem;
+  color: #1a202c;
+  flex: 1;
+  word-break: break-word;
+}
+
+.elderCardFooter {
+  padding: 24px;
+  background: linear-gradient(135deg, #fafbfc 0%, #f8fafc 100%);
+  border-top: 1px solid rgba(226, 232, 240, 0.5);
+}
+
+.bookButton {
+  width: 100%;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  border: none;
+  padding: 16px 24px;
+  border-radius: 14px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
+  letter-spacing: 0.3px;
+}
+
+.bookButton:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4);
+}
+
+.buttonIcon {
+  font-size: 1.2rem;
+}
+
+/* Info Banner */
+.infoBanner {
+  margin-top: 32px;
+  padding: 24px 28px;
+  background: white;
+  border-radius: 16px;
+  border: 2px solid #3b82f6;
+  display: flex;
+  gap: 1rem;
+  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.15);
+  position: relative;
+  overflow: hidden;
+}
+
+.infoBanner::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 6px;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+}
+
+.bannerIcon {
+  font-size: 2rem;
+  flex-shrink: 0;
+  color: #3b82f6;
+}
+
+.bannerContent h4 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 0.5rem 0;
+}
+
+.bannerContent p {
+  font-size: 0.95rem;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* Access Denied */
+.accessDenied,
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  text-align: center;
+  padding: 2rem;
+}
+
+.accessDenied h2,
+.loadingContainer h2 {
+  font-size: 2rem;
+  color: #1a202c;
+  margin-bottom: 0.5rem;
+}
+
+.accessDenied p,
+.loadingContainer p {
+  font-size: 1.1rem;
+  color: #64748b;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .content {
+    padding: 1rem;
+  }
+
+  .title {
+    font-size: 2rem;
+  }
+
+  .subtitle {
+    font-size: 1rem;
+  }
+
+  .eldersGrid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .searchBox {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .title {
+    font-size: 1.75rem;
+  }
+
+  .elderCard {
+    margin-bottom: 0;
+  }
+
+  .elderCardHeader {
+    padding: 1rem;
+  }
+
+  .elderAvatar {
+    width: 60px;
+    height: 60px;
+  }
+
+  .elderName {
+    font-size: 1.2rem;
+  }
+
+  .infoBanner {
+    flex-direction: column;
+  }
+}

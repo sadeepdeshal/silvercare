@@ -1,0 +1,2155 @@
+.container {
+  min-height: 100vh;
+  background: #ffffff;
+  margin: 0;
+  padding: 0;
+  position: relative;
+}
+
+
+.content {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 32px 40px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Loading States */
+.loadingContainer, .accessDenied {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 60vh;
+  color: #64748b;
+  text-align: center;
+}
+
+.loadingSpinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #e2e8f0;
+  border-top: 3px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Header */
+.header {
+  background: linear-gradient(135deg, #ffffff 0%, #fefefe 100%);
+  border-radius: 20px;
+  padding: 40px 36px;
+  margin-bottom: 40px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(226, 232, 240, 0.6);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  backdrop-filter: blur(10px);
+  position: relative;
+  overflow: hidden;
+  position: relative;
+  overflow: hidden;
+}
+
+.headerContent {
+  flex: 1;
+}
+
+.title {
+  color: #1e293b;
+  font-size: 2rem;
+  font-weight: 800;
+  margin: 0 0 12px 0;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #3b82f6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+}
+
+.subtitle {
+  color: #64748b;
+  font-size: 1.05rem;
+  margin: 0 0 12px 0;
+}
+
+.cancellationPolicy {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  border-radius: 12px;
+  border: 1px solid #3b82f6;
+  margin-top: 8px;
+}
+
+.policyIcon {
+  font-size: 1rem;
+  color: #2563eb;
+}
+
+.policyText {
+  color: #2563eb;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.backButton {
+  background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+  color: white;
+  border: none;
+  padding: 14px 28px;
+  border-radius: 14px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  box-shadow: 0 6px 20px rgba(100, 116, 139, 0.3);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.backButton:hover {
+  background: linear-gradient(135deg, #475569 0%, #334155 100%);
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 8px 28px rgba(100, 116, 139, 0.4);
+}
+
+/* Error Message */
+.errorMessage {
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  border: 2px solid #fecaca;
+  color: #dc2626;
+  padding: 16px 20px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.1);
+}
+
+.errorIcon {
+  font-size: 1.25rem;
+}
+
+/* Filters Section */
+.filtersSection {
+  margin-bottom: 40px;
+}
+
+.filterTabs {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+
+.filterTab {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border: 2px solid #e2e8f0;
+  color: #64748b;
+  padding: 14px 28px;
+  border-radius: 14px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  text-transform: none;
+  letter-spacing: 0.3px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.filterTab:hover {
+  border-color: #3b82f6;
+  color: #3b82f6;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+}
+
+.filterTab.active {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  border-color: #3b82f6;
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.35);
+  transform: translateY(-2px);
+}
+
+.searchContainer {
+  max-width: 500px;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 14px 18px;
+  border: 2px solid #e2e8f0;
+  border-radius: 14px;
+  font-size: 1rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  font-weight: 500;
+  color: #1e293b;
+}
+
+.searchInput:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15), 0 4px 12px rgba(59, 130, 246, 0.2);
+  transform: translateY(-1px);
+}
+
+.infoMessage {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 24px;
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  border: 2px solid #3b82f6;
+  border-radius: 14px;
+  margin-bottom: 32px;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+}
+
+.infoIcon {
+  font-size: 1.25rem;
+  color: #2563eb;
+}
+
+.infoMessage span:last-child {
+  color: #1e40af;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.filtersContainer {
+  background: linear-gradient(135deg, #ffffff 0%, #fefefe 100%);
+  border-radius: 20px;
+  padding: 32px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06), 0 2px 8px rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(226, 232, 240, 0.6);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 28px;
+  align-items: end;
+  backdrop-filter: blur(10px);
+}
+
+.filterGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.filterGroup label {
+  font-weight: 600;
+  color: #1e293b;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.filterSelect, .searchInput {
+  padding: 14px 18px;
+  border: 2px solid #e2e8f0;
+  border-radius: 14px;
+  font-size: 1rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  font-weight: 500;
+  color: #1e293b;
+}
+
+.filterSelect:hover, .searchInput:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.filterSelect:focus, .searchInput:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15), 0 4px 12px rgba(59, 130, 246, 0.2);
+  transform: translateY(-1px);
+}
+
+.searchInput {
+  min-width: 300px;
+}
+
+/* Appointments Section */
+.appointmentsSection,
+.bookingsSection {
+  background: linear-gradient(135deg, #ffffff 0%, #fefefe 100%);
+  border-radius: 20px;
+  padding: 40px 36px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06), 0 2px 8px rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(226, 232, 240, 0.6);
+  position: relative;
+  overflow: visible;
+  min-height: 400px;
+  backdrop-filter: blur(10px);
+}
+
+.noAppointments {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 20px;
+  text-align: center;
+}
+
+.noAppointmentsIcon {
+  font-size: 3rem;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.noAppointments h2 {
+  color: #475569;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+}
+
+.noAppointments p {
+  color: #64748b;
+  font-size: 0.875rem;
+  margin: 0 0 24px 0;
+  max-width: 400px;
+}
+
+.bookAppointmentButton,
+.newBookingButton {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  border: none;
+  padding: 14px 32px;
+  border-radius: 14px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.35);
+  position: relative;
+  overflow: hidden;
+}
+
+.bookAppointmentButton::before,
+.newBookingButton::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.5s;
+}
+
+.bookAppointmentButton:hover,
+.newBookingButton:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 12px 32px rgba(59, 130, 246, 0.5);
+}
+
+.bookAppointmentButton:hover::before,
+.newBookingButton:hover::before {
+  left: 100%;
+}
+
+.bookAppointmentButton:active,
+.newBookingButton:active {
+  transform: translateY(-1px) scale(0.98);
+}
+
+/* Appointments List */
+.appointmentsList {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+/* Bookings List - 2 Column Grid */
+.bookingsList {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.appointmentCard {
+  background: linear-gradient(135deg, #ffffff 0%, #fefefe 100%);
+  border: 1px solid rgba(226, 232, 240, 0.6);
+  border-radius: 20px;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  position: relative;
+}
+
+/* Professional Booking Card */
+.bookingCard {
+  background: linear-gradient(135deg, #ffffff 0%, #fefefe 100%);
+  border: 1px solid rgba(226, 232, 240, 0.6);
+  border-radius: 16px;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+}
+
+.appointmentCard:hover {
+  transform: translateY(-6px) scale(1.01);
+  box-shadow: 0 16px 48px rgba(59, 130, 246, 0.15), 0 8px 16px rgba(0, 0, 0, 0.1);
+  border-color: #3b82f6;
+}
+
+.bookingCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(59, 130, 246, 0.15);
+  border-color: #3b82f6;
+}
+
+.appointmentHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 28px 32px;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 50%, #1d4ed8 100%);
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.appointmentHeader::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+  border-radius: 50%;
+  transform: translate(50%, -50%);
+}
+
+.appointmentType {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.typeIcon {
+  font-size: 1.5rem;
+}
+
+.typeText {
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.appointmentStatusContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: flex-end;
+}
+
+.appointmentStatus,
+.statusBadge {
+  padding: 10px 20px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Status Badge Variants */
+.pending {
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  box-shadow: 0 4px 16px rgba(34, 197, 94, 0.4);
+}
+
+.upcoming {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.4);
+}
+
+.ongoing {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.4);
+}
+
+.completed {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  box-shadow: 0 4px 16px rgba(139, 92, 246, 0.4);
+}
+
+.cancelled {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.4);
+}
+
+.refunded {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  box-shadow: 0 4px 16px rgba(220, 38, 38, 0.4);
+  color: white;
+}
+
+.cancellationStatus {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 4px 8px;
+  border-radius: 12px;
+}
+
+.cancellationText {
+  font-size: 0.7rem;
+}
+
+.appointmentBody {
+  padding: 32px;
+  background: linear-gradient(to bottom, transparent 0%, rgba(248, 250, 252, 0.3) 100%);
+}
+
+.appointmentInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.infoRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.infoItem {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.infoIcon {
+  font-size: 1.4rem;
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  color: #0369a1;
+  transition: all 0.3s ease;
+}
+
+.infoContent {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.infoLabel {
+  font-size: 0.75rem;
+  color: #64748b;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.infoValue {
+  font-size: 1rem;
+  color: #1e293b;
+  font-weight: 600;
+  word-wrap: break-word;
+}
+
+/* Booking Details Section */
+.bookingDetails {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  margin-top: 24px;
+}
+
+.detailRow {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  transition: all 0.3s ease;
+}
+
+.detailRow:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+  border-color: #cbd5e1;
+}
+
+.detailLabel {
+  font-size: 0.8rem;
+  color: #64748b;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.detailValue {
+  font-size: 1.05rem;
+  color: #1e293b;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.cancellationPolicyInfo,
+.cancellationInfo {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 18px 20px;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border-radius: 14px;
+  margin-top: 20px;
+  border: 2px solid #bae6fd;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.08);
+}
+
+.policyContent {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.appointmentNotes {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 20px;
+  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+  border-radius: 12px;
+  margin-top: 16px;
+  border: 1px solid #cbd5e1;
+}
+
+.notesContent {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+
+.notesText {
+  font-size: 0.875rem;
+  color: #475569;
+  line-height: 1.6;
+  font-style: italic;
+}
+
+.appointmentFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 28px;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-top: 2px solid #e2e8f0;
+}
+
+.appointmentMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.appointmentId, .appointmentCreated {
+  font-size: 0.75rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.appointmentId {
+  font-weight: 600;
+  color: #475569;
+}
+
+.daysAgo {
+  font-size: 0.75rem;
+  color: #64748b;
+  font-weight: 400;
+  margin-left: 4px;
+}
+
+.appointmentActions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.cancelButton {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  border: none;
+  padding: 14px 24px;
+  border-radius: 14px;
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  box-shadow: 0 8px 20px rgba(239, 68, 68, 0.35);
+  white-space: nowrap;
+  position: relative;
+  overflow: hidden;
+}
+
+.cancelButton::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.5s;
+}
+
+.cancelButton:hover:not(:disabled) {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 12px 28px rgba(239, 68, 68, 0.45);
+}
+
+.cancelButton:hover:not(:disabled)::before {
+  left: 100%;
+}
+
+.cancelButton:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.cancelButton.cancelling {
+  background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+}
+
+.refundAmount {
+  font-size: 0.75rem;
+  opacity: 0.9;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.buttonSpinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid transparent;
+  border-top: 2px solid currentColor;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.canCancelInfo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 20px;
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  border: 2px solid #6ee7b7;
+  border-radius: 14px;
+  font-size: 0.875rem;
+  color: #065f46;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+}
+
+.checkIcon {
+  font-size: 1.25rem;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
+}
+
+.cannotCancelInfo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 20px;
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  border: 2px solid #fca5a5;
+  border-radius: 14px;
+  font-size: 0.875rem;
+  color: #991b1b;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15);
+}
+
+.xIcon,
+.cannotCancelIcon {
+  font-size: 1.25rem;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3);
+}
+
+.cannotCancelText {
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+.viewDetailsButton {
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+  white-space: nowrap;
+}
+
+.viewDetailsButton:hover {
+  background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4);
+}
+
+.viewButton {
+  background: transparent;
+  color: #3b82f6;
+  border: 2px solid #3b82f6;
+  padding: 10px 20px;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.viewButton:hover {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+/* Load More Section */
+.loadMoreSection {
+  display: flex;
+  justify-content: center;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 2px solid #e2e8f0;
+}
+
+.loadMoreButton {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  color: #3b82f6;
+  border: 2px solid #3b82f6;
+  padding: 12px 32px;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
+}
+
+.loadMoreButton:hover:not(:disabled) {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.35);
+}
+
+.loadMoreButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.paginationInfo {
+  text-align: center;
+  margin-top: 20px;
+  color: #64748b;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.paginationInfo p {
+  margin: 0;
+}
+
+/* Success/Error message styling for cancellation */
+.cancellationSuccess {
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  border: 2px solid #10b981;
+  color: #065f46;
+  padding: 16px 20px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.1);
+}
+
+.cancellationError {
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  border: 2px solid #ef4444;
+  color: #991b1b;
+  padding: 16px 20px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.1);
+}
+
+/* Animation for status changes */
+@keyframes statusChange {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+  100% { transform: scale(1); }
+}
+
+.appointmentCard.statusChanged,
+.bookingCard.statusChanged {
+  animation: statusChange 0.5s ease-in-out;
+}
+
+/* Hover effects for interactive elements */
+.appointmentCard .infoItem:hover .infoIcon,
+.bookingCard .infoItem:hover .infoIcon {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  transform: scale(1.05);
+  transition: all 0.3s ease;
+}
+
+/* Focus states for accessibility */
+.cancelButton:focus,
+.viewDetailsButton:focus,
+.viewButton:focus,
+.loadMoreButton:focus,
+.backButton:focus,
+.bookAppointmentButton:focus,
+.newBookingButton:focus,
+.filterSelect:focus,
+.searchInput:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* ===== PROFESSIONAL BOOKING CARD STYLES ===== */
+
+/* Card Header */
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.cardHeaderLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.bookingIdBadge {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #3b82f6;
+  background: white;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid #3b82f6;
+}
+
+.bookingDate {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.dateLabel {
+  font-size: 0.7rem;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.dateValue {
+  font-size: 0.85rem;
+  color: #1e293b;
+  font-weight: 600;
+}
+
+/* Card Body */
+.cardBody {
+  padding: 20px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.caregiverSection {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.sectionIcon {
+  font-size: 2rem;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  border-radius: 50%;
+}
+
+.sectionContent {
+  flex: 1;
+}
+
+.caregiverName {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 4px 0;
+}
+
+.caregiverLabel {
+  font-size: 0.8rem;
+  color: #3b82f6;
+  font-weight: 500;
+  margin: 0;
+}
+
+.elderSection {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  background: #f8fafc;
+  border-radius: 8px;
+}
+
+.infoLabel {
+  font-size: 0.85rem;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.infoValue {
+  font-size: 0.9rem;
+  color: #1e293b;
+  font-weight: 700;
+}
+
+/* Date Range Section */
+.dateRangeSection {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border-radius: 10px;
+  border: 1px solid #bae6fd;
+}
+
+.dateBox {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dateBoxLabel {
+  font-size: 0.7rem;
+  color: #0369a1;
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.dateBoxValue {
+  font-size: 0.85rem;
+  color: #1e293b;
+  font-weight: 700;
+}
+
+.dateArrow {
+  font-size: 1.2rem;
+  color: #3b82f6;
+  font-weight: bold;
+}
+
+/* Duration and Price Section */
+.durationPriceSection {
+  display: flex;
+  gap: 10px;
+}
+
+.durationBadge,
+.priceBadge {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.durationBadge {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  color: #1e40af;
+  border: 1px solid #93c5fd;
+}
+
+.priceBadge {
+  background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+  color: #15803d;
+  border: 1px solid #86efac;
+}
+
+.durationIcon,
+.priceIcon {
+  font-size: 1rem;
+}
+
+/* Payment Status */
+.paymentStatusSection {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px;
+  background: #f8fafc;
+  border-radius: 6px;
+}
+
+.paymentLabel {
+  font-size: 0.8rem;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.paymentBadge {
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.paymentBadge.completed {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+}
+
+.paymentBadge.pending {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: white;
+}
+
+/* Cancellation Alert */
+.cancellationAlert {
+  margin: 0 20px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.canCancelAlert {
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  border: 1px solid #6ee7b7;
+  color: #065f46;
+}
+
+.cannotCancelAlert {
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  border: 1px solid #fca5a5;
+  color: #991b1b;
+}
+
+.alertIcon {
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+.alertText {
+  flex: 1;
+  font-weight: 600;
+}
+
+/* Card Footer */
+.cardFooter {
+  display: flex;
+  gap: 10px;
+  padding: 16px 20px;
+  background: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+}
+
+.detailsButton {
+  flex: 1;
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: none;
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.detailsButton:hover {
+  background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4);
+}
+
+.buttonIcon {
+  font-size: 1rem;
+}
+
+.buttonSpinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+/* ===== MODAL STYLES ===== */
+
+.modalOverlay {
+  position: fixed;
+  top: 70px; /* below navbar (navbar height ~70px) */
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: flex-start; /* align to top so modal does not overlap navbar */
+  justify-content: center;
+  padding-top: 20px; /* provide a small gap under navbar */
+  z-index: 999; /* keep navbar (1000) above the overlay */
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.modalContent {
+  background: white;
+  border-radius: 20px;
+  width: 90%;
+  max-width: 700px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 28px;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  border-radius: 20px 20px 0 0;
+}
+
+.modalTitle {
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin: 0;
+}
+
+.modalClose {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.modalClose:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: rotate(90deg);
+}
+
+.modalBody {
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.modalSection {
+  padding: 20px;
+  background: #f8fafc;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+}
+
+.sectionTitle {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 16px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #3b82f6;
+}
+
+.modalRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 10px 0;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.modalRow:last-child {
+  border-bottom: none;
+}
+
+.modalLabel {
+  font-size: 0.85rem;
+  color: #64748b;
+  font-weight: 600;
+  flex: 0 0 40%;
+}
+
+.modalValue {
+  font-size: 0.9rem;
+  color: #1e293b;
+  font-weight: 600;
+  flex: 1;
+  text-align: right;
+}
+
+.modalValueHighlight {
+  color: #3b82f6;
+  font-weight: 700;
+}
+
+.durationHighlight {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  border-radius: 8px;
+  color: #1e40af;
+  font-weight: 700;
+}
+
+.cancellationPolicy {
+  padding: 16px;
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  border: 1px solid #6ee7b7;
+  border-radius: 10px;
+  color: #065f46;
+  font-size: 0.85rem;
+  font-weight: 600;
+  line-height: 1.6;
+}
+
+.modalFooter {
+  display: flex;
+  gap: 12px;
+  padding: 20px 28px;
+  background: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+  border-radius: 0 0 20px 20px;
+}
+
+.modalCloseButton,
+.modalCancelButton {
+  flex: 1;
+  padding: 14px 24px;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: none;
+}
+
+.modalCloseButton {
+  background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(100, 116, 139, 0.3);
+}
+
+.modalCloseButton:hover {
+  background: linear-gradient(135deg, #475569 0%, #334155 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(100, 116, 139, 0.4);
+}
+
+.modalCancelButton {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.modalCancelButton:hover:not(:disabled) {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
+}
+
+.modalCancelButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ===== END PROFESSIONAL BOOKING CARD STYLES ===== */
+
+/* ===== CANCEL CONFIRMATION MODAL ===== */
+
+.cancelModalContent {
+  background: white;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.3s ease-out;
+  overflow: hidden;
+}
+
+.cancelModalHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 24px 28px;
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border-bottom: 2px solid #fbbf24;
+}
+
+.cancelModalIcon {
+  font-size: 2rem;
+}
+
+.cancelModalTitle {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #92400e;
+  margin: 0;
+}
+
+.cancelModalBody {
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.cancelModalText {
+  font-size: 1.05rem;
+  color: #1e293b;
+  font-weight: 600;
+  margin: 0;
+  text-align: center;
+}
+
+.cancelModalInfo {
+  background: #f8fafc;
+  border-radius: 10px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border: 1px solid #e2e8f0;
+}
+
+.cancelInfoRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+}
+
+.cancelInfoLabel {
+  font-size: 0.9rem;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.cancelInfoValue {
+  font-size: 0.95rem;
+  color: #1e293b;
+  font-weight: 700;
+}
+
+.cancelModalNotice {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  border: 1px solid #6ee7b7;
+  border-radius: 10px;
+}
+
+.noticeIcon {
+  font-size: 1.5rem;
+}
+
+.noticeText {
+  font-size: 0.9rem;
+  color: #065f46;
+  font-weight: 600;
+  flex: 1;
+}
+
+.cancelModalFooter {
+  display: flex;
+  gap: 12px;
+  padding: 20px 28px;
+  background: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+}
+
+.cancelModalNoButton,
+.cancelModalYesButton {
+  flex: 1;
+  padding: 14px 24px;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.cancelModalNoButton {
+  background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(100, 116, 139, 0.3);
+}
+
+.cancelModalNoButton:hover {
+  background: linear-gradient(135deg, #475569 0%, #334155 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(100, 116, 139, 0.4);
+}
+
+.cancelModalYesButton {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.cancelModalYesButton:hover {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
+}
+
+/* ===== END CANCEL CONFIRMATION MODAL ===== */
+
+/* ===== RATING MODAL STYLES ===== */
+
+.addRatingButton {
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.addRatingButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(245, 158, 11, 0.4);
+}
+
+.viewRatingButton {
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.viewRatingButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+}
+
+.ratingModalContent {
+  background: white;
+  border-radius: 20px;
+  padding: 0;
+  width: 90%;
+  max-width: 550px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+  animation: slideUpFadeIn 0.3s ease-out;
+}
+
+.ratingModalHeader {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  padding: 24px 30px;
+  border-radius: 20px 20px 0 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ratingModalTitle {
+  color: white;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.ratingModalBody {
+  padding: 30px;
+}
+
+.ratingCaregiverInfo {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 20px;
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border-radius: 12px;
+  margin-bottom: 25px;
+}
+
+.ratingInfoIcon {
+  font-size: 2.5rem;
+}
+
+.ratingInfoText h3 {
+  margin: 0 0 5px 0;
+  font-size: 1.2rem;
+  color: #92400e;
+}
+
+.ratingInfoText p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #78350f;
+  opacity: 0.8;
+}
+
+.starRatingSection {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.ratingLabel {
+  display: block;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 12px;
+  text-align: left;
+}
+
+.optional {
+  font-weight: 400;
+  color: #6b7280;
+  font-size: 0.85rem;
+}
+
+.starRating {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.star {
+  color: #ddd;
+  transition: all 0.2s ease;
+}
+
+.star.filled {
+  color: #f59e0b;
+  text-shadow: 0 2px 4px rgba(245, 158, 11, 0.3);
+}
+
+.star:not(.disabled):hover {
+  transform: scale(1.2);
+}
+
+.ratingText {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #f59e0b;
+  margin: 10px 0 0 0;
+}
+
+.feedbackSection {
+  margin-bottom: 20px;
+}
+
+.feedbackTextarea {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  resize: vertical;
+  transition: all 0.3s ease;
+}
+
+.feedbackTextarea:focus {
+  outline: none;
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+}
+
+.feedbackTextarea:disabled,
+.feedbackTextarea:read-only {
+  background-color: #f9fafb;
+  color: #6b7280;
+  cursor: not-allowed;
+}
+
+.ratingDateSection {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  background: #f3f4f6;
+  border-radius: 8px;
+  margin-top: 15px;
+}
+
+.ratingDateLabel {
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+
+.ratingDateValue {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.ratingNoticeSection {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: #fef3c7;
+  border-radius: 8px;
+  margin-top: 15px;
+  border-left: 4px solid #f59e0b;
+}
+
+.noticeIcon {
+  font-size: 1.2rem;
+}
+
+.noticeText {
+  font-size: 0.9rem;
+  color: #92400e;
+  line-height: 1.5;
+}
+
+.ratingModalFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 20px 30px;
+  background: #f9fafb;
+  border-radius: 0 0 20px 20px;
+}
+
+.ratingCancelButton {
+  padding: 12px 24px;
+  background: white;
+  color: #6b7280;
+  border: 2px solid #e5e7eb;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.ratingCancelButton:hover {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+}
+
+.ratingSubmitButton {
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ratingSubmitButton:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(245, 158, 11, 0.4);
+}
+
+.ratingSubmitButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ===== END RATING MODAL STYLES ===== */
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .content {
+    padding: 16px 20px;
+  }
+
+  /* 2-column to 1-column transition */
+  .bookingsList {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .header {
+    flex-direction: column;
+    gap: 20px;
+    text-align: center;
+    padding: 24px;
+  }
+
+  .title {
+    font-size: 1.5rem;
+  }
+
+  .subtitle {
+    font-size: 0.875rem;
+  }
+
+  .statsGrid {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+  }
+
+  .filtersContainer {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    padding: 24px;
+  }
+
+  .searchInput {
+    min-width: auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .content {
+    padding: 12px 16px;
+  }
+
+  .header, .filtersContainer, .appointmentsSection, .bookingsSection {
+    padding: 20px;
+  }
+
+  .title {
+    font-size: 1.25rem;
+  }
+
+  .filterTabs {
+    gap: 8px;
+  }
+
+  .filterTab {
+    padding: 12px 20px;
+    font-size: 0.85rem;
+  }
+
+  .infoRow {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .appointmentFooter {
+    flex-direction: column;
+    gap: 16px;
+    align-items: stretch;
+  }
+
+  .appointmentStatusContainer {
+    align-items: flex-start;
+  }
+
+  .cancellationStatus {
+    font-size: 0.7rem;
+  }
+
+  .appointmentActions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .cancelButton,
+  .viewDetailsButton,
+  .viewButton {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .cannotCancelInfo {
+    font-size: 0.7rem;
+    padding: 6px 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .content {
+    padding: 8px 12px;
+  }
+
+  .header, .filtersContainer, .appointmentsSection, .bookingsSection {
+    padding: 16px;
+  }
+
+  .title {
+    font-size: 1.125rem;
+  }
+
+  .filterTabs {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .filterTab {
+    width: 100%;
+    text-align: center;
+  }
+
+  .appointmentHeader {
+    flex-direction: column;
+    gap: 12px;
+    text-align: center;
+    padding: 20px;
+  }
+
+  .appointmentBody {
+    padding: 20px;
+  }
+
+  .infoItem {
+    gap: 12px;
+  }
+
+  .infoIcon {
+    width: 32px;
+    height: 32px;
+    font-size: 1rem;
+  }
+
+  .appointmentActions {
+    gap: 8px;
+  }
+
+  .cancelButton, .viewButton, .viewDetailsButton {
+    padding: 10px 16px;
+    font-size: 0.8rem;
+  }
+
+  .cancellationPolicy {
+    flex-direction: column;
+    text-align: center;
+    gap: 6px;
+  }
+
+  .cancellationPolicyInfo {
+    flex-direction: column;
+    gap: 8px;
+    text-align: center;
+  }
+}
+
+/* Print styles */
+@media print {
+  .container {
+    background: white;
+  }
+
+  .header,
+  .filtersSection,
+  .appointmentsSection,
+  .bookingsSection {
+    background: white;
+    box-shadow: none;
+    border: 1px solid #ccc;
+  }
+
+  .appointmentActions,
+  .loadMoreSection,
+  .backButton {
+    display: none;
+  }
+
+  .appointmentCard,
+  .bookingCard {
+    break-inside: avoid;
+    margin-bottom: 20px;
+  }
+}

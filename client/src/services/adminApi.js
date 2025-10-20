@@ -1,3 +1,5 @@
+// import { changeStatus } from "../../../server/controllers/adminController";
+
 const API_BASE_URL = 'http://localhost:5000/api';
 
 export const adminApi = {
@@ -91,5 +93,68 @@ export const adminApi = {
       console.error('Error fetching all users:', error);
       throw error;
     }
-  }
+  },
+  changeStatus: async (user_Id, newStatus) => {
+    try {
+      console.log(`Changing status for user ID: ${user_Id} to ${newStatus}`);
+      const response = await fetch(`${API_BASE_URL}/admin/change-status/${user_Id}/${newStatus}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: newStatus }),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error updating caregiver status:', error);
+      throw error;
+    }
+  },
+  // New: update user status (used by Admin UI)
+  updateUserStatus: async (user_Id, newStatus) => {
+    try {
+      console.log(`Updating status for user ID: ${user_Id} to ${newStatus}`);
+      const response = await fetch(`${API_BASE_URL}/admin/change-status/${user_Id}/${newStatus}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error updating user status:', error);
+      throw error;
+    }
+  },
+
+  // Delete a user
+  deleteUser: async (user_Id) => {
+    try {
+      console.log(`Deleting user ID: ${user_Id}`);
+      const response = await fetch(`${API_BASE_URL}/users/${user_Id}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok && response.status !== 204) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      return { success: true };
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      throw error;
+    }
+  },
 };

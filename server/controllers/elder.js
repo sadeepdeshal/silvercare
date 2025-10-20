@@ -820,6 +820,59 @@ const getFamilyMembersForChat = async (req, res) => {
   }
 };
 
+// Get doctors who have confirmed or completed appointments with this elder
+const getDoctorsWithAppointments = async (req, res) => {
+  const { elderId } = req.params;
+  
+  try {
+    console.log('Getting doctors with appointments for elder:', elderId);
+    
+    const result = await pool.query(
+      `SELECT DISTINCT
+        d.doctor_id,
+        d.specialization,
+        d.license_number,
+        d.current_institution,
+        d.years_experience,
+        d.district as doctor_district,
+        u.user_id,
+        u.name as doctor_name,
+        u.email as doctor_email,
+        u.phone as doctor_phone,
+        COUNT(a.appointment_id) as total_appointments,
+        COUNT(CASE WHEN a.status = 'confirmed' THEN 1 END) as confirmed_appointments,
+        COUNT(CASE WHEN a.status = 'completed' THEN 1 END) as completed_appointments,
+        MAX(a.date_time) as latest_appointment_date,
+        STRING_AGG(DISTINCT a.elder_id::text, ', ') as elders_treated_count
+      FROM doctor d
+      JOIN "User" u ON d.user_id = u.user_id
+      JOIN appointment a ON d.doctor_id = a.doctor_id
+      WHERE a.elder_id = $1 
+      AND a.status IN ('confirmed', 'completed')
+      AND d.status = 'confirmed'
+      GROUP BY d.doctor_id, d.specialization, d.license_number, d.current_institution, 
+               d.years_experience, d.district, u.user_id, u.name, u.email, u.phone
+      ORDER BY latest_appointment_date DESC`,
+      [elderId]
+    );
+    
+    console.log('Found doctors with appointments:', result.rows.length);
+    
+    res.json({
+      success: true,
+      doctors: result.rows,
+      count: result.rows.length
+    });
+    
+  } catch (err) {
+    console.error('Error fetching doctors with appointments:', err);
+    res.status(500).json({ 
+      success: false,
+      error: 'Error fetching doctors with appointments' 
+    });
+  }
+};
+
 
 module.exports = {
   getElderDetails,
@@ -833,5 +886,6 @@ module.exports = {
   getAppointmentById,
   joinAppointment,
   getFamilyMembersForChat,
+  getDoctorsWithAppointments,
 };
 

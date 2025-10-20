@@ -1,0 +1,548 @@
+/* CaregiverMessages styles for elder perspective - based on DoctorMessages but with caregiver theme */
+.container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+.content {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.header {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 24px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 
+    0 20px 40px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+.headerContent {
+  flex: 1;
+}
+
+.title {
+  background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0 0 0.75rem 0;
+  font-size: 2.5rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.subtitle {
+  color: #64748b;
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 500;
+  line-height: 1.6;
+}
+
+.backButton {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 16px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.backButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+  background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+}
+
+.backButton:active {
+  transform: translateY(0);
+}
+
+.errorMessage {
+  background: linear-gradient(135deg, #fed7d7 0%, #feb2b2 100%);
+  color: #c53030;
+  padding: 1.5rem;
+  border-radius: 16px;
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: 0 4px 12px rgba(197, 48, 48, 0.2);
+  border: 1px solid rgba(197, 48, 48, 0.2);
+}
+
+.errorIcon {
+  font-size: 1.5rem;
+}
+
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 24px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.loadingSpinner {
+  width: 60px;
+  height: 60px;
+  border: 4px solid #e2e8f0;
+  border-top: 4px solid #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1.5rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loadingContainer h2 {
+  color: #1a202c;
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.mainContent {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  min-height: 600px;
+  overflow: hidden;
+}
+
+.caregiversSection {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 24px;
+  padding: 2rem;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  overflow: hidden;
+  min-width: 0;
+  height: 100%;
+  max-height: 600px;
+}
+
+.sectionTitle {
+  color: #1a202c;
+  margin: 0 0 2rem 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.noCaregivers {
+  text-align: center;
+  padding: 3rem 2rem;
+  color: #64748b;
+}
+
+.noCaregiversIcon {
+  font-size: 4rem;
+  margin-bottom: 1.5rem;
+  opacity: 0.5;
+}
+
+.noCaregivers h3 {
+  color: #1a202c;
+  margin: 0 0 1rem 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.noCaregivers p {
+  margin: 0.5rem 0;
+  line-height: 1.6;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.caregiversList {
+  max-height: 600px;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+.caregiversList::-webkit-scrollbar {
+  width: 6px;
+}
+
+.caregiversList::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 3px;
+}
+
+.caregiversList::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 3px;
+}
+
+.caregiverCard {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  border: 2px solid transparent;
+  border-radius: 20px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.caregiverCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, transparent 0%, rgba(102, 126, 234, 0.05) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.caregiverCard:hover {
+  transform: translateY(-4px);
+  border-color: rgba(102, 126, 234, 0.3);
+  box-shadow: 
+    0 12px 40px rgba(0, 0, 0, 0.15),
+    0 0 0 1px rgba(102, 126, 234, 0.1);
+}
+
+.caregiverCard:hover::before {
+  opacity: 1;
+}
+
+.caregiverCard.selectedCaregiver {
+  border-color: #667eea;
+  background: rgba(102, 126, 234, 0.1);
+  transform: translateY(-2px);
+  box-shadow: 
+    0 8px 30px rgba(102, 126, 234, 0.3),
+    0 0 0 2px rgba(102, 126, 234, 0.2);
+}
+
+.caregiverHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+  position: relative;
+  z-index: 1;
+}
+
+.caregiverInfo {
+  flex: 1;
+}
+
+.caregiverName {
+  margin: 0 0 0.5rem 0;
+  color: #1a202c;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.caregiverDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.caregiverDetails span {
+  color: #64748b;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.location {
+  color: #059669 !important;
+}
+
+.status {
+  color: #7c3aed !important;
+}
+
+.statusBadge {
+  padding: 0.5rem 1rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.statusBadge.approved {
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  color: #065f46;
+  border: 1px solid rgba(5, 150, 105, 0.2);
+}
+
+.statusBadge.completed {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  color: #1e40af;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.statusBadge.confirmed {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  color: #92400e;
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.caregiverMeta {
+  margin-bottom: 1.5rem;
+  position: relative;
+  z-index: 1;
+}
+
+.contactInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 12px;
+  border: 1px solid rgba(102, 126, 234, 0.1);
+}
+
+.contactInfo span {
+  color: #4a5568;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.assignmentDetails {
+  padding: 1rem;
+  background: rgba(102, 126, 234, 0.05);
+  border-radius: 12px;
+  border: 1px solid rgba(102, 126, 234, 0.1);
+}
+
+.assignmentInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.assignmentInfo span {
+  color: #4a5568;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.chatButton {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  width: 100%;
+  position: relative;
+  z-index: 1;
+}
+
+.chatButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+  background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+}
+
+.chatButton:active {
+  transform: translateY(0);
+}
+
+.chatSection {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 24px;
+  padding: 2rem;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  height: 100%;
+  max-height: 600px;
+}
+
+.chatHeader {
+  padding: 2rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.startChatButton {
+  background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(72, 187, 120, 0.3);
+}
+
+.startChatButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(72, 187, 120, 0.4);
+}
+
+.noChatSelected {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 3rem 2rem;
+  color: #64748b;
+  text-align: center;
+}
+
+.noChatIcon {
+  font-size: 4rem;
+  margin-bottom: 1.5rem;
+  opacity: 0.5;
+}
+
+.noChatSelected h3 {
+  color: #1a202c;
+  margin: 0 0 1rem 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.noChatSelected p {
+  margin: 0;
+  line-height: 1.6;
+  max-width: 300px;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .mainContent {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .chatSection {
+    min-height: 500px;
+  }
+}
+
+@media (max-width: 768px) {
+  .content {
+    padding: 1rem;
+  }
+  
+  .header {
+    padding: 1.5rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .title {
+    font-size: 2rem;
+  }
+  
+  .subtitle {
+    font-size: 1rem;
+  }
+  
+  .backButton {
+    padding: 0.75rem 1.5rem;
+    font-size: 0.9rem;
+  }
+  
+  .caregiversSection,
+  .chatSection {
+    padding: 1.5rem;
+  }
+  
+  .caregiverCard {
+    padding: 1.25rem;
+  }
+  
+  .caregiverHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .contactInfo,
+  .assignmentDetails {
+    padding: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .content {
+    padding: 0.75rem;
+  }
+  
+  .header {
+    padding: 1.25rem;
+  }
+  
+  .title {
+    font-size: 1.75rem;
+  }
+  
+  .caregiversSection,
+  .chatSection {
+    padding: 1.25rem;
+  }
+  
+  .caregiverCard {
+    padding: 1rem;
+  }
+  
+  .sectionTitle {
+    font-size: 1.25rem;
+  }
+}

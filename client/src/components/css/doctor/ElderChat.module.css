@@ -1,0 +1,445 @@
+/* ElderChat.module.css */
+
+/* Layout Container */
+.container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f8fdf9 0%, #e8f5e8 100%);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Main Layout with Sidebar */
+.layout {
+  display: flex;
+  flex: 1;
+  min-height: calc(100vh - 80px);
+}
+
+/* Main Content Area */
+.content {
+  flex: 1;
+  padding: 30px;
+  margin-left: 260px;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fdf9 50%, #e8f5e8 100%);
+  border-radius: 20px 0 0 0;
+  box-shadow: -2px 0 20px rgba(34, 139, 34, 0.1);
+  overflow-y: auto;
+}
+
+/* Header Section */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  padding: 20px 0;
+  border-bottom: 2px solid #e8f5e8;
+}
+
+.headerContent {
+  flex: 1;
+}
+
+.title {
+  color: #2e8b57;
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin: 0 0 10px 0;
+  text-shadow: 2px 2px 4px rgba(46, 139, 87, 0.1);
+}
+
+.subtitle {
+  color: #666;
+  font-size: 1.1rem;
+  margin: 0;
+  font-style: italic;
+}
+
+.backButton {
+  background: linear-gradient(135deg, #228b22 0%, #32cd32 100%);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 25px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(34, 139, 34, 0.3);
+}
+
+.backButton:hover {
+  background: linear-gradient(135deg, #1e7b1e 0%, #2eb82e 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(34, 139, 34, 0.4);
+}
+
+/* Loading States */
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 400px;
+  color: #2e8b57;
+}
+
+.loadingSpinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #e8f5e8;
+  border-top: 4px solid #2e8b57;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Error Handling */
+.errorMessage {
+  background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+  color: #c62828;
+  padding: 15px 20px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  border-left: 4px solid #c62828;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 4px 10px rgba(198, 40, 40, 0.1);
+}
+
+.errorIcon {
+  font-size: 1.2rem;
+}
+
+/* Main Content Layout */
+.mainContent {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  min-height: 600px;
+}
+
+/* Elders Section */
+.eldersSection {
+  background: white;
+  border-radius: 15px;
+  padding: 25px;
+  box-shadow: 0 8px 25px rgba(46, 139, 87, 0.1);
+  border: 1px solid #e8f5e8;
+}
+
+.sectionTitle {
+  color: #2e8b57;
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #e8f5e8;
+}
+
+/* No Elders State */
+.noElders {
+  text-align: center;
+  padding: 40px 20px;
+  color: #666;
+}
+
+.noEldersIcon {
+  font-size: 4rem;
+  margin-bottom: 20px;
+  opacity: 0.5;
+}
+
+.noElders h3 {
+  color: #2e8b57;
+  margin-bottom: 15px;
+  font-size: 1.4rem;
+}
+
+.noElders p {
+  font-size: 1rem;
+  line-height: 1.6;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+/* Elders List */
+.eldersList {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  max-height: 500px;
+  overflow-y: auto;
+  padding-right: 10px;
+}
+
+.eldersList::-webkit-scrollbar {
+  width: 6px;
+}
+
+.eldersList::-webkit-scrollbar-track {
+  background: #f0f0f0;
+  border-radius: 3px;
+}
+
+.eldersList::-webkit-scrollbar-thumb {
+  background: #2e8b57;
+  border-radius: 3px;
+}
+
+/* Elder Card */
+.elderCard {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fdf9 100%);
+  border: 2px solid #e8f5e8;
+  border-radius: 12px;
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.elderCard:hover {
+  border-color: #2e8b57;
+  box-shadow: 0 6px 20px rgba(46, 139, 87, 0.15);
+  transform: translateY(-2px);
+}
+
+.selectedElder {
+  border-color: #2e8b57 !important;
+  background: linear-gradient(135deg, #f0fff0 0%, #e8f5e8 100%);
+  box-shadow: 0 8px 25px rgba(46, 139, 87, 0.2);
+}
+
+.elderInfo {
+  flex: 1;
+}
+
+.elderHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.elderName {
+  color: #2e8b57;
+  font-size: 1.3rem;
+  font-weight: bold;
+  margin: 0;
+}
+
+.appointmentCount {
+  background: linear-gradient(135deg, #2e8b57 0%, #32cd32 100%);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.elderDetails {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 15px;
+}
+
+.elderDetails p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.elderDetails strong {
+  color: #2e8b57;
+  font-weight: 600;
+}
+
+.elderDetails span {
+  color: #333;
+}
+
+.elderStats {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 10px;
+}
+
+.statItem {
+  text-align: center;
+  padding: 8px 12px;
+  background: linear-gradient(135deg, #e8f5e8 0%, #f0fff0 100%);
+  border-radius: 8px;
+  border: 1px solid #d4edda;
+}
+
+.statNumber {
+  display: block;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #2e8b57;
+}
+
+.statLabel {
+  display: block;
+  font-size: 0.8rem;
+  color: #666;
+  text-transform: uppercase;
+}
+
+.patientSince {
+  font-size: 0.85rem;
+  color: #666;
+  font-style: italic;
+  border-top: 1px solid #e8f5e8;
+  padding-top: 10px;
+}
+
+.chatButton {
+  background: linear-gradient(135deg, #228b22 0%, #32cd32 100%);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  align-self: flex-start;
+  font-size: 0.9rem;
+}
+
+.chatButton:hover {
+  background: linear-gradient(135deg, #1e7b1e 0%, #2eb82e 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(34, 139, 34, 0.3);
+}
+
+/* Chat Section */
+.chatSection {
+  background: white;
+  border-radius: 15px;
+  padding: 25px;
+  box-shadow: 0 8px 25px rgba(46, 139, 87, 0.1);
+  border: 1px solid #e8f5e8;
+  display: flex;
+  flex-direction: column;
+}
+
+.chatHeader {
+  margin-bottom: 20px;
+}
+
+.chatInterface {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.comingSoon {
+  text-align: center;
+  padding: 40px 20px;
+  background: linear-gradient(135deg, #f8fdf9 0%, #e8f5e8 100%);
+  border-radius: 12px;
+  border: 2px dashed #2e8b57;
+}
+
+.comingSoon h4 {
+  color: #2e8b57;
+  font-size: 1.4rem;
+  margin-bottom: 15px;
+}
+
+.comingSoon p {
+  color: #666;
+  margin-bottom: 25px;
+  font-size: 1rem;
+}
+
+.startChatButton {
+  background: linear-gradient(135deg, #228b22 0%, #32cd32 100%);
+  color: white;
+  border: none;
+  padding: 15px 30px;
+  border-radius: 25px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-bottom: 25px;
+  box-shadow: 0 4px 15px rgba(34, 139, 34, 0.3);
+}
+
+.startChatButton:hover {
+  background: linear-gradient(135deg, #1e7b1e 0%, #2eb82e 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(34, 139, 34, 0.4);
+}
+
+.contactInfo {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  border: 1px solid #e8f5e8;
+  text-align: left;
+  box-shadow: 0 4px 10px rgba(46, 139, 87, 0.05);
+}
+
+.contactInfo p {
+  margin: 8px 0;
+  color: #555;
+  font-size: 0.95rem;
+}
+
+.contactInfo p:first-child {
+  font-weight: bold;
+  color: #2e8b57;
+  margin-bottom: 15px;
+  font-size: 1rem;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .mainContent {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .content {
+    margin-left: 240px;
+    padding: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .content {
+    margin-left: 0;
+    padding: 15px;
+  }
+  
+  .header {
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+  }
+  
+  .title {
+    font-size: 2rem;
+  }
+  
+  .elderDetails {
+    grid-template-columns: 1fr;
+  }
+  
+  .elderStats {
+    justify-content: center;
+  }
+}

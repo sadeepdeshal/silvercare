@@ -302,11 +302,18 @@ const joinSession = async (req, res) => {
     const timeDiff = sessionTime.getTime() - now.getTime();
     const minutesDiff = Math.floor(timeDiff / (1000 * 60));
 
-    // Allow joining 15 minutes before the session starts
-    if (minutesDiff > 15) {
+    console.log('Session timing check:', {
+      sessionTime: sessionTime.toISOString(),
+      now: now.toISOString(),
+      minutesDiff,
+      timeDiff
+    });
+
+    // Allow joining 30 minutes before the session starts
+    if (minutesDiff > 30) {
       return res.status(400).json({
         success: false,
-        error: "Session can only be joined 15 minutes before the scheduled time"
+        error: "Session can only be joined 30 minutes before the scheduled time"
       });
     }
 

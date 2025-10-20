@@ -8,7 +8,17 @@ const {
   createCareRequest,
   getCareRequestsByFamily,
   searchCaregivers,
-  updateCareRequestStatus
+  updateCareRequestStatus,
+  getBlockedDates,  // NEW: Get blocked dates for caregiver
+  createTemporaryCaregiverBooking,  // NEW: Create temporary booking
+  getTemporaryCaregiverBooking,  // NEW: Get temporary booking by ID
+  confirmPaymentAndCreateCareRequest,  // NEW: Confirm payment
+  cancelTemporaryCaregiverBooking,  // NEW: Cancel temporary booking
+  cleanupExpiredCaregiverBookings,  // NEW: Cleanup expired bookings
+  getCaregiverBookingsByFamily,  // NEW: Get caregiver bookings for family
+  cancelCaregiverBooking,  // NEW: Cancel caregiver booking with refund
+  submitCaregiverRating,  // NEW: Submit rating for booking
+  getBookingRating,  // NEW: Get rating for booking
 } = require('../controllers/caregiverController');
 
 const { 
@@ -44,6 +54,24 @@ router.get('/search', searchCaregivers);
 
 // Get care requests for a family member
 router.get('/requests/family/:familyMemberId', getCareRequestsByFamily);
+
+// NEW: Get blocked dates for a caregiver
+router.get('/:caregiverId/blocked-dates', getBlockedDates);
+
+// NEW: Payment and booking routes
+router.post('/temporary-booking', createTemporaryCaregiverBooking);
+router.get('/temporary-booking/:tempBookingId', getTemporaryCaregiverBooking);
+router.post('/confirm-payment', confirmPaymentAndCreateCareRequest);
+router.delete('/temporary-booking/:tempBookingId', cancelTemporaryCaregiverBooking);
+router.post('/cleanup-expired', cleanupExpiredCaregiverBookings);
+
+// NEW: Caregiver bookings management
+router.get('/bookings/family/:familyMemberId', getCaregiverBookingsByFamily);
+router.post('/bookings/:requestId/cancel', cancelCaregiverBooking);
+
+// NEW: Rating and feedback routes
+router.post('/bookings/:careRequestId/rating', submitCaregiverRating);
+router.get('/bookings/:careRequestId/rating', getBookingRating);
 
 // Get specific caregiver by ID
 router.get('/:caregiverId', getCaregiverById);

@@ -476,6 +476,30 @@ const updateAppointmentMeetingLink = async (appointmentId, meetingLink, meetingI
   }
 };
 
+// Get simple appointment statistics for a doctor - just online and physical counts
+const getDoctorAppointmentStatistics = async (doctorId) => {
+  try {
+    const result = await pool.query(`
+      SELECT 
+        COUNT(CASE WHEN appointment_type = 'online' THEN 1 END) as online_appointments,
+        COUNT(CASE WHEN appointment_type = 'physical' THEN 1 END) as physical_appointments
+      FROM appointment 
+      WHERE doctor_id = $1
+    `, [doctorId]);
+
+    const stats = result.rows[0];
+    
+    return {
+      online: parseInt(stats.online_appointments) || 0,
+      physical: parseInt(stats.physical_appointments) || 0,
+      total: (parseInt(stats.online_appointments) || 0) + (parseInt(stats.physical_appointments) || 0)
+    };
+  } catch (error) {
+    console.error('Error in getDoctorAppointmentStatistics:', error);
+    throw error;
+  }
+};
+
 module.exports = {
   getAppointmentsByDoctorId,
   getUpcomingAppointmentsByDoctorId,
@@ -487,5 +511,6 @@ module.exports = {
   getFamilyMembersWithAppointments,
   getAppointmentHistoryWithFamilyMember,
   getAppointmentForJoin,
-  updateAppointmentMeetingLink
+  updateAppointmentMeetingLink,
+  getDoctorAppointmentStatistics
 };

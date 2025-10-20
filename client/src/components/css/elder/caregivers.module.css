@@ -1,280 +1,201 @@
-/* Caregivers Page Styles */
-.caregiversContainer {
+.pageContainer {
   min-height: 100vh;
   background-color: #f8fafc;
   margin: 0;
   padding: 0;
 }
 
-.caregiversContent {
-  max-width: 1200px;
+.contentWrapper {
+  max-width: 1400px;
   margin: 0 auto;
   padding: 20px 24px;
 }
 
 /* Page Header */
 .pageHeader {
-  margin-bottom: 32px;
-}
-
-.headerContent {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-}
-
-.backButton {
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-  color: #3b82f6;
-  border: 2px solid #3b82f6;
-  padding: 12px 24px;
-  border-radius: 12px;
-  font-size: 0.875rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
-  align-self: flex-start;
-}
-
-.backButton:hover {
   background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  color: white;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.35);
+  border-radius: 16px;
+  padding: 32px;
+  margin-bottom: 32px;
+  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
 }
 
-.headerInfo h1 {
-  color: #1e293b;
-  font-size: 2.25rem;
+.headerContent h1 {
+  color: white;
+  font-size: 2rem;
   font-weight: 700;
   margin: 0 0 8px 0;
-  background: linear-gradient(135deg, #1e293b 0%, #475569 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
 }
 
-.headerInfo p {
-  color: #64748b;
+.headerContent p {
+  color: rgba(255, 255, 255, 0.9);
   font-size: 1rem;
   margin: 0;
 }
 
-/* Stats Grid */
-.statsGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
-  margin-bottom: 32px;
-}
-
-.statsCard {
-  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+/* Section Styles */
+.section {
+  background: white;
   border-radius: 16px;
-  padding: 28px 24px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  border: 2px solid #e2e8f0;
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-}
-
-.statsCard:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-  border-color: #3b82f6;
-}
-
-.statsIcon {
-  font-size: 2.5rem;
-  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
-  border-radius: 50%;
-  width: 70px;
-  height: 70px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  border: 2px solid white;
-}
-
-.statsContent {
-  flex: 1;
-}
-
-.statsContent h3 {
-  color: #1e293b;
-  font-size: 0.875rem;
-  font-weight: 500;
-  margin: 0 0 4px 0;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.statsNumber {
-  color: #3b82f6;
-  font-size: 2rem;
-  font-weight: 700;
-  margin: 0;
-}
-
-/* Schedule Section */
-.scheduleSection {
-  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-  border-radius: 16px;
-  padding: 32px 28px;
+  padding: 28px;
   margin-bottom: 32px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   border: 2px solid #e2e8f0;
-  position: relative;
-  overflow: hidden;
 }
 
 .sectionHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   margin-bottom: 24px;
   padding-bottom: 16px;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 2px solid #e2e8f0;
 }
 
 .sectionHeader h2 {
   color: #1e293b;
-  font-size: 1.75rem;
+  font-size: 1.5rem;
   font-weight: 700;
+  margin: 0 0 8px 0;
+}
+
+.sectionHeader p {
+  color: #64748b;
+  font-size: 0.9rem;
   margin: 0;
-  background: linear-gradient(135deg, #1e293b 0%, #475569 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
 }
 
-.viewAllBtn {
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-  color: #3b82f6;
-  border: 2px solid #3b82f6;
-  padding: 8px 16px;
-  border-radius: 8px;
-  font-size: 0.875rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+.sectionContent {
+  margin-top: 24px;
 }
 
-.viewAllBtn:hover {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  color: white;
-}
-
-.scheduleGrid {
+/* Upcoming Care Schedule */
+.upcomingGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 24px;
 }
 
-.scheduleCard {
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+.upcomingCard {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
   border: 2px solid #e2e8f0;
   border-radius: 12px;
-  padding: 20px;
+  padding: 0;
   transition: all 0.3s ease;
+  overflow: hidden;
 }
 
-.scheduleCard:hover {
-  transform: translateY(-2px);
+.upcomingCard:hover {
+  transform: translateY(-4px);
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
   border-color: #3b82f6;
 }
 
-.scheduleHeader {
+.cardHeader {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 16px;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  border-bottom: 2px solid #bfdbfe;
 }
 
-.scheduleDate .dateText {
-  font-size: 1rem;
-  font-weight: 700;
+.caregiverIcon {
+  font-size: 2.5rem;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.cardHeaderInfo {
+  flex: 1;
+}
+
+.cardHeaderInfo h3 {
   color: #1e293b;
-  margin-bottom: 4px;
-}
-
-.scheduleDate .timeText {
-  font-size: 0.875rem;
-  color: #64748b;
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0 0 6px 0;
 }
 
 .statusBadge {
+  display: inline-block;
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   color: white;
+  font-size: 0.75rem;
+  font-weight: 600;
   padding: 4px 12px;
   border-radius: 12px;
-  font-size: 0.75rem;
-  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
 }
 
-.scheduleContent h4 {
-  color: #1e293b;
-  font-size: 1.125rem;
-  font-weight: 600;
-  margin: 0 0 12px 0;
-}
-
-.servicesList {
+.cardBody {
+  padding: 20px;
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.serviceTag {
-  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-  color: #2563eb;
-  padding: 4px 8px;
-  border-radius: 6px;
-  font-size: 0.75rem;
+.infoRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.infoRow:last-child {
+  border-bottom: none;
+}
+
+.infoLabel {
+  color: #64748b;
+  font-size: 0.875rem;
   font-weight: 500;
-  border: 1px solid #3b82f6;
 }
 
-/* Caregivers Section */
-.caregiversSection {
-  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-  border-radius: 16px;
-  padding: 32px 28px;
-  margin-bottom: 32px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  border: 2px solid #e2e8f0;
-  position: relative;
-  overflow: hidden;
+.infoValue {
+  color: #1e293b;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-align: right;
 }
 
-.tabContainer {
+.certificationsRow {
   display: flex;
+  flex-direction: column;
   gap: 8px;
-  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
-  padding: 6px;
-  border-radius: 12px;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+  padding: 12px;
+  background: #f8fafc;
+  border-radius: 8px;
+  margin-top: 8px;
 }
 
-.tabBtn {
-  background: transparent;
+.certificationsValue {
+  color: #1e293b;
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+/* Calendar Navigation */
+.calendarNavigation {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-radius: 12px;
+  border: 2px solid #e2e8f0;
+}
+
+.navBtn {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
   border: none;
   padding: 10px 20px;
   border-radius: 8px;
@@ -282,232 +203,160 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  color: #64748b;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
 }
 
-.tabBtn:hover {
-  background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
-  color: #475569;
-  transform: translateY(-1px);
+.navBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
 }
 
-.activeTab {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
-  color: white !important;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.35) !important;
-  transform: translateY(-1px);
-}
-
-.caregiversGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-  gap: 24px;
-}
-
-.caregiverCard {
-  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-  border: 2px solid #e2e8f0;
-  border-radius: 16px;
-  padding: 24px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-}
-
-.caregiverCard:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-  border-color: #3b82f6;
-}
-
-.caregiverHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 20px;
-}
-
-.caregiverInfo {
+.monthDisplay {
   display: flex;
   align-items: center;
   gap: 16px;
 }
 
-.caregiverAvatar {
-  width: 56px;
-  height: 56px;
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.5rem;
-  color: white;
-  font-weight: 700;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-  border: 3px solid white;
-  flex-shrink: 0;
-}
-
-.caregiverAvatar img {
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-.caregiverDetails h3 {
+.monthText {
   color: #1e293b;
   font-size: 1.25rem;
   font-weight: 700;
-  margin: 0 0 6px 0;
-  background: linear-gradient(135deg, #1e293b 0%, #475569 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
 }
 
-.specialization {
-  color: #3b82f6;
-  font-size: 0.875rem;
-  font-weight: 600;
-  margin: 0 0 8px 0;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.rating {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.875rem;
-}
-
-.stars {
-  color: #f59e0b;
-  font-weight: 600;
-}
-
-.experience {
-  color: #64748b;
-}
-
-.statusIndicator {
-  flex-shrink: 0;
-}
-
-.status {
+.currentMonthBtn {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border: none;
   padding: 6px 16px;
-  border-radius: 20px;
+  border-radius: 6px;
   font-size: 0.75rem;
   font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
-.active {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  color: white;
+.currentMonthBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
 }
 
-.onleave {
-  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-  color: white;
+/* Calendar */
+.calendarContent {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
 }
 
-.caregiverMeta {
-  margin-bottom: 20px;
+.calendarHeader {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+  margin-bottom: 16px;
 }
 
-.metaItem {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px 0;
-  border-bottom: 1px solid #e2e8f0;
-}
-
-.metaItem:last-child {
-  border-bottom: none;
-}
-
-.metaLabel {
+.dayHeader {
+  text-align: center;
   font-size: 0.875rem;
-  font-weight: 600;
+  font-weight: 700;
   color: #64748b;
-}
-
-.metaValue {
-  font-size: 0.875rem;
-  color: #1e293b;
-  font-weight: 500;
-}
-
-.caregiverActions {
-  display: flex;
-  gap: 12px;
-  justify-content: center;
-  align-items: center;
-  padding-top: 16px;
-  border-top: 2px solid #e2e8f0;
-}
-
-.callBtn, .messageBtn {
-  width: 44px;
-  height: 44px;
-  border: none;
-  border-radius: 12px;
-  font-size: 1.25rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.callBtn {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  color: white;
-}
-
-.messageBtn {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  color: white;
-}
-
-.callBtn:hover, .messageBtn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
-}
-
-.detailsBtn {
-  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
-  color: white;
-  border: none;
-  padding: 12px 24px;
-  border-radius: 12px;
-  font-size: 0.875rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
+  padding: 12px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
-  flex: 1;
 }
 
-.detailsBtn:hover {
-  background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+.calendarGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+}
+
+.emptyDay {
+  min-height: 100px;
+}
+
+.calendarDay {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 12px;
+  min-height: 100px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.calendarDay:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+  border-color: #cbd5e1;
 }
 
-/* Modal Styles */
+.hasAssignment {
+  border-color: #3b82f6;
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+}
+
+.hasAssignment:hover {
+  border-color: #2563eb;
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+}
+
+.todayDay {
+  border-color: #10b981;
+  background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+}
+
+.todayDay:hover {
+  border-color: #059669;
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+}
+
+.dayNumber {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 8px;
+}
+
+.todayBadge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  font-size: 0.625rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.assignmentsPreview {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.assignmentPreviewItem {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 6px;
+  padding: 6px 8px;
+}
+
+.caregiverNamePreview {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #1e293b;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Modal */
 .modal {
   position: fixed;
   top: 0;
@@ -519,41 +368,75 @@
   align-items: center;
   justify-content: center;
   z-index: 1000;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .modalContent {
-  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  background: white;
   border-radius: 16px;
-  max-width: 700px;
+  max-width: 600px;
   width: 90%;
   max-height: 80vh;
   overflow-y: auto;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   border: 2px solid #e2e8f0;
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 .modalHeader {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  padding: 24px 28px 16px;
-  border-bottom: 1px solid #e2e8f0;
+  align-items: flex-start;
+  padding: 24px 28px;
+  border-bottom: 2px solid #e2e8f0;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
 }
 
 .modalHeader h3 {
   font-size: 1.5rem;
   font-weight: 700;
   color: #1e293b;
-  margin: 0;
+  margin: 0 0 8px 0;
+}
+
+.modalDate {
+  font-size: 0.875rem;
+  color: #64748b;
+  font-weight: 500;
 }
 
 .closeBtn {
   background: none;
   border: none;
-  font-size: 1.5rem;
+  font-size: 2rem;
   color: #64748b;
   cursor: pointer;
-  padding: 4px;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 4px;
   transition: all 0.3s ease;
 }
@@ -564,252 +447,266 @@
 }
 
 .modalBody {
-  padding: 24px 28px;
-}
-
-.caregiverProfile {
+  padding: 24px;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 16px;
 }
 
-.profileSection {
+.modalAssignmentCard {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.modalCardHeader {
   display: flex;
   align-items: center;
-  gap: 20px;
-  padding: 20px;
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-  border-radius: 12px;
-  border: 1px solid #e2e8f0;
+  gap: 16px;
+  padding: 16px;
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  border-bottom: 2px solid #bfdbfe;
 }
 
-.profileAvatar {
-  width: 80px;
-  height: 80px;
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+.modalCaregiverIcon {
+  font-size: 2rem;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
   border-radius: 50%;
+  width: 50px;
+  height: 50px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2rem;
-  color: white;
-  font-weight: 700;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
   flex-shrink: 0;
 }
 
-.profileAvatar img {
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-.profileInfo h4 {
-  font-size: 1.5rem;
-  font-weight: 700;
+.modalCardHeader h4 {
   color: #1e293b;
-  margin: 0 0 8px 0;
+  font-size: 1.125rem;
+  font-weight: 700;
+  margin: 0 0 6px 0;
 }
 
-.profileInfo p {
-  color: #3b82f6;
-  font-size: 1rem;
+.modalStatusBadge {
+  display: inline-block;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  font-size: 0.7rem;
   font-weight: 600;
-  margin: 0 0 8px 0;
+  padding: 3px 10px;
+  border-radius: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.profileMeta {
-  display: flex;
-  gap: 16px;
-  font-size: 0.875rem;
-  color: #64748b;
-}
-
-.profileDetails {
+.modalCardBody {
+  padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 10px;
 }
 
-.detailSection {
+.modalInfoRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
   border-bottom: 1px solid #e2e8f0;
-  padding-bottom: 16px;
 }
 
-.detailSection:last-child {
+.modalInfoRow:last-child {
   border-bottom: none;
 }
 
-.detailSection h5 {
-  color: #1e293b;
-  font-size: 1.125rem;
-  font-weight: 600;
-  margin: 0 0 12px 0;
-}
-
-.detailSection p {
+.modalInfoLabel {
   color: #64748b;
   font-size: 0.875rem;
-  margin: 0;
-  line-height: 1.5;
-}
-
-.certificationsList {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.certificationTag {
-  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-  color: #92400e;
-  padding: 6px 12px;
-  border-radius: 8px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  border: 1px solid #f59e0b;
-}
-
-.statsSection {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
-  padding: 20px;
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-  border-radius: 12px;
-  border: 1px solid #e2e8f0;
-}
-
-.statItem {
-  text-align: center;
-}
-
-.statNumber {
-  display: block;
-  font-size: 2rem;
-  font-weight: 700;
-  color: #3b82f6;
-  margin-bottom: 4px;
-}
-
-.statLabel {
-  font-size: 0.875rem;
-  color: #64748b;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
   font-weight: 500;
 }
 
-/* Loading States */
+.modalInfoValue {
+  color: #1e293b;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-align: right;
+}
+
+.modalCertifications {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  background: white;
+  border-radius: 8px;
+  margin-top: 8px;
+}
+
+.modalCertificationsValue {
+  color: #1e293b;
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+/* Loading and Error States */
 .loadingContainer {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 60vh;
-  color: #64748b;
+  padding: 60px 20px;
 }
 
 .loadingSpinner {
-  width: 40px;
-  height: 40px;
-  border: 3px solid #e2e8f0;
-  border-top: 3px solid #3b82f6;
+  width: 50px;
+  height: 50px;
+  border: 4px solid #e2e8f0;
+  border-top-color: #3b82f6;
   border-radius: 50%;
   animation: spin 1s linear infinite;
-  margin-bottom: 16px;
-}
-
-.loadingContainer p {
-  font-size: 1rem;
 }
 
 @keyframes spin {
-  0% { 
-    transform: rotate(0deg); 
-  }
-  100% { 
-    transform: rotate(360deg); 
+  to {
+    transform: rotate(360deg);
   }
 }
 
+.loadingContainer p {
+  margin-top: 16px;
+  color: #64748b;
+  font-size: 0.875rem;
+}
+
+.errorContainer {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.errorIcon {
+  font-size: 4rem;
+  margin-bottom: 16px;
+}
+
+.errorContainer h2 {
+  color: #1e293b;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 12px 0;
+}
+
+.errorContainer p {
+  color: #64748b;
+  font-size: 1rem;
+  margin: 0 0 24px 0;
+}
+
+.retryBtn {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  border: none;
+  padding: 12px 32px;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+.retryBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+.noData {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.noDataIcon {
+  font-size: 4rem;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.noData h3 {
+  color: #1e293b;
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0 0 12px 0;
+}
+
+.noData p {
+  color: #64748b;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
 /* Responsive Design */
+@media (max-width: 1024px) {
+  .upcomingGrid {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  }
+}
+
 @media (max-width: 768px) {
-  .caregiversContent {
+  .contentWrapper {
     padding: 16px;
   }
-  
-  .statsGrid {
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 16px;
+
+  .pageHeader {
+    padding: 24px;
   }
-  
-  .scheduleGrid {
+
+  .headerContent h1 {
+    font-size: 1.5rem;
+  }
+
+  .section {
+    padding: 20px;
+  }
+
+  .upcomingGrid {
     grid-template-columns: 1fr;
   }
-  
-  .caregiversGrid {
-    grid-template-columns: 1fr;
-    gap: 16px;
-  }
-  
-  .caregiverInfo {
+
+  .calendarNavigation {
     flex-direction: column;
-    text-align: center;
     gap: 12px;
   }
-  
-  .caregiverHeader {
-    flex-direction: column;
-    gap: 16px;
-    text-align: center;
+
+  .navBtn {
+    width: 100%;
   }
-  
-  .caregiverActions {
-    justify-content: center;
-    flex-wrap: wrap;
+
+  .calendarGrid {
+    gap: 4px;
+  }
+
+  .calendarDay {
+    min-height: 80px;
+    padding: 8px;
+  }
+
+  .dayNumber {
+    font-size: 1rem;
+  }
+
+  .caregiverNamePreview {
+    font-size: 0.65rem;
   }
 
   .modalContent {
     width: 95%;
-    margin: 20px;
+    max-height: 90vh;
   }
-  
-  .profileSection {
-    flex-direction: column;
-    text-align: center;
-  }
-  
-  .statsSection {
-    grid-template-columns: 1fr;
-  }
-}
 
-@media (max-width: 480px) {
-  .statsGrid {
-    grid-template-columns: 1fr;
+  .modalHeader {
+    padding: 20px;
   }
-  
-  .caregiverCard {
+
+  .modalBody {
     padding: 16px;
   }
-  
-  .caregiverAvatar, .profileAvatar {
-    width: 50px;
-    height: 50px;
-    font-size: 1.25rem;
-  }
-}
-
-/* Focus states for accessibility */
-.backButton:focus,
-.viewAllBtn:focus,
-.tabBtn:focus,
-.callBtn:focus,
-.messageBtn:focus,
-.detailsBtn:focus,
-.closeBtn:focus {
-  outline: 2px solid #3b82f6;
-  outline-offset: 2px;
 }
