@@ -33,28 +33,10 @@ useEffect(() => {
   fetchCareRequests();
 }, [user, debouncedSearchTerm]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Auto-update status from 'confirmed' to 'completed' if end_date has passed
-  useEffect(() => {
-    if (!careRequests || careRequests.length === 0) return;
-    const today = new Date();
-    today.setHours(0,0,0,0);
-    careRequests.forEach(async (request) => {
-      if (request.status === 'confirmed' || request.status === 'approved') {
-        const endDate = new Date(request.end_date);
-        endDate.setHours(0,0,0,0);
-        if (endDate.getTime() < today.getTime()) {
-          // Update status in backend
-          try {
-            await caregiverApi.updateCareRequestStatus(request.request_id, 'completed');
-            // Refresh the data to show updated status
-            fetchCareRequests();
-          } catch (err) {
-            console.error('Error updating status to completed:', err);
-          }
-        }
-      }
-    });
-  }, [careRequests]); // eslint-disable-line react-hooks/exhaustive-deps
+  // NOTE: Do NOT auto-update status to 'completed'
+  // Status stays as 'confirmed' in database
+  // Display logic shows if assignment is past/current based on end_date
+  
 
   const fetchCareRequests = async () => {
     try {
@@ -300,27 +282,48 @@ useEffect(() => {
             ) : (
               <div className={styles.requestsList}>
                 {currentRequests.map((request, index) => {
-                  // For confirmed status, if start date < today, add green border/background
+                  // Determine display status and styling
+                  const today = new Date();
+                  today.setHours(0,0,0,0);
+                  
+                  const startDate = new Date(request.start_date);
+                  startDate.setHours(0,0,0,0);
+                  
+                  const endDate = new Date(request.end_date);
+                  endDate.setHours(0,0,0,0);
+                  
+                  let displayStatus = request.status === 'approved' ? 'confirmed' : request.status;
                   let confirmedPast = false;
+                  let isCompleted = false;
+                  
+                  // Check if it's a confirmed/approved assignment
                   if (request.status === 'confirmed' || request.status === 'approved') {
-                    const today = new Date();
-                    today.setHours(0,0,0,0);
-                    const start = new Date(request.start_date);
-                    start.setHours(0,0,0,0);
-                    if (start < today) confirmedPast = true;
+                    // If end_date < today, show as completed
+                    if (endDate < today) {
+                      displayStatus = 'completed';
+                      isCompleted = true;
+                    }
+                    // If start_date < today AND end_date >= today, it's active
+                    else if (startDate < today && endDate >= today) {
+                      confirmedPast = true;
+                    }
                   }
+                  
                   return (
                     <div
                       key={request.request_id || index}
-                      className={styles.requestCard}
-                      style={confirmedPast ? { border: '2px solid #10b981', background: '#d1fae5' } : {}}
+                      className={`${styles.requestCard} ${confirmedPast ? styles.activeAssignment : ''}`}
                     >
                       <div className={styles.requestHeader}>
                         <div className={styles.requestInfo}>
                           <h3 className={styles.elderName}>{request.elder_name}</h3>
+                          {confirmedPast && (
+                            <span className={styles.activeLabel}>🟢 Active Assignment</span>
+                          )}
+                          
                         </div>
-                        <div className={`${styles.statusBadge} ${styles[request.status === 'approved' ? 'confirmed' : request.status]}`}>
-                          {request.status === 'approved' ? 'confirmed' : request.status}
+                        <div className={`${styles.statusBadge} ${styles[displayStatus]}`}>
+                          {displayStatus}
                         </div>
                       </div>
 

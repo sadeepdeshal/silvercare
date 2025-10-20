@@ -283,17 +283,6 @@ const CareRequestDetails = () => {
               <div className={styles.infoCard}>
                 <h2>Elder Information</h2>
                 <div className={styles.elderInfo}>
-                  {careRequest?.elder_photo && (
-                    <div className={styles.elderPhoto}>
-                      <img 
-                        src={`http://localhost:5000/uploads/profiles/${careRequest.elder_photo}`} 
-                        alt={careRequest?.elder_name}
-                        onError={(e) => {
-                          e.target.style.display = 'none';
-                        }}
-                      />
-                    </div>
-                  )}
                   <div className={styles.elderDetails}>
                     <div className={styles.infoGrid}>
                       <div className={styles.infoItem}>

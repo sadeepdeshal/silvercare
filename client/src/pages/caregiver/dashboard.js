@@ -120,6 +120,39 @@ const CaregiverDashboard = () => {
       
       // Update care requests - this will get the latest status updates
       if (Array.isArray(careRequestsData)) {
+        // Count unique elder IDs with status 'confirmed'
+        const uniqueElderIds = Array.from(new Set(
+          careRequestsData
+            .filter(request => request.status === 'confirmed')
+            .map(request => request.elder_id)
+            .filter(Boolean)
+        ));
+        
+        // Transform elder data for display
+        const transformedElders = uniqueElderIds.map(elderId => {
+          const elderRequest = careRequestsData.find(req => req.elder_id === elderId && req.status === 'confirmed');
+          return {
+            elder_id: elderId,
+            name: elderRequest?.elder_name || 'Unknown',
+            age: elderRequest?.elder_age || 'N/A',
+            duration: elderRequest?.duration || 'N/A',
+            status: elderRequest?.status || 'confirmed',
+            family_id: elderRequest?.family_id
+          };
+        });
+        
+        setElders(transformedElders);
+        
+        // Count unique family IDs with status 'confirmed'
+        const uniqueFamilyIds = Array.from(new Set(
+          careRequestsData
+            .filter(request => request.status === 'confirmed')
+            .map(request => request.family_id)
+            .filter(Boolean)
+        ));
+        
+        setFamilies(uniqueFamilyIds);
+        
         const pendingRequests = careRequestsData
           .filter(request => request.status === 'pending')
           .map((request) => ({
@@ -170,54 +203,50 @@ const CaregiverDashboard = () => {
     const caregiverId = user.caregiver_id;
     setLoading(true);
     Promise.all([
-      caregiverApi.fetchAssignedElders(caregiverId).then((data) => {
-        console.log('Raw elder data from API:', data);
-        const transformed = data.map((elder) => ({
-          elder_id: elder.elder_id, // Add this missing field!
-          name: elder.name,
-          age: elder.age,
-          duration: elder.duration || "N/A",
-          status: elder.status,
-          family_id: elder.family_id,
-        }));
-        console.log('Transformed elder data:', transformed);
-        setElders(transformed);
-      }),
-      caregiverApi.getAssignedFamiliesCount(caregiverId).then((data) => {
-        const count = Number(data.count);
-        if (!isNaN(count)) {
-          const dummyFamilies = Array.from({ length: count }, (_, i) => ({
-            elder: `Family ${i + 1}`
-          }));
-          setFamilies(dummyFamilies);
-        } else {
-          setFamilies([]);
-        }
-      }),
-      caregiverApi.getcarelogsCount(caregiverId).then((data) => {
-        const count = Number(data.count);
-        if (!isNaN(count)) {
-          setCarelogCount(count);
-        } else {
-          setCarelogCount(0);
-        }
-      }).catch(error => {
-        setCarelogCount(0);
-      }),
       caregiverApi.fetchCareRequests(caregiverId).then((data) => {
         // Get today's date for comparison
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         
-        // Get all family IDs from carerequest table for this caregiver, status approved or completed
-        const allFamilyIds = Array.isArray(data)
-          ? data.filter(request => request.status === 'confirmed' )
+        if (Array.isArray(data)) {
+          // Count unique elder IDs with status 'confirmed'
+          const uniqueElderIds = Array.from(new Set(
+            data
+              .filter(request => request.status === 'confirmed')
+              .map(request => request.elder_id)
+              .filter(Boolean)
+          ));
+          
+          // Transform elder data for display
+          const transformedElders = uniqueElderIds.map(elderId => {
+            const elderRequest = data.find(req => req.elder_id === elderId && req.status === 'confirmed');
+            return {
+              elder_id: elderId,
+              name: elderRequest?.elder_name || 'Unknown',
+              age: elderRequest?.elder_age || 'N/A',
+              duration: elderRequest?.duration || 'N/A',
+              status: elderRequest?.status || 'confirmed',
+              family_id: elderRequest?.family_id
+            };
+          });
+          
+          console.log('Unique confirmed elders:', transformedElders);
+          setElders(transformedElders);
+          
+          // Count unique family IDs with status 'confirmed'
+          const uniqueFamilyIds = Array.from(new Set(
+            data
+              .filter(request => request.status === 'confirmed')
               .map(request => request.family_id)
               .filter(Boolean)
-          : [];
-        // Get unique family IDs
-        const uniqueFamilyIdsFromRequests = Array.from(new Set(allFamilyIds));
-        setFamilies(uniqueFamilyIdsFromRequests);
+          ));
+          
+          console.log('Unique confirmed family IDs:', uniqueFamilyIds);
+          setFamilies(uniqueFamilyIds);
+        } else {
+          setElders([]);
+          setFamilies([]);
+        }
 
         // Count completed shifts - check if end_date < today for confirmed requests
         const completedCount = Array.isArray(data)
@@ -230,48 +259,7 @@ const CaregiverDashboard = () => {
           : 0;
         setCompletedShifts(completedCount);
 
-        // Calculate total hours worked
-        {/*let totalHours = 0;
-        if (Array.isArray(data)) {
-          const today = new Date();
-          today.setHours(0, 0, 0, 0);
-          data.forEach(request => {
-            if (request.status === 'completed') {
-              // duration is in days, multiply by 24
-              const days = Number(request.duration);
-              if (!isNaN(days)) {
-                totalHours += days * 24;
-                console.log(`Completed request ${request.request_id}: days=${days}, hours=${days * 24}`);
-              } else if (request.start_date && request.end_date) {
-                // fallback: calculate days from dates
-                const start = new Date(request.start_date);
-                const end = new Date(request.end_date);
-                const diffDays = Math.round((end - start) / (1000 * 60 * 60 * 24)) + 1;
-                totalHours += diffDays * 24;
-                console.log(`Completed request ${request.request_id}: days=${diffDays}, hours=${diffDays * 24} (from dates)`);
-              }
-            } else if (request.status === 'confirmed') {
-              // calculate hours from start_date to day before today (inclusive)
-              if (request.start_date) {
-                const start = new Date(request.start_date);
-                start.setHours(0, 0, 0, 0);
-                let end = new Date(today);
-                end.setDate(end.getDate() - 1); // day before today
-                end.setHours(0, 0, 0, 0);
-                if (end >= start) {
-                  // Calculate days inclusive
-                  const diffDays = Math.round((end - start) / (1000 * 60 * 60 * 24)) + 1;
-                  const diffHours = diffDays * 24;
-                  totalHours += diffHours > 0 ? diffHours : 0;
-                  console.log(`Confirmed request ${request.request_id}: days=${diffDays}, hours=${diffHours}`);
-                }
-              }
-            }
-          });
-        }
-        setTotalHoursWorked(totalHours);*/}
-
-        // Keep your existing careRequests logic
+        // Keep your existing careRequests logic for pending requests
         const transformed = Array.isArray(data)
           ? data.filter(request => request.status === 'pending')
             .map((request) => ({
@@ -304,16 +292,46 @@ const CaregiverDashboard = () => {
     });
   }, []);
 
-  // Helper function to calculate week range
+  // Helper function to get Sri Lanka date string in YYYY-MM-DD format
+  const getSriLankaDateString = (date = new Date()) => {
+    // Create a copy to avoid mutating the original
+    const d = new Date(date);
+    // Get Sri Lanka time by adding 5.5 hours (in milliseconds)
+    const sriLankaTime = new Date(d.getTime() + (5.5 * 60 * 60 * 1000));
+    // Return YYYY-MM-DD format
+    return sriLankaTime.toISOString().split('T')[0];
+  };
+
+  // Helper function to calculate week range in Sri Lanka timezone
   const getWeekRange = (weekOffset = 0) => {
+    // Get current time in Sri Lanka
     const now = new Date();
-    const start = new Date(now);
-    start.setDate(now.getDate() - now.getDay() + 1 + weekOffset * 7); // Monday
-    start.setHours(0,0,0,0);
-    const end = new Date(start);
-    end.setDate(start.getDate() + 6); // Sunday
-    end.setHours(23,59,59,999);
-    return { start, end };
+    const sriLankaOffset = 5.5 * 60 * 60 * 1000;
+    const sriLankaNow = new Date(now.getTime() + sriLankaOffset);
+    
+    // Get day of week (0 = Sunday, 1 = Monday, etc.)
+    const dayOfWeek = sriLankaNow.getUTCDay();
+    
+    // Calculate days to Monday (if today is Sunday, go back 6 days to get to Monday)
+    const daysToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+    
+    // Calculate Monday of the current week + offset
+    const monday = new Date(sriLankaNow);
+    monday.setUTCDate(sriLankaNow.getUTCDate() + daysToMonday + (weekOffset * 7));
+    monday.setUTCHours(0, 0, 0, 0);
+    
+    // Calculate Sunday (6 days after Monday)
+    const sunday = new Date(monday);
+    sunday.setUTCDate(monday.getUTCDate() + 6);
+    sunday.setUTCHours(23, 59, 59, 999);
+    
+    // Format as YYYY-MM-DD
+    const startStr = monday.toISOString().split('T')[0];
+    const endStr = sunday.toISOString().split('T')[0];
+    
+    console.log(`Week range calculated (Sri Lanka time): ${startStr} to ${endStr}`);
+    
+    return { start: monday, end: sunday, startStr, endStr };
   };
 
   // Function to fetch shifts for a specific week
@@ -322,15 +340,15 @@ const CaregiverDashboard = () => {
     
     console.log(`Fetching shifts for week offset: ${weekOffset}`);
     setLoadingWeeklyShifts(true);
-    const { start, end } = getWeekRange(weekOffset);
+    const { startStr, endStr } = getWeekRange(weekOffset);
     
-    console.log(`Week range: ${start.toISOString().split('T')[0]} to ${end.toISOString().split('T')[0]}`);
+    console.log(`Week range: ${startStr} to ${endStr}`);
     
     try {
       const data = await caregiverApi.fetchUpcomingShifts(
         user.caregiver_id,
-        start.toISOString().split('T')[0], // Format as YYYY-MM-DD
-        end.toISOString().split('T')[0]
+        startStr,
+        endStr
       );
       console.log(`Week ${weekOffset} shifts data:`, data);
       setWeeklyShifts(data);
@@ -348,18 +366,18 @@ const CaregiverDashboard = () => {
     
     console.log(`Fetching daily reports for week offset: ${weekOffset}`);
     setLoadingReports(true);
-    const { start, end } = getWeekRange(weekOffset);
+    const { startStr, endStr } = getWeekRange(weekOffset);
     
     try {
       const data = await caregiverApi.fetchWeeklyReports(
         user.caregiver_id,
-        start.toISOString().split('T')[0],
-        end.toISOString().split('T')[0]
+        startStr,
+        endStr
       );
       console.log(`Week ${weekOffset} reports data:`, data);
       
       // Log today's specific data for debugging
-      const today = new Date().toISOString().split('T')[0];
+      const today = getSriLankaDateString();
       const todayData = data.find(report => report.date === today);
       console.log(`Today (${today}) report data:`, todayData);
       
@@ -528,11 +546,13 @@ const CaregiverDashboard = () => {
   );
 }, [upcomingShifts]);
 
-  const { start: weekStart, end: weekEnd } = getWeekRange(currentWeek);
+  const { start: weekStart, end: weekEnd, startStr, endStr } = getWeekRange(currentWeek);
 
-  // Format dates with month names (no year)
-  const formatDateWithMonth = (date) => {
-    const options = { month: 'short', day: 'numeric' };
+  // Format dates with month names (no year) - use the string versions to avoid timezone conversion
+  const formatDateWithMonth = (dateStr) => {
+    const [year, month, day] = dateStr.split('-');
+    const date = new Date(Date.UTC(parseInt(year), parseInt(month) - 1, parseInt(day)));
+    const options = { month: 'short', day: 'numeric', timeZone: 'UTC' };
     return date.toLocaleDateString('en-US', options);
   };
 
@@ -545,7 +565,7 @@ const CaregiverDashboard = () => {
   };
 
   const weekLabel = getWeekLabel(currentWeek);
-  const dateRange = `${formatDateWithMonth(weekStart)} - ${formatDateWithMonth(weekEnd)}`;
+  const dateRange = `${formatDateWithMonth(startStr)} - ${formatDateWithMonth(endStr)}`;
   
   // Format the display: show brackets only for This Week, Next Week, Last Week
   const weekRangeLabel = weekLabel ? `${dateRange} (${weekLabel})` : dateRange;
@@ -868,8 +888,12 @@ const CaregiverDashboard = () => {
             </button>
             <span className={styles.weekNavLabel} style={{margin: '0 4px', whiteSpace: 'nowrap', textAlign: 'center'}}>
               {(() => {
-                const { start: reportStart, end: reportEnd } = getWeekRange(currentReportWeek);
-                const formatDateWithMonth = (date) => date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                const { startStr: reportStartStr, endStr: reportEndStr } = getWeekRange(currentReportWeek);
+                const formatDateStr = (dateStr) => {
+                  const [year, month, day] = dateStr.split('-');
+                  const date = new Date(Date.UTC(parseInt(year), parseInt(month) - 1, parseInt(day)));
+                  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
+                };
                 const getWeekLabel = (weekOffset) => {
                   if (weekOffset === 0) return 'This Week';
                   if (weekOffset === 1) return 'Next Week';
@@ -877,7 +901,7 @@ const CaregiverDashboard = () => {
                   return null;
                 };
                 const weekLabel = getWeekLabel(currentReportWeek);
-                const dateRange = `${formatDateWithMonth(reportStart)} - ${formatDateWithMonth(reportEnd)}`;
+                const dateRange = `${formatDateStr(reportStartStr)} - ${formatDateStr(reportEndStr)}`;
                 return weekLabel ? `${dateRange} (${weekLabel})` : dateRange;
               })()}
             </span>
