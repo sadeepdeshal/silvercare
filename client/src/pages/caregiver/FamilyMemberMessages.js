@@ -90,23 +90,25 @@ const FamilyMemberMessages = () => {
   }
 
   return (
-    <div className={styles.container}>
-      <Navbar />
-      <CaregiverLayout>
+  <>
+    <Navbar />
+    <CaregiverLayout>
+      <div className={styles.container}>
         <div className={styles.content}>
-          <div className={styles.header}>
-            <div className={styles.headerContent}>
-              <h1 className={styles.title}>👨‍👩‍👧‍👦 Family Member Messages</h1>
-              <p className={styles.subtitle}>
-                Chat with family members of elders you are caring for
-              </p>
-            </div>
-            <button 
+          <button 
               className={styles.backButton}
               onClick={() => navigate('/caregiver/dashboard')}
             >
               ← Back to Dashboard
             </button>
+          <div className={styles.header}>
+            <div className={styles.headerContent}>
+              <h1 className={styles.title}>Family Member Messages</h1>
+              <p className={styles.subtitle}>
+                Chat with family members of elders you are caring for
+              </p>
+            </div>
+            
           </div>
 
           {error && (
@@ -169,8 +171,10 @@ const FamilyMemberMessages = () => {
                           </div>
                         </div>
                         
-                        <div className={styles.lastAssignment}>
-                          Latest assignment: {formatDate(familyMember.latest_assignment_date)}
+                        <div className={styles.assignmentInfo}>
+                          <div className={styles.lastAssignment}>
+                            Latest: {formatDate(familyMember.latest_assignment_date)}
+                          </div>
                         </div>
                       </div>
                       
@@ -222,11 +226,21 @@ const FamilyMemberMessages = () => {
                   </div>
                 </div>
               </div>
-            ) : null}
+            ) : (
+              <div className={styles.chatSection}>
+                <div className={styles.noChatSelected}>
+                  <div className={styles.noChatIcon}>💬</div>
+                  <h3>Select a Family Member to Start Chatting</h3>
+                  <p>Choose a family member from the list to begin your conversation.</p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
-      </CaregiverLayout>
-    </div>
+      </div>
+    </CaregiverLayout>
+    
+  </>
   );
 };
 
