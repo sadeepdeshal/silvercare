@@ -81,7 +81,7 @@ const ElderCounselorChat = ({ currentUser, selectedCounselor, onClose }) => {
         from: currentUser.elder_id,
         to: selectedCounselor.user_id,
         senderType: 'elder',
-        receiverType: 'counselor',
+        receiverType: 'healthprofessional',
         message: messageToSend,
         selectedCounselorObject: selectedCounselor
       });
@@ -90,7 +90,7 @@ const ElderCounselorChat = ({ currentUser, selectedCounselor, onClose }) => {
         currentUser.elder_id,
         selectedCounselor.user_id,
         'elder',
-        'counselor',
+        'healthprofessional',
         messageToSend
       );
 
@@ -101,7 +101,7 @@ const ElderCounselorChat = ({ currentUser, selectedCounselor, onClose }) => {
           sender_id: currentUser.elder_id,
           receiver_id: selectedCounselor.user_id,
           sender_type: 'elder',
-          receiver_type: 'counselor',
+          receiver_type: 'healthprofessional',
           message_text: messageToSend,
           sent_at: new Date().toISOString(),
           is_read: false,
