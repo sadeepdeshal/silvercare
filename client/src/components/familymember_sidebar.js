@@ -38,9 +38,6 @@ const FamilyMemberSidebar = ({ onItemClick }) => {
       case 'elder-profiles':
         navigate('/family-member/elders');
         break;
-      case 'medical-history':
-        navigate('/family-member/medical-history');
-        break;
       case 'book-appointment':
         navigate('/family-member/elders');
         break;
@@ -129,8 +126,7 @@ const FamilyMemberSidebar = ({ onItemClick }) => {
       hasSubmenu: true,
       submenu: [
         { key: 'register-elder', label: 'Register Elder', path: '/family-member/elder-signup' },
-        { key: 'elder-profiles', label: 'Elder Profiles', path: '/family-member/elders' },
-        { key: 'medical-history', label: 'Medical History', path: '/family-member/medical-history' }
+        { key: 'elder-profiles', label: 'Elder Profiles', path: '/family-member/elders' }
       ]
     },
     {
