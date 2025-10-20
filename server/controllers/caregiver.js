@@ -179,8 +179,8 @@ const fetchCareRequests = async (req, res) => {
     // Auto-update expired requests using the service
     await StatusUpdateService.updateExpiredRequestsForCaregiver(caregiverId);
     
-    // Update caregiver availability
-    await StatusUpdateService.updateCaregiverAvailability(caregiverId);
+    // DISABLED: Only 'available' or 'unavailable' allowed - no automatic 'busy' status
+    // await StatusUpdateService.updateCaregiverAvailability(caregiverId);
 
     let query = `
       SELECT 
@@ -458,8 +458,8 @@ const getUpcomingShifts = async (req, res) => {
     // Auto-update expired requests using the service
     await StatusUpdateService.updateExpiredRequestsForCaregiver(caregiverId);
     
-    // Update caregiver availability
-    await StatusUpdateService.updateCaregiverAvailability(caregiverId);
+    // DISABLED: Only 'available' or 'unavailable' allowed - no automatic 'busy' status
+    // await StatusUpdateService.updateCaregiverAvailability(caregiverId);
     
     let query;
     let queryParams;
@@ -741,8 +741,8 @@ const getWeeklyReports = async (req, res) => {
   try {
     console.log('Fetching weekly reports for caregiver:', caregiverId, 'from', startDate, 'to', endDate);
     
-    // Update caregiver availability before fetching reports
-    await StatusUpdateService.updateCaregiverAvailability(caregiverId);
+    // DISABLED: Only 'available' or 'unavailable' allowed - no automatic 'busy' status
+    // await StatusUpdateService.updateCaregiverAvailability(caregiverId);
     
     // First, get all care assignments for the caregiver in the date range (confirmed and completed status)
     const assignmentQuery = `

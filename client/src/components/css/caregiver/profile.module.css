@@ -569,11 +569,6 @@
   color: #16a34a;
 }
 
-.statusText.busy {
-  background: #fef3c7;
-  color: #d97706;
-}
-
 .statusText.unavailable {
   background: #fee2e2;
   color: #dc2626;
