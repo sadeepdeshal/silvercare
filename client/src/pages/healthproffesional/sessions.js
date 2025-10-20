@@ -4,8 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import Navbar from '../../components/navbar';
 import HealthProfessionalSidebar from '../../components/HealthProfessionalSidebar';
 import { getImageSrc, handleImageError } from '../../utils/imageUtils';
-import styles from '../../components/css/doctor/dashboard.module.css';
-import sessionStyles from '../../components/css/elder/sessions.module.css';
+import styles from '../../components/css/doctor/profile.module.css';
 
 const API_BASE = "http://localhost:5000";
 
@@ -235,70 +234,82 @@ const HealthProfessionalSessions = () => {
     const sessionType = session.appointment_type || session.session_type;
     
     return (
-      <div key={session.appointment_id} className={sessionStyles.sessionCard}>
-        <div className={sessionStyles.sessionHeader}>
-          <div className={sessionStyles.sessionInfo}>
+      <div key={session.appointment_id} className={styles.sessionCard}>
+        <div className={styles.sessionCardHeader}>
+          <div className={styles.sessionMainInfo}>
             <img
               src={getImageSrc(session.elder_avatar, 'elder', session.elder_gender)}
               alt={session.elder_name}
-              className={sessionStyles.elderAvatar}
+              className={styles.sessionAvatar}
               onError={(e) => handleImageError(e, 'elder', session.elder_gender)}
             />
-            <div className={sessionStyles.sessionDetails}>
-              <h3 className={sessionStyles.elderName}>{session.elder_name}</h3>
-              <p className={sessionStyles.sessionType}>
+            <div className={styles.sessionInfo}>
+              <h3 className={styles.sessionPatientName}>{session.elder_name}</h3>
+              <p className={styles.sessionTypeLabel}>
                 {sessionType === 'online' ? '💻 Online Session' : '🏥 In-Person Session'}
               </p>
-              <p className={sessionStyles.sessionDate}>
-                📅 {formatDate(session.date_time)} at {formatTime(session.date_time)}
+              <p className={styles.sessionDateTime}>
+                📅 {formatDate(session.date_time)} • ⏰ {formatTime(session.date_time)}
               </p>
             </div>
           </div>
-          <div className={sessionStyles.sessionStatus}>
-            <span className={`${sessionStyles.statusBadge} ${sessionStyles[session.status]}`}>
+          <div className={styles.sessionStatusBadge}>
+            <span className={`${styles.statusPill} ${styles[session.status]}`}>
               {session.status}
             </span>
           </div>
         </div>
 
-        <div className={sessionStyles.sessionBody}>
-          {session.elder_gender && (
-            <p className={sessionStyles.sessionDetail}>
-              <strong>Gender:</strong> {session.elder_gender}
-            </p>
-          )}
-          {session.elder_dob && (
-            <p className={sessionStyles.sessionDetail}>
-              <strong>Age:</strong> {calculateAge(session.elder_dob)} years
-            </p>
-          )}
-          {session.elder_contact && (
-            <p className={sessionStyles.sessionDetail}>
-              <strong>Contact:</strong> {session.elder_contact}
-            </p>
-          )}
+        <div className={styles.sessionCardBody}>
+          <div className={styles.sessionDetailsGrid}>
+            {session.elder_gender && (
+              <div className={styles.sessionDetailItem}>
+                <span className={styles.detailLabel}>Gender:</span>
+                <span className={styles.detailValue}>{session.elder_gender}</span>
+              </div>
+            )}
+            {session.elder_dob && (
+              <div className={styles.sessionDetailItem}>
+                <span className={styles.detailLabel}>Age:</span>
+                <span className={styles.detailValue}>{calculateAge(session.elder_dob)} years</span>
+              </div>
+            )}
+            {session.elder_contact && (
+              <div className={styles.sessionDetailItem}>
+                <span className={styles.detailLabel}>Contact:</span>
+                <span className={styles.detailValue}>{session.elder_contact}</span>
+              </div>
+            )}
+            {session.session_duration && (
+              <div className={styles.sessionDetailItem}>
+                <span className={styles.detailLabel}>Duration:</span>
+                <span className={styles.detailValue}>{session.session_duration} mins</span>
+              </div>
+            )}
+          </div>
+          
           {session.medical_conditions && (
-            <p className={sessionStyles.sessionDetail}>
+            <div className={styles.sessionNotes}>
               <strong>Medical Conditions:</strong> {session.medical_conditions}
-            </p>
+            </div>
           )}
           {session.notes && (
-            <p className={sessionStyles.sessionDetail}>
+            <div className={styles.sessionNotes}>
               <strong>Notes:</strong> {session.notes}
-            </p>
+            </div>
           )}
         </div>
 
-        <div className={sessionStyles.sessionActions}>
+        <div className={styles.sessionCardActions}>
           {sessionType === 'online' && session.status === 'confirmed' && isUpcoming && (
             <button
-              className={sessionStyles.joinBtn}
+              className={styles.joinMeetingBtn}
               onClick={() => handleJoinMeeting(session)}
               disabled={joinMeetingLoading[session.appointment_id]}
             >
               {joinMeetingLoading[session.appointment_id] ? (
                 <>
-                  <span className={sessionStyles.spinner}></span>
+                  <span className={styles.btnSpinner}></span>
                   Joining...
                 </>
               ) : (
@@ -306,7 +317,7 @@ const HealthProfessionalSessions = () => {
               )}
             </button>
           )}
-          <button className={sessionStyles.detailsBtn}>
+          <button className={styles.viewDetailsBtn}>
             📋 View Details
           </button>
         </div>
@@ -316,12 +327,12 @@ const HealthProfessionalSessions = () => {
 
   if (loading) {
     return (
-      <div className={styles.dashboardContainer}>
+      <div className={styles.profileContainer}>
         <HealthProfessionalSidebar onToggleCollapse={setSidebarCollapsed} />
         <div className={`${styles.mainContent} ${sidebarCollapsed ? styles.mainContentCollapsed : ''}`}>
           <Navbar />
-          <div className={styles.loadingContainer}>
-            <div className={styles.loadingSpinner}></div>
+          <div className={styles.loadingState}>
+            <div className={styles.spinner}></div>
             <h2>Loading Sessions...</h2>
             <p>Please wait while we fetch your session data.</p>
           </div>
@@ -332,14 +343,14 @@ const HealthProfessionalSessions = () => {
 
   if (error) {
     return (
-      <div className={styles.dashboardContainer}>
+      <div className={styles.profileContainer}>
         <HealthProfessionalSidebar onToggleCollapse={setSidebarCollapsed} />
         <div className={`${styles.mainContent} ${sidebarCollapsed ? styles.mainContentCollapsed : ''}`}>
           <Navbar />
-          <div className={styles.errorContainer}>
+          <div className={styles.errorState}>
             <h2>⚠️ Error</h2>
             <p>{error}</p>
-            <button onClick={() => window.location.reload()} className={styles.retryBtn}>
+            <button onClick={() => window.location.reload()} className={styles.retryButton}>
               🔄 Retry
             </button>
           </div>
@@ -349,121 +360,131 @@ const HealthProfessionalSessions = () => {
   }
 
   return (
-    <div className={styles.dashboardContainer}>
+    <div className={styles.profileContainer}>
       <HealthProfessionalSidebar onToggleCollapse={setSidebarCollapsed} />
       <div className={`${styles.mainContent} ${sidebarCollapsed ? styles.mainContentCollapsed : ''}`}>
         <Navbar />
         
-        <div className={sessionStyles.sessionsContainer}>
-          {/* Header */}
-          <div className={sessionStyles.sessionsHeader}>
-            <h1 className={sessionStyles.pageTitle}>My Sessions</h1>
-            <p className={sessionStyles.pageSubtitle}>
-              Manage and view all your counseling sessions
-            </p>
-          </div>
-
-          {/* Filters and Search */}
-          <div className={sessionStyles.filtersSection}>
-            {/* Status Filter Tabs */}
-            <div className={sessionStyles.filterTabs}>
-              <button
-                className={`${sessionStyles.filterTab} ${activeFilter === "all" ? sessionStyles.active : ""}`}
-                onClick={() => setActiveFilter("all")}
-              >
-                All Sessions
-                <span className={sessionStyles.tabCount}>{sessions.length}</span>
-              </button>
-              <button
-                className={`${sessionStyles.filterTab} ${activeFilter === "upcoming" ? sessionStyles.active : ""}`}
-                onClick={() => setActiveFilter("upcoming")}
-              >
-                Upcoming
-                <span className={sessionStyles.tabCount}>
-                  {sessions.filter(s => new Date(s.date_time) > new Date() && s.status !== 'cancelled').length}
-                </span>
-              </button>
-              <button
-                className={`${sessionStyles.filterTab} ${activeFilter === "today" ? sessionStyles.active : ""}`}
-                onClick={() => setActiveFilter("today")}
-              >
-                Today
-                <span className={sessionStyles.tabCount}>
-                  {sessions.filter(s => {
-                    const today = new Date();
-                    today.setHours(0, 0, 0, 0);
-                    const tomorrow = new Date(today);
-                    tomorrow.setDate(tomorrow.getDate() + 1);
-                    const sessionDate = new Date(s.date_time);
-                    return sessionDate >= today && sessionDate < tomorrow && s.status !== 'cancelled';
-                  }).length}
-                </span>
-              </button>
-              <button
-                className={`${sessionStyles.filterTab} ${activeFilter === "past" ? sessionStyles.active : ""}`}
-                onClick={() => setActiveFilter("past")}
-              >
-                Past
-                <span className={sessionStyles.tabCount}>
-                  {sessions.filter(s => new Date(s.date_time) < new Date() || s.status === 'completed' || s.status === 'cancelled').length}
-                </span>
-              </button>
+        {/* Header Section */}
+        <div className={styles.profileHeader}>
+          <div className={styles.headerContent}>
+            <div className={styles.avatarSection}>
+              <div className={styles.avatar}>
+                <span className={styles.avatarIcon}>🗓️</span>
+              </div>
+              <div className={styles.avatarInfo}>
+                <h1 className={styles.doctorName}>My Sessions</h1>
+                <p className={styles.specialization}>Manage and view all your counseling sessions</p>
+                <p className={styles.institution}>Total Sessions: {sessions.length}</p>
+              </div>
             </div>
+          </div>
+        </div>
 
-            {/* Search and Additional Filters */}
-            <div className={sessionStyles.additionalFilters}>
-              <div className={sessionStyles.searchBox}>
-                <input
-                  type="text"
-                  placeholder="Search by patient name..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className={sessionStyles.searchInput}
-                />
-                <span className={sessionStyles.searchIcon}>🔍</span>
+        {/* Filters Section */}
+        <div className={styles.profileContent}>
+          <div className={styles.profileSection}>
+            <div className={styles.sessionFiltersContainer}>
+              {/* Status Filter Tabs */}
+              <div className={styles.filterTabsRow}>
+                <button
+                  className={`${styles.filterTabButton} ${activeFilter === "all" ? styles.activeFilterTab : ""}`}
+                  onClick={() => setActiveFilter("all")}
+                >
+                  All Sessions
+                  <span className={styles.filterCount}>{sessions.length}</span>
+                </button>
+                <button
+                  className={`${styles.filterTabButton} ${activeFilter === "upcoming" ? styles.activeFilterTab : ""}`}
+                  onClick={() => setActiveFilter("upcoming")}
+                >
+                  Upcoming
+                  <span className={styles.filterCount}>
+                    {sessions.filter(s => new Date(s.date_time) > new Date() && s.status !== 'cancelled').length}
+                  </span>
+                </button>
+                <button
+                  className={`${styles.filterTabButton} ${activeFilter === "today" ? styles.activeFilterTab : ""}`}
+                  onClick={() => setActiveFilter("today")}
+                >
+                  Today
+                  <span className={styles.filterCount}>
+                    {sessions.filter(s => {
+                      const today = new Date();
+                      today.setHours(0, 0, 0, 0);
+                      const tomorrow = new Date(today);
+                      tomorrow.setDate(tomorrow.getDate() + 1);
+                      const sessionDate = new Date(s.date_time);
+                      return sessionDate >= today && sessionDate < tomorrow && s.status !== 'cancelled';
+                    }).length}
+                  </span>
+                </button>
+                <button
+                  className={`${styles.filterTabButton} ${activeFilter === "past" ? styles.activeFilterTab : ""}`}
+                  onClick={() => setActiveFilter("past")}
+                >
+                  Past
+                  <span className={styles.filterCount}>
+                    {sessions.filter(s => new Date(s.date_time) < new Date() || s.status === 'completed' || s.status === 'cancelled').length}
+                  </span>
+                </button>
               </div>
 
-              <div className={sessionStyles.dateFilterBox}>
+              {/* Search and Additional Filters */}
+              <div className={styles.searchFiltersRow}>
+                <div className={styles.searchInputWrapper}>
+                  <span className={styles.searchIconSpan}>🔍</span>
+                  <input
+                    type="text"
+                    placeholder="Search by patient name..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className={styles.searchInput}
+                  />
+                </div>
+
                 <input
                   type="date"
                   value={dateFilter}
                   onChange={(e) => setDateFilter(e.target.value)}
-                  className={sessionStyles.dateInput}
+                  className={styles.dateFilterInput}
                 />
-              </div>
 
-              <div className={sessionStyles.typeFilterBox}>
                 <select
                   value={typeFilter}
                   onChange={(e) => setTypeFilter(e.target.value)}
-                  className={sessionStyles.typeSelect}
+                  className={styles.typeFilterSelect}
                 >
                   <option value="all">All Types</option>
                   <option value="online">Online</option>
                   <option value="in-person">In-Person</option>
                 </select>
-              </div>
 
-              {(searchTerm || dateFilter || typeFilter !== "all") && (
-                <button
-                  className={sessionStyles.clearFiltersBtn}
-                  onClick={() => {
-                    setSearchTerm("");
-                    setDateFilter("");
-                    setTypeFilter("all");
-                  }}
-                >
-                  Clear Filters
-                </button>
-              )}
+                {(searchTerm || dateFilter || typeFilter !== "all") && (
+                  <button
+                    className={styles.clearFiltersButton}
+                    onClick={() => {
+                      setSearchTerm("");
+                      setDateFilter("");
+                      setTypeFilter("all");
+                    }}
+                  >
+                    Clear Filters
+                  </button>
+                )}
+              </div>
             </div>
           </div>
 
           {/* Sessions List */}
-          <div className={sessionStyles.sessionsContent}>
+          <div className={styles.profileSection}>
+            <h2 className={styles.sectionTitle}>
+              📋 {activeFilter === "all" ? "All" : activeFilter === "upcoming" ? "Upcoming" : activeFilter === "today" ? "Today's" : "Past"} Sessions
+            </h2>
+            
             {currentSessions.length === 0 ? (
-              <div className={sessionStyles.emptyState}>
-                <div className={sessionStyles.emptyIcon}>🗓️</div>
+              <div className={styles.emptySessionsState}>
+                <div className={styles.emptyIcon}>🗓️</div>
                 <h3>No Sessions Found</h3>
                 <p>
                   {activeFilter === "all"
@@ -477,27 +498,27 @@ const HealthProfessionalSessions = () => {
               </div>
             ) : (
               <>
-                <div className={sessionStyles.sessionsGrid}>
+                <div className={styles.sessionsGridContainer}>
                   {currentSessions.map(renderSessionCard)}
                 </div>
 
                 {/* Pagination */}
                 {totalPages > 1 && (
-                  <div className={sessionStyles.pagination}>
+                  <div className={styles.paginationContainer}>
                     <button
-                      className={sessionStyles.paginationBtn}
+                      className={styles.paginationButton}
                       onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                       disabled={currentPage === 1}
                     >
                       ← Previous
                     </button>
                     
-                    <div className={sessionStyles.paginationInfo}>
+                    <div className={styles.paginationInfo}>
                       Page {currentPage} of {totalPages}
                     </div>
                     
                     <button
-                      className={sessionStyles.paginationBtn}
+                      className={styles.paginationButton}
                       onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                       disabled={currentPage === totalPages}
                     >

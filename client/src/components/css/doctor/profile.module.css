@@ -449,3 +449,438 @@
 .profileContent::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.5);
 }
+
+/* Sessions Page Specific Styles */
+.sessionFiltersContainer {
+  margin-bottom: 2rem;
+}
+
+.filterTabsRow {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.filterTabButton {
+  padding: 0.75rem 1.5rem;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.filterTabButton:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.activeFilterTab {
+  background: white !important;
+  color: #667eea !important;
+  border-color: white !important;
+}
+
+.filterCount {
+  background: rgba(102, 126, 234, 0.2);
+  padding: 0.25rem 0.5rem;
+  border-radius: 50px;
+  font-size: 0.85rem;
+  font-weight: bold;
+}
+
+.activeFilterTab .filterCount {
+  background: #667eea;
+  color: white;
+}
+
+.searchFiltersRow {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.searchInputWrapper {
+  position: relative;
+  flex: 1;
+  min-width: 250px;
+}
+
+.searchIconSpan {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.2rem;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 0.75rem 1rem 0.75rem 3rem;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border-radius: 12px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.searchInput::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: white;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.dateFilterInput,
+.typeFilterSelect {
+  padding: 0.75rem 1rem;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border-radius: 12px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.dateFilterInput:focus,
+.typeFilterSelect:focus {
+  outline: none;
+  border-color: white;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.typeFilterSelect option {
+  background: #667eea;
+  color: white;
+}
+
+.clearFiltersButton {
+  padding: 0.75rem 1.5rem;
+  background: rgba(231, 76, 60, 0.2);
+  color: white;
+  border: 2px solid rgba(231, 76, 60, 0.5);
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.clearFiltersButton:hover {
+  background: rgba(231, 76, 60, 0.4);
+  transform: translateY(-2px);
+}
+
+.sessionsGridContainer {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.sessionCard {
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.sessionCard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.sessionCardHeader {
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.sessionMainInfo {
+  display: flex;
+  gap: 1rem;
+  flex: 1;
+}
+
+.sessionAvatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid rgba(255, 255, 255, 0.5);
+}
+
+.sessionInfo {
+  flex: 1;
+}
+
+.sessionPatientName {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+  color: white;
+}
+
+.sessionTypeLabel {
+  font-size: 0.9rem;
+  margin: 0.25rem 0;
+  opacity: 0.9;
+}
+
+.sessionDateTime {
+  font-size: 0.85rem;
+  margin: 0.25rem 0;
+  opacity: 0.8;
+}
+
+.sessionStatusBadge {
+  margin-left: 1rem;
+}
+
+.statusPill {
+  padding: 0.4rem 1rem;
+  border-radius: 50px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: capitalize;
+  background: rgba(255, 255, 255, 0.3);
+  color: white;
+}
+
+.statusPill.confirmed {
+  background: rgba(39, 174, 96, 0.9);
+}
+
+.statusPill.pending {
+  background: rgba(243, 156, 18, 0.9);
+}
+
+.statusPill.completed {
+  background: rgba(52, 152, 219, 0.9);
+}
+
+.statusPill.cancelled {
+  background: rgba(231, 76, 60, 0.9);
+}
+
+.sessionCardBody {
+  padding: 1.5rem;
+}
+
+.sessionDetailsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.sessionDetailItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.detailLabel {
+  font-size: 0.85rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.detailValue {
+  font-size: 1rem;
+  color: #333;
+  font-weight: 600;
+}
+
+.sessionNotes {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: #555;
+  line-height: 1.6;
+}
+
+.sessionNotes strong {
+  color: #333;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.sessionCardActions {
+  padding: 1rem 1.5rem;
+  background: #f8f9fa;
+  display: flex;
+  gap: 1rem;
+  border-top: 1px solid #e9ecef;
+}
+
+.joinMeetingBtn,
+.viewDetailsBtn {
+  flex: 1;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.95rem;
+}
+
+.joinMeetingBtn {
+  background: linear-gradient(135deg, #27ae60, #229954);
+  color: white;
+}
+
+.joinMeetingBtn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
+}
+
+.joinMeetingBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.viewDetailsBtn {
+  background: white;
+  color: #667eea;
+  border: 2px solid #667eea;
+}
+
+.viewDetailsBtn:hover {
+  background: #667eea;
+  color: white;
+  transform: translateY(-2px);
+}
+
+.btnSpinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-right: 0.5rem;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.emptySessionsState {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: white;
+}
+
+.emptyIcon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.emptySessionsState h3 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+  color: white;
+}
+
+.emptySessionsState p {
+  font-size: 1rem;
+  opacity: 0.8;
+  color: white;
+}
+
+.paginationContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 2rem;
+  margin-top: 2rem;
+  padding: 1.5rem;
+}
+
+.paginationButton {
+  padding: 0.75rem 1.5rem;
+  background: white;
+  color: #667eea;
+  border: 2px solid #667eea;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.paginationButton:hover:not(:disabled) {
+  background: #667eea;
+  color: white;
+  transform: translateY(-2px);
+}
+
+.paginationButton:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.paginationInfo {
+  color: white;
+  font-weight: 500;
+  font-size: 1rem;
+}
+
+.loadingState,
+.errorState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  color: white;
+  text-align: center;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1.5rem;
+}
+
+.retryButton {
+  margin-top: 1.5rem;
+  padding: 0.75rem 2rem;
+  background: white;
+  color: #667eea;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+}
+
+.retryButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.3);
+}
+
