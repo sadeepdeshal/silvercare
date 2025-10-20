@@ -49,7 +49,6 @@ const ElderDashboard = () => {
   const [statsData, setStatsData] = useState({
     upcomingAppointments: 0,
     upcomingSessions: 0,
-    upcomingCampaigns: 0,
     assignedCaregivers: 0,
   });
 
@@ -720,16 +719,6 @@ const ElderDashboard = () => {
                 <h3>Upcoming Sessions</h3>
                 <p className={styles.statsNumber}>
                   {statsLoading ? "..." : statsData.upcomingSessions}
-                </p>
-              </div>
-            </div>
-
-            <div className={styles.statsCard}>
-              <div className={styles.statsIcon}>📢</div>
-              <div className={styles.statsContent}>
-                <h3>Upcoming Activities</h3>
-                <p className={styles.statsNumber}>
-                  {statsLoading ? "..." : statsData.upcomingCampaigns}
                 </p>
               </div>
             </div>
