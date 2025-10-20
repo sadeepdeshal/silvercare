@@ -1,11 +1,14 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import UserPage from "./pages/UserPage";
+import About from "./pages/About";
+import Contact from "./pages/Contact";
 import { FamilyMemberReg } from "./pages/familemember/signup";
 import { FamilyMemberReg2 } from "./pages/familemember/signup-step2";
 import ElderSignup from "./pages/familemember/elder-signup";
 import FamilyMemberDashboard from "./pages/familemember/dashboard";
 import FamilyMemberElders from "./pages/familemember/elders";
+import FamilyMemberReports from "./pages/familemember/reports";
 import ElderDetails from "./pages/familemember/elder-details";
 import CaregiverDetails from "./pages/familemember/caregiver-details";
 import FamilyMemberLayout from "./components/FamilyMemberLayout";
@@ -24,6 +27,7 @@ import { MentalHealthProfessionalReg } from "./pages/healthproffesional/signup";
 import { HealthProfessionalRegStep2 } from "./pages/healthproffesional/signup-step2";
 import { HealthProfessionalRegStep3 } from "./pages/healthproffesional/signup-step3";
 import HealthProfessionalDashboard from "./pages/healthproffesional/dashboard";
+import HealthProfessionalReports from "./pages/healthproffesional/reports";
 import { DoctorRegStep2 } from "./pages/doctor/signup-step2";
 // Import new appointment components
 
@@ -42,6 +46,17 @@ import PaymentSuccess from './pages/familemember/payment-success';
 import HealthcarePayment from './pages/familemember/healthcare-payment';
 import HealthcarePaymentSuccess from './pages/familemember/healthcare-payment-success';
 
+// Import new caregiver booking components
+import FamilyMemberElderCaregivers from './pages/familemember/elder-caregivers';
+import CaregiversByDistrict from './pages/familemember/caregivers-by-district';
+import CaregiverBooking from './pages/familemember/caregiver-booking';
+import CaregiverBookingSummary from './pages/familemember/caregiver-booking-summary';
+import CaregiverPayment from './pages/familemember/caregiver-payment';
+import CaregiverPaymentSuccess from './pages/familemember/caregiver-payment-success';
+import CaregiverBookings from './pages/familemember/caregiver-bookings';
+import TodaysCareReport from './pages/familemember/todays-care-report';
+import ElderCareSchedule from './pages/familemember/elder-care-schedule';
+
 
 
 import AllAppointments from "./pages/elder/appointments";
@@ -49,12 +64,13 @@ import AppointmentDetails from "./pages/elder/appointment-details";
 import AllSessions from "./pages/elder/sessions";
 import SessionDetails from "./pages/elder/session-details";
 import ElderCaregivers from "./pages/elder/caregivers";
-import ElderEvents from "./pages/elder/events";
 
 
 import DoctorDashboard from './pages/doctor/dashboard';
 import DoctorProfile from './pages/doctor/profile';
-import DoctorAvailabilitySettings from './pages/doctor/availability-settings';
+import DoctorReports from './pages/doctor/reports';
+import TodaysAppointments from './pages/doctor/appointments';
+import DoctorSchedule from './pages/doctor/schedule';
 import VirtualMeetingRoom from './pages/VirtualMeetingRoom';
 import JitsiMeetingRoom from './pages/JitsiMeetingRoom';
 import MeetingGenerator from './pages/MeetingGenerator';
@@ -75,6 +91,19 @@ import FamilyMemberProfile from "./pages/familemember/profile";
 import HealthProfessionalProfile from "./pages/healthproffesional/profile";
 import ElderProfile from "./pages/elder/profile";
 import FamilyMessages from "./pages/elder/FamilyMessages";
+import ElderDoctorMessages from "./pages/elder/DoctorMessages";
+import CounselorMessages from "./pages/elder/CounselorMessages";
+import ElderChat from "./pages/doctor/ElderChat";
+import HealthProfessionalElderMessages from "./pages/healthproffesional/ElderMessages";
+import CaregiverMessages from "./pages/familemember/CaregiverMessages";
+import FamilyMemberMessages from "./pages/caregiver/FamilyMemberMessages";
+
+// Import caregiver-elder messaging components
+import CaregiverElderMessages from "./pages/caregiver/CaregiverElderMessages";
+import ElderCaregiverMessages from "./pages/elder/ElderCaregiverMessages";
+
+import HealthcareProfessionalMessages from "./pages/familemember/HealthcareProfessionalMessages";
+import HealthProfessionalFamilyMessages from "./pages/healthproffesional/FamilyMessages";
 
 // Import admin related
 import AdminUsers from "./pages/admin/users";
@@ -98,6 +127,8 @@ function App() {
         <Routes>
           {/* Public Routes - No authentication required */}
           <Route path="/" element={<LandingPage />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
           <Route path="/roles" element={<Roles />} />
           <Route path="/login" element={<Login />} />
           <Route path="/unauthorized" element={<Unauthorized />} />
@@ -267,6 +298,15 @@ function App() {
           />
 
           <Route
+            path="/family-member/reports"
+            element={
+              <ProtectedRoute allowedRoles={["family_member"]}>
+                <FamilyMemberReports />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
             path="/family-member/elder/:elderId"
             element={
               <ProtectedRoute allowedRoles={["family_member"]}>
@@ -315,6 +355,61 @@ function App() {
   </ProtectedRoute>
 } />
 
+{/* NEW: Caregiver booking flow routes */}
+<Route path="/family-member/elder-caregivers" element={
+  <ProtectedRoute allowedRoles={['family_member']}>
+    <FamilyMemberElderCaregivers />
+  </ProtectedRoute>
+} />
+
+<Route path="/family-member/elder/:elderId/caregivers-list" element={
+  <ProtectedRoute allowedRoles={['family_member']}>
+    <CaregiversByDistrict />
+  </ProtectedRoute>
+} />
+
+<Route path="/family-member/elder/:elderId/caregiver-booking/:caregiverId" element={
+  <ProtectedRoute allowedRoles={['family_member']}>
+    <CaregiverBooking />
+  </ProtectedRoute>
+} />
+
+<Route path="/family-member/caregiver-booking-summary" element={
+  <ProtectedRoute allowedRoles={['family_member']}>
+    <CaregiverBookingSummary />
+  </ProtectedRoute>
+} />
+
+<Route path="/family-member/caregiver-payment" element={
+  <ProtectedRoute allowedRoles={['family_member']}>
+    <CaregiverPayment />
+  </ProtectedRoute>
+} />
+
+<Route path="/family-member/caregiver-payment-success" element={
+  <ProtectedRoute allowedRoles={['family_member']}>
+    <CaregiverPaymentSuccess />
+  </ProtectedRoute>
+} />
+
+<Route path="/family-member/caregiver-bookings" element={
+  <ProtectedRoute allowedRoles={['family_member']}>
+    <CaregiverBookings />
+  </ProtectedRoute>
+} />
+
+<Route path="/family-member/todays-care-report" element={
+  <ProtectedRoute allowedRoles={['family_member']}>
+    <TodaysCareReport />
+  </ProtectedRoute>
+} />
+
+<Route path="/family-member/elder/:elderId/care-schedule" element={
+  <ProtectedRoute allowedRoles={['family_member']}>
+    <ElderCareSchedule />
+  </ProtectedRoute>
+} />
+
           
           <Route path="/doctor/dashboard" element={
             <ProtectedRoute allowedRoles={['doctor']}>
@@ -334,9 +429,32 @@ function App() {
             </ProtectedRoute>
           } />
 
-          <Route path="/doctor/availability-settings" element={
+          <Route path="/doctor/elder-chat" element={
             <ProtectedRoute allowedRoles={['doctor']}>
-              <DoctorAvailabilitySettings />
+              <ElderChat />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/doctor/appointments" element={
+            <ProtectedRoute allowedRoles={['doctor']}>
+              <TodaysAppointments />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/doctor/schedule" element={
+            <ProtectedRoute allowedRoles={['doctor']}>
+              <DoctorSchedule />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/doctor/reports" element={
+            <ProtectedRoute allowedRoles={['doctor']}>
+              <DoctorReports />
+            </ProtectedRoute>
+          } />
+                    <Route path="/doctor/reports" element={
+            <ProtectedRoute allowedRoles={['doctor']}>
+              <DoctorReports />
             </ProtectedRoute>
           } />
           
@@ -386,6 +504,33 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={["healthprofessional"]}>
                 <HealthProfessionalProfile />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/healthprofessional/messages"
+            element={
+              <ProtectedRoute allowedRoles={["healthprofessional"]}>
+                <HealthProfessionalElderMessages />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/healthprofessional/family-messages"
+            element={
+              <ProtectedRoute allowedRoles={["healthprofessional"]}>
+                <HealthProfessionalFamilyMessages />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/healthprofessional/reports"
+            element={
+              <ProtectedRoute allowedRoles={["healthprofessional"]}>
+                <HealthProfessionalReports />
               </ProtectedRoute>
             }
           />
@@ -451,6 +596,24 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={["caregiver"]}>
                 <Elder />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/caregiver/family-member-messages"
+            element={
+              <ProtectedRoute allowedRoles={["caregiver"]}>
+                <FamilyMemberMessages />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/caregiver/elder-messages"
+            element={
+              <ProtectedRoute allowedRoles={["caregiver"]}>
+                <CaregiverElderMessages />
               </ProtectedRoute>
             }
           />
@@ -564,6 +727,15 @@ function App() {
 />
 
           <Route
+  path="/family-member/caregiver-chat"
+  element={
+    <ProtectedRoute allowedRoles={["family_member"]}>
+      <CaregiverMessages />
+    </ProtectedRoute>
+  }
+/>
+
+          <Route
   path="/family-member/elder-messages"
   element={
     <ProtectedRoute allowedRoles={["family_member"]}>
@@ -573,19 +745,46 @@ function App() {
 />
 
           <Route
-            path="/elder/events"
-            element={
-              <ProtectedRoute allowedRoles={["elder"]}>
-                <ElderEvents />
-              </ProtectedRoute>
-            }
-          />
+  path="/family-member/healthcare-professional-messages"
+  element={
+    <ProtectedRoute allowedRoles={["family_member"]}>
+      <HealthcareProfessionalMessages />
+    </ProtectedRoute>
+  }
+/>
 
           <Route
             path="/elder/family-chat"
             element={
               <ProtectedRoute allowedRoles={["elder"]}>
                 <FamilyMessages />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/elder/doctor-chat"
+            element={
+              <ProtectedRoute allowedRoles={["elder"]}>
+                <ElderDoctorMessages />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/elder/counselor-chat"
+            element={
+              <ProtectedRoute allowedRoles={["elder"]}>
+                <CounselorMessages />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/elder/caregiver-messages"
+            element={
+              <ProtectedRoute allowedRoles={["elder"]}>
+                <ElderCaregiverMessages />
               </ProtectedRoute>
             }
           />
