@@ -71,6 +71,7 @@ import DoctorProfile from './pages/doctor/profile';
 import DoctorReports from './pages/doctor/reports';
 import TodaysAppointments from './pages/doctor/appointments';
 import DoctorSchedule from './pages/doctor/schedule';
+import DoctorPatients from './pages/doctor/patients';
 import VirtualMeetingRoom from './pages/VirtualMeetingRoom';
 import JitsiMeetingRoom from './pages/JitsiMeetingRoom';
 import MeetingGenerator from './pages/MeetingGenerator';
@@ -444,6 +445,12 @@ function App() {
           <Route path="/doctor/schedule" element={
             <ProtectedRoute allowedRoles={['doctor']}>
               <DoctorSchedule />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/doctor/patients" element={
+            <ProtectedRoute allowedRoles={['doctor']}>
+              <DoctorPatients />
             </ProtectedRoute>
           } />
 
