@@ -629,7 +629,6 @@ const FamilyMemberDashboard = () => {
                     <div 
                       key={appointment.appointment_id} 
                       className={styles.appointmentCard}
-                      onClick={() => handleAppointmentDetails(appointment.appointment_id)}
                     >
                       <div className={styles.cardHeader}>
                         <div className={styles.doctorInfo}>
