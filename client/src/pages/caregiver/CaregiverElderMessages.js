@@ -103,23 +103,25 @@ const CaregiverElderMessages = () => {
 
 
   return (
-    <div className={styles.container}>
+    <>
       <Navbar />
       <CaregiverLayout>
+      <div className={styles.container}>
         <div className={styles.content}>
-          <div className={styles.header}>
-            <div className={styles.headerContent}>
-              <h1 className={styles.title}>👴🏻 Elder Messages</h1>
-              <p className={styles.subtitle}>
-                Connect and chat with elders you're assigned to care for
-              </p>
-            </div>
-            <button 
+          <button 
               className={styles.backButton}
               onClick={() => navigate('/caregiver/dashboard')}
             >
               ← Back to Dashboard
             </button>
+          <div className={styles.header}>
+            <div className={styles.headerContent}>
+              <h1 className={styles.title}>Elder Messages</h1>
+              <p className={styles.subtitle}>
+                Connect and chat with elders you're assigned to care for
+              </p>
+            </div>
+            
           </div>
 
           {error && (
@@ -263,8 +265,10 @@ const CaregiverElderMessages = () => {
             )}
           </div>
         </div>
-      </CaregiverLayout>
-    </div>
+      </div>
+    </CaregiverLayout>
+    
+  </>
   );
 };
 
