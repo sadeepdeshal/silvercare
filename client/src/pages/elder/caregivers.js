@@ -347,12 +347,7 @@ const Caregivers = () => {
                           <span className={styles.infoValue}>{formatDate(assignment.end_date)}</span>
                         </div>
                         
-                        {assignment.certifications && (
-                          <div className={styles.certificationsRow}>
-                            <span className={styles.infoLabel}>🎓 Certifications:</span>
-                            <span className={styles.certificationsValue}>{assignment.certifications}</span>
-                          </div>
-                        )}
+                        
                       </div>
                     </div>
                   ))}

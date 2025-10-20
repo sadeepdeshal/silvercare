@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from './css/DailyCareReportModal.module.css';
 
-const DailyCareReportModal = ({ isOpen, onClose, onSubmit, elderName, reportDate, existingReport, isSubmitting, isReadOnly = false }) => {
+const DailyCareReportModal = ({ isOpen, onClose, onSubmit, elderName, reportDate, existingReport, isSubmitting, isReadOnly = false, isCarelogMode = false }) => {
   const [formData, setFormData] = useState({
     notes: existingReport?.notes || '',
     mood: existingReport?.mood || 'good',
@@ -10,6 +10,20 @@ const DailyCareReportModal = ({ isOpen, onClose, onSubmit, elderName, reportDate
     activities: existingReport?.activities || '',
     concerns: existingReport?.concerns || ''
   });
+
+  // Reset form data when modal opens or existing report changes
+  useEffect(() => {
+    if (isOpen) {
+      setFormData({
+        notes: existingReport?.notes || '',
+        mood: existingReport?.mood || 'good',
+        health_status: existingReport?.health_status || 'stable',
+        medications: existingReport?.medications || '',
+        activities: existingReport?.activities || '',
+        concerns: existingReport?.concerns || ''
+      });
+    }
+  }, [isOpen, existingReport]);
 
   const handleChange = (e) => {
     // Prevent changes in read-only mode

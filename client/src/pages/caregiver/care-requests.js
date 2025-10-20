@@ -5,6 +5,7 @@ import CaregiverLayout from '../../components/CaregiverLayout';
 import caregiverApi from '../../services/caregiverApi2';
 import { useAuth } from '../../context/AuthContext';
 import styles from "../../components/css/caregiver/care-requests.module.css";
+import RequestCountdownTimer from '../../components/RequestCountdownTimer.jsx';
 
 const CareRequests = () => {
   const { user } = useAuth();
@@ -379,38 +380,16 @@ useEffect(() => {
                         </div>
                       </div>
                     </div>
-                      {/* Show time left only in pending tab */}
-                      {(request?.status === 'pending' || request?.status === 'confirmed' || request?.status === 'approved') && (() => {
-                        // Don't show time left if status is confirmed/approved and start date < today
-                        if (request.status === 'confirmed' || request.status === 'approved') {
-                          const today = new Date();
-                          today.setHours(0, 0, 0, 0);
-                          const startDate = new Date(request.start_date);
-                          startDate.setHours(0, 0, 0, 0);
-                          
-                          if (startDate < today) {
-                            return null; // Don't show time left
-                          }
-                        }
-                        // Show time left for pending or confirmed with start date >= today
-                        const timeLeft = getTimeLeft(request.start_date);
-                        const startDate = new Date(request.start_date);
-                        const now = new Date();
-                        const timeDiff = startDate - now;
-                        const hoursLeft = timeDiff / (1000 * 60 * 60);
-                        
-                        // Red if <= 24 hours, green otherwise
-                        const timeLeftClass = hoursLeft <= 24 ? styles.redText : styles.greenText;
-                        
-                        return (
-                          <div className={styles.timeLeftRow}>
-                            <span className={styles.label}>Time Left:</span>
-                            <span className={timeLeftClass}>
-                              {timeLeft}
-                            </span>
-                          </div>
-                        );
-                      })()}
+                      {/* Show countdown timer for pending requests */}
+                      {request?.status === 'pending' && (
+                        <div className={styles.timeLeftRow}>
+                          <span className={styles.label}>Time Left to Accept:</span>
+                          <RequestCountdownTimer 
+                            requestDate={request.request_date}
+                            status={request.status}
+                          />
+                        </div>
+                      )}
                     <div className={styles.requestActions}>
                       
                       <button 

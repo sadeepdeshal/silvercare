@@ -4,6 +4,7 @@ import Navbar from '../../components/navbar';
 import CaregiverLayout from '../../components/CaregiverLayout';
 import caregiverApi from '../../services/caregiverApi2';
 import styles from "../../components/css/caregiver/care-request-details.module.css";
+import RequestCountdownTimer from '../../components/RequestCountdownTimer.jsx';
 
 const CareRequestDetails = () => {
   const { requestId } = useParams();
@@ -268,26 +269,14 @@ const CareRequestDetails = () => {
                     <label>Duration: </label>
                     <span>{careRequest?.duration} days</span>
                   </div>
-                  {/* Show time left only for pending and approved requests */}
-                  {(careRequest?.status === 'pending' ) && (
-                    <div className={styles.infoItem}>
-                      <label>Time Left:</label>
-                      <span className={(() => {
-                        const timeLeft = getTimeLeft(careRequest.start_date);
-                        if (careRequest.status === 'confirmed' && timeLeft === 'Started') {
-                          return styles.greenText;
-                        }
-                        // Show red for overdue requests
-                        if (timeLeft.includes('Overdue:')) {
-                          return styles.redText;
-                        }
-                        // Existing color logic for other cases
-                        return (new Date(careRequest.start_date) - new Date() < 7 * 24 * 60 * 60 * 1000 ? styles.redText : styles.greenText);
-                      })()}>
-                        {getTimeLeft(careRequest.start_date)}
-                      </span>
-                    </div>
-                  )}
+                  {/* Show countdown timer for pending requests */}
+                  <div className={styles.infoItem}>
+                    <label>Time Left to Accept:</label>
+                    <RequestCountdownTimer 
+                      requestDate={careRequest?.request_date}
+                      status={careRequest?.status}
+                    />
+                  </div>
                 </div>
               </div>
 

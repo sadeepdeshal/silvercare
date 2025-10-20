@@ -1,0 +1,92 @@
+.countdown-timer {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.countdown-timer .timer-icon {
+  font-size: 16px;
+}
+
+.countdown-timer .timer-text {
+  font-family: 'Courier New', monospace;
+}
+
+/* Urgency states for pending requests */
+.countdown-timer.safe {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.countdown-timer.warning {
+  background-color: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeaa7;
+  animation: pulse-warning 2s ease-in-out infinite;
+}
+
+.countdown-timer.critical {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+  animation: pulse-critical 1s ease-in-out infinite;
+}
+
+.countdown-timer.expired {
+  background-color: #dc3545;
+  color: white;
+  border: 1px solid #c82333;
+  font-weight: bold;
+}
+
+/* Status states */
+.countdown-timer.accepted {
+  background-color: #28a745;
+  color: white;
+  border: 1px solid #218838;
+}
+
+.countdown-timer.cancelled {
+  background-color: #6c757d;
+  color: white;
+  border: 1px solid #5a6268;
+}
+
+.countdown-timer.completed {
+  background-color: #17a2b8;
+  color: white;
+  border: 1px solid #138496;
+}
+
+.countdown-timer.loading {
+  background-color: #e9ecef;
+  color: #495057;
+  border: 1px solid #ced4da;
+}
+
+/* Pulse animations for urgency */
+@keyframes pulse-warning {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+
+@keyframes pulse-critical {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.02);
+  }
+}

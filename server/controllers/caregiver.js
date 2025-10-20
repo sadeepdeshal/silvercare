@@ -80,6 +80,8 @@ const getAssignedElders = async (req, res) => {
         e.age,
         cr.duration,
         cr.status,
+        cr.start_date,
+        cr.end_date,
         cr.caregiver_id,
         cr.family_id,
         u.user_id
@@ -87,7 +89,8 @@ const getAssignedElders = async (req, res) => {
       JOIN elder e ON cr.elder_id = e.elder_id
       JOIN caregiver cg ON cr.caregiver_id = cg.caregiver_id
       JOIN "User" u ON cg.user_id = u.user_id
-      WHERE cg.caregiver_id = $1`;
+      WHERE cg.caregiver_id = $1
+      ORDER BY cr.end_date DESC`;
 
     const result = await pool.query(query, [caregiverId]);
 
@@ -239,7 +242,8 @@ const updateCaregiverProfile = async (req, res) => {
     availability,
     certifications,
     fixed_line,
-    district
+    district,
+    day_rate
   } = req.body;
   
   try {
@@ -252,6 +256,14 @@ const updateCaregiverProfile = async (req, res) => {
         error: 'Name, email, and phone are required'
       });
     }
+    
+    // Convert day_rate to integer, handle empty string
+    const dayRateValue = day_rate === '' || day_rate === null || day_rate === undefined 
+      ? null 
+      : parseInt(day_rate, 10);
+    
+    console.log('Day rate from request:', day_rate);
+    console.log('Converted day_rate value:', dayRateValue);
     
     // Start transaction
     const client = await pool.connect();
@@ -281,13 +293,25 @@ const updateCaregiverProfile = async (req, res) => {
         [name, email, phone, userId]
       );
       
-      // Update caregiver table
-      await client.query(
-        'UPDATE caregiver SET availability = $1, certifications = $2, fixed_line = $3, district = $4 WHERE caregiver_id = $5',
-        [availability, certifications, fixed_line, district, caregiverId]
+      // Update caregiver table with day_rate
+      console.log('Updating caregiver table with day_rate:', dayRateValue);
+      const updateResult = await client.query(
+        'UPDATE caregiver SET availability = $1, certifications = $2, fixed_line = $3, district = $4, day_rate = $5 WHERE caregiver_id = $6',
+        [availability, certifications, fixed_line, district, dayRateValue, caregiverId]
       );
+      console.log('UPDATE query executed, rows affected:', updateResult.rowCount);
       
       await client.query('COMMIT');
+      console.log('Transaction COMMITTED successfully');
+      
+      // Verify the update in DB immediately after commit
+      const verifyResult = await client.query(
+        'SELECT availability, day_rate FROM caregiver WHERE caregiver_id = $1',
+        [caregiverId]
+      );
+      console.log('VERIFICATION - After COMMIT:');
+      console.log('  availability in DB:', verifyResult.rows[0]?.availability);
+      console.log('  day_rate in DB:', verifyResult.rows[0]?.day_rate);
       
       // Fetch updated profile
       const updatedResult = await client.query(`
@@ -298,6 +322,7 @@ const updateCaregiverProfile = async (req, res) => {
           c.certifications,
           c.fixed_line,
           c.district,
+          c.day_rate,
           u.name as caregiver_name,
           u.email as caregiver_email,
           u.phone as caregiver_phone,
@@ -308,16 +333,29 @@ const updateCaregiverProfile = async (req, res) => {
         WHERE c.caregiver_id = $1
       `, [caregiverId]);
       
+      console.log('Updated profile fetched:', updatedResult.rows[0]);
+      console.log('Updated availability:', updatedResult.rows[0]?.availability);
+      console.log('Updated day_rate:', updatedResult.rows[0]?.day_rate);
       console.log('Caregiver profile updated successfully');
       
-      // Update caregiver availability based on current assignments
-      await StatusUpdateService.updateCaregiverAvailability(caregiverId);
-      
-      res.json({
+      const responseData = {
         success: true,
         message: 'Profile updated successfully',
         caregiver: updatedResult.rows[0]
-      });
+      };
+      
+      console.log('=== SENDING RESPONSE TO CLIENT ===');
+      console.log('Response availability:', responseData.caregiver.availability);
+      console.log('Response day_rate:', responseData.caregiver.day_rate);
+      
+      // REMOVED: Automatic availability update that was overriding manual changes
+      // The StatusUpdateService was automatically setting availability based on assignments,
+      // which prevented users from manually setting their own availability status.
+      // This service is still called in other endpoints where automatic updates are appropriate.
+      
+      // await StatusUpdateService.updateCaregiverAvailability(caregiverId);
+      
+      res.json(responseData);
       
     } catch (err) {
       await client.query('ROLLBACK');
@@ -706,7 +744,7 @@ const getWeeklyReports = async (req, res) => {
     // Update caregiver availability before fetching reports
     await StatusUpdateService.updateCaregiverAvailability(caregiverId);
     
-    // First, get all care assignments for the caregiver in the date range (confirmed status only)
+    // First, get all care assignments for the caregiver in the date range (confirmed and completed status)
     const assignmentQuery = `
       SELECT DISTINCT
         cr.elder_id,
@@ -717,14 +755,14 @@ const getWeeklyReports = async (req, res) => {
       FROM carerequest cr
       JOIN elder e ON cr.elder_id = e.elder_id
       WHERE cr.caregiver_id = $1
-        AND cr.status = 'confirmed'
+        AND cr.status IN ('confirmed', 'completed')
         AND cr.start_date <= $3::date 
         AND cr.end_date >= $2::date
       ORDER BY e.name;
     `;
     
     const assignmentResult = await pool.query(assignmentQuery, [caregiverId, startDate, endDate]);
-    console.log('Found confirmed assignments:', assignmentResult.rows);
+    console.log('Found confirmed and completed assignments:', assignmentResult.rows);
     
     // Get existing reports for the date range
     const reportsQuery = `
@@ -792,7 +830,7 @@ const getWeeklyReports = async (req, res) => {
       }
       
       if (dayAssignment) {
-        // There's a confirmed assignment for this day
+        // There's a confirmed or completed assignment for this day
         const elderId = dayAssignment.elder_id;
         const reportData = reportsByDate[dateKey] && reportsByDate[dateKey][elderId];
         
@@ -800,11 +838,12 @@ const getWeeklyReports = async (req, res) => {
           date: dateKey,
           elder_id: elderId,
           elder_name: dayAssignment.elder_name,
+          status: dayAssignment.status,
           hasReport: reportData ? reportData.hasReport : false,
           existingReport: reportData ? reportData.existingReport : null
         });
       } else {
-        // No confirmed assignment for this day
+        // No confirmed or completed assignment for this day
         weeklyReports.push({
           date: dateKey,
           elder_id: null,
@@ -889,4 +928,3 @@ module.exports = {
   getWeeklyReports,
   submitDailyReport
 };
-
