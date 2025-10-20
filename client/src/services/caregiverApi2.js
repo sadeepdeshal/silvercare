@@ -220,10 +220,12 @@ export const caregiverApi = {
   },
 
   // Get elder details with family information
-  getElderDetails: async (elderId) => {
+  getElderDetails: async (elderId, caregiverId = null) => {
     try {
-      console.log('API: Fetching elder details for elderId:', elderId);
-      const url = `${API_BASE}/elder/${elderId}/details`;
+      console.log('API: Fetching elder details for elderId:', elderId, 'caregiverId:', caregiverId);
+      const url = caregiverId 
+        ? `${API_BASE}/elder/${elderId}/details?caregiver_id=${caregiverId}`
+        : `${API_BASE}/elder/${elderId}/details`;
       console.log('API: Making request to:', url);
       const response = await axios.get(url);
       console.log('API: Elder details response:', response.data);
