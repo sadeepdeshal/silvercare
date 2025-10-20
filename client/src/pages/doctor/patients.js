@@ -23,6 +23,10 @@ const DoctorPatients = () => {
   const [searchTerm, setSearchTerm] = useState('');
 
   // Helper functions
+  const handleSendMessage = (elderId) => {
+    navigate(`/doctor/elder-chat/${elderId}`);
+  };
+
   const formatDate = (dateString) => {
     if (!dateString) return '';
     return new Date(dateString).toLocaleDateString();
@@ -291,7 +295,10 @@ const DoctorPatients = () => {
                         <button className={styles.actionBtn}>
                           📅 View Appointments
                         </button>
-                        <button className={styles.actionBtn}>
+                        <button 
+                          className={styles.actionBtn}
+                          onClick={() => handleSendMessage(patient.elder_id)}
+                        >
                           💬 Send Message
                         </button>
                         <button className={styles.actionBtn}>

@@ -435,6 +435,12 @@ function App() {
               <ElderChat />
             </ProtectedRoute>
           } />
+          
+          <Route path="/doctor/elder-chat/:elderId" element={
+            <ProtectedRoute allowedRoles={['doctor']}>
+              <ElderChat />
+            </ProtectedRoute>
+          } />
 
           <Route path="/doctor/appointments" element={
             <ProtectedRoute allowedRoles={['doctor']}>
