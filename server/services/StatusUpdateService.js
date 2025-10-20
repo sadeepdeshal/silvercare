@@ -7,71 +7,50 @@ class StatusUpdateService {
   
   /**
    * Update caregiver availability based on their active care assignments
+   * DISABLED: Caregivers should manually set their availability to 'available' or 'unavailable' only.
+   * This function is kept for backward compatibility but does nothing.
    */
   static async updateCaregiverAvailability(caregiverId) {
     try {
-      console.log('Updating caregiver availability for caregiver:', caregiverId);
+      console.log('⚠️ updateCaregiverAvailability called but DISABLED - caregivers must manually set availability');
       
-      // Check if caregiver has any active confirmed assignments (current date is within start and end date)
-      const activeAssignmentResult = await pool.query(`
-        SELECT COUNT(*) as active_count
-        FROM carerequest 
-        WHERE caregiver_id = $1 
-        AND status = 'confirmed'
-        AND CURRENT_DATE >= start_date 
-        AND CURRENT_DATE <= end_date
-      `, [caregiverId]);
-      
-      const hasActiveAssignments = parseInt(activeAssignmentResult.rows[0].active_count) > 0;
-      const newAvailability = hasActiveAssignments ? 'busy' : 'available';
-      
-      // Update caregiver availability
-      const updateResult = await pool.query(`
-        UPDATE caregiver 
-        SET availability = $1
-        WHERE caregiver_id = $2
-        RETURNING caregiver_id, availability;
-      `, [newAvailability, caregiverId]);
-      
-      if (updateResult.rows.length > 0) {
-        console.log(`Updated caregiver ${caregiverId} availability to: ${newAvailability}`);
-      }
+      // DISABLED: No automatic status changes
+      // Availability should only be 'available' or 'unavailable', set manually by the caregiver
+      // The 'busy' status has been removed from the system
       
       return {
         caregiverId,
-        availability: newAvailability,
-        hasActiveAssignments
+        availability: 'unchanged',
+        hasActiveAssignments: false,
+        disabled: true,
+        message: 'Automatic availability updates are disabled. Caregivers must manually set availability.'
       };
       
     } catch (error) {
-      console.error('Error updating caregiver availability:', error);
+      console.error('Error in updateCaregiverAvailability:', error);
       throw error;
     }
   }
   
   /**
    * Update all caregivers availability based on their assignments
+   * DISABLED: Caregivers should manually set their availability to 'available' or 'unavailable' only.
+   * This function is kept for backward compatibility but does nothing.
    */
   static async updateAllCaregiversAvailability() {
     try {
-      console.log('Updating all caregivers availability...');
+      console.log('⚠️ updateAllCaregiversAvailability called but DISABLED - caregivers must manually set availability');
       
-      // Get all caregivers
-      const caregiversResult = await pool.query(`
-        SELECT caregiver_id FROM caregiver
-      `);
+      // DISABLED: No automatic status changes
+      // Availability should only be 'available' or 'unavailable', set manually by caregivers
       
-      const updatePromises = caregiversResult.rows.map(row => 
-        this.updateCaregiverAvailability(row.caregiver_id)
-      );
-      
-      const results = await Promise.all(updatePromises);
-      console.log(`Updated availability for ${results.length} caregivers`);
-      
-      return results;
+      return {
+        disabled: true,
+        message: 'Automatic availability updates are disabled for all caregivers.'
+      };
       
     } catch (error) {
-      console.error('Error updating all caregivers availability:', error);
+      console.error('Error in updateAllCaregiversAvailability:', error);
       throw error;
     }
   }
