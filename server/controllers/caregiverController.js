@@ -4,7 +4,7 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 // Get all approved caregivers
 const getAllCaregivers = async (req, res) => {
   try {
-    console.log('Fetching all approved caregivers');
+    console.log('Fetching all approved caregivers with ratings');
     
     const result = await pool.query(`
       SELECT 
@@ -18,14 +18,19 @@ const getAllCaregivers = async (req, res) => {
         u.email as caregiver_email,
         u.phone as caregiver_phone,
         u.role,
-        u.created_at
+        u.created_at,
+        COALESCE(ROUND(AVG(fc.rating)::numeric, 1), 0) as average_rating,
+        COUNT(fc.id) as total_reviews
       FROM caregiver c
       INNER JOIN "User" u ON c.user_id = u.user_id
+      LEFT JOIN feedback_caregiver fc ON c.caregiver_id = fc.caregiver_id
       WHERE u.role = 'caregiver' AND c.availability = 'available'
+      GROUP BY c.caregiver_id, c.user_id, c.availability, c.certifications, 
+               c.fixed_line, c.district, u.name, u.email, u.phone, u.role, u.created_at
       ORDER BY u.created_at DESC
     `);
     
-    console.log('Found caregivers:', result.rows.length);
+    console.log('Found caregivers with ratings:', result.rows.length);
     
     res.json({
       success: true,
@@ -1537,7 +1542,7 @@ const getCaregiverBookingsByFamily = async (req, res) => {
   try {
     console.log('Fetching caregiver bookings for family member:', familyMemberId);
     
-    // Get all care requests with payment information
+    // Get all care requests with payment and rating information
     const bookingsResult = await pool.query(`
       SELECT 
         cr.request_id,
@@ -1556,12 +1561,17 @@ const getCaregiverBookingsByFamily = async (req, res) => {
         cp.payment_method,
         cp.transaction_id,
         cp.payment_status,
-        cp.payment_date
+        cp.payment_date,
+        fc.id as rating_id,
+        fc.rating,
+        fc.feedback,
+        fc.created_at as rating_date
       FROM carerequest cr
       INNER JOIN elder e ON cr.elder_id = e.elder_id
       INNER JOIN caregiver c ON cr.caregiver_id = c.caregiver_id
       INNER JOIN "User" u_caregiver ON c.user_id = u_caregiver.user_id
       LEFT JOIN caregiver_payment cp ON cr.request_id = cp.care_request_id
+      LEFT JOIN feedback_caregiver fc ON cr.request_id = fc.care_request_id
       WHERE cr.family_id = $1
       ORDER BY cr.request_date DESC
     `, [familyMemberId]);
@@ -1774,42 +1784,148 @@ const cancelCaregiverBooking = async (req, res) => {
     });
   }
 };
-const getFeedbackByCaregiverId = async (req, res) => {
-  const { caregiverId } = req.params;
+// Removed old feedback functions - replaced with new implementation below
+
+// NEW: Submit rating/feedback for a completed booking
+const submitCaregiverRating = async (req, res) => {
+  const { careRequestId } = req.params;
+  const { rating, feedback } = req.body;
+
   try {
-    console.log('Fetching feedback for caregiver ID:', caregiverId);
-    const result = await pool.query(`
-      SELECT rating,feedback from feedback_caregiver where caregiver_id = $1
-    `, [caregiverId]);
-    res.status(200).json({
-      success: true,
-      feedbacks: result.rows
+    console.log('Submitting rating for care request:', careRequestId);
+
+    // Validate rating
+    if (!rating || rating < 1 || rating > 5) {
+      return res.status(400).json({
+        success: false,
+        error: 'Rating must be between 1 and 5'
+      });
+    }
+
+    // Check if care request exists and has ended
+    const careRequestCheck = await pool.query(
+      `SELECT cr.request_id, cr.caregiver_id, cr.status, cr.family_id, cr.end_date
+       FROM carerequest cr
+       WHERE cr.request_id = $1`,
+      [careRequestId]
+    );
+
+    if (careRequestCheck.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: 'Care request not found'
+      });
+    }
+
+    const careRequest = careRequestCheck.rows[0];
+
+    // Check if booking has ended (end_date < current date)
+    // Compare dates only (not time) by setting time to midnight
+    const currentDate = new Date();
+    currentDate.setHours(0, 0, 0, 0);
+    
+    const endDate = new Date(careRequest.end_date);
+    endDate.setHours(0, 0, 0, 0);
+    
+    console.log('Date comparison:', {
+      currentDate: currentDate.toISOString(),
+      endDate: endDate.toISOString(),
+      hasEnded: endDate < currentDate
     });
-    console.log('Feedback fetched:', result.rows);
-  } catch (error) {
-    console.error('Error fetching feedback:', error);
-    res.status(500).json({ message: 'Server error' });
+    
+    if (endDate >= currentDate) {
+      return res.status(400).json({
+        success: false,
+        error: 'Can only rate after the booking period has ended'
+      });
+    }
+
+    // Don't allow rating for cancelled bookings
+    if (careRequest.status === 'cancelled') {
+      return res.status(400).json({
+        success: false,
+        error: 'Cannot rate cancelled bookings'
+      });
+    }
+
+    // Check if rating already exists for this booking
+    const existingRating = await pool.query(
+      'SELECT id FROM feedback_caregiver WHERE care_request_id = $1',
+      [careRequestId]
+    );
+
+    if (existingRating.rows.length > 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'Rating already submitted for this booking'
+      });
+    }
+
+    // Insert the rating
+    const result = await pool.query(
+      `INSERT INTO feedback_caregiver (caregiver_id, care_request_id, rating, feedback)
+       VALUES ($1, $2, $3, $4)
+       RETURNING id, caregiver_id, care_request_id, rating, feedback, created_at`,
+      [careRequest.caregiver_id, careRequestId, rating, feedback || null]
+    );
+
+    console.log('Rating submitted successfully:', result.rows[0]);
+
+    res.status(201).json({
+      success: true,
+      message: 'Rating submitted successfully',
+      ratingId: result.rows[0].id,
+      rating: result.rows[0]
+    });
+
+  } catch (err) {
+    console.error('Error submitting caregiver rating:', err);
+    
+    // Handle unique constraint violation
+    if (err.code === '23505') {
+      return res.status(400).json({
+        success: false,
+        error: 'Rating already submitted for this booking'
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      error: 'Error submitting rating'
+    });
   }
 };
 
-const addFeedbackForCaregiver = async (req, res) => {
-  const { caregiverId } = req.params;
-  const { rating, feedback } = req.body;
+// NEW: Get rating for a specific booking
+const getBookingRating = async (req, res) => {
+  const { careRequestId } = req.params;
+
   try {
-    console.log('Adding feedback for caregiver ID:', caregiverId);
-    const result = await pool.query(`
-      INSERT INTO feedback_caregiver (caregiver_id, rating, feedback)
-      VALUES ($1, $2, $3)
-      RETURNING caregiver_id, rating, feedback
-    `, [caregiverId, rating, feedback]);
-    res.status(201).json({
+    const result = await pool.query(
+      `SELECT id, caregiver_id, care_request_id, rating, feedback, created_at
+       FROM feedback_caregiver
+       WHERE care_request_id = $1`,
+      [careRequestId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: 'No rating found for this booking'
+      });
+    }
+
+    res.json({
       success: true,
-      feedback: result.rows[0]
+      rating: result.rows[0]
     });
-    console.log('Feedback added:', result.rows[0]);
-  } catch (error) {
-    console.error('Error adding feedback:', error);
-    res.status(500).json({ message: 'Server error' });
+
+  } catch (err) {
+    console.error('Error fetching booking rating:', err);
+    res.status(500).json({
+      success: false,
+      error: 'Error fetching rating'
+    });
   }
 };
 
@@ -1927,10 +2043,6 @@ module.exports = {
   getCareRequestsByFamily,
   searchCaregivers,
   updateCareRequestStatus,
-
-  //caregiver feedback
-  getFeedbackByCaregiverId,
-  addFeedbackForCaregiver,
   
   // NEW: Caregiver booking functions
   getBlockedDates,
@@ -1941,7 +2053,11 @@ module.exports = {
   cleanupExpiredCaregiverBookings,
   getCaregiverBookingsByFamily,
   cancelCaregiverBooking,
-  autoCancelExpiredCareRequests
+  autoCancelExpiredCareRequests,
+  
+  // NEW: Rating/Feedback functions
+  submitCaregiverRating,
+  getBookingRating
   //getCareRequestById,
   //getAssignedElders,
   //getAssignedFamiliesCount,
