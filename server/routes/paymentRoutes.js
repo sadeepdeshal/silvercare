@@ -1,7 +1,17 @@
 const express = require('express');
 const router = express.Router();
 require('dotenv').config(); // Ensure env vars are loaded
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+let stripe = null;
+try {
+  if (process.env.STRIPE_SECRET_KEY) {
+    stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+  } else {
+    console.warn('Stripe not configured in paymentRoutes: STRIPE_SECRET_KEY is missing.');
+  }
+} catch (e) {
+  console.warn('Stripe init failed in paymentRoutes:', e.message);
+  stripe = null;
+}
 const jwt = require('jsonwebtoken');
 
 // Authentication middleware
@@ -26,6 +36,9 @@ const authenticate = (req, res, next) => {
 // Create payment intent - CLEAN VERSION WITHOUT statement_descriptor
 router.post('/create-payment-intent', authenticate, async (req, res) => {
   try {
+    if (!stripe) {
+      return res.status(503).json({ success: false, error: 'Payment service unavailable. Please try again later.' });
+    }
     const { amount, currency = 'lkr', bookingData, billingDetails } = req.body;
 
     console.log('Creating payment intent for:', {
@@ -112,6 +125,9 @@ router.post('/create-payment-intent', authenticate, async (req, res) => {
 // Get payment intent status
 router.get('/payment-intent/:paymentIntentId', authenticate, async (req, res) => {
   try {
+    if (!stripe) {
+      return res.status(503).json({ success: false, error: 'Payment service unavailable.' });
+    }
     const { paymentIntentId } = req.params;
 
     console.log('Retrieving payment intent:', paymentIntentId);

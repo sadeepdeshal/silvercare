@@ -1,5 +1,16 @@
 const pool = require('../db');
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+// Initialize Stripe safely
+let stripe = null;
+try {
+  if (process.env.STRIPE_SECRET_KEY) {
+    stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+  } else {
+    console.warn('Stripe not configured in caregiverController: STRIPE_SECRET_KEY is missing.');
+  }
+} catch (e) {
+  console.warn('Stripe init failed in caregiverController:', e.message);
+  stripe = null;
+}
 
 // Get all approved caregivers
 const getAllCaregivers = async (req, res) => {
@@ -521,47 +532,55 @@ const updateCareRequestStatus = async (req, res) => {
         if (request.payment_id && request.transaction_id && request.payment_status === 'completed') {
           console.log('Processing refund for caregiver cancellation:', request.transaction_id);
 
-          try {
-            // Create refund in Stripe
-            const refund = await stripe.refunds.create({
-              payment_intent: request.transaction_id,
-              amount: Math.round(parseFloat(request.amount) * 100), // Convert to cents
-              reason: 'requested_by_customer',
-              metadata: {
-                care_request_id: requestId.toString(),
-                elder_name: request.elder_name || '',
-                caregiver_name: request.caregiver_name || '',
-                cancellation_reason: 'Cancelled by caregiver',
-                cancelled_at: new Date().toISOString(),
-                platform: 'SilverCare'
-              }
-            });
-
-            console.log('Stripe refund created:', refund.id);
-
-            // Update payment status in database
-            await pool.query(
-              `UPDATE caregiver_payment 
-               SET payment_status = 'refunded'
-               WHERE payment_id = $1`,
-              [request.payment_id]
-            );
-
+          if (!stripe) {
+            console.warn('Stripe not configured. Skipping refund API call.');
             refundResult = {
-              refund_id: refund.id,
-              amount: parseFloat(request.amount),
-              status: refund.status,
-              estimated_arrival: refund.created + (5 * 24 * 60 * 60) // Estimate 5-10 business days
+              error: 'Stripe not configured. Refund not processed.',
+              details: 'Set STRIPE_SECRET_KEY to enable refunds.'
             };
+          } else {
+            try {
+              // Create refund in Stripe
+              const refund = await stripe.refunds.create({
+                payment_intent: request.transaction_id,
+                amount: Math.round(parseFloat(request.amount) * 100), // Convert to cents
+                reason: 'requested_by_customer',
+                metadata: {
+                  care_request_id: requestId.toString(),
+                  elder_name: request.elder_name || '',
+                  caregiver_name: request.caregiver_name || '',
+                  cancellation_reason: 'Cancelled by caregiver',
+                  cancelled_at: new Date().toISOString(),
+                  platform: 'SilverCare'
+                }
+              });
 
-          } catch (stripeError) {
-            console.error('Stripe refund failed:', stripeError);
+              console.log('Stripe refund created:', refund.id);
 
-            // Don't fail the entire cancellation if refund fails
-            refundResult = {
-              error: 'Refund processing failed. Please contact support.',
-              details: stripeError.message
-            };
+              // Update payment status in database
+              await pool.query(
+                `UPDATE caregiver_payment 
+                 SET payment_status = 'refunded'
+                 WHERE payment_id = $1`,
+                [request.payment_id]
+              );
+
+              refundResult = {
+                refund_id: refund.id,
+                amount: parseFloat(request.amount),
+                status: refund.status,
+                estimated_arrival: refund.created + (5 * 24 * 60 * 60) // Estimate 5-10 business days
+              };
+
+            } catch (stripeError) {
+              console.error('Stripe refund failed:', stripeError);
+
+              // Don't fail the entire cancellation if refund fails
+              refundResult = {
+                error: 'Refund processing failed. Please contact support.',
+                details: stripeError.message
+              };
+            }
           }
         }
 

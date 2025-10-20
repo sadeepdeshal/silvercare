@@ -1,7 +1,18 @@
 process.env.TZ = 'Asia/Colombo';
 require('dotenv').config(); // Ensure env vars are loaded
 const pool = require('../db');
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+// Initialize Stripe safely (do not crash server if key missing)
+let stripe = null;
+try {
+  if (process.env.STRIPE_SECRET_KEY) {
+    stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+  } else {
+    console.warn('Stripe not configured: STRIPE_SECRET_KEY is missing. Refund features will be disabled.');
+  }
+} catch (e) {
+  console.warn('Stripe initialization failed. Refund features will be disabled. Error:', e.message);
+  stripe = null;
+}
 
 // Get all appointments for a family member (only confirmed status)
 // Update the getAllAppointmentsByFamily function
@@ -348,7 +359,7 @@ const getUpcomingAppointmentsByFamily = async (req, res) => {
     const familyId = familyMemberResult.rows[0].family_id;
     console.log('Found family_id for upcoming appointments:', familyId);
     
-    // Get upcoming confirmed appointments only
+    // Get upcoming appointments (pending/approved/confirmed) for dashboard
     const query = `
       SELECT 
         a.appointment_id,
@@ -378,7 +389,7 @@ const getUpcomingAppointmentsByFamily = async (req, res) => {
       INNER JOIN doctor d ON a.doctor_id = d.doctor_id
       INNER JOIN "User" u ON d.user_id = u.user_id
       WHERE a.family_id = $1 
-        AND a.status = 'confirmed'
+        AND a.status IN ('pending','approved','confirmed')
         AND a.date_time > CURRENT_TIMESTAMP
       ORDER BY a.date_time ASC
       LIMIT $2
@@ -424,12 +435,12 @@ const getAppointmentCountByFamily = async (req, res) => {
     
     const familyId = familyMemberResult.rows[0].family_id;
     
-    // Get count of upcoming confirmed appointments
+    // Get count of upcoming appointments (pending/approved/confirmed)
     const countResult = await pool.query(
       `SELECT COUNT(*) as count
        FROM appointment a
        WHERE a.family_id = $1 
-         AND a.status = 'confirmed'
+         AND a.status IN ('pending','approved','confirmed')
          AND a.date_time > CURRENT_TIMESTAMP`,
       [familyId]
     );
@@ -673,63 +684,76 @@ const cancelAppointment = async (req, res) => {
       if (appointment.payment_id && appointment.transaction_id && appointment.payment_status === 'completed') {
         console.log('Processing refund for payment:', appointment.transaction_id);
         
-        try {
-          // Create refund in Stripe
-          const refund = await stripe.refunds.create({
-            payment_intent: appointment.transaction_id,
-            amount: Math.round(parseFloat(appointment.amount) * 100), // Convert to cents
-            reason: 'requested_by_customer',
-            metadata: {
-              appointment_id: appointmentId.toString(),
-              elder_name: appointment.elder_name || '',
-              doctor_name: appointment.doctor_name || '',
-              cancellation_reason: reason || 'Cancelled within 2-hour creation policy',
-              cancelled_at: new Date().toISOString(),
-              hours_since_created: hoursSinceCreated.toString(),
-              platform: 'SilverCare'
-            }
-          });
-          
-          console.log('Stripe refund created:', refund.id);
-          
-          // Update payment status in database
-          await pool.query(
-            `UPDATE payment 
-             SET payment_status = 'refunded'
-             WHERE payment_id = $1`,
-            [appointment.payment_id]
-          );
-          
-          // Insert refund record
+        if (!stripe) {
+          console.warn('Stripe not configured. Skipping refund API call.');
           await pool.query(
             `UPDATE appointment 
-             SET notes = COALESCE(notes, '') || ' | REFUND: ' || $1 || ' (Amount: Rs.' || $2 || ')'
-             WHERE appointment_id = $3`,
-            [refund.id, appointment.amount, appointmentId]
+             SET notes = COALESCE(notes, '') || ' | REFUND PENDING: Stripe not configured. Contact support.'
+             WHERE appointment_id = $1`,
+            [appointmentId]
           );
-          
           refundResult = {
-            refund_id: refund.id,
-            amount: parseFloat(appointment.amount),
-            status: refund.status,
-            estimated_arrival: refund.created + (5 * 24 * 60 * 60) // Estimate 5-10 business days
+            error: 'Stripe not configured. Refund not processed.',
+            details: 'Set STRIPE_SECRET_KEY to enable refunds.'
           };
-          
-        } catch (stripeError) {
-          console.error('Stripe refund failed:', stripeError);
-          
-          // Don't fail the entire cancellation if refund fails
-          await pool.query(
-            `UPDATE appointment 
-             SET notes = COALESCE(notes, '') || ' | REFUND FAILED: ' || $1 || ' - Contact support'
-             WHERE appointment_id = $2`,
-            [stripeError.message, appointmentId]
-          );
-          
-          refundResult = {
-            error: 'Refund processing failed. Please contact support.',
-            details: stripeError.message
-          };
+        } else {
+          try {
+            // Create refund in Stripe
+            const refund = await stripe.refunds.create({
+              payment_intent: appointment.transaction_id,
+              amount: Math.round(parseFloat(appointment.amount) * 100), // Convert to cents
+              reason: 'requested_by_customer',
+              metadata: {
+                appointment_id: appointmentId.toString(),
+                elder_name: appointment.elder_name || '',
+                doctor_name: appointment.doctor_name || '',
+                cancellation_reason: reason || 'Cancelled within 2-hour creation policy',
+                cancelled_at: new Date().toISOString(),
+                hours_since_created: hoursSinceCreated.toString(),
+                platform: 'SilverCare'
+              }
+            });
+            
+            console.log('Stripe refund created:', refund.id);
+            
+            // Update payment status in database
+            await pool.query(
+              `UPDATE payment 
+               SET payment_status = 'refunded'
+               WHERE payment_id = $1`,
+              [appointment.payment_id]
+            );
+            
+            // Insert refund record
+            await pool.query(
+              `UPDATE appointment 
+               SET notes = COALESCE(notes, '') || ' | REFUND: ' || $1 || ' (Amount: Rs.' || $2 || ')'
+               WHERE appointment_id = $3`,
+              [refund.id, appointment.amount, appointmentId]
+            );
+            
+            refundResult = {
+              refund_id: refund.id,
+              amount: parseFloat(appointment.amount),
+              status: refund.status,
+              estimated_arrival: refund.created + (5 * 24 * 60 * 60) // Estimate 5-10 business days
+            };
+          } catch (stripeError) {
+            console.error('Stripe refund failed:', stripeError);
+            
+            // Don't fail the entire cancellation if refund fails
+            await pool.query(
+              `UPDATE appointment 
+               SET notes = COALESCE(notes, '') || ' | REFUND FAILED: ' || $1 || ' - Contact support'
+               WHERE appointment_id = $2`,
+              [stripeError.message, appointmentId]
+            );
+            
+            refundResult = {
+              error: 'Refund processing failed. Please contact support.',
+              details: stripeError.message
+            };
+          }
         }
       }
       
