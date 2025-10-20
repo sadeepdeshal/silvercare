@@ -331,9 +331,6 @@ const Profile = () => {
           <div className={styles.profileCard}>
             <div className={styles.profileHeader}>
               <div className={styles.avatarSection}>
-                <div className={styles.avatar}>
-                  {profileData?.caregiver_name?.charAt(0)?.toUpperCase() || 'C'}
-                </div>
                 <div className={styles.userInfo}>
                   <h2>{profileData?.caregiver_name}</h2>
                   <p className={styles.role}>Professional Caregiver</p>
