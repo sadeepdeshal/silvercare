@@ -17,8 +17,8 @@ const {
   cleanupExpiredCaregiverBookings,  // NEW: Cleanup expired bookings
   getCaregiverBookingsByFamily,  // NEW: Get caregiver bookings for family
   cancelCaregiverBooking,  // NEW: Cancel caregiver booking with refund
-  getFeedbackByCaregiverId,  // NEW: Get feedback for caregiver
-  addFeedbackForCaregiver ,  // NEW: Add feedback for caregiver
+  submitCaregiverRating,  // NEW: Submit rating for booking
+  getBookingRating,  // NEW: Get rating for booking
 } = require('../controllers/caregiverController');
 
 const { 
@@ -69,12 +69,12 @@ router.post('/cleanup-expired', cleanupExpiredCaregiverBookings);
 router.get('/bookings/family/:familyMemberId', getCaregiverBookingsByFamily);
 router.post('/bookings/:requestId/cancel', cancelCaregiverBooking);
 
+// NEW: Rating and feedback routes
+router.post('/bookings/:careRequestId/rating', submitCaregiverRating);
+router.get('/bookings/:careRequestId/rating', getBookingRating);
+
 // Get specific caregiver by ID
 router.get('/:caregiverId', getCaregiverById);
-
-// Get feedback for caregiver
-router.get('/:caregiverId/feedback', getFeedbackByCaregiverId);
-router.post('/:caregiverId/feedback', addFeedbackForCaregiver);
 
 // Create care request (book caregiver)
 router.post('/:caregiverId/request', createCareRequest);

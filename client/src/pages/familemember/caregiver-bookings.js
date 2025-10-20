@@ -19,6 +19,10 @@ const CaregiverBookings = () => {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [bookingToCancel, setBookingToCancel] = useState(null);
+  const [showRatingModal, setShowRatingModal] = useState(false);
+  const [bookingToRate, setBookingToRate] = useState(null);
+  const [ratingData, setRatingData] = useState({ rating: 0, feedback: '' });
+  const [submittingRating, setSubmittingRating] = useState(false);
   const [filters, setFilters] = useState({
     type: 'all',
     search: ''
@@ -181,6 +185,98 @@ const CaregiverBookings = () => {
     setBookingToCancel(null);
   };
 
+  // Open rating modal
+  const openRatingModal = (booking) => {
+    setBookingToRate(booking);
+    // If booking already has a rating, pre-fill the form
+    if (booking.rating_id) {
+      setRatingData({
+        rating: booking.rating || 0,
+        feedback: booking.feedback || ''
+      });
+    } else {
+      setRatingData({ rating: 0, feedback: '' });
+    }
+    setShowRatingModal(true);
+  };
+
+  // Close rating modal
+  const closeRatingModal = () => {
+    setShowRatingModal(false);
+    setBookingToRate(null);
+    setRatingData({ rating: 0, feedback: '' });
+  };
+
+  // Submit caregiver rating
+  const handleSubmitRating = async () => {
+    if (!bookingToRate) return;
+    
+    // Validate rating
+    if (ratingData.rating < 1 || ratingData.rating > 5) {
+      alert('Please select a rating between 1 and 5 stars');
+      return;
+    }
+
+    // Check if booking has ended
+    if (!hasBookingEnded(bookingToRate)) {
+      alert('You can only rate a caregiver after the booking period has ended.');
+      return;
+    }
+
+    try {
+      setSubmittingRating(true);
+      
+      const response = await caregiverApi.submitCaregiverRating(
+        bookingToRate.request_id,
+        ratingData.rating,
+        ratingData.feedback
+      );
+      
+      if (response.success) {
+        // Update the booking with rating info
+        setBookings(prev =>
+          prev.map(b =>
+            b.request_id === bookingToRate.request_id
+              ? {
+                  ...b,
+                  rating_id: response.ratingId,
+                  rating: ratingData.rating,
+                  feedback: ratingData.feedback,
+                  rating_date: new Date().toISOString()
+                }
+              : b
+          )
+        );
+
+        alert('Thank you for rating the caregiver!');
+        closeRatingModal();
+      } else {
+        // Handle non-success response
+        alert(response.error || 'Failed to submit rating. Please try again.');
+      }
+    } catch (err) {
+      console.error('Error submitting rating:', err);
+      const errorMessage = err.message || 'Failed to submit rating. Please try again.';
+      
+      if (errorMessage.includes('already rated')) {
+        alert('You have already rated this caregiver for this booking.');
+      } else if (errorMessage.includes('booking period has ended')) {
+        alert('You can only rate after the booking period has ended.');
+      } else if (errorMessage.includes('cancelled')) {
+        alert('Cannot rate cancelled bookings.');
+      } else {
+        alert(errorMessage);
+      }
+    } finally {
+      setSubmittingRating(false);
+    }
+  };
+
+  // Handle star click
+  const handleStarClick = (starValue) => {
+    setRatingData(prev => ({ ...prev, rating: starValue }));
+  };
+
   const formatDateRange = (startDate, endDate) => {
     const start = new Date(startDate);
     const end = new Date(endDate);
@@ -226,6 +322,16 @@ const CaregiverBookings = () => {
     if (startDate <= currentDate && endDate >= currentDate) return 'Ongoing';
     if (endDate < currentDate) return 'Completed';
     return booking.status;
+  };
+
+  // Check if booking has ended (can be rated)
+  const hasBookingEnded = (booking) => {
+    const currentDate = new Date();
+    currentDate.setHours(0, 0, 0, 0);
+    const endDate = new Date(booking.end_date);
+    endDate.setHours(0, 0, 0, 0);
+    
+    return endDate < currentDate;
   };
 
   const openDetailsModal = (booking) => {
@@ -474,6 +580,19 @@ const CaregiverBookings = () => {
                         >
                           More Details
                         </button>
+                        
+                        {/* Rating Button - Show for all bookings */}
+                        <button
+                          className={booking.rating_id ? styles.viewRatingButton : styles.addRatingButton}
+                          onClick={() => openRatingModal(booking)}
+                        >
+                          {booking.rating_id ? (
+                            <>⭐ View Rating</>
+                          ) : (
+                            <>⭐ Rate Caregiver</>
+                          )}
+                        </button>
+                        
                         {canCancel && (
                           <button
                             className={`${styles.cancelButton} ${cancellingId === booking.request_id ? styles.cancelling : ''}`}
@@ -710,6 +829,132 @@ const CaregiverBookings = () => {
                   >
                     Yes, Cancel Booking
                   </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Rating Modal */}
+          {showRatingModal && bookingToRate && (
+            <div className={styles.modalOverlay} onClick={closeRatingModal}>
+              <div className={styles.ratingModalContent} onClick={(e) => e.stopPropagation()}>
+                <div className={styles.ratingModalHeader}>
+                  <h2 className={styles.ratingModalTitle}>
+                    {bookingToRate.rating_id ? 'Your Rating' : 'Rate Caregiver'}
+                  </h2>
+                  <button className={styles.modalClose} onClick={closeRatingModal}>✕</button>
+                </div>
+
+                <div className={styles.ratingModalBody}>
+                  {/* Caregiver Info */}
+                  <div className={styles.ratingCaregiverInfo}>
+                    <div className={styles.ratingInfoIcon}>🧑‍💼</div>
+                    <div className={styles.ratingInfoText}>
+                      <h3>{bookingToRate.caregiver_name}</h3>
+                      <p>Booking #{bookingToRate.request_id}</p>
+                    </div>
+                  </div>
+
+                  {/* Star Rating */}
+                  <div className={styles.starRatingSection}>
+                    <label className={styles.ratingLabel}>Rating</label>
+                    <div className={styles.starRating}>
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <span
+                          key={star}
+                          className={`${styles.star} ${
+                            star <= ratingData.rating ? styles.filled : ''
+                          } ${bookingToRate.rating_id ? styles.disabled : ''}`}
+                          onClick={() => !bookingToRate.rating_id && handleStarClick(star)}
+                          style={{
+                            cursor: bookingToRate.rating_id ? 'default' : 'pointer',
+                            fontSize: '2.5rem'
+                          }}
+                        >
+                          ★
+                        </span>
+                      ))}
+                    </div>
+                    {ratingData.rating > 0 && (
+                      <p className={styles.ratingText}>
+                        {ratingData.rating === 1 && 'Poor'}
+                        {ratingData.rating === 2 && 'Fair'}
+                        {ratingData.rating === 3 && 'Good'}
+                        {ratingData.rating === 4 && 'Very Good'}
+                        {ratingData.rating === 5 && 'Excellent'}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Feedback */}
+                  <div className={styles.feedbackSection}>
+                    <label className={styles.ratingLabel}>
+                      Feedback {!bookingToRate.rating_id && <span className={styles.optional}>(Optional)</span>}
+                    </label>
+                    <textarea
+                      className={styles.feedbackTextarea}
+                      placeholder="Share your experience with this caregiver..."
+                      value={ratingData.feedback}
+                      onChange={(e) => setRatingData(prev => ({ ...prev, feedback: e.target.value }))}
+                      rows={4}
+                      disabled={bookingToRate.rating_id}
+                      readOnly={bookingToRate.rating_id}
+                    />
+                  </div>
+
+                  {/* Rating Date (if already rated) */}
+                  {bookingToRate.rating_id && bookingToRate.rating_date && (
+                    <div className={styles.ratingDateSection}>
+                      <span className={styles.ratingDateLabel}>Rated on:</span>
+                      <span className={styles.ratingDateValue}>
+                        {new Date(bookingToRate.rating_date).toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric'
+                        })}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Booking Not Ended Notice */}
+                  {!bookingToRate.rating_id && !hasBookingEnded(bookingToRate) && (
+                    <div className={styles.ratingNoticeSection}>
+                      <span className={styles.noticeIcon}>ℹ️</span>
+                      <span className={styles.noticeText}>
+                        You can rate this caregiver after the booking period ends on{' '}
+                        {new Date(bookingToRate.end_date).toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric'
+                        })}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                <div className={styles.ratingModalFooter}>
+                  <button
+                    className={styles.ratingCancelButton}
+                    onClick={closeRatingModal}
+                  >
+                    {bookingToRate.rating_id ? 'Close' : 'Cancel'}
+                  </button>
+                  {!bookingToRate.rating_id && (
+                    <button
+                      className={styles.ratingSubmitButton}
+                      onClick={handleSubmitRating}
+                      disabled={submittingRating || ratingData.rating === 0 || !hasBookingEnded(bookingToRate)}
+                    >
+                      {submittingRating ? (
+                        <>
+                          <span className={styles.buttonSpinner}></span>
+                          Submitting...
+                        </>
+                      ) : (
+                        'Submit Rating'
+                      )}
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
