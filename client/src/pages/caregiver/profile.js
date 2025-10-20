@@ -339,6 +339,30 @@ const Profile = () => {
                   <div className={`${styles.statusBadge} ${styles[profileData?.availability]}`}>
                     {profileData?.availability}
                   </div>
+                  {/* Rating Display */}
+                  <div className={styles.ratingSection}>
+                    <div className={styles.stars}>
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <span
+                          key={star}
+                          className={styles.star}
+                          style={{
+                            color: star <= Math.round(profileData?.average_rating || 0) ? '#fbbf24' : '#d1d5db'
+                          }}
+                        >
+                          ★
+                        </span>
+                      ))}
+                    </div>
+                    <span className={styles.ratingText}>
+                      {profileData?.average_rating > 0 
+                        ? `${profileData.average_rating} / 5.0` 
+                        : 'No ratings yet'}
+                    </span>
+                    <span className={styles.reviewCount}>
+                      ({profileData?.total_reviews || 0} {profileData?.total_reviews === 1 ? 'review' : 'reviews'})
+                    </span>
+                  </div>
                 </div>
               </div>
               <div className={styles.actions}>

@@ -136,10 +136,15 @@ const getCaregiverById = async (req, res) => {
         u.email as caregiver_email,
         u.phone as caregiver_phone,
         u.role,
-        u.created_at
+        u.created_at,
+        COALESCE(ROUND(AVG(fc.rating)::numeric, 1), 0) as average_rating,
+        COUNT(fc.id) as total_reviews
       FROM caregiver c
       INNER JOIN "User" u ON c.user_id = u.user_id
+      LEFT JOIN feedback_caregiver fc ON c.caregiver_id = fc.caregiver_id
       WHERE c.caregiver_id = $1
+      GROUP BY c.caregiver_id, c.user_id, c.availability, c.certifications, 
+               c.fixed_line, c.district, c.day_rate, u.name, u.email, u.phone, u.role, u.created_at
     `, [caregiverId]);
     
     if (result.rows.length === 0) {
@@ -151,6 +156,8 @@ const getCaregiverById = async (req, res) => {
     
     console.log('Caregiver found:', result.rows[0].caregiver_name);
     console.log('Day rate from DB:', result.rows[0].day_rate);
+    console.log('Average rating:', result.rows[0].average_rating);
+    console.log('Total reviews:', result.rows[0].total_reviews);
     console.log('Full caregiver data:', result.rows[0]);
     
     res.json({
