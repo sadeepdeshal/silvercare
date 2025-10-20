@@ -54,6 +54,7 @@ import ElderEvents from "./pages/elder/events";
 
 import DoctorDashboard from './pages/doctor/dashboard';
 import DoctorProfile from './pages/doctor/profile';
+import DoctorAvailabilitySettings from './pages/doctor/availability-settings';
 import VirtualMeetingRoom from './pages/VirtualMeetingRoom';
 import JitsiMeetingRoom from './pages/JitsiMeetingRoom';
 import MeetingGenerator from './pages/MeetingGenerator';
@@ -330,6 +331,12 @@ function App() {
           <Route path="/doctor/messages" element={
             <ProtectedRoute allowedRoles={['doctor']}>
               <DoctorMessages2 />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/doctor/availability-settings" element={
+            <ProtectedRoute allowedRoles={['doctor']}>
+              <DoctorAvailabilitySettings />
             </ProtectedRoute>
           } />
           

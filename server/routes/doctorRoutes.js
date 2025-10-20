@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const doctorController = require('../controllers/doctorController');
+const doctorAvailability = require('../controllers/doctorAvailabilityController');
 const jwt = require('jsonwebtoken');
 
 // Integrated authentication middleware
@@ -37,6 +38,11 @@ router.put('/appointments/:appointmentId/status', doctorController.updateAppoint
 
 // Join appointment for online meetings
 router.post('/:doctorId/appointments/:appointmentId/join', doctorController.joinAppointment);
+
+// Doctor availability (blocked time) routes
+router.post('/:doctorId/blocked', doctorAvailability.createBlockedTime);
+router.get('/:doctorId/blocked', doctorAvailability.listBlockedTimes);
+router.delete('/:doctorId/blocked/:blockedId', doctorAvailability.deleteBlockedTime);
 
 // Family member chat routes
 router.get('/:doctorId/family-members-with-appointments', doctorController.getFamilyMembersWithAppointments);

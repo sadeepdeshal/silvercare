@@ -2213,7 +2213,7 @@ const getBlockedTimeSlots = async (req, res) => {
       });
     }
     
-    // Get all appointments for this doctor on the specified date
+  // Get all appointments for this doctor on the specified date
     const appointmentsResult = await pool.query(
       `SELECT 
         appointment_id,
@@ -2232,7 +2232,7 @@ const getBlockedTimeSlots = async (req, res) => {
     
     console.log('Existing appointments:', appointmentsResult.rows);
     
-    const blockedSlots = [];
+  const blockedSlots = [];
     const appointmentDetails = [];
     
     // Generate all possible time slots for the day
@@ -2242,7 +2242,7 @@ const getBlockedTimeSlots = async (req, res) => {
       allTimeSlots.push(`${hour.toString().padStart(2, '0')}:30`);
     }
     
-    appointmentsResult.rows.forEach(appointment => {
+  appointmentsResult.rows.forEach(appointment => {
       const hour = parseInt(appointment.hour);
       const minute = parseInt(appointment.minute);
       const existingType = appointment.appointment_type;
@@ -2326,6 +2326,43 @@ const getBlockedTimeSlots = async (req, res) => {
       });
     });
     
+    // Additionally, block out doctor-declared blocked time ranges (if table exists)
+    try {
+      const blockedRanges = await pool.query(
+        `SELECT all_day, start_time, end_time FROM doctor_blocked_time WHERE doctor_id=$1 AND date=$2`,
+        [doctorId, date]
+      );
+      if (blockedRanges.rows.length > 0) {
+        // If all-day, then the whole day is blocked
+        const allDay = blockedRanges.rows.some(r => r.all_day);
+        if (allDay) {
+          allTimeSlots.forEach(ts => blockedSlots.push(ts));
+        } else {
+          for (const r of blockedRanges.rows) {
+            if (!r.start_time || !r.end_time) continue;
+            const [bsH, bsM] = r.start_time.split(':').map(Number);
+            const [beH, beM] = r.end_time.split(':').map(Number);
+            const rangeStart = bsH * 60 + bsM;
+            const rangeEnd = beH * 60 + beM;
+            allTimeSlots.forEach(timeSlot => {
+              const [slotHour, slotMinute] = timeSlot.split(':').map(Number);
+              // Consider the requested type duration to determine overlap
+              let newEndHour = slotHour;
+              let newEndMinute = slotMinute + (requestedType === 'physical' ? 120 : 60);
+              newEndHour += Math.floor(newEndMinute / 60);
+              newEndMinute = newEndMinute % 60;
+              const slotStartMinutes = slotHour * 60 + slotMinute;
+              const slotEndMinutes = newEndHour * 60 + newEndMinute;
+              const hasConflict = (slotStartMinutes < rangeEnd && slotEndMinutes > rangeStart);
+              if (hasConflict) blockedSlots.push(timeSlot);
+            });
+          }
+        }
+      }
+    } catch (e) {
+      // table may not exist; ignore
+    }
+
     // Remove duplicates and sort
     const uniqueBlockedSlots = [...new Set(blockedSlots)].sort();
     
