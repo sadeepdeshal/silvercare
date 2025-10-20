@@ -94,7 +94,7 @@ const CaregiverSidebar = ({ onItemClick }) => {
     {
       key: 'elder-messages',
       label: 'Elder Messages',
-      icon: '👴👵',
+      icon: '👵',
       path: '/caregiver/elder-messages'
     },
     {
