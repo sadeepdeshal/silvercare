@@ -55,6 +55,15 @@ const CaregiversByDistrict = () => {
         if (response && response.success) {
           setCaregivers(response.caregivers || []);
           setElderInfo(response.elderInfo);
+          
+          // Debug: Log rating data for first caregiver
+          if (response.caregivers && response.caregivers.length > 0) {
+            console.log('Sample caregiver rating data:', {
+              name: response.caregivers[0].caregiver_name,
+              average_rating: response.caregivers[0].average_rating,
+              total_reviews: response.caregivers[0].total_reviews
+            });
+          }
         } else {
           setError(response?.error || 'Failed to load caregivers data');
         }
@@ -210,6 +219,25 @@ const CaregiversByDistrict = () => {
                       </div>
                       <div className={styles.caregiverHeaderInfo}>
                         <h3 className={styles.caregiverName}>{caregiver.caregiver_name}</h3>
+                        <div className={styles.ratingContainer}>
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <span 
+                              key={star}
+                              className={styles.star}
+                              style={{ 
+                                color: star <= Number(caregiver.average_rating || 0) ? '#FFD700' : '#ddd',
+                                fontSize: '16px'
+                              }}
+                            >
+                              ★
+                            </span>
+                          ))}
+                          <span className={styles.ratingText}>
+                            {Number(caregiver.total_reviews) > 0 
+                              ? `${caregiver.average_rating}/5 (${caregiver.total_reviews} ${Number(caregiver.total_reviews) === 1 ? 'review' : 'reviews'})`
+                              : 'No ratings yet'}
+                          </span>
+                        </div>
                         <p className={styles.caregiverDistrict}>
                           📍 {caregiver.district}
                         </p>

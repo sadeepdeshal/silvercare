@@ -3157,7 +3157,7 @@ const getCaregiversByElderDistrict = async (req, res) => {
     const elderInfo = elderResult.rows[0];
     console.log('Elder district:', elderInfo.district);
     
-    // Get caregivers from the same district who are available
+    // Get caregivers from the same district who are available with ratings
     const caregiversResult = await pool.query(`
       SELECT 
         c.caregiver_id,
@@ -3170,16 +3170,30 @@ const getCaregiversByElderDistrict = async (req, res) => {
         u.name as caregiver_name,
         u.email as caregiver_email,
         u.phone as caregiver_phone,
-        u.created_at
+        u.created_at,
+        COALESCE(ROUND(AVG(fc.rating)::numeric, 1), 0) as average_rating,
+        COUNT(fc.id) as total_reviews
       FROM caregiver c
       INNER JOIN "User" u ON c.user_id = u.user_id
+      LEFT JOIN feedback_caregiver fc ON c.caregiver_id = fc.caregiver_id
       WHERE c.district = $1 
         AND u.role = 'caregiver' 
         AND c.availability = 'available'
+      GROUP BY c.caregiver_id, c.user_id, c.availability, c.certifications, 
+               c.fixed_line, c.district, c.day_rate, u.name, u.email, u.phone, u.created_at
       ORDER BY u.created_at DESC
     `, [elderInfo.district]);
     
     console.log('Found caregivers:', caregiversResult.rows.length);
+    
+    // Log rating data for debugging
+    if (caregiversResult.rows.length > 0) {
+      console.log('Sample caregiver with rating data:', {
+        name: caregiversResult.rows[0].caregiver_name,
+        average_rating: caregiversResult.rows[0].average_rating,
+        total_reviews: caregiversResult.rows[0].total_reviews
+      });
+    }
     
     res.json({
       success: true,

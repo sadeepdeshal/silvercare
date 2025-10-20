@@ -613,6 +613,65 @@ export const caregiverApi = {
       console.error('API: Error cancelling caregiver booking:', error);
       throw error;
     }
+  },
+
+  // NEW: Submit caregiver rating for a booking
+  submitCaregiverRating: async (careRequestId, rating, feedback) => {
+    try {
+      console.log('API: Submitting rating for booking:', careRequestId, 'Rating:', rating);
+      const token = localStorage.getItem('silvercare_token');
+      
+      const response = await fetch(`${API_BASE}/bookings/${careRequestId}/rating`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ rating, feedback })
+      });
+      
+      const data = await response.json();
+      console.log('API: Submit rating response status:', response.status);
+      console.log('API: Submit rating response data:', data);
+      
+      if (!response.ok) {
+        console.error('API: Rating submission failed:', data.error);
+        throw new Error(data.error || 'Failed to submit rating');
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('API: Error submitting rating:', error);
+      throw error;
+    }
+  },
+
+  // NEW: Get rating for a booking
+  getBookingRating: async (careRequestId) => {
+    try {
+      console.log('API: Fetching rating for booking:', careRequestId);
+      const token = localStorage.getItem('silvercare_token');
+      
+      const response = await fetch(`${API_BASE}/bookings/${careRequestId}/rating`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      const data = await response.json();
+      console.log('API: Get rating response:', data);
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to fetch rating');
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('API: Error fetching rating:', error);
+      throw error;
+    }
   }
 
 };
