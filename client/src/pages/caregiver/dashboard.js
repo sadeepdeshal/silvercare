@@ -674,6 +674,41 @@ const CaregiverDashboard = () => {
               <span role="img" aria-label="Care Requests">📝</span> Care Requests
             </h2>
           </div>
+          
+          {/* Auto-cancel notification banner */}
+          {careRequests.length > 0 && (
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              padding: '14px 18px',
+              marginBottom: '16px',
+              background: 'linear-gradient(135deg, #fff8e1 0%, #ffe0b2 100%)',
+              borderLeft: '4px solid #ff9800',
+              borderRadius: '10px',
+              boxShadow: '0 2px 8px rgba(255, 152, 0, 0.12)'
+            }}>
+              <span style={{fontSize: '1.5rem', flexShrink: 0}}>⏰</span>
+              <div style={{display: 'flex', flexDirection: 'column', gap: '2px'}}>
+                <span style={{
+                  color: '#e65100',
+                  fontWeight: 700,
+                  fontSize: '0.95rem',
+                  letterSpacing: '0.3px'
+                }}>
+                  ⚡ Time-Sensitive Requests
+                </span>
+                <span style={{
+                  color: '#f57c00',
+                  fontSize: '0.875rem',
+                  lineHeight: '1.4'
+                }}>
+                  Please respond quickly! Unaccepted requests automatically expire after <strong>10 hours</strong> to ensure timely elder care.
+                </span>
+              </div>
+            </div>
+          )}
+          
           <div className={styles.careRequestsList}>
             {careRequests.length === 0 ? (
               <div className={styles.noCareRequests} style={{display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '48px 20px', background: 'linear-gradient(135deg, #f8fafc 0%, #eef2fa 100%)', borderRadius: '12px', boxShadow: '0 2px 8px rgba(102,126,234,0.08)'}}>
