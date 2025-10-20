@@ -464,9 +464,9 @@
 
 .filterTabButton {
   padding: 0.75rem 1.5rem;
-  border: 2px solid rgba(255, 255, 255, 0.5);
-  background: rgba(255, 255, 255, 0.15);
-  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.9);
+  color: #333;
   border-radius: 12px;
   cursor: pointer;
   font-weight: 600;
@@ -475,28 +475,29 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  text-shadow: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .filterTabButton:hover {
-  background: rgba(255, 255, 255, 0.25);
+  background: white;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  border-color: rgba(255, 255, 255, 0.7);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  border-color: white;
 }
 
 .activeFilterTab {
-  background: white !important;
-  color: #667eea !important;
-  border-color: white !important;
+  background: #667eea !important;
+  color: white !important;
+  border-color: #667eea !important;
   text-shadow: none !important;
-  box-shadow: 0 4px 15px rgba(255, 255, 255, 0.3) !important;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4) !important;
   font-weight: 700 !important;
 }
 
 .filterCount {
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(0, 0, 0, 0.1);
+  color: #333;
   padding: 0.3rem 0.7rem;
   border-radius: 50px;
   font-size: 0.9rem;
@@ -506,9 +507,9 @@
 }
 
 .activeFilterTab .filterCount {
-  background: #667eea;
+  background: rgba(255, 255, 255, 0.3);
   color: white;
-  box-shadow: 0 2px 6px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
 .searchFiltersRow {
