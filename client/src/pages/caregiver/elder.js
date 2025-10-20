@@ -5,6 +5,7 @@ import styles from "../../components/css/caregiver/elder.module.css";
 import CaregiverLayout from '../../components/CaregiverLayout';
 import caregiverApi from '../../services/caregiverApi2';
 import { useAuth } from '../../context/AuthContext';
+import DailyCareReportModal from '../../components/DailyCareReportModal';
 
 const ElderPage = () => {
   const params = useParams();
@@ -21,14 +22,8 @@ const ElderPage = () => {
   const [filterDate, setFilterDate] = useState('');
   const [loading, setLoading] = useState(true);
   const [showReportModal, setShowReportModal] = useState(false);
-  const [newReport, setNewReport] = useState({
-    notes: '',
-    mood: 'good',
-    health_status: '',
-    medications_given: '',
-    activities: '',
-    concerns: ''
-  });
+  const [selectedReportDay, setSelectedReportDay] = useState(null);
+  const [reportSubmissionLoading, setReportSubmissionLoading] = useState(false);
 
   // Comprehensive debug logging
   console.log('=== ElderPage Debug Information ===');
@@ -66,7 +61,7 @@ const ElderPage = () => {
       console.log('Fetching elder data for elderId:', elderId, 'caregiverId:', caregiverId);
       
       const [elderData, carelogsData] = await Promise.all([
-        caregiverApi.getElderDetails(elderId),
+        caregiverApi.getElderDetails(elderId, caregiverId),
         caregiverApi.getElderCarelogs(caregiverId, elderId)
       ]);
       
@@ -84,22 +79,39 @@ const ElderPage = () => {
     }
   };
 
-  const handleAddReport = async (e) => {
-    e.preventDefault();
+  const handleAddReport = async (reportData) => {
     try {
-      await caregiverApi.addElderReport(user.caregiver_id, elderId, newReport);
+      setReportSubmissionLoading(true);
+      
+      console.log('=== ELDER REPORT SUBMISSION ===');
+      console.log('Report data:', reportData);
+      console.log('Selected day:', selectedReportDay);
+      
+      const response = await caregiverApi.submitDailyReport(
+        user.caregiver_id,
+        elderId,
+        {
+          ...reportData,
+          date: selectedReportDay?.date
+        }
+      );
+      
+      console.log('Report submitted successfully:', response);
+      alert('Daily care report submitted successfully!');
+      
+      // Close modal
       setShowReportModal(false);
-      setNewReport({
-        notes: '',
-        mood: 'good',
-        health_status: '',
-        medications_given: '',
-        activities: '',
-        concerns: ''
-      });
-      fetchElderData(); // Refresh data
+      setSelectedReportDay(null);
+      
+      // Refresh elder data
+      fetchElderData();
+      
     } catch (error) {
-      console.error('Error adding report:', error);
+      console.error('Error submitting report:', error);
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to submit report. Please try again.';
+      alert(`Error: ${errorMessage}`);
+    } finally {
+      setReportSubmissionLoading(false);
     }
   };
 
@@ -224,21 +236,23 @@ const ElderPage = () => {
               }}
             >
               <span style={{ fontSize: '18px' }}>←</span>
-              Back to all elders
+              Back to All Elders
             </button>
           </div>
 
           {/* Header */}
           <div style={{ marginBottom: '30px' }}>
             <h1 style={{
-              fontSize: '2rem',
-              fontWeight: 700,
-              margin: 0,
+              marginbottom: '1rem',
+              padding: '1.5rem',
+              color: '#2c3e50',
+              fontsize: '2rem',
+              fontweight: 700,
+              margin: '0 0 0.5rem 0',
               background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-              fontFamily: "'Segoe UI', sans-serif"
+              backgroundClip:'text'
             }}>
               Elder Care Management
             </h1>
@@ -277,19 +291,7 @@ const ElderPage = () => {
                 position: 'relative',
                 zIndex: 1
               }}>
-                <div style={{
-                  width: '48px',
-                  height: '48px',
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                  borderRadius: '12px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '24px',
-                  boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)'
-                }}>
-                  👴
-                </div>
+                
                 <h2 style={{
                   fontSize: '1.5rem',
                   fontWeight: 700,
@@ -519,19 +521,7 @@ const ElderPage = () => {
                   position: 'relative',
                   zIndex: 1
                 }}>
-                  <div style={{
-                    width: '48px',
-                    height: '48px',
-                    background: 'linear-gradient(135deg, #fb923c 0%, #f97316 100%)',
-                    borderRadius: '12px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '24px',
-                    boxShadow: '0 4px 12px rgba(251, 146, 60, 0.3)'
-                  }}>
-                    👨‍👩‍👧‍👦
-                  </div>
+                  
                   <h2 style={{
                     fontSize: '1.5rem',
                     fontWeight: 700,
@@ -867,26 +857,33 @@ const ElderPage = () => {
                   const sriLankaToday = new Date(now.getTime() + (5.5 * 60 * 60 * 1000));
                   const todayStr = sriLankaToday.toISOString().split('T')[0];
                   
-                  // Get assignment date range
-                  const assignmentStart = elder.start_date ? new Date(elder.start_date) : null;
-                  const assignmentEnd = elder.end_date ? new Date(elder.end_date) : null;
+                  // Get all confirmed assignments for this caregiver
+                  const assignments = elder.assignments || [];
                   
-                  if (assignmentStart) assignmentStart.setHours(0, 0, 0, 0);
-                  if (assignmentEnd) assignmentEnd.setHours(0, 0, 0, 0);
+                  // Helper function to convert date to Sri Lanka timezone string (YYYY-MM-DD)
+                  const toSriLankaDateString = (dateInput) => {
+                    if (!dateInput) return null;
+                    const date = new Date(dateInput);
+                    // Add 5.5 hours for Sri Lanka timezone (UTC+5:30)
+                    const sriLankaDate = new Date(date.getTime() + (5.5 * 60 * 60 * 1000));
+                    return sriLankaDate.toISOString().split('T')[0];
+                  };
                   
+                  // Helper function to check if a date falls within any assignment period
+                  const isDateWithinAnyAssignment = (dateStr) => {
+                    if (assignments.length === 0) return false;
+                    
+                    return assignments.some(assignment => {
+                      const startStr = toSriLankaDateString(assignment.start_date);
+                      const endStr = toSriLankaDateString(assignment.end_date);
+                      return startStr && endStr && dateStr >= startStr && dateStr <= endStr;
+                    });
+                  };
+                  
+                  // Always show all days of the month
                   const calendarDays = [];
                   for (let day = 1; day <= daysInMonth; day++) {
-                    const targetDate = new Date(displayYear, displayMonth, day);
-                    targetDate.setHours(0, 0, 0, 0);
-                    
-                    // Only include dates within assignment period
-                    if (assignmentStart && assignmentEnd) {
-                      if (targetDate >= assignmentStart && targetDate <= assignmentEnd) {
-                        calendarDays.push(day);
-                      }
-                    } else {
-                      calendarDays.push(day);
-                    }
+                    calendarDays.push(day);
                   }
                   
                   return calendarDays.map((day, index) => {
@@ -904,32 +901,77 @@ const ElderPage = () => {
                     const isPast = dateStr < todayStr;
                     const hasReport = dayReport && dayReport.carelog_id;
                     
+                    // Check if this date is within ANY assignment period
+                    const isWithinAssignment = isDateWithinAnyAssignment(dateStr);
+                    
+                    // Can only upload report if: assigned day AND today
+                    const canUploadReport = isWithinAssignment && isToday;
+                    
+                    // Can view report if there's a report for this day (regardless of assignment)
+                    const canViewReport = hasReport;
+                    
+                    // Day is interactive if can upload OR can view
+                    const isInteractive = canUploadReport || canViewReport;
+                    
+                    // Show status badge for assigned dates OR dates with reports
+                    const showStatus = isWithinAssignment || hasReport;
+                    
                     return (
                       <div
                         key={index}
                         onClick={() => {
-                          if (hasReport) {
-                            // Show report details
-                            alert(`Report for ${dateStr}:\n\nMood: ${dayReport.mood}\n\nNotes: ${dayReport.notes}\n\nHealth: ${dayReport.health_status || 'N/A'}\n\nActivities: ${dayReport.activities || 'N/A'}\n\nConcerns: ${dayReport.concerns || 'N/A'}`);
-                          } else if (isToday) {
-                            // Open modal to submit report for today
-                            setShowReportModal(true);
-                          }
+                          // Don't allow interaction if not within assignment
+                          if (!isInteractive) return;
+                          
+                          const dayReport = filteredCarelogs.find(report => {
+                            const reportDate = getLocalDateString(report.date);
+                            return reportDate === dateStr;
+                          });
+                          
+                          const hasReport = dayReport && dayReport.carelog_id;
+                          
+                          // Prepare day data for modal
+                          const dayData = {
+                            date: dateStr,
+                            elder_name: elder.name,
+                            elder_id: elderId,
+                            hasReport: hasReport,
+                            existingReport: hasReport ? {
+                              notes: dayReport.notes,
+                              mood: dayReport.mood,
+                              health_status: dayReport.health_status,
+                              medications: dayReport.medications_given,
+                              activities: dayReport.activities,
+                              concerns: dayReport.concerns
+                            } : null,
+                            isReadOnly: !canUploadReport // Read-only if not today's assigned day
+                          };
+                          
+                          setSelectedReportDay(dayData);
+                          setShowReportModal(true);
                         }}
                         style={{
-                          background: isToday 
-                            ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' 
-                            : hasReport
-                              ? 'linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%)'
-                              : 'linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%)',
-                          border: isToday 
-                            ? '3px solid #764ba2' 
-                            : hasReport
-                              ? '2px solid #10b981' 
-                              : '2px solid #e5e7eb',
+                          background: hasReport
+                            ? 'linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%)' // Has report - green (priority)
+                            : !isWithinAssignment
+                              ? 'linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%)' // Not assigned - gray
+                              : canUploadReport 
+                                ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' // Today & assigned - purple
+                                : isPast
+                                  ? 'linear-gradient(135deg, #fee2e2 0%, #fecaca 100%)' // Assigned past missed - red
+                                  : 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)', // Assigned future - yellow
+                          border: hasReport
+                            ? '2px solid #10b981' // Has report - green border (priority)
+                            : !isWithinAssignment
+                              ? '2px solid #d1d5db'
+                              : canUploadReport 
+                                ? '3px solid #764ba2' 
+                                : isPast
+                                  ? '2px solid #ef4444'
+                                  : '2px solid #f59e0b',
                           borderRadius: '20px',
                           padding: '20px 16px',
-                          cursor: (hasReport || isToday) ? 'pointer' : 'default',
+                          cursor: isInteractive ? 'pointer' : 'not-allowed',
                           transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
                           minHeight: '120px',
                           display: 'flex',
@@ -938,32 +980,40 @@ const ElderPage = () => {
                           justifyContent: 'center',
                           textAlign: 'center',
                           position: 'relative',
-                          boxShadow: isToday 
-                            ? '0 8px 24px rgba(118, 75, 162, 0.35)' 
-                            : hasReport
-                              ? '0 4px 12px rgba(16, 185, 129, 0.15)'
-                              : '0 2px 6px rgba(0, 0, 0, 0.04)',
-                          opacity: (hasReport || isToday) ? 1 : 0.5,
+                          boxShadow: hasReport
+                            ? '0 4px 12px rgba(16, 185, 129, 0.15)' // Has report - green shadow (priority)
+                            : !isWithinAssignment
+                              ? '0 1px 3px rgba(0, 0, 0, 0.05)'
+                              : canUploadReport 
+                                ? '0 8px 24px rgba(118, 75, 162, 0.35)' 
+                                : isPast
+                                  ? '0 4px 12px rgba(239, 68, 68, 0.15)'
+                                  : '0 2px 8px rgba(245, 158, 11, 0.1)',
+                          opacity: hasReport || isWithinAssignment ? 1 : 0.3, // Full opacity if has report OR assigned
                           transform: 'scale(1)'
                         }}
                         onMouseEnter={(e) => {
-                          if (hasReport || isToday) {
+                          if (isInteractive) {
                             e.currentTarget.style.transform = 'scale(1.05) translateY(-4px)';
-                            e.currentTarget.style.boxShadow = isToday 
-                              ? '0 12px 32px rgba(118, 75, 162, 0.45)' 
-                              : '0 12px 28px rgba(16, 185, 129, 0.25)';
+                            e.currentTarget.style.boxShadow = hasReport
+                              ? '0 12px 28px rgba(16, 185, 129, 0.25)'
+                              : canUploadReport 
+                                ? '0 12px 32px rgba(118, 75, 162, 0.45)' 
+                                : '0 12px 28px rgba(16, 185, 129, 0.25)';
                           }
                         }}
                         onMouseLeave={(e) => {
-                          if (hasReport || isToday) {
+                          if (isInteractive) {
                             e.currentTarget.style.transform = 'scale(1) translateY(0px)';
-                            e.currentTarget.style.boxShadow = isToday 
-                              ? '0 8px 24px rgba(118, 75, 162, 0.35)' 
-                              : '0 4px 12px rgba(16, 185, 129, 0.15)';
+                            e.currentTarget.style.boxShadow = hasReport
+                              ? '0 4px 12px rgba(16, 185, 129, 0.15)'
+                              : canUploadReport 
+                                ? '0 8px 24px rgba(118, 75, 162, 0.35)' 
+                                : '0 4px 12px rgba(16, 185, 129, 0.15)';
                           }
                         }}
                       >
-                        {isToday && (
+                        {canUploadReport && (
                           <div style={{
                             position: 'absolute',
                             top: '10px',
@@ -984,7 +1034,15 @@ const ElderPage = () => {
                         <div style={{
                           fontSize: '13px', 
                           fontWeight: 700, 
-                          color: isToday ? 'rgba(255, 255, 255, 0.9)' : '#9ca3af', 
+                          color: hasReport
+                            ? '#065f46' // Green for reports (priority)
+                            : !isWithinAssignment 
+                              ? '#9ca3af' 
+                              : canUploadReport 
+                                ? 'rgba(255, 255, 255, 0.9)' 
+                                : isPast 
+                                  ? '#991b1b' 
+                                  : '#92400e', 
                           marginBottom: '10px',
                           textTransform: 'uppercase',
                           letterSpacing: '1px'
@@ -995,14 +1053,22 @@ const ElderPage = () => {
                         <div style={{
                           fontSize: '32px', 
                           fontWeight: 800, 
-                          color: isToday ? '#ffffff' : hasReport ? '#10b981' : '#9ca3af',
+                          color: hasReport
+                            ? '#10b981' // Green for reports (priority)
+                            : !isWithinAssignment 
+                              ? '#9ca3af' 
+                              : canUploadReport 
+                                ? '#ffffff' 
+                                : isPast 
+                                  ? '#ef4444' 
+                                  : '#f59e0b',
                           marginBottom: '12px',
-                          textShadow: isToday ? '0 2px 4px rgba(0, 0, 0, 0.1)' : 'none'
+                          textShadow: canUploadReport ? '0 2px 4px rgba(0, 0, 0, 0.1)' : 'none'
                         }}>
                           {day}
                         </div>
                         
-                        {hasReport && (
+                        {showStatus && hasReport && (
                           <div style={{
                             fontSize: '10px', 
                             fontWeight: 700, 
@@ -1025,7 +1091,7 @@ const ElderPage = () => {
                           </div>
                         )}
                         
-                        {!hasReport && isToday && (
+                        {showStatus && canUploadReport && !hasReport && (
                           <div style={{
                             fontSize: '10px', 
                             fontWeight: 700, 
@@ -1046,7 +1112,7 @@ const ElderPage = () => {
                           </div>
                         )}
                         
-                        {!hasReport && !isToday && isPast && (
+                        {showStatus && !hasReport && isPast && !isToday && (
                           <div style={{
                             fontSize: '10px', 
                             fontWeight: 700, 
@@ -1066,6 +1132,27 @@ const ElderPage = () => {
                             Missed
                           </div>
                         )}
+                        
+                        {showStatus && !hasReport && !isPast && !isToday && (
+                          <div style={{
+                            fontSize: '10px', 
+                            fontWeight: 700, 
+                            color: '#92400e',
+                            background: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)',
+                            padding: '7px 14px',
+                            borderRadius: '20px',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.8px',
+                            border: '2px solid #f59e0b',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '5px',
+                            boxShadow: '0 2px 8px rgba(245, 158, 11, 0.2)'
+                          }}>
+                            <span style={{fontSize: '12px'}}>⏱</span>
+                            Upcoming
+                          </div>
+                        )}
                       </div>
                     );
                   });
@@ -1075,101 +1162,19 @@ const ElderPage = () => {
           </div>
 
           {/* Add Report Modal */}
-          {showReportModal && (
-            <div className={styles.modalOverlay} onClick={() => setShowReportModal(false)}>
-              <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-                <div className={styles.modalHeader}>
-                  <h2>Add Carelog for {elder.name}</h2>
-                  <button 
-                    className={styles.closeButton}
-                    onClick={() => setShowReportModal(false)}
-                  >
-                    ✕
-                  </button>
-                </div>
-                
-                <form onSubmit={handleAddReport} className={styles.modalForm}>
-                  <div className={styles.formRow}>
-                    <div className={styles.formGroup}>
-                      <label>Elder's Mood</label>
-                      <select 
-                        value={newReport.mood}
-                        onChange={(e) => setNewReport({...newReport, mood: e.target.value})}
-                      >
-                        <option value="good">😊 Good</option>
-                        <option value="neutral">😐 Neutral</option>
-                        <option value="bad">😞 Bad</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className={styles.formGroup}>
-                    <label>General Care Notes *</label>
-                    <textarea 
-                      value={newReport.notes}
-                      onChange={(e) => setNewReport({...newReport, notes: e.target.value})}
-                      placeholder="Describe the daily care activities, observations, and general notes..."
-                      rows={3}
-                      required
-                    />
-                  </div>
-
-                  <div className={styles.formGroup}>
-                    <label>Health Status</label>
-                    <textarea 
-                      value={newReport.health_status}
-                      onChange={(e) => setNewReport({...newReport, health_status: e.target.value})}
-                      placeholder="Note any health observations, vital signs, appetite, sleep patterns..."
-                      rows={2}
-                    />
-                  </div>
-
-                  <div className={styles.formGroup}>
-                    <label>Medications Given</label>
-                    <textarea 
-                      value={newReport.medications_given}
-                      onChange={(e) => setNewReport({...newReport, medications_given: e.target.value})}
-                      placeholder="List medications administered, times, and any reactions..."
-                      rows={2}
-                    />
-                  </div>
-
-                  <div className={styles.formGroup}>
-                    <label>Activities & Exercise</label>
-                    <textarea 
-                      value={newReport.activities}
-                      onChange={(e) => setNewReport({...newReport, activities: e.target.value})}
-                      placeholder="Physical activities, exercises, social interactions, hobbies..."
-                      rows={2}
-                    />
-                  </div>
-
-                  <div className={styles.formGroup}>
-                    <label>Concerns or Issues</label>
-                    <textarea 
-                      value={newReport.concerns}
-                      onChange={(e) => setNewReport({...newReport, concerns: e.target.value})}
-                      placeholder="Any concerns, incidents, or issues that need family attention..."
-                      rows={2}
-                    />
-                  </div>
-
-                  <div className={styles.modalActions}>
-                    <button 
-                      type="button" 
-                      onClick={() => setShowReportModal(false)}
-                      className={styles.cancelButton}
-                    >
-                      Cancel
-                    </button>
-                    <button type="submit" className={styles.submitButton}>
-                      Submit Report
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          )}
+          <DailyCareReportModal
+            isOpen={showReportModal}
+            onClose={() => {
+              setShowReportModal(false);
+              setSelectedReportDay(null);
+            }}
+            onSubmit={handleAddReport}
+            elderName={elder?.name}
+            reportDate={selectedReportDay?.date}
+            existingReport={selectedReportDay?.existingReport}
+            isSubmitting={reportSubmissionLoading}
+            isReadOnly={selectedReportDay?.isReadOnly || false}
+          />
         </div>
       </CaregiverLayout>
     </>

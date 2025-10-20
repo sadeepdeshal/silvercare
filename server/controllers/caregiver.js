@@ -574,10 +574,12 @@ const addCarelog = async (req, res) => {
 // Get elder details with family information
 const getElderDetails = async (req, res) => {
   const { elderId } = req.params;
-  console.log('Backend: getElderDetails called with elderId:', elderId);
+  // Get caregiver_id from authenticated user or query params
+  const caregiverId = req.user?.caregiver_id || req.query.caregiver_id;
   
   try {
-    const query = `
+    // First, get elder and family details
+    const elderQuery = `
       SELECT 
         e.elder_id,
         e.name,
@@ -598,70 +600,59 @@ const getElderDetails = async (req, res) => {
         u.email as family_email,
         u.phone as family_phone,
         fm.address as family_address,
-        fm.phone_fixed as family_phone_fixed,
-        cr.start_date,
-        cr.end_date,
-        cr.status as assignment_status
+        fm.phone_fixed as family_phone_fixed
       FROM elder e
       JOIN familymember fm ON e.family_id = fm.family_id
       JOIN "User" u ON fm.user_id = u.user_id
-      LEFT JOIN carerequest cr ON e.elder_id = cr.elder_id
-      WHERE e.elder_id = $1
-      ORDER BY cr.start_date DESC
-      LIMIT 1;
+      WHERE e.elder_id = $1;
     `;
     
-    console.log('Backend: Executing query:', query);
-    console.log('Backend: Query parameters:', [elderId]);
+    const elderResult = await pool.query(elderQuery, [elderId]);
     
-    const result = await pool.query(query, [elderId]);
-    console.log('Backend: Query result rows count:', result.rows.length);
-    
-    if (result.rows.length === 0) {
-      console.log('Backend: No elder found with id:', elderId);
+    if (elderResult.rows.length === 0) {
       return res.status(404).json({ error: 'Elder not found' });
     }
     
-    const data = result.rows[0];
-    console.log('Backend: Raw data from DB:', data);
+    const elderData = elderResult.rows[0];
     
-    const elder = {
-      elder_id: data.elder_id,
-      name: data.name,
-      dob: data.dob,
-      age: data.age,
-      gender: data.gender,
-      contact: data.contact,
-      address: data.address,
-      nic: data.nic,
-      medical_conditions: data.medical_conditions,
-      profile_photo: data.profile_photo,
-      email: data.email,
-      district: data.district,
-      created_at: data.created_at,
-      start_date: data.start_date,
-      end_date: data.end_date,
-      assignment_status: data.assignment_status
+    // Then, get ALL confirmed assignments for this caregiver (if caregiverId provided)
+    let assignments = [];
+    if (caregiverId) {
+      const assignmentQuery = `
+        SELECT start_date, end_date, status
+        FROM carerequest
+        WHERE elder_id = $1 AND caregiver_id = $2 AND status = 'confirmed'
+        ORDER BY start_date ASC;
+      `;
+      const assignmentResult = await pool.query(assignmentQuery, [elderId, caregiverId]);
+      assignments = assignmentResult.rows;
+    }
+    
+    // Return elder data with assignments array
+    const response = {
+      elder: {
+        ...elderData,
+        assignments: assignments, // Array of all confirmed assignments
+        // For backward compatibility, include first assignment dates
+        start_date: assignments.length > 0 ? assignments[0].start_date : null,
+        end_date: assignments.length > 0 ? assignments[assignments.length - 1].end_date : null,
+        assignment_status: assignments.length > 0 ? 'confirmed' : null
+      },
+      familyMember: {
+        family_id: elderData.family_id,
+        user_id: elderData.family_user_id,
+        name: elderData.family_name,
+        email: elderData.family_email,
+        phone: elderData.family_phone,
+        address: elderData.family_address,
+        phone_fixed: elderData.family_phone_fixed
+      }
     };
     
-    const familyMember = {
-      family_id: data.family_id,
-      user_id: data.family_user_id,
-      name: data.family_name,
-      email: data.family_email,
-      phone: data.family_phone,
-      address: data.family_address,
-      phone_fixed: data.family_phone_fixed
-    };
-    
-    console.log('Backend: Formatted elder:', elder);
-    console.log('Backend: Formatted familyMember:', familyMember);
-    
-    res.status(200).json({ elder, familyMember });
+    res.json(response);
   } catch (error) {
-    console.error('Backend: Error fetching elder details:', error);
-    console.error('Backend: Error stack:', error.stack);
-    res.status(500).json({ error: 'Failed to fetch elder details', details: error.message });
+    console.error('Error in getElderDetails:', error);
+    res.status(500).json({ error: 'Server error' });
   }
 };
 

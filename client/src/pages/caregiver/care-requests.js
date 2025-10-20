@@ -225,7 +225,6 @@ useEffect(() => {
           <div className={styles.header}>
             
             <h1>Care Requests</h1>
-            <p>Manage and view all your care requests</p>
           </div>
 
           {/* Search Section */}
@@ -237,11 +236,9 @@ useEffect(() => {
               onChange={(e) => setSearchTerm(e.target.value)}
               className={styles.searchInput}
             />
-            {searchTerm && (
-              <button onClick={handleClearSearch} className={styles.clearSearchButton}>
-                Clear Search
-              </button>
-            )}
+            <button onClick={handleClearSearch} className={styles.clearSearchButton}>
+              Clear Filters
+            </button>
           </div>
 
           {/* Tabs */}

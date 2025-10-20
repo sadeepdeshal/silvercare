@@ -270,6 +270,10 @@ const Carelogs = () => {
     }
   };
 
+  const handleBack = () => {
+    navigate('/caregiver/dashboard');
+  };
+
   if (loading) {
     return (
       <>
@@ -301,16 +305,42 @@ const Carelogs = () => {
       <Navbar />
       <CaregiverLayout>
         <div style={{ padding: '30px', minHeight: '100vh', backgroundColor: '#f5f7fa', fontFamily: "'Segoe UI', sans-serif" }}>
+          {/* Back Button */}
+          <button 
+            onClick={handleBack}
+            style={{
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              color: 'white',
+              border: 'none',
+              padding: '12px 28px',
+              borderRadius: '12px',
+              cursor: 'pointer',
+              fontSize: '1rem',
+              fontWeight: 600,
+              transition: 'all 0.3s ease',
+              boxShadow: '0 4px 15px rgba(102, 126, 234, 0.18)',
+              marginBottom: '1.5rem',
+              marginTop: '0.5rem',
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.transform = 'translateY(-2px)';
+              e.target.style.boxShadow = '0 6px 20px rgba(102, 126, 234, 0.35)';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.transform = 'translateY(0)';
+              e.target.style.boxShadow = '0 4px 15px rgba(102, 126, 234, 0.18)';
+            }}
+          >
+            ← Back to Dashboard
+          </button>
+
           {/* Header */}
           <div style={{
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
             marginBottom: '32px',
-            background: 'white',
             padding: '20px 28px',
-            borderRadius: '16px',
-            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.05)'
           }}>
             <h1 style={{
               color: '#2c3e50',
@@ -406,7 +436,7 @@ const Carelogs = () => {
                 scrollbarColor: '#764ba2 rgba(255, 255, 255, 0.3)'
               }}
             >
-              {Array.from({ length: 26 }, (_, i) => 2015 + i).map(year => (
+              {Array.from({ length: 28 }, (_, i) => 2023 + i).map(year => (
                 <option key={year} value={year}>
                   {year}
                 </option>
