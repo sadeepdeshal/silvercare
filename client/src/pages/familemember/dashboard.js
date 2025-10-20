@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { elderApi } from '../../services/elderApi';
 import { caregiverApi } from '../../services/caregiverApi';
+import { appointmentApi } from '../../services/appointmentApi';
 import Navbar from '../../components/navbar';
 import styles from '../../components/css/familymember/dashboard.module.css';
 import FamilyMemberLayout from '../../components/FamilyMemberLayout';
@@ -14,6 +15,10 @@ const FamilyMemberDashboard = () => {
   const [elders, setElders] = useState([]);
   const [appointments, setAppointments] = useState([]);
   const [appointmentCount, setAppointmentCount] = useState(0);
+  const [historyAppointments, setHistoryAppointments] = useState([]);
+  const [historyLoading, setHistoryLoading] = useState(true);
+  const [historyError, setHistoryError] = useState(null);
+  const [historyFilter, setHistoryFilter] = useState('all'); // 'all' | 'cancelled'
   const [activeCaregiverCount, setActiveCaregiverCount] = useState(0);
   const [dataLoading, setDataLoading] = useState(true);
   const [appointmentsLoading, setAppointmentsLoading] = useState(true);
@@ -132,6 +137,34 @@ const FamilyMemberDashboard = () => {
     }
   }, [currentUser]);
 
+  // Fetch appointment history (completed + cancelled) across all elders under this family member
+  useEffect(() => {
+    const fetchHistory = async () => {
+      if (!currentUser?.user_id) return;
+      try {
+        setHistoryLoading(true);
+        setHistoryError(null);
+        const response = await appointmentApi.getAppointmentHistory(currentUser.user_id, {
+          status: historyFilter === 'all' ? undefined : 'cancelled'
+        });
+        if (response.success) {
+          setHistoryAppointments(response.appointments || []);
+        } else {
+          setHistoryAppointments([]);
+        }
+      } catch (err) {
+        console.error('Error fetching appointment history:', err);
+        setHistoryError('Failed to load appointment history');
+        setHistoryAppointments([]);
+      } finally {
+        setHistoryLoading(false);
+      }
+    };
+    if (currentUser && currentUser.role === 'family_member') {
+      fetchHistory();
+    }
+  }, [currentUser, historyFilter]);
+
   const handleElderRegistration = () => {
     navigate('/family-member/elder-signup');
   };
@@ -158,6 +191,10 @@ const FamilyMemberDashboard = () => {
 
   const handleViewAllAppointments = () => {
     navigate('/family-member/appointments'); // This will now navigate to the new appointments page
+  };
+
+  const handleViewFullHistory = () => {
+    navigate('/family-member/appointment-history');
   };
 
   const handleAppointmentDetails = (appointmentId) => {
@@ -657,6 +694,113 @@ const FamilyMemberDashboard = () => {
                   onClick={handleViewAllAppointments}
                 >
                   View All Appointments ({appointmentCount})
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Appointment History Section - Right Half (below upcoming) */}
+          <div className={styles.appointmentsSection}>
+            <div className={styles.appointmentsSectionHeader}>
+              <h2 className={styles.sectionTitle}>Appointment History</h2>
+              <p className={styles.appointmentsSubtitle}>
+                View completed and cancelled appointments across all elders
+              </p>
+            </div>
+
+            {/* Simple filter for All vs Cancelled */}
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'center', marginBottom: 12 }}>
+              <button
+                className={styles.viewAllAppointmentsButton}
+                style={{
+                  background: historyFilter === 'all' ? 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)' : '',
+                  color: historyFilter === 'all' ? '#fff' : ''
+                }}
+                onClick={() => setHistoryFilter('all')}
+              >
+                All History
+              </button>
+              <button
+                className={styles.viewAllAppointmentsButton}
+                style={{
+                  background: historyFilter === 'cancelled' ? 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)' : '',
+                  color: historyFilter === 'cancelled' ? '#fff' : ''
+                }}
+                onClick={() => setHistoryFilter('cancelled')}
+              >
+                Cancelled Only
+              </button>
+            </div>
+
+            <div className={styles.appointmentsContainer}>
+              {historyLoading ? (
+                <div className={styles.loadingAppointments}>
+                  <div className={styles.loadingSpinner}></div>
+                  <p>Loading appointment history...</p>
+                </div>
+              ) : historyError ? (
+                <div className={styles.noAppointments}>
+                  <div className={styles.noAppointmentsIcon}>📋</div>
+                  <p className={styles.noAppointmentsText}>{historyError}</p>
+                </div>
+              ) : historyAppointments.length === 0 ? (
+                <div className={styles.noAppointments}>
+                  <div className={styles.noAppointmentsIcon}>📋</div>
+                  <p className={styles.noAppointmentsText}>
+                    {historyFilter === 'all' ? 'No completed or cancelled appointments found.' : 'No cancelled appointments found.'}
+                  </p>
+                </div>
+              ) : (
+                <div className={styles.appointmentsList}>
+                  {historyAppointments.slice(0, 5).map((appointment) => (
+                    <div 
+                      key={appointment.appointment_id} 
+                      className={styles.appointmentItem}
+                      onClick={() => handleAppointmentDetails(appointment.appointment_id)}
+                    >
+                      <div className={styles.appointmentContent}>
+                        <div className={styles.appointmentLeft}>
+                          <div className={styles.appointmentIcon} style={{ background: appointment.status === 'cancelled' ? 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)' : undefined }}>
+                            {getAppointmentTypeIcon(appointment.appointment_type)}
+                          </div>
+                          <div className={styles.appointmentInfo}>
+                            <h3 className={styles.appointmentTitle}>
+                              {appointment.specialization || 'Medical Appointment'}
+                            </h3>
+                            <div className={styles.appointmentDetails}>
+                              <span className={styles.appointmentDetail}>👤 {appointment.elder_name}</span>
+                              <span className={styles.appointmentDetail}>👨‍⚕️ {appointment.doctor_name}</span>
+                              <span className={styles.appointmentDetail}>📅 {formatAppointmentDate(appointment.date_time)}</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className={styles.appointmentRight}>
+                          <div 
+                            className={styles.appointmentStatus}
+                            style={{ backgroundColor: getStatusColor(appointment.status), color: '#fff' }}
+                          >
+                            {appointment.status?.charAt(0).toUpperCase() + appointment.status?.slice(1)}
+                          </div>
+                          <div className={styles.appointmentArrow}>
+                            <span>→</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className={styles.appointmentDivider}></div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* View full history */}
+            {historyAppointments.length > 0 && (
+              <div className={styles.viewAllAppointments}>
+                <button 
+                  className={styles.viewAllAppointmentsButton}
+                  onClick={handleViewFullHistory}
+                >
+                  View Full History
                 </button>
               </div>
             )}
