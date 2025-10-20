@@ -88,3 +88,59 @@ const AppointmentDetails = () => {
       fetchSessionDetails();
     }
   }, [counselorId, statusFilter, currentPage, limit]); // Removed searchQuery from dependency
+
+  const fetchSessionDetails = async () => {
+    try {
+      const storedUser = localStorage.getItem('silvercare_user');
+      const token = storedUser ? JSON.parse(storedUser).token : null;
+      const offset = (currentPage - 1) * limit;
+      const url = `http://localhost:5000/api/healthprofessional/counselors/${counselorId}/sessions?status=${statusFilter}&limit=${limit}&offset=${offset}`;
+      const response = await axios.get(url, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      if (!response.data.success) {
+        throw new Error(response.data.error || 'Failed to fetch session details');
+      }
+
+      // Filter sessions to ensure they match the logged-in user's counselorId (optional safety check)
+      const filteredSessions = Array.isArray(response.data.sessions) 
+        ? response.data.sessions.filter(session => session.counselor_id.toString() === counselorId)
+        : [];
+      setAllSessionData(filteredSessions); // Store all sessions
+      setSessionData(filteredSessions.slice(offset, offset + limit)); // Set initial filtered data
+      setPagination(response.data.pagination || { total: response.data.sessions.length || 0, limit, offset, hasMore: (offset + limit) < (response.data.sessions.length || 0) });
+      setLoading(false);
+    } catch (err) {
+      console.error('Error fetching session details:', err);
+      setErrorMessage(err.message || 'Failed to load session details');
+      setLoading(false);
+    }
+  };
+
+  const toggleRow = (index) => {
+    setExpandedRow(expandedRow === index ? null : index);
+  };
+
+  const handleStatusFilterChange = (e) => {
+    setStatusFilter(e.target.value);
+    setCurrentPage(1); // Reset to first page on filter change
+  };
+
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+    const offset = (newPage - 1) * limit;
+    setSessionData(allSessionData.slice(offset, offset + limit)); // Update displayed data based on page
+  };
+
+  const handleSearchChange = (e) => {
+    const query = e.target.value.toLowerCase();
+    setSearchQuery(query);
+    setCurrentPage(1); // Reset to first page on search
+    const offset = 0;
+    const filteredData = allSessionData.filter(session =>
+      session.elder_name.toLowerCase().includes(query) || session.session_id.toString().includes(query)
+    );
+    setSessionData(filteredData.slice(offset, offset + limit)); // Filter and paginate
+    setPagination({ total: filteredData.length, limit, offset, hasMore: (offset + limit) < filteredData.length });
+  };
