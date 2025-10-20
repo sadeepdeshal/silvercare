@@ -362,12 +362,14 @@ const getElderDashboardStats = async (req, res) => {
       upcomingCampaignsCount = 0;
     }
 
-    // Get active caregivers count (caregivers who have recent logs)
-    const activeCaregiversResult = await pool.query(
+    // Get upcoming care visits count
+    const upcomingCareVisitsResult = await pool.query(
       `
-      SELECT COUNT(DISTINCT caregiver_id) as count
-      FROM carelog 
+      SELECT COUNT(*) as count
+      FROM carerequest 
       WHERE elder_id = $1
+      AND status IN ('approved', 'completed', 'confirmed')
+      AND end_date >= CURRENT_DATE
     `,
       [elderId]
     );
@@ -377,7 +379,7 @@ const getElderDashboardStats = async (req, res) => {
         parseInt(upcomingAppointmentsResult.rows[0].count) || 0,
       upcomingSessions: parseInt(upcomingSessionsResult.rows[0].count) || 0,
       upcomingCampaigns: upcomingCampaignsCount,
-      assignedCaregivers: parseInt(activeCaregiversResult.rows[0].count) || 0,
+      upcomingCareVisits: parseInt(upcomingCareVisitsResult.rows[0].count) || 0,
     };
 
     console.log("Dashboard stats:", stats);
