@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import styles from './css/doctor_sidebar.module.css';
 
 const HealthProfessionalSidebar = ({ onToggleCollapse }) => {
-  const [activeMenuItem, setActiveMenuItem] = useState('dashboard');
+  const [activeMenuItem, setActiveMenuItem] = useState('dashboard'); // Default to 'dashboard'
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [expandedMenus, setExpandedMenus] = useState({});
   const navigate = useNavigate();
+  const location = useLocation(); // To track current path
 
   const handleToggleSidebar = () => {
     setSidebarCollapsed(!sidebarCollapsed);
@@ -14,40 +14,24 @@ const HealthProfessionalSidebar = ({ onToggleCollapse }) => {
   };
 
   const handleMenuItemClick = (item) => {
-    if (item.subItems) {
-      // Toggle submenu
-      setExpandedMenus(prev => ({
-        ...prev,
-        [item.key]: !prev[item.key]
-      }));
-    } else {
-      setActiveMenuItem(item.key);
-      navigate(item.path);
-    }
-  };
-
-  const handleSubMenuItemClick = (parentKey, subItem) => {
-    setActiveMenuItem(subItem.key);
-    navigate(subItem.path);
+    setActiveMenuItem(item.key); // Update active item when clicked
+    navigate(item.path); // Navigate to the corresponding path
   };
 
   const sidebarItems = [
     { key: 'dashboard', label: 'Dashboard', icon: '🏠', path: '/healthprofessional/dashboard' },
-    { key: 'profile', label: 'Profile', icon: '🧑‍⚕️', path: '/healthprofessional/profile' },
+    { key: 'profile', label: 'Profile', icon: '🧑', path: '/healthprofessional/profile' },
     { key: 'elders', label: 'Patients', icon: '👴', path: '/healthprofessional/elders' },
-    { key: 'sessions', label: 'Sessions', icon: '🗓️', path: '/healthprofessional/sessions' },
-    { key: 'consultations', label: 'Consultations', icon: '💬', path: '/healthprofessional/consultations' },
-    { key: 'reports', label: 'Reports', icon: '📊', path: '/healthprofessional/reports' },
-    { 
-      key: 'messages', 
-      label: 'Messages', 
-      icon: '✉️',
-      subItems: [
-        { key: 'elder-chat', label: 'Elder Chat', icon: '👴', path: '/healthprofessional/messages' },
-        { key: 'family-chat', label: 'Family Chat', icon: '👨‍👩‍👧‍👦', path: '/healthprofessional/family-messages' },
-      ]
-    },
+    { key: 'sessions', label: 'Appointments', icon: '🗓️', path: '/healthprofessional/sessions' },
+    { key: 'messages', label: 'Messages', icon: '✉️', path: '/healthprofessional/messages' },
   ];
+
+  // Sync activeMenuItem with current URL
+  useEffect(() => {
+    const currentPath = location.pathname;
+    const activeItem = sidebarItems.find(item => item.path === currentPath);
+    if (activeItem) setActiveMenuItem(activeItem.key);
+  }, [location.pathname, sidebarItems]);
 
   return (
     <div className={`${styles.sidebar} ${sidebarCollapsed ? styles.collapsed : ''}`}>
@@ -82,35 +66,8 @@ const HealthProfessionalSidebar = ({ onToggleCollapse }) => {
                 title={sidebarCollapsed ? item.label : ''}
               >
                 <span className={styles.menuIcon}>{item.icon}</span>
-                {!sidebarCollapsed && (
-                  <>
-                    <span className={styles.menuLabel}>{item.label}</span>
-                    {item.subItems && (
-                      <span className={styles.submenuArrow}>
-                        {expandedMenus[item.key] ? '▼' : '▶'}
-                      </span>
-                    )}
-                  </>
-                )}
+                {!sidebarCollapsed && <span className={styles.menuLabel}>{item.label}</span>}
               </div>
-              
-              {/* Submenu */}
-              {item.subItems && expandedMenus[item.key] && !sidebarCollapsed && (
-                <ul className={styles.submenu}>
-                  {item.subItems.map((subItem) => (
-                    <li key={subItem.key} className={styles.submenuItem}>
-                      <div
-                        className={`${styles.submenuLink} ${activeMenuItem === subItem.key ? styles.active : ''}`}
-                        onClick={() => handleSubMenuItemClick(item.key, subItem)}
-                        title={subItem.label}
-                      >
-                        <span className={styles.menuIcon}>{subItem.icon}</span>
-                        <span className={styles.submenuLabel}>{subItem.label}</span>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              )}
             </li>
           ))}
         </ul>
@@ -119,4 +76,4 @@ const HealthProfessionalSidebar = ({ onToggleCollapse }) => {
   );
 };
 
-export default HealthProfessionalSidebar; 
+export default HealthProfessionalSidebar;

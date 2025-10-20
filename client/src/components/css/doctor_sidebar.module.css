@@ -1,25 +1,23 @@
-/*testing*/
 
-/* Doctor Sidebar Styles */ 
+/* Doctor Sidebar Styles */
 .sidebar {
-  width: 250px;
-  height: 100vh;
-  background: #4C4DDC;
-  color: white;
   position: fixed;
   left: 0;
-  top: 10;
-  z-index: 1000;
-  display: flex;
-  flex-direction: column;
-  transition: width 0.3s ease;
+  top: 0;
+  height: 100vh;
+  width: 280px;
+  background: #4C4DDC;
   box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1000;
   overflow-y: auto;
   overflow-x: hidden;
+  border-right: 1px solid #34495e;
 }
 
 .sidebar.collapsed {
   width: 70px;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
 }
 
 .sidebarHeader {
@@ -27,9 +25,8 @@
   align-items: center;
   justify-content: space-between;
   padding: 20px 15px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  min-height: 70px;
-  background: none;
+  border-bottom: 1px solid #34495e;
+  background: rgba(0, 0, 0, 0.1);
 }
 
 .logo {
@@ -39,66 +36,99 @@
 }
 
 .logoText {
-  font-size: 20px;
-  font-weight: bold;
-  color: #fff;
-  white-space: nowrap;
+  font-size: 18px;
+  font-weight: 700;
+  color: #ecf0f1;
+  letter-spacing: 0.5px;
 }
 
 .toggleButton {
   background: rgba(255, 255, 255, 0.1);
   border: none;
-  color: white;
-  padding: 4px 8px 8px 8px;
-  border-radius: 4px;
+  color: #ecf0f1;
+  padding: 8px 10px;
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 12px;
-  transition: background-color 0.3s ease;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  font-weight: bold;
+  min-width: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
 }
 
 .toggleButton:hover {
   background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.toggleButton::after {
+  content: 'Ctrl+B';
+  position: absolute;
+  top: -25px;
+  right: 0;
+  font-size: 10px;
+  color: #bdc3c7;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  font-weight: normal;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 2px 4px;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+
+.toggleButton:hover::after {
+  opacity: 1;
 }
 
 .userInfo {
-  padding: 0px 15px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   display: flex;
   align-items: center;
   gap: 12px;
+  padding: 20px 15px;
+  border-bottom: 1px solid #34495e;
+  background: rgba(0, 0, 0, 0.05);
 }
 
 .userAvatar {
-  width: 40px;
-  height: 40px;
-  background: rgba(255, 255, 255, 0.2);
+  width: 45px;
+  height: 45px;
   border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 18px;
+  color: white;
+  border: 2px solid #ecf0f1;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .userDetails {
   display: flex;
   flex-direction: column;
+  gap: 2px;
 }
 
 .userName {
   font-weight: 600;
-  font-size: 20px;
-  color: #fff;
+  color: #ecf0f1;
+  font-size: 14px;
 }
 
 .userRole {
   font-size: 12px;
-  opacity: 0.8;
-  color: #fff;
+  color: #bdc3c7;
+  font-weight: 500;
 }
 
 .navigation {
-  flex: 1;
-  padding: 20px 15px;
+  padding: 10px 0;
 }
 
 .menuList {
@@ -108,68 +138,85 @@
 }
 
 .menuItem {
-  margin-bottom: 15px;
+  margin-bottom: 2px;
 }
 
 .menuLink {
   display: flex;
   align-items: center;
-  padding: 6px 10px;
-  background: white;
-  color: #333;
+  padding: 12px 15px;
+  color: #ecf0f1;
   text-decoration: none;
   cursor: pointer;
   transition: all 0.3s ease;
+  border-radius: 0 25px 25px 0;
+  margin-right: 10px;
   position: relative;
-  border-radius: 8px;
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+.menuLink::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transition: left 0.5s ease;
+}
+
+.menuLink:hover::before {
+  left: 100%;
 }
 
 .menuLink:hover {
-  background: #f8f9fa;
-  color: #333;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateX(5px);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
 }
 
+/* Add or update in doctor_sidebar.module.css */
 .menuLink.active {
-  background: #e0e7ff;
-  color: #4C4DDC;
-  font-weight: bold;
-  box-shadow: 0 4px 12px rgba(76, 77, 220, 0.15);
+  background: linear-gradient(135deg, #5D5EFF 0%, #4C4DDC 100%); /* Stronger gradient */
+  color: white;
+  box-shadow: 0 4px 20px rgba(76, 77, 220, 0.5); /* Enhanced shadow */
+  border-left: 4px solid #FFFFFF; /* Add a left border for emphasis */
+  font-weight: 600; /* Bold text for active item */
 }
 
 .menuIcon {
+  width: 24px;
+  height: 24px;
   font-size: 18px;
-  min-width: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   margin-right: 12px;
-  color: inherit;
+  flex-shrink: 0;
 }
 
 .menuLabel {
-  flex: 1;
   font-size: 14px;
   font-weight: 500;
-  white-space: nowrap;
-  color: inherit;
+  flex-grow: 1;
 }
 
 .badge {
-  background: #ff4757;
+  background: #e74c3c;
   color: white;
   font-size: 11px;
   padding: 2px 6px;
   border-radius: 10px;
+  font-weight: 600;
   min-width: 18px;
   text-align: center;
-  margin-left: 8px;
 }
 
 .submenuArrow {
-  font-size: 10px;
-  margin-left: 8px;
+  font-size: 12px;
   transition: transform 0.3s ease;
-  color: inherit;
+  margin-left: 8px;
 }
 
 .submenuArrow.expanded {
@@ -179,61 +226,58 @@
 .submenu {
   list-style: none;
   padding: 0;
-  margin: 8px 0 0 0;
-  background: transparent;
-  animation: slideDown 0.3s ease;
-}
-
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    max-height: 0;
-  }
-  to {
-    opacity: 1;
-    max-height: 300px;
-  }
+  margin: 0;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 0 0 10px 0;
+  overflow: hidden;
 }
 
 .submenuItem {
-  margin-bottom: 1px;
+  border-left: 2px solid #3498db;
+  margin-left: 25px;
 }
 
 .submenuLink {
   display: flex;
   align-items: center;
-  padding: 10px 16px 10px 24px;
-  background: rgba(255, 255, 255, 0.9);
-  color: #555;
+  padding: 10px 15px 10px 20px;
+  color: #bdc3c7;
   cursor: pointer;
   transition: all 0.3s ease;
   font-size: 13px;
-  border-radius: 6px;
-  margin-left: 16px;
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  position: relative;
+}
+
+.submenuLink::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #3498db;
+  margin-right: 10px;
 }
 
 .submenuLink:hover {
-  background: #f0f0f0;
-  color: #333;
-  transform: translateX(4px);
+  background: rgba(52, 152, 219, 0.1);
+  color: #ecf0f1;
+  padding-left: 25px;
 }
 
 .submenuLink.active {
-  background: #4CAF50;
+  background: rgba(255, 255, 255, 0.2);
   color: white;
-  border-left: 3px solid #2E7D32;
 }
 
 .submenuLabel {
-  white-space: nowrap;
-  color: inherit;
+  font-weight: 500;
+  margin-left: 15px;
 }
 
 /* Collapsed State Styles */
-.sidebar.collapsed {
-  width: 70px;
-}
 .sidebar.collapsed .menuLink {
   justify-content: center;
   margin-right: 0;
@@ -241,10 +285,12 @@
   padding: 15px;
   position: relative;
 }
+
 .sidebar.collapsed .menuIcon {
   margin-right: 0;
   font-size: 20px;
 }
+
 .sidebar.collapsed .menuLink:hover {
   transform: none;
   border-radius: 0;
@@ -323,17 +369,21 @@
     border-right: none;
     border-bottom: 1px solid #34495e;
   }
+  
   .sidebar.collapsed {
     width: 100%;
     height: 60px;
     overflow: hidden;
   }
+  
   .sidebarHeader {
     padding: 10px 15px;
   }
+  
   .userInfo {
     padding: 15px;
   }
+  
   .menuLink {
     margin-right: 0;
     border-radius: 0;
