@@ -17,10 +17,16 @@ const FamilyMemberDashboard = () => {
   const [appointmentCount, setAppointmentCount] = useState(0);
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
   const [historyAppointments, setHistoryAppointments] = useState([]);
   const [historyLoading, setHistoryLoading] = useState(true);
   const [historyError, setHistoryError] = useState(null);
   const [historyFilter, setHistoryFilter] = useState('all'); // 'all' | 'cancelled'
+=======
+  const [upcomingSessions, setUpcomingSessions] = useState([]);
+  const [sessionsLoading, setSessionsLoading] = useState(true);
+  const [sessionsError, setSessionsError] = useState(null);
+>>>>>>> Stashed changes
 =======
   const [upcomingSessions, setUpcomingSessions] = useState([]);
   const [sessionsLoading, setSessionsLoading] = useState(true);
@@ -38,7 +44,10 @@ const FamilyMemberDashboard = () => {
   const [error, setError] = useState(null);
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 =======
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
   const [upcomingCareVisits, setUpcomingCareVisits] = useState([]);
@@ -159,6 +168,7 @@ const FamilyMemberDashboard = () => {
 
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
   // Fetch appointment history (completed + cancelled) across all elders under this family member
   useEffect(() => {
     const fetchHistory = async () => {
@@ -181,6 +191,10 @@ const FamilyMemberDashboard = () => {
 =======
   // Fetch upcoming counselor sessions (across all elders under this family member)
   useEffect(() => {
+=======
+  // Fetch upcoming counselor sessions (across all elders under this family member)
+  useEffect(() => {
+>>>>>>> Stashed changes
 =======
   // Fetch upcoming counselor sessions (across all elders under this family member)
   useEffect(() => {
@@ -208,10 +222,13 @@ const FamilyMemberDashboard = () => {
     if (currentUser && currentUser.role === 'family_member') {
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
       fetchHistory();
     }
   }, [currentUser, historyFilter]);
 =======
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
       fetchUpcomingSessions();
