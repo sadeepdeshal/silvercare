@@ -147,6 +147,11 @@ const CaregiverBooking = () => {
     const startingDayOfWeek = firstDay.getDay();
     const today = new Date();
     today.setHours(0, 0, 0, 0);
+    
+    // Calculate day after tomorrow (minimum selectable date)
+    const dayAfterTomorrow = new Date(today);
+    dayAfterTomorrow.setDate(today.getDate() + 2);
+    dayAfterTomorrow.setHours(0, 0, 0, 0);
 
     const days = [];
     
@@ -164,22 +169,23 @@ const CaregiverBooking = () => {
       
       const isToday = date.getTime() === today.getTime();
       const isPast = date < today;
+      const isTodayOrTomorrow = date < dayAfterTomorrow; // Blocks today and tomorrow
       const isBlocked = blockedDates.includes(dateString);
       const isSelected = selectedDates.includes(dateString);
       
       // Debug logging for first few dates
       if (day <= 3) {
-        console.log(`Date ${dateString}: isBlocked=${isBlocked}, blockedDates array:`, blockedDates);
+        console.log(`Date ${dateString}: isBlocked=${isBlocked}, isTodayOrTomorrow=${isTodayOrTomorrow}, blockedDates array:`, blockedDates);
       }
       
       days.push({
         day,
         date: dateString,
         isToday,
-        isPast,
+        isPast: isTodayOrTomorrow, // Mark today and tomorrow as "past" (unavailable)
         isBlocked,
         isSelected,
-        isAvailable: !isPast && !isBlocked
+        isAvailable: !isTodayOrTomorrow && !isBlocked // Available only from day after tomorrow
       });
     }
     
@@ -385,7 +391,7 @@ const CaregiverBooking = () => {
                 Book Caregiver Service
               </h1>
               <p className={styles.subtitle}>
-                Select dates as a range - Click two dates to automatically select all dates in between
+                Select dates as a range - Click two dates to automatically select all dates in between. <br></br>Bookings must be made at least 2 days in advance.
               </p>
             </div>
             <button 
@@ -401,7 +407,8 @@ const CaregiverBooking = () => {
             <div className={styles.calendarSection}>
               <h2 className={styles.sectionTitle}>Select Dates</h2>
               <p className={styles.calendarInstructions}>
-                Click on available dates to select them. Click again to deselect. You can select multiple dates for booking.
+                Click on available dates to select them. Click again to deselect. You can select multiple dates for booking. 
+                <br></br><span style={{ color: '#dc2626', fontWeight: '600' }}>Note: Dates can only be selected from 2 days ahead.</span>
               </p>
               
               <div className={styles.calendarContainer}>
@@ -448,7 +455,7 @@ const CaregiverBooking = () => {
                         }}
                         title={
                           dayInfo?.isBlocked ? 'This date is already booked' :
-                          dayInfo?.isPast ? 'Past date' :
+                          dayInfo?.isPast ? 'Not available (bookings must be at least 2 days in advance)' :
                           dayInfo?.isSelected ? 'Click to deselect' :
                           'Click to select'
                         }
@@ -474,7 +481,7 @@ const CaregiverBooking = () => {
                   </div>
                   <div className={styles.legendItem}>
                     <div className={styles.legendColor + ' ' + styles.pastColor}></div>
-                    <span>Past</span>
+                    <span>Unavailable</span>
                   </div>
                 </div>
               </div>
