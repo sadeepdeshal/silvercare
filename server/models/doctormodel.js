@@ -476,6 +476,44 @@ const updateAppointmentMeetingLink = async (appointmentId, meetingLink, meetingI
   }
 };
 
+// Get appointment history for a specific doctor (past appointments)
+const getAppointmentHistoryByDoctorId = async (doctorId) => {
+  try {
+    const result = await pool.query(`
+      SELECT 
+        a.appointment_id as id,
+        a.elder_id,
+        a.doctor_id,
+        a.date_time,
+        a.status,
+        a.notes,
+        a.appointment_type,
+        a.zoom_meeting_id,
+        a.zoom_join_url,
+        a.zoom_host_url,
+        a.meeting_link,
+        e.name as elder_name,
+        e.email as elder_email,
+        e.dob as elder_dob,
+        e.gender as elder_gender,
+        e.contact as elder_contact,
+        e.address as elder_address,
+        e.medical_conditions,
+        e.profile_photo as elder_avatar
+      FROM appointment a
+      LEFT JOIN elder e ON a.elder_id = e.elder_id
+      WHERE a.doctor_id = $1 
+      AND a.date_time < CURRENT_TIMESTAMP
+      AND a.status IN ('completed', 'cancelled')
+      ORDER BY a.date_time DESC
+    `, [doctorId]);
+    return result.rows;
+  } catch (error) {
+    console.error('Error fetching appointment history:', error);
+    throw error;
+  }
+};
+
 // Get simple appointment statistics for a doctor - just online and physical counts
 const getDoctorAppointmentStatistics = async (doctorId) => {
   try {
@@ -505,6 +543,7 @@ module.exports = {
   getUpcomingAppointmentsByDoctorId,
   getTodaysAppointmentsByDoctorId,
   getNextAppointmentByDoctorId,
+  getAppointmentHistoryByDoctorId,
   updateAppointmentStatus,
   getDoctorByUserId,
   updateDoctorProfile,
