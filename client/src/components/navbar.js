@@ -4,7 +4,6 @@ import { useAuth } from '../context/AuthContext'; // ✅ Import useAuth
 import styles from './css/navbar.module.css';
 import logoSilver from './images/logo_silver.png'; // ✅ Import your custom logo
 import userIcon from './images/user.png'; // ✅ Import user icon
-import bellIcon from './images/bell.png'; // ✅ Import bell icon
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -84,11 +83,6 @@ const Navbar = () => {
   const handleSettingsNavigation = () => {
     navigate('/settings');
     setIsProfileDropdownOpen(false);
-  };
-
-  // ✅ Bell icon click handler
-  const handleNotificationClick = () => {
-    navigate('/notifications'); // Navigate to notifications page
   };
 
   // ✅ Check if current user is admin
@@ -186,18 +180,6 @@ const Navbar = () => {
                   </div>
                 )}
               </div>
-
-              <div 
-                className={styles.iconButton}
-                onClick={handleNotificationClick}
-                title="Notifications"
-              >
-                <img 
-                  src={bellIcon} 
-                  alt="Notifications" 
-                  className={styles.iconImage}
-                />
-              </div>
             </div>
           )}
         </div>
@@ -254,10 +236,6 @@ const Navbar = () => {
             )}
             <div className={styles.mobileNavItem} onClick={() => handleNavigation('/settings')}>
               Settings
-            </div>
-            <div className={styles.mobileNavItem} onClick={handleNotificationClick}>
-              <img src={bellIcon} alt="Notifications" className={styles.mobileIconImage} />
-              Notifications
             </div>
           </div>
         )}
