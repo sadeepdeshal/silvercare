@@ -80,11 +80,6 @@ const Navbar = () => {
     setIsProfileDropdownOpen(false);
   };
 
-  const handleSettingsNavigation = () => {
-    navigate('/settings');
-    setIsProfileDropdownOpen(false);
-  };
-
   // ✅ Check if current user is admin
   const isAdmin = currentUser && currentUser.role && currentUser.role.toLowerCase() === 'admin';
 
@@ -167,12 +162,6 @@ const Navbar = () => {
                     )}
                     <div 
                       className={styles.dropdownItem}
-                      onClick={handleSettingsNavigation}
-                    >
-                      Settings
-                    </div>
-                    <div 
-                      className={styles.dropdownItem}
                       onClick={handleLogout}
                     >
                       Logout
@@ -234,9 +223,6 @@ const Navbar = () => {
                 Profile
               </div>
             )}
-            <div className={styles.mobileNavItem} onClick={() => handleNavigation('/settings')}>
-              Settings
-            </div>
           </div>
         )}
 
