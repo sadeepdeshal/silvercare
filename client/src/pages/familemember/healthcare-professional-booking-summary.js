@@ -373,9 +373,10 @@ const HealthcareProfessionalBookingSummary = () => {
                       <li>Ensure all relevant documents and previous prescriptions are ready.</li>
                       <li>Please confirm the home address and contact details are accurate.</li>
                       <li>Physical appointments have a 2-hour duration to ensure comprehensive consultation.</li>
+                      <li>Get 2 hours for (Home visit + Treatment).</li>
                     </>
                   )}
-                  <li>Cancellation must be done at least 3 days before the appointment time.</li>
+                  <li>Cancellation must be done 2 hours before the appointment time.</li>
                   <li>By proceeding, you agree to our terms and conditions.</li>
                 </ul>
                 
