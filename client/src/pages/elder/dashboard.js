@@ -49,8 +49,7 @@ const ElderDashboard = () => {
   const [statsData, setStatsData] = useState({
     upcomingAppointments: 0,
     upcomingSessions: 0,
-    upcomingCampaigns: 0,
-    assignedCaregivers: 0,
+    upcomingCareVisits: 0,
   });
 
   // Scroll to top when component mounts
@@ -725,21 +724,11 @@ const ElderDashboard = () => {
             </div>
 
             <div className={styles.statsCard}>
-              <div className={styles.statsIcon}>📢</div>
-              <div className={styles.statsContent}>
-                <h3>Upcoming Activities</h3>
-                <p className={styles.statsNumber}>
-                  {statsLoading ? "..." : statsData.upcomingCampaigns}
-                </p>
-              </div>
-            </div>
-
-            <div className={styles.statsCard}>
               <div className={styles.statsIcon}>🧑‍🤝‍🧑</div>
               <div className={styles.statsContent}>
-                <h3>Caregiver Visits</h3>
+                <h3>Upcoming Care Visits</h3>
                 <p className={styles.statsNumber}>
-                  {statsLoading ? "..." : statsData.assignedCaregivers}
+                  {statsLoading ? "..." : statsData.upcomingCareVisits}
                 </p>
               </div>
             </div>
