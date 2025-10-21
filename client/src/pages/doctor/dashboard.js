@@ -3,8 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Navbar from '../../components/navbar';
 import DoctorSidebar from '../../components/doctor_sidebar';
-import WelcomeModal from '../../components/WelcomeModal';
-import OnboardingTour from '../../components/OnboardingTour';
+// WelcomeModal and OnboardingTour removed per request
 import OnlineMeetingInterface from '../../components/OnlineMeetingInterface';
 import { joinAppointment } from '../../services/doctorMeetingApi';
 import { getImageSrc, handleImageError } from '../../utils/imageUtils';
@@ -28,9 +27,7 @@ const DoctorDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   
-  // Onboarding tour state
-  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
-  const [showTour, setShowTour] = useState(false);
+  // Onboarding tour removed
   
   // Sidebar state
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -40,87 +37,8 @@ const DoctorDashboard = () => {
   const [joinedMeetings, setJoinedMeetings] = useState({});
   const [meetingLinks, setMeetingLinks] = useState({});
 
-  // Tour steps configuration
-  const tourSteps = [
-    {
-      target: '[data-tour="header"]',
-      title: 'Welcome to Your Dashboard',
-      content: 'This is your personalized medical dashboard where you can manage your practice efficiently.',
-      placement: 'bottom'
-    },
-    {
-      target: '[data-tour="stats"]',
-      title: 'Quick Statistics',
-      content: 'Get an instant overview of your daily activities and patient load.',
-      placement: 'bottom'
-    },
-    {
-      target: '[data-tour="next-patient"]',
-      title: 'Next Patient Details',
-      content: 'View comprehensive information about your next scheduled patient.',
-      placement: 'right'
-    },
-    {
-      target: '[data-tour="tasks"]',
-      title: 'Today\'s Tasks',
-      content: 'Stay organized with your daily medical tasks and reminders.',
-      placement: 'left'
-    },
-    {
-      target: '[data-tour="consultations"]',
-      title: 'Upcoming Consultations',
-      content: 'Manage your consultation schedule and patient appointments.',
-      placement: 'right'
-    },
-    {
-      target: '[data-tour="schedule"]',
-      title: 'Today\'s Schedule',
-      content: 'View your complete daily schedule at a glance.',
-      placement: 'left'
-    },
-    {
-      target: '[data-tour="quick-actions"]',
-      title: 'Quick Actions',
-      content: 'Access frequently used medical tools and features instantly.',
-      placement: 'top'
-    }
-  ];
-
-  // Check if user is new and should see onboarding
-  useEffect(() => {
-    if (currentUser && !loading && !error) {
-      const tourKey = `doctor_tour_${currentUser.user_id}`;
-      const hasSeenTour = localStorage.getItem(tourKey);
-      
-      // Only show tour if user hasn't seen it before
-      if (!hasSeenTour || hasSeenTour !== 'completed') {
-        setShowWelcomeModal(true);
-      }
-    }
-  }, [currentUser, loading, error]);
-
-  // Tour control functions
-  const startTour = () => {
-    setShowWelcomeModal(false);
-    setShowTour(true);
-  };
-
-  const skipTour = () => {
-    setShowWelcomeModal(false);
-    setShowTour(false);
-    localStorage.setItem(`doctor_tour_${currentUser?.user_id}`, 'completed');
-  };
-
-  const completeTour = () => {
-    setShowTour(false);
-    localStorage.setItem(`doctor_tour_${currentUser?.user_id}`, 'completed');
-  };
-
-  // Function to restart tour (can be triggered by a help button)
-  const restartTour = () => {
-    localStorage.removeItem(`doctor_tour_${currentUser?.user_id}`);
-    setShowWelcomeModal(true);
-  };
+  // Tour removed; restartTour kept as a no-op in case other code references it
+  const restartTour = () => {};
 
   // Helper functions
   const formatDate = (dateString) => {
@@ -590,29 +508,7 @@ const DoctorDashboard = () => {
         </div>
       </div>
 
-      {/* Help Button to restart tour */}
-      <button 
-        className={styles.helpButton}
-        onClick={restartTour}
-        title="Take a tour of the dashboard"
-      >
-        ❓
-      </button>
-
-      {/* Onboarding Components */}
-      <WelcomeModal 
-        isVisible={showWelcomeModal}
-        onStartTour={startTour}
-        onSkip={skipTour}
-        userName={currentUser?.name}
-      />
-      
-      <OnboardingTour 
-        steps={tourSteps}
-        isActive={showTour}
-        onComplete={completeTour}
-        onSkip={skipTour}
-      />
+      {/* Onboarding tour removed for doctors */}
       </div>
     </div>
   );

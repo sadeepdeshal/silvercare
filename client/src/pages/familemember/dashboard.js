@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { elderApi } from '../../services/elderApi';
 import { caregiverApi } from '../../services/caregiverApi';
 import { appointmentApi } from '../../services/appointmentApi';
+import { familyMemberApi } from '../../services/familyMemberApi';
 import Navbar from '../../components/navbar';
 import styles from '../../components/css/familymember/dashboard.module.css';
 import FamilyMemberLayout from '../../components/FamilyMemberLayout';
@@ -15,44 +16,20 @@ const FamilyMemberDashboard = () => {
   const [elders, setElders] = useState([]);
   const [appointments, setAppointments] = useState([]);
   const [appointmentCount, setAppointmentCount] = useState(0);
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
   const [historyAppointments, setHistoryAppointments] = useState([]);
   const [historyLoading, setHistoryLoading] = useState(true);
   const [historyError, setHistoryError] = useState(null);
   const [historyFilter, setHistoryFilter] = useState('all'); // 'all' | 'cancelled'
-=======
   const [upcomingSessions, setUpcomingSessions] = useState([]);
   const [sessionsLoading, setSessionsLoading] = useState(true);
   const [sessionsError, setSessionsError] = useState(null);
->>>>>>> Stashed changes
-=======
-  const [upcomingSessions, setUpcomingSessions] = useState([]);
-  const [sessionsLoading, setSessionsLoading] = useState(true);
-  const [sessionsError, setSessionsError] = useState(null);
->>>>>>> Stashed changes
-=======
-  const [upcomingSessions, setUpcomingSessions] = useState([]);
-  const [sessionsLoading, setSessionsLoading] = useState(true);
-  const [sessionsError, setSessionsError] = useState(null);
->>>>>>> Stashed changes
   const [activeCaregiverCount, setActiveCaregiverCount] = useState(0);
   const [dataLoading, setDataLoading] = useState(true);
   const [appointmentsLoading, setAppointmentsLoading] = useState(true);
   const [caregiversLoading, setCaregiversLoading] = useState(true);
   const [error, setError] = useState(null);
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-=======
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
   const [upcomingCareVisits, setUpcomingCareVisits] = useState([]);
   const [careVisitsLoading, setCareVisitsLoading] = useState(true);
->>>>>>> Stashed changes
 
   // Protect the dashboard route
   useEffect(() => {
@@ -133,24 +110,48 @@ const FamilyMemberDashboard = () => {
   useEffect(() => {
     const fetchAppointmentsData = async () => {
       if (!currentUser?.user_id) return;
-      
+
       try {
         setAppointmentsLoading(true);
-        
-        // Fetch real upcoming appointments from the database
-        const [appointmentsResponse, countResponse] = await Promise.all([
+
+        // Fetch real upcoming doctor appointments and counselor sessions
+        const [appointmentsResponse, countResponse, sessionsResponse] = await Promise.all([
           elderApi.getUpcomingAppointmentsByFamily(currentUser.user_id),
-          elderApi.getAppointmentCountByFamily(currentUser.user_id)
+          elderApi.getAppointmentCountByFamily(currentUser.user_id),
+          familyMemberApi.getUpcomingSessions(currentUser.user_id)
         ]);
-        
-        if (appointmentsResponse.success) {
-          setAppointments(appointmentsResponse.appointments);
+
+        // Start with doctor appointments (they should already match expected shape)
+        const appts = appointmentsResponse?.success ? (appointmentsResponse.appointments || []) : [];
+
+        // Map counselor sessions to the same shape so they can be displayed alongside appointments
+        let sessions = [];
+        if (sessionsResponse?.success) {
+          sessions = (sessionsResponse.sessions || []).map((s) => ({
+            appointment_id: s.appointment_id,
+            appointment_type: s.appointment_type,
+            elder_name: s.elder_name,
+            doctor_name: s.counselor_name, // use doctor_name slot for display
+            doctor_district: s.counselor_district,
+            date_time: s.date_time,
+            meeting_link: s.meeting_link,
+            status: s.status,
+            notes: s.notes,
+            specialization: s.specialization || 'Counseling Session',
+            isSession: true
+          }));
         }
-        
-        if (countResponse.success) {
-          setAppointmentCount(countResponse.count);
-        }
-        
+
+        // Combine and sort by date_time (ascending)
+        const combined = [...appts, ...sessions].sort((a, b) => new Date(a.date_time) - new Date(b.date_time));
+
+        setAppointments(combined);
+
+        // Set appointment count as combined length (fallback to countResponse if provided)
+        const sessionsCount = sessionsResponse?.success ? (sessionsResponse.count || sessions.length) : 0;
+        const doctorsCount = countResponse?.success ? (countResponse.count || appts.length) : appts.length;
+        setAppointmentCount(doctorsCount + sessionsCount);
+
       } catch (err) {
         console.error('Error fetching appointments data:', err);
         // Set fallback data if API fails
@@ -166,9 +167,6 @@ const FamilyMemberDashboard = () => {
     }
   }, [currentUser]);
 
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
   // Fetch appointment history (completed + cancelled) across all elders under this family member
   useEffect(() => {
     const fetchHistory = async () => {
@@ -188,17 +186,17 @@ const FamilyMemberDashboard = () => {
         console.error('Error fetching appointment history:', err);
         setHistoryError('Failed to load appointment history');
         setHistoryAppointments([]);
-=======
+      } finally {
+        setHistoryLoading(false);
+      }
+    };
+    if (currentUser && currentUser.role === 'family_member') {
+      fetchHistory();
+    }
+  }, [currentUser, historyFilter]);
+
   // Fetch upcoming counselor sessions (across all elders under this family member)
   useEffect(() => {
-=======
-  // Fetch upcoming counselor sessions (across all elders under this family member)
-  useEffect(() => {
->>>>>>> Stashed changes
-=======
-  // Fetch upcoming counselor sessions (across all elders under this family member)
-  useEffect(() => {
->>>>>>> Stashed changes
     const fetchUpcomingSessions = async () => {
       if (!currentUser?.user_id) return;
       try {
@@ -214,28 +212,14 @@ const FamilyMemberDashboard = () => {
         console.error('Error fetching upcoming sessions:', err);
         setSessionsError('Failed to load upcoming sessions');
         setUpcomingSessions([]);
->>>>>>> Stashed changes
       } finally {
-        setHistoryLoading(false);
+        setSessionsLoading(false);
       }
     };
     if (currentUser && currentUser.role === 'family_member') {
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-      fetchHistory();
-    }
-  }, [currentUser, historyFilter]);
-=======
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
       fetchUpcomingSessions();
     }
   }, [currentUser]);
-
-  // (deduplicated) Fetch upcoming sessions data handled above
 
   // Fetch upcoming care visits data
   useEffect(() => {
@@ -263,7 +247,6 @@ const FamilyMemberDashboard = () => {
       fetchCareVisitsData();
     }
   }, [currentUser]);
->>>>>>> Stashed changes
 
   const handleElderRegistration = () => {
     navigate('/family-member/elder-signup');
