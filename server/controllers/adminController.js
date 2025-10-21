@@ -113,25 +113,30 @@ const getAdminDashboard = async (req, res) => {
       console.log('Error getting new bookings:', bookingError.message);
     }
 
-    // Get monthly signups
-    const monthlySignupsQuery = `
-      SELECT COUNT(*) as count
-      FROM "User"
-      WHERE created_at >= CURRENT_DATE - INTERVAL '30 days'
+    // Get overall ratings stats
+    const ratingsQuery = `
+      SELECT 
+        ROUND(AVG(rating)::numeric, 1) as caregiver_rating,
+        COUNT(*) as total_reviews
+      FROM feedback_caregiver
     `;
     
-    const monthlySignupsResult = await pool.query(monthlySignupsQuery);
-    const monthlySignups = parseInt(monthlySignupsResult.rows[0]?.count || 0);
+    const ratingsResult = await pool.query(ratingsQuery);
+    const ratings = ratingsResult.rows[0];
 
     const responseData = {
       success: true,
       data: {
         stats: stats,
         pendingDoctors: pendingDoctors,
-        pendingHealthProfessionals: pendingHealthProfessionals, // Add health professionals data
+        pendingHealthProfessionals: pendingHealthProfessionals,
         recentRegistrations: recentRegistrations,
         newBookings: newBookings,
-        monthlySignups: monthlySignups,
+        ratings: {
+          caregiverRating: parseFloat(ratings.caregiver_rating) || 0,
+          totalReviews: parseInt(ratings.total_reviews) || 0,
+          overallRating: parseFloat(ratings.caregiver_rating) || 0 // Using caregiver rating as overall since it's the only one
+        },
         revenue: revenue
       }
     };
@@ -412,7 +417,7 @@ const getAllUsers = async (req, res) => {
     console.log('Fetching all users');
     
     const result = await pool.query(`
-      SELECT user_id, name, email, role, created_at
+      SELECT user_id, name, email, role, status, created_at
       FROM "User"
       ORDER BY created_at DESC
     `);
@@ -440,9 +445,16 @@ const changeStatus = async (req, res) => {
     const { id, status } = req.params;
     console.log(`Changing status for user ID: ${id} to ${status}`);
 
-    // Use clear parameter order: SET status = $1 WHERE user_id = $2
+    if (!['active', 'inactive'].includes(status)) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Invalid status. Status must be either active or inactive' 
+      });
+    }
+
+    // Update user status in the User table
     const result = await pool.query(
-      'UPDATE caregiver SET status = $1 WHERE user_id = $2 RETURNING *',
+      'UPDATE "User" SET status = $1 WHERE user_id = $2 RETURNING *',
       [status, id]
     );
 

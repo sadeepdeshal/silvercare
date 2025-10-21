@@ -28,11 +28,16 @@ const AdminDashboard = () => {
   // State for dashboard data with proper default values
   const [dashboardData, setDashboardData] = useState({
     newBookings: 0,
-    monthlySignups: 0,
     pendingDoctors: [],
     pendingHealthProfessionals: [],
     recentRegistrations: [],
     revenue: 0,
+    ratings: {
+      doctorRating: 0,
+      caregiverRating: 0,
+      overallRating: 0,
+      totalReviews: 0
+    },
     stats: {
       family_members: 0,
       elders: 0,
@@ -86,11 +91,16 @@ const AdminDashboard = () => {
           // Ensure all required properties exist with default values
           const safeData = {
             newBookings: response.data.newBookings || 0,
-            monthlySignups: response.data.monthlySignups || 0,
             pendingDoctors: response.data.pendingDoctors || [],
             pendingHealthProfessionals: response.data.pendingHealthProfessionals || [],
             recentRegistrations: response.data.recentRegistrations || [],
             revenue: response.data.revenue || 0,
+            ratings: {
+              doctorRating: response.data.ratings?.doctorRating || 0,
+              caregiverRating: response.data.ratings?.caregiverRating || 0,
+              overallRating: response.data.ratings?.overallRating || 0,
+              totalReviews: response.data.ratings?.totalReviews || 0
+            },
             stats: {
               family_members: response.data.stats?.family_members || 0,
               elders: response.data.stats?.elders || 0,
@@ -169,10 +179,15 @@ const AdminDashboard = () => {
         if (updatedData.success) {
           const safeData = {
             newBookings: updatedData.data.newBookings || 0,
-            monthlySignups: updatedData.data.monthlySignups || 0,
             pendingDoctors: updatedData.data.pendingDoctors || [],
             pendingHealthProfessionals: updatedData.data.pendingHealthProfessionals || [],
             recentRegistrations: updatedData.data.recentRegistrations || [],
+            ratings: {
+              doctorRating: updatedData.data.ratings?.doctorRating || 0,
+              caregiverRating: updatedData.data.ratings?.caregiverRating || 0,
+              overallRating: updatedData.data.ratings?.overallRating || 0,
+              totalReviews: updatedData.data.ratings?.totalReviews || 0
+            },
             stats: {
               family_members: updatedData.data.stats?.family_members || 0,
               elders: updatedData.data.stats?.elders || 0,
@@ -258,10 +273,15 @@ const AdminDashboard = () => {
           <h2 className={styles.sectionTitle}>Dashboard Overview</h2>
           <div className={styles.statsGrid}>
             <div className={`${styles.statCard} ${styles.statCard1} ${styles.clickableCard}`} onClick={handleMonthlySignupsClick}>
-              <div className={styles.statIcon}>📈</div>
+              <div className={styles.statIcon}>⭐</div>
               <div className={styles.statContent}>
-                <h3 className={styles.statNumber}>{dataLoading ? '...' : dashboardData.monthlySignups}</h3>
-                <p className={styles.statLabel}>Monthly Signups</p>
+                <h3 className={styles.statNumber}>
+                  {dataLoading ? '...' : `${dashboardData.ratings.overallRating}/5`}
+                </h3>
+                <p className={styles.statLabel}>Overall Rating</p>
+                <small className={styles.ratingSubtext}>
+                  {dashboardData.ratings.totalReviews} reviews
+                </small>
               </div>
             </div>
             <div className={`${styles.statCard} ${styles.statCard2} ${styles.clickableCard}`} onClick={handlePendingDoctorsClick}>
@@ -424,32 +444,78 @@ const AdminDashboard = () => {
       </Modal>
 
 
-      {/* Monthly Signups Modal */}
-      <Modal show={showMonthlySignupsModal} onClose={closeMonthlySignupsModal} title="Monthly Signups">
+      {/* Ratings Modal */}
+      <Modal 
+        show={showMonthlySignupsModal} 
+        onClose={closeMonthlySignupsModal} 
+        title={`Platform Ratings - ${dashboardData.ratings.overallRating}/5 (${dashboardData.ratings.totalReviews} Reviews)`}>
         {dataLoading ? (
           <div className={styles.modalLoading}>
             <div className={styles.loadingSpinner}></div>
-            <p>Loading monthly signups...</p>
-          </div>
-        ) : recentRegistrations.length > 0 ? (
-          <div className={styles.modalProfessionalsList}>
-            {recentRegistrations.map((registration, index) => (
-              <div key={registration.user_id || index} className={styles.professionalCard}>
-                <div className={styles.professionalInfo}>
-                  <div className={styles.professionalHeader}>
-                    <h3>{registration.name || 'Unknown Name'}</h3>
-                    <span className={`${styles.professionalBadge} ${styles.signupBadge}`}>{getRoleIcon(registration.role)} {registration.role?.replace('_', ' ') || 'User'}</span>
-                  </div>
-                  <p><strong>📧 Email:</strong> {registration.email || 'N/A'}</p>
-                  <p><strong>📅 Registered:</strong> {registration.created_at ? new Date(registration.created_at).toLocaleDateString() : 'N/A'}</p>
-                </div>
-              </div>
-            ))}
+            <p>Loading ratings data...</p>
           </div>
         ) : (
-          <div className={styles.modalEmptyState}>
-            <h3>No Recent Signups</h3>
-            <p>No users have registered in the past month.</p>
+          <div className={styles.ratingsModalContent}>
+            <div className={styles.overallRatingSection}>
+              <h3 className={styles.modalSectionTitle}>Overall Platform Rating</h3>
+              <div className={styles.ratingDisplay}>
+                <div className={styles.bigRating}>
+                  {dashboardData.ratings.overallRating}
+                  <span className={styles.outOf}>/5</span>
+                </div>
+                <div className={styles.starDisplay}>
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <span
+                      key={star}
+                      className={`${styles.star} ${
+                        star <= Math.round(dashboardData.ratings.overallRating)
+                          ? styles.filled
+                          : ''
+                      }`}
+                    >
+                      ★
+                    </span>
+                  ))}
+                </div>
+                <p className={styles.totalReviews}>
+                  Based on {dashboardData.ratings.totalReviews} reviews
+                </p>
+              </div>
+            </div>
+
+            <div className={styles.ratingBreakdown}>
+              <h3 className={styles.modalSectionTitle}>Rating Breakdown</h3>
+              
+              <div className={styles.serviceRating}>
+                <div className={styles.serviceHeader}>
+                  <h4>👨‍⚕️ Doctors</h4>
+                  <span className={styles.ratingValue}>
+                    {dashboardData.ratings.doctorRating}/5
+                  </span>
+                </div>
+                <div className={styles.ratingBar}>
+                  <div 
+                    className={styles.ratingFill} 
+                    style={{ width: `${(dashboardData.ratings.doctorRating / 5) * 100}%` }}
+                  ></div>
+                </div>
+              </div>
+
+              <div className={styles.serviceRating}>
+                <div className={styles.serviceHeader}>
+                  <h4>👥 Caregivers</h4>
+                  <span className={styles.ratingValue}>
+                    {dashboardData.ratings.caregiverRating}/5
+                  </span>
+                </div>
+                <div className={styles.ratingBar}>
+                  <div 
+                    className={styles.ratingFill} 
+                    style={{ width: `${(dashboardData.ratings.caregiverRating / 5) * 100}%` }}
+                  ></div>
+                </div>
+              </div>
+            </div>
           </div>
         )}
       </Modal>
