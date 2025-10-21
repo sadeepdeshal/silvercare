@@ -33,6 +33,7 @@ router.get('/:doctorId/appointments', doctorController.getDoctorAppointments);
 router.get('/:doctorId/upcoming', doctorController.getUpcomingAppointments);
 router.get('/:doctorId/today', doctorController.getTodaysAppointments);
 router.get('/:doctorId/next', doctorController.getNextAppointment);
+router.get('/:doctorId/history', doctorController.getAppointmentHistory);
 router.get('/:doctorId/dashboard', doctorController.getDoctorDashboard);
 router.put('/appointments/:appointmentId/status', doctorController.updateAppointmentStatus);
 

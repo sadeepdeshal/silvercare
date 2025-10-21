@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { doctorElderChatApi } from '../../services/doctorElderChatApi';
 import Navbar from '../../components/navbar';
@@ -10,6 +10,7 @@ import styles from '../../components/css/doctor/ElderChat.module.css';
 const ElderChat = () => {
   const { currentUser, loading, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const { elderId } = useParams(); // Get elderId from URL parameters
   
   const [elders, setElders] = useState([]);
   const [dataLoading, setDataLoading] = useState(true);
@@ -57,6 +58,16 @@ const ElderChat = () => {
       fetchEldersForChat();
     }
   }, [currentUser]);
+
+  // Auto-select elder if elderId is provided in URL
+  useEffect(() => {
+    if (elderId && elders.length > 0) {
+      const targetElder = elders.find(elder => elder.elder_id.toString() === elderId);
+      if (targetElder) {
+        handleElderSelect(targetElder);
+      }
+    }
+  }, [elderId, elders]);
 
   // Handle elder selection and show chat
   const handleElderSelect = async (elder) => {

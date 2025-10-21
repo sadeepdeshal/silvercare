@@ -71,6 +71,8 @@ import DoctorProfile from './pages/doctor/profile';
 import DoctorReports from './pages/doctor/reports';
 import TodaysAppointments from './pages/doctor/appointments';
 import DoctorSchedule from './pages/doctor/schedule';
+import DoctorAppointmentHistory from './pages/doctor/appointment-history';
+import DoctorPatients from './pages/doctor/patients';
 import VirtualMeetingRoom from './pages/VirtualMeetingRoom';
 import JitsiMeetingRoom from './pages/JitsiMeetingRoom';
 import MeetingGenerator from './pages/MeetingGenerator';
@@ -434,6 +436,12 @@ function App() {
               <ElderChat />
             </ProtectedRoute>
           } />
+          
+          <Route path="/doctor/elder-chat/:elderId" element={
+            <ProtectedRoute allowedRoles={['doctor']}>
+              <ElderChat />
+            </ProtectedRoute>
+          } />
 
           <Route path="/doctor/appointments" element={
             <ProtectedRoute allowedRoles={['doctor']}>
@@ -444,6 +452,18 @@ function App() {
           <Route path="/doctor/schedule" element={
             <ProtectedRoute allowedRoles={['doctor']}>
               <DoctorSchedule />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/doctor/appointment-history" element={
+            <ProtectedRoute allowedRoles={['doctor']}>
+              <DoctorAppointmentHistory />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/doctor/patients" element={
+            <ProtectedRoute allowedRoles={['doctor']}>
+              <DoctorPatients />
             </ProtectedRoute>
           } />
 
