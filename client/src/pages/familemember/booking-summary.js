@@ -358,9 +358,10 @@ const BookingSummary = () => {
                       <li>Bring all relevant medical documents and previous prescriptions.</li>
                       <li>Please confirm the Home address and contact details before doctor visit if it should change , use chat system with the doctor.</li>
                       <li>Physical appointments have a 2-hour duration to ensure comprehensive consultation.</li>
+                      <li>Get 2 hours for (Home visit + Treatment).</li>
                     </>
                   )}
-                  <li>Cancellation must be done at least 3 days before the appointment time.</li>
+                  <li>Cancellation must be done 2 hours before the appointment time.</li>
                   <li>By proceeding, you agree to our terms and conditions.</li>
                 </ul>
                 
