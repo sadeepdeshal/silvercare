@@ -36,7 +36,6 @@ const HealthProfessionalSidebar = ({ onToggleCollapse }) => {
     { key: 'profile', label: 'Profile', icon: '🧑‍⚕️', path: '/healthprofessional/profile' },
     { key: 'elders', label: 'Patients', icon: '👴', path: '/healthprofessional/elders' },
     { key: 'sessions', label: 'Sessions', icon: '🗓️', path: '/healthprofessional/sessions' },
-    { key: 'consultations', label: 'Consultations', icon: '💬', path: '/healthprofessional/consultations' },
     { key: 'reports', label: 'Reports', icon: '📊', path: '/healthprofessional/reports' },
     { 
       key: 'messages', 
