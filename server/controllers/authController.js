@@ -8,7 +8,7 @@ const loginUser = async (req, res) => {
   try {
     // First, check in the User table
     const userResult = await pool.query(
-      'SELECT user_id, name, email, password, phone, role FROM "User" WHERE email = $1',
+      'SELECT user_id, name, email, password, phone, role, status FROM "User" WHERE email = $1',
       [email]
     );
     
@@ -92,6 +92,11 @@ const loginUser = async (req, res) => {
     
     if (!user) {
       return res.status(401).json({ error: 'Invalid email or password' });
+    }
+
+    // Check if user is active
+    if (user.status === 'inactive') {
+      return res.status(403).json({ error: 'Your account has been deactivated. Please contact the administrator.' });
     }
     
     // Verify password
