@@ -9,6 +9,9 @@ const {
 // GET /api/healthprofessional/user/:userId
 router.get('/user/:userId', healthProfessionalController.getByUserId);
 
+// GET /api/healthprofessional/:counselorId/dashboard - MUST BE BEFORE other /:counselorId routes
+router.get('/:counselorId/dashboard', healthProfessionalController.getDashboard);
+
 // GET /api/healthprofessional/:counselorId/appointment-statistics
 router.get('/:counselorId/appointment-statistics', healthProfessionalController.getAppointmentStatistics);
 

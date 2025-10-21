@@ -28,6 +28,8 @@ import { HealthProfessionalRegStep2 } from "./pages/healthproffesional/signup-st
 import { HealthProfessionalRegStep3 } from "./pages/healthproffesional/signup-step3";
 import HealthProfessionalDashboard from "./pages/healthproffesional/dashboard";
 import HealthProfessionalReports from "./pages/healthproffesional/reports";
+import HealthProfessionalSessions from "./pages/healthproffesional/sessions";
+import HealthProfessionalElders from "./pages/healthproffesional/elders";
 import { DoctorRegStep2 } from "./pages/doctor/signup-step2";
 // Import new appointment components
 
@@ -524,6 +526,24 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={["healthprofessional"]}>
                 <HealthProfessionalProfile />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/healthprofessional/sessions"
+            element={
+              <ProtectedRoute allowedRoles={["healthprofessional"]}>
+                <HealthProfessionalSessions />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/healthprofessional/elders"
+            element={
+              <ProtectedRoute allowedRoles={["healthprofessional"]}>
+                <HealthProfessionalElders />
               </ProtectedRoute>
             }
           />
